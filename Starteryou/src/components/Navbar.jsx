@@ -46,7 +46,7 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <ul className="absolute top-16 left-0 w-full bg-white text-[#2700D3] flex flex-col items-center space-y-6 py-8 z-50 md:hidden">
+        <ul className="absolute top-16 left-0 w-full bg-white text-[#2700D3] flex flex-col items-center space-y-6 py-8 z-50 md:hidden text-sm sm:text-base md:text-lg lg:text-xl font-bold uppercase">
           <li className="cursor-pointer">Home</li>
           <li className="cursor-pointer">Education</li>
           <li className="cursor-pointer">Jobs</li>
