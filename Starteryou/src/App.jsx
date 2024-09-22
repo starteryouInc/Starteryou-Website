@@ -1,4 +1,5 @@
 import BestBuddy from "./components/BestBuddy";
+import BestJob from "./components/BestJob";
 import Hero from "./components/Hero";
 import Navbar from "./components/Navbar";
 
@@ -9,6 +10,7 @@ function App() {
         <Navbar />
         <Hero />
         <BestBuddy />
+        <BestJob />
       </div>
     </>
   );
