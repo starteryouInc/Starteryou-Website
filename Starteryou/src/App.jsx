@@ -16,7 +16,7 @@ import UpcomingFeatures from "./components/UpcomingFeatures";
 function App() {
   return (
     <>
-      <div className="font-montserrat">
+      <div className="font-montserrat scroll-smooth">
         <Navbar />
         <Hero />
         <BestBuddy />
