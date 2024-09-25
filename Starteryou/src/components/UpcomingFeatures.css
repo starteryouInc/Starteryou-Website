@@ -1,0 +1,11 @@
+.custom-carousel .control-dots .dot {
+  background-color: white !important;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin: 0 8px;
+}
+
+.custom-carousel .control-dots .dot.selected {
+  background-color: #7950f2 !important; /* Active dot color */
+}
