@@ -117,14 +117,14 @@ const Blog = () => {
               {/* Blur effect container */}
               <div className="absolute inset-0 bg-[#FFFFFF66] backdrop-filter backdrop-blur-[7px] h-[25%] flex items-center justify-between p-4 top-[12.1rem] md:top-[14.9rem]">
                 <div className="flex flex-col">
-                  <span className="text-white font-bold text-lg">
+                  <span className="text-white font-bold text-base md:text-lg">
                     {box.title}
                   </span>
                   <span className="text-white font-thin text-sm">
                     {box.date}
                   </span>
                 </div>
-                <span className="text-white font-bold text-lg">
+                <span className="text-white font-bold text-base md:text-lg">
                   {box.category}
                 </span>
               </div>
