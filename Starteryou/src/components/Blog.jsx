@@ -66,7 +66,7 @@ const Blog = () => {
   };
 
   return (
-    <div className="max-w-[1440px] mx-auto px-4 py-12">
+    <div className="max-w-[1440px] mx-auto px-4 py-12 " id="blog">
       <div className="md:flex justify-between items-start">
         <div className="md:w-2/3">
           <h2 className="text-3xl font-bold md:text-4xl md:font-extrabold mb-4 text-left">
@@ -117,14 +117,14 @@ const Blog = () => {
               {/* Blur effect container */}
               <div className="absolute inset-0 bg-[#FFFFFF66] backdrop-filter backdrop-blur-[7px] h-[25%] flex items-center justify-between p-4 top-[12.1rem] md:top-[14.9rem]">
                 <div className="flex flex-col">
-                  <span className="text-white font-bold text-lg">
+                  <span className="text-white font-bold text-base md:text-lg">
                     {box.title}
                   </span>
                   <span className="text-white font-thin text-sm">
                     {box.date}
                   </span>
                 </div>
-                <span className="text-white font-bold text-lg">
+                <span className="text-white font-bold text-base md:text-lg">
                   {box.category}
                 </span>
               </div>
