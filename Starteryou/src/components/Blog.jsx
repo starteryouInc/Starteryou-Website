@@ -66,7 +66,7 @@ const Blog = () => {
   };
 
   return (
-    <div className="max-w-[1440px] mx-auto px-4 py-12">
+    <div className="max-w-[1440px] mx-auto px-4 py-12 " id="blog">
       <div className="md:flex justify-between items-start">
         <div className="md:w-2/3">
           <h2 className="text-3xl font-bold md:text-4xl md:font-extrabold mb-4 text-left">
