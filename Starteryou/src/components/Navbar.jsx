@@ -34,7 +34,6 @@ const Navbar = () => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
       if (scrollY > 50) {
-        // Adjust this value as needed
         setIsScrolled(true);
       } else {
         setIsScrolled(false);
@@ -207,7 +206,7 @@ const Navbar = () => {
         </ul>
 
         {/* Divider and Social Media Icons*/}
-        <div className="absolute bottom-6 left-6 right-6">
+        <div className="absolute bottom-[2.5rem] left-6 right-6">
           <hr className="border-0 h-[1px] bg-black rounded-sm mb-4" />
 
           {/* Social Media Icons */}
