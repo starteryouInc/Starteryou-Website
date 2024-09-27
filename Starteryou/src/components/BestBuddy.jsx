@@ -69,8 +69,8 @@ const BestBuddy = () => {
 
         {/*  medium and large screens */}
         <div className="hidden sm:flex flex-wrap justify-center space-x-6 ">
-          {icons.map(({ src, alt, text }, index) => (
-            <div key={index} className="flex items-center mb-4">
+          {icons.map(({ src, alt, text, link }, index) => (
+            <a href={link} key={index} className="flex items-center mb-4">
               <img
                 src={src}
                 alt={alt}
@@ -79,7 +79,7 @@ const BestBuddy = () => {
               <span className="ml-2 text-[9px] sm:text-sm italic text-[#1F2329]">
                 {text}
               </span>
-            </div>
+            </a>
           ))}
         </div>
 
