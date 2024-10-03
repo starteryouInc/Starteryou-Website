@@ -48,7 +48,7 @@ const Team = () => {
         {teamMembers.slice(0, 3).map((member, index) => (
           <div
             key={index}
-            className="flex flex-col items-center bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] p-6 shadow-md h-[350px] rounded-md"
+            className="flex flex-col items-center bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] p-6 shadow-md h-[350px] rounded-md "
           >
             <img
               src={member.imgSrc}

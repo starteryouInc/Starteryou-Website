@@ -2,7 +2,7 @@ const teamMembers = [
   {
     imgSrc: "/AboutPage/TechTeam/rohit1.jpg",
     position: "Title",
-    name: "John Doe",
+    name: "Rohit Kumar BR",
     about: "the quick fox jumps over the lazy dog",
   },
   {
