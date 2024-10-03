@@ -1,7 +1,7 @@
 const OurMission = () => {
   return (
-    <div className="max-w-[1300px] mx-auto container px-4 py-10">
-      <div className="flex flex-col md:flex-row md:space-x-4">
+    <div className="max-w-[1300px] mx-auto container px-4 pt-4">
+      <div className="flex flex-col md:flex-row md:space-x-4 items-center">
         {/* Text Box */}
         <div className="bg-white p-6 mb-4 md:mb-0 flex-1 flex flex-col justify-center">
           <div>
@@ -27,7 +27,7 @@ const OurMission = () => {
 
         {/* Image Box */}
         <div
-          className="flex-1 bg-cover bg-center rounded-lg mb-4 md:mb-0 h-[200px] min-h-[200px] md:h-[300px] md:min-h-[400px]"
+          className="md:flex-1 w-full bg-cover bg-center rounded-lg mb-4 md:mb-0 h-[250px] min-h-[200px] md:h-[300px] md:min-h-[400px] "
           style={{
             backgroundImage: "url('https://via.placeholder.com/300')",
           }}

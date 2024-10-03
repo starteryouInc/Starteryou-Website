@@ -16,7 +16,7 @@ const BetterFuture = () => {
   };
 
   return (
-    <div className="max-w-[1300px] mx-auto text-center p-6 pt-24 pb-7">
+    <div className="max-w-[1300px] mx-auto text-center p-6 pt-24 md:pb-12">
       {/* Heading */}
       <h1 className="text-4xl font-bold md:font-extrabold mb-4 text-[#252B42]">
         Build Better Future
