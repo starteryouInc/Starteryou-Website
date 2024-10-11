@@ -1,7 +1,7 @@
 const DiscoverPath = () => {
   const opportunities = [
     {
-      img: "/LandingPage/Blogimg1.png",
+      img: "/JobPortalPage/Placeholder Image.png",
       title:
         "Gain Real-World Experience with Internships and Part-Time Opportunities",
       description:
@@ -10,7 +10,7 @@ const DiscoverPath = () => {
       linkUrl: "#",
     },
     {
-      img: "/LandingPage/Blogimg1.png",
+      img: "/JobPortalPage/Placeholder Image.png",
 
       title: "Access Essential Career Resources to Boost Your Job Search",
       description:
@@ -19,7 +19,7 @@ const DiscoverPath = () => {
       linkUrl: "#",
     },
     {
-      img: "/LandingPage/Blogimg1.png",
+      img: "/JobPortalPage/Placeholder Image.png",
 
       title:
         "Streamlined Job Listings for Students Seeking Flexible Work Options",
@@ -31,7 +31,7 @@ const DiscoverPath = () => {
   ];
 
   return (
-    <div className="mx-auto px-4 lg:px-10 py-16">
+    <div className="mx-auto max-w-[1430px] px-4 lg:px-10 py-16">
       {/* Top Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center md:pb-6">
         <h1 className="text-2xl lg:text-4xl font-bold mb-6 md:mb-0 text-black md:text-left md:max-w-[320px] lg:max-w-[600px]">

@@ -1,6 +1,6 @@
 const UnlockPotential = () => {
   return (
-    <div className=" mx-auto container px-4 lg:px-10 py-7 md:py-16">
+    <div className="max-w-[1430px] mx-auto px-4 lg:px-10 py-7 md:py-20 ">
       <div className="flex flex-col md:flex-row md:items-center lg:items-center space-y-6 md:space-y-0 md:space-x-6">
         {/* Left Section */}
         <div className="flex-1 bg-white p-6 flex flex-col justify-center">
