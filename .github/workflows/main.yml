@@ -16,12 +16,14 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '16' # Adjust to match your Node.js version
+        node-version: '16' # Adjust to your Node.js version
 
     - name: Install dependencies
+      working-directory: RevampUI/Starteryou
       run: npm install
 
     - name: Build the app
+      working-directory: RevampUI/Starteryou
       run: npm run build
 
     - name: Prepare SSH key
@@ -33,7 +35,7 @@ jobs:
     - name: Deploy to AWS EC2 via SSH
       run: |
         ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_IP }} << 'EOF'
-          cd /path/to/your/project # Navigate to your project directory on the server
+          cd /path/to/your/project/on/ec2 # Navigate to the project directory on EC2
           
           # Clean up old Docker images and volumes
           docker system prune -a --volumes -f
