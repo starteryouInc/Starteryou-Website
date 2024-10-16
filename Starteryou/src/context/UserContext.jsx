@@ -1,12 +1,12 @@
 import { createContext, useContext, useState } from "react";
-import PropTypes from "prop-types"; // Import PropTypes
+import PropTypes from "prop-types";
 
-// Create UserContext
-export const UserContext = createContext();
+// A context
+const UserContext = createContext();
 
-// Create UserProvider component
+// Provider component
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState({ isAdmin: false }); // Adjust this state as needed
+  const [user, setUser] = useState(null);
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
@@ -15,10 +15,12 @@ export const UserProvider = ({ children }) => {
   );
 };
 
-// Define PropTypes for UserProvider
+// PropTypes validation
 UserProvider.propTypes = {
-  children: PropTypes.node.isRequired, // Validate that children is a required prop
+  children: PropTypes.node.isRequired,
 };
 
-// Hook for accessing UserContext
-export const useUserContext = () => useContext(UserContext);
+// A custom hook to use the UserContext
+export const useUserContext = () => {
+  return useContext(UserContext);
+};

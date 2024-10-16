@@ -7,6 +7,7 @@ const NavigationContext = createContext();
 export const NavigationProvider = ({ children }) => {
   const [canAccessProtectedRoute, setCanAccessProtectedRoute] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false); 
 
   return (
     <NavigationContext.Provider
@@ -14,7 +15,9 @@ export const NavigationProvider = ({ children }) => {
         canAccessProtectedRoute,
         setCanAccessProtectedRoute,
         isAdmin,
-        setIsAdmin, // Adding this so you can update isAdmin from anywhere
+        setIsAdmin, 
+        isAuthenticated,
+        setIsAuthenticated, 
       }}
     >
       {children}
@@ -30,15 +33,20 @@ export const useNavigation = () => {
   return useContext(NavigationContext);
 };
 
-// New component to handle location updates
+// Component to handle location updates and manage isAdmin state
 export const NavigationHandler = () => {
-  const { setIsAdmin } = useNavigation(); // Access setIsAdmin from context
+  const { setIsAdmin, setIsAuthenticated } = useNavigation(); 
   const location = useLocation();
 
   useEffect(() => {
     // Update isAdmin based on the current pathname
     setIsAdmin(location.pathname.startsWith("/admin"));
-  }, [location.pathname, setIsAdmin]);
 
-  return null; // This component doesn't render anything
+    // Simulate a check to see if the user is logged in (you'd replace this with actual authentication logic)
+    const isLoggedIn = Boolean(localStorage.getItem("isLoggedIn")); // Mock check using localStorage
+
+    setIsAuthenticated(isLoggedIn); // Update the context with the authentication status
+  }, [location.pathname, setIsAdmin, setIsAuthenticated]);
+
+  return null; 
 };

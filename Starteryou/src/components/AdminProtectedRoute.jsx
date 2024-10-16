@@ -1,17 +1,16 @@
-import { useContext } from "react";
 import { Navigate } from "react-router-dom";
-import { UserContext } from "../context/UserContext"; // Correct import
+import PropTypes from "prop-types";
+import { useUserContext } from "../context/UserContext";
 
 const AdminProtectedRoute = ({ element }) => {
-  const { user } = useContext(UserContext);
+  const { user } = useUserContext();
 
-  // If the user is not an admin, redirect them to the regular home page
-  if (!user.isAdmin) {
-    return <Navigate to="/" replace />;
-  }
+  return user && user.isAdmin ? element : <Navigate to="/login" />; // Check if user exists and is admin
+};
 
-  // If the user is an admin, render the element (admin page)
-  return element;
+// PropTypes validation
+AdminProtectedRoute.propTypes = {
+  element: PropTypes.element.isRequired,
 };
 
 export default AdminProtectedRoute;

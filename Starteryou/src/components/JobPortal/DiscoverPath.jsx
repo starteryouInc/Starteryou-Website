@@ -1,5 +1,10 @@
+import { useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUpload } from "@fortawesome/free-solid-svg-icons";
+import { useNavigation } from "../../context/NavigationContext";
+
 const DiscoverPath = () => {
-  const opportunities = [
+  const [opportunities, setOpportunities] = useState([
     {
       img: "/JobPortalPage/Placeholder Image.png",
       title:
@@ -11,7 +16,6 @@ const DiscoverPath = () => {
     },
     {
       img: "/JobPortalPage/Placeholder Image.png",
-
       title: "Access Essential Career Resources to Boost Your Job Search",
       description:
         "Utilize our comprehensive resources to enhance your job readiness and skills.",
@@ -20,7 +24,6 @@ const DiscoverPath = () => {
     },
     {
       img: "/JobPortalPage/Placeholder Image.png",
-
       title:
         "Streamlined Job Listings for Students Seeking Flexible Work Options",
       description:
@@ -28,7 +31,20 @@ const DiscoverPath = () => {
       linkText: "Browse",
       linkUrl: "#",
     },
-  ];
+  ]);
+
+  const { isAdmin } = useNavigation();
+
+  const handleFileChange = (e, index) => {
+    const file = e.target.files[0];
+    const newImageUrl = URL.createObjectURL(file);
+
+    // Update the image for the specific opportunity
+    const updatedOpportunities = opportunities.map((opportunity, i) =>
+      i === index ? { ...opportunity, img: newImageUrl } : opportunity
+    );
+    setOpportunities(updatedOpportunities);
+  };
 
   return (
     <div className="mx-auto max-w-[1430px] px-4 lg:px-10 py-16">
@@ -37,7 +53,7 @@ const DiscoverPath = () => {
         <h1 className="text-2xl lg:text-4xl font-bold mb-6 md:mb-0 text-black md:text-left md:max-w-[320px] lg:max-w-[600px]">
           Discover Your Path: Opportunities for Students at Your Fingertips
         </h1>
-        <p className="mt-4 md:mt-0 text-black text-base md:text-right md:max-w-[400px] lg:max-w-[540px]">
+        <p className="mt-1 md:mt-0 text-black text-base md:text-right md:max-w-[400px] lg:max-w-[540px]">
           Our platform simplifies the job application process for college
           students. With just a few clicks, you can apply for internships and
           part-time jobs that fit your schedule. Say goodbye to complicated
@@ -48,12 +64,31 @@ const DiscoverPath = () => {
       {/* Boxes Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
         {opportunities.map((opportunity, index) => (
-          <div key={index}>
+          <div key={index} className="relative">
             <img
               src={opportunity.img}
               alt={opportunity.title}
-              className="w-full h-auto mb-4"
+              className="relative w-[500px] h-[250px] mb-4"
             />
+            {isAdmin && (
+              <div className="absolute top-4 right-4">
+                <label
+                  htmlFor={`file-upload-${index}`}
+                  className="cursor-pointer"
+                >
+                  <div className="w-10 h-10 rounded-full bg-blue-700 text-white flex items-center justify-center hover:bg-blue-600 transition-colors duration-300">
+                    <FontAwesomeIcon icon={faUpload} size="lg" />
+                  </div>
+                </label>
+                <input
+                  id={`file-upload-${index}`}
+                  type="file"
+                  onChange={(e) => handleFileChange(e, index)}
+                  className="hidden"
+                  aria-label="Upload Image"
+                />
+              </div>
+            )}
             <h2 className="text-lg font-semibold mb-2 px-1 ">
               {opportunity.title}
             </h2>
