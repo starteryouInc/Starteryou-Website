@@ -41,14 +41,15 @@ jobs:
           # Clean up old Docker images and volumes
           docker system prune -a --volumes -f
 
-          # Check if port 8080 is in use and handle accordingly
-          if lsof -i :8080; then
-              echo "Port 8080 is in use. Stopping the existing container."
-              # Stop the running container using port 8080
-              docker stop starteryou-ui-dev-container || true
-              docker rm starteryou-ui-dev-container || true
-          else
-              echo "Port 8080 is free."
+          # Check if the old container exists and stop/remove it
+          if [ "$(docker ps -q -f name=starteryou-ui-dev-container)" ]; then
+              echo "Stopping existing container..."
+              docker stop starteryou-ui-dev-container
+          fi
+
+          if [ "$(docker ps -aq -f name=starteryou-ui-dev-container)" ]; then
+              echo "Removing existing container..."
+              docker rm starteryou-ui-dev-container
           fi
 
           # Build the new Docker image
@@ -56,4 +57,13 @@ jobs:
 
           # Run the new Docker image
           docker run -d -p 8080:8080 --name starteryou-ui-dev-container starteryou-ui-dev
+
+          # Check if the container is running
+          if [ "$(docker ps -q -f name=starteryou-ui-dev-container)" ]; then
+              echo "Container is running."
+          else
+              echo "Container failed to start. Checking logs..."
+              docker logs starteryou-ui-dev-container
+              exit 1 # Exit with error if the container is not running
+          fi
         EOF
