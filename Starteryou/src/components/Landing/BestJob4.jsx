@@ -1,5 +1,6 @@
 import { useState } from "react";
-
+import { useNavigation } from "../../context/NavigationContext";
+import FileUpload from "../FileUpload";
 const icons = [
   {
     src: "/LandingPage/Icons/dashboard.svg",
@@ -29,7 +30,13 @@ const icons = [
 
 const BestJob4 = () => {
   const [activeIcon, setActiveIcon] = useState(0);
-
+  const [preview, setPreview] = useState(null);
+  const { isAdmin } = useNavigation();
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setPreview(URL.createObjectURL(file));
+    console.log("Selected file:", file);
+  };
   return (
     <div className="flex items-center justify-center py-16 lg:mt-20 px-4 lg:px-0">
       <div className="max-w-[1200px] h-auto w-full text-center">
@@ -112,11 +119,21 @@ const BestJob4 = () => {
 
           {/* Image */}
           <div className="w-[330px] h-[250px] md:w-[550px] lg:w-[1020px] lg:h-[550px] bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] rounded-t-2xl rounded-b-none overflow-hidden relative flex items-center justify-center lg:mt-5">
-            <img
-              src="/LandingPage/Rectangle.png"
-              alt="Overflowing Image"
-              className="relative w-[235px] h-[220px] top-[25px] md:w-[380px] md:h-[200px] lg:w-[900px] lg:h-[460px] lg:top-[50px] object-cover rounded-t-2xl rounded-b-none"
-            />
+            {preview ? (
+              <img
+                src={preview}
+                alt="Preview"
+                className="relative w-[235px] h-[220px] top-[25px] md:w-[380px] md:h-[200px] lg:w-[900px] lg:h-[460px] lg:top-[50px] object-cover rounded-t-2xl rounded-b-none"
+              />
+            ) : (
+              <img
+                src="/LandingPage/Rectangle.png"
+                alt="img"
+                className="relative w-[235px] h-[220px] top-[25px] md:w-[380px] md:h-[200px] lg:w-[900px] lg:h-[460px] lg:top-[50px] object-cover rounded-t-2xl rounded-b-none"
+              />
+            )}
+            {/* Admin file upload section */}
+            {isAdmin && <FileUpload handleFileChange={handleFileChange} />}
           </div>
         </div>
       </div>

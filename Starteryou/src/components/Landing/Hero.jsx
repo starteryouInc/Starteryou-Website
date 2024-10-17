@@ -1,4 +1,25 @@
+import { useState } from "react";
+import FileUpload from "../FileUpload";
+import { useNavigation } from "../../context/NavigationContext";
+
 const Hero = () => {
+  const [image1, setImage1] = useState("/LandingPage/Heroimg3.png");
+  const [image2, setImage2] = useState("/LandingPage/Heroimg2.jpg");
+  const [image3, setImage3] = useState("/LandingPage/Heroimg3.png");
+
+  const { isAdmin } = useNavigation();
+
+  const handleImageUpload = (e, setImage) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setImage(event.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <section className="relative w-full min-h-screen bg-[#2700D3] flex flex-col justify-center items-center text-center text-white px-4 overflow-hidden">
       {/* Background glow effect */}
@@ -34,7 +55,7 @@ const Hero = () => {
       </h1>
 
       {/* doodle2 */}
-      <div className="absolute z-10 w-[100px] h-[100px] md:w-[150px] md:h-[150px] top-[236px] left-[280px] lg:w-[275px] lg:h-[242px] lg:top-[110px] md:top-[240px] md:left-[570px]  lg:left-[1180px] opacity-90">
+      <div className="absolute z-10 w-[100px] h-[100px] md:w-[150px] md:h-[150px] top-[236px] left-[280px] lg:w-[275px] lg:h-[242px] lg:top-[110px] md:top-[240px] md:left-[570px] lg:left-[1180px] opacity-90">
         <img
           src="/LandingPage/hat.png"
           alt="Doodle 2"
@@ -78,40 +99,52 @@ const Hero = () => {
 
       {/* Image Section */}
       <div className="relative mt-20 flex justify-center items-center w-full">
-        {/* Left Image */}
+        {/* Left Image with File Upload */}
         <div className="absolute left-[22px] z-5 pt-20 w-[500px] h-[300px] md:w-[300px] md:h-[400px] lg:w-[500px] lg:h-[500px]">
           <img
-            src="/LandingPage/Heroimg3.png"
+            src={image1}
             alt="Left Image"
             className="w-full h-full object-cover border-t-4 border-l-4 border-r-4 border-[#A9DCF7] rounded-t-2xl rounded-b-none"
           />
+          {isAdmin && (
+            <div className="hidden md:block absolute top-20 left-20">
+              <FileUpload
+                handleFileChange={(e) => handleImageUpload(e, setImage1)}
+              />
+            </div>
+          )}
         </div>
 
         {/* Central Image */}
         <div className="relative overflow-hidden z-10 w-full h-[300px] sm:w-[400px] md:w-[500px] md:h-[400px] lg:w-[900px] lg:h-[500px]">
           <img
-            src="/LandingPage/Heroimg2.jpg"
+            src={image2}
             alt="Central Image"
             className="w-full h-full object-cover border-t-4 border-l-4 border-r-4 border-[#A9DCF7] rounded-t-2xl rounded-b-none"
           />
+          {isAdmin && (
+            <div>
+              <FileUpload
+                handleFileChange={(e) => handleImageUpload(e, setImage2)}
+              />
+            </div>
+          )}
         </div>
 
-        {/* doodle5 */}
-        <div className="absolute w-[100px] h-[100px]  lg:w-[191px] lg:h-[192px] lg:top-[-60px] lg:left-[1080px] md:left-[566px] md:top-[-1px]">
-          <img
-            src="/LandingPage/doodle-7 1.png"
-            alt="Doodle 5"
-            className="w-full h-full object-cover rounded-2xl"
-          />
-        </div>
-
-        {/* Right Image */}
+        {/* Right Image with File Upload */}
         <div className="absolute right-[22px] z-5 pt-20 w-[500px] h-[300px] md:w-[300px] md:h-[400px] lg:w-[500px] lg:h-[500px]">
           <img
-            src="/LandingPage/Heroimg3.png"
+            src={image3}
             alt="Right Image"
             className="w-full h-full object-cover border-t-4 border-l-4 border-r-4 border-[#A9DCF7] rounded-t-2xl rounded-b-none"
           />
+          {isAdmin && (
+            <div className="hidden md:block absolute top-20 right-2">
+              <FileUpload
+                handleFileChange={(e) => handleImageUpload(e, setImage3)}
+              />
+            </div>
+          )}
         </div>
       </div>
     </section>

@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useNavigation } from "../context/NavigationContext";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false); // New state to track scroll
+  const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAdmin } = useNavigation(); // Access isAdmin from context
 
   useEffect(() => {
-    // Handle smooth scrolling to the blog section when the route changes
     if (location.hash === "#blog") {
       const blogSection = document.getElementById("blog");
       if (blogSection) {
@@ -17,7 +18,6 @@ const Navbar = () => {
     }
   }, [location]);
 
-  // Function to handle scrolling to blog section
   const handleBlogClick = () => {
     if (location.pathname === "/") {
       const blogSection = document.getElementById("blog");
@@ -29,12 +29,10 @@ const Navbar = () => {
     }
   };
 
-  // Scroll event listener to change color when user scrolls
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
       if (scrollY > 50) {
-       
         setIsScrolled(true);
       } else {
         setIsScrolled(false);
@@ -42,8 +40,6 @@ const Navbar = () => {
     };
 
     window.addEventListener("scroll", handleScroll);
-
-    // Clean up event listener on unmount
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
@@ -93,7 +89,7 @@ const Navbar = () => {
       {/* Navigation Links for Medium and Large Screens */}
       <ul className="hidden md:flex space-x-4 sm:space-x-6 md:space-x-8 lg:space-x-12 text-sm sm:text-base lg:text-xl font-bold uppercase z-10">
         <li>
-          <Link to="/" className="cursor-pointer">
+          <Link to={isAdmin ? "/admin" : "/"} className="cursor-pointer">
             Home
           </Link>
         </li>
@@ -103,12 +99,18 @@ const Navbar = () => {
           </Link>
         </li>
         <li>
-          <Link to="/jobs" className="cursor-pointer">
+          <Link
+            to={isAdmin ? "/admin/jobs" : "/jobs"}
+            className="cursor-pointer"
+          >
             Jobs
           </Link>
         </li>
         <li>
-          <Link to="/about" className="cursor-pointer">
+          <Link
+            to={isAdmin ? "/admin/about" : "/about"}
+            className="cursor-pointer"
+          >
             About Us
           </Link>
         </li>
@@ -151,11 +153,11 @@ const Navbar = () => {
 
         {/* Navigation Links for Mobile Screen */}
         <ul className="flex flex-col space-y-6 text-left text-base font-semibold uppercase mt-[5.5rem] opacity-[0.9]">
-          <li className="flex items-center space-x-3 ">
+          <li className="flex items-center space-x-3">
             <img
               src="/LandingPage/Icons/home.png"
               alt="Home"
-              className="w-5 h-5 "
+              className="w-5 h-5"
             />
             <Link to="/" onClick={() => setIsMenuOpen(false)}>
               Home
@@ -177,7 +179,10 @@ const Navbar = () => {
               alt="Jobs"
               className="w-5 h-5"
             />
-            <Link to="/jobs" onClick={() => setIsMenuOpen(false)}>
+            <Link
+              to={isAdmin ? "/admin/jobs" : "/jobs"}
+              onClick={() => setIsMenuOpen(false)}
+            >
               Jobs
             </Link>
           </li>
@@ -187,7 +192,10 @@ const Navbar = () => {
               alt="About Us"
               className="w-5 h-5"
             />
-            <Link to="/about" onClick={() => setIsMenuOpen(false)}>
+            <Link
+              to={isAdmin ? "/admin/about" : "/about"}
+              onClick={() => setIsMenuOpen(false)}
+            >
               About Us
             </Link>
           </li>
@@ -206,8 +214,8 @@ const Navbar = () => {
           </li>
         </ul>
 
-        {/* Divider and Social Media Icons*/}
-        <div className="absolute bottom-6 left-6 right-6">
+        {/* Divider and Social Media Icons */}
+        <div className="absolute bottom-[2.5rem] left-6 right-6">
           <hr className="border-0 h-[1px] bg-black rounded-sm mb-4" />
 
           {/* Social Media Icons */}
