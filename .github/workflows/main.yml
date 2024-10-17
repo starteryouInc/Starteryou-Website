@@ -19,11 +19,11 @@ jobs:
         node-version: '16' # Adjust to your Node.js version
 
     - name: Install dependencies
-      working-directory: RevampUI/Starteryou
+      working-directory: Starteryou
       run: npm install
 
     - name: Build the app
-      working-directory: RevampUI/Starteryou
+      working-directory: Starteryou
       run: npm run build
 
     - name: Prepare SSH key
