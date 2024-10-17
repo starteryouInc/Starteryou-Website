@@ -52,6 +52,14 @@ jobs:
               docker rm starteryou-ui-dev-container
           fi
 
+          # Check if Nginx is running and using port 8080, then stop it
+          if sudo lsof -i :8080; then
+              echo "Nginx is running on port 8080. Stopping Nginx..."
+              sudo systemctl stop nginx
+          else
+              echo "No service is using port 8080."
+          fi
+
           # Build the new Docker image
           docker build -t starteryou-ui-dev . -f /home/ec2-user/RevampUI/Starteryou/Dockerfile
 
