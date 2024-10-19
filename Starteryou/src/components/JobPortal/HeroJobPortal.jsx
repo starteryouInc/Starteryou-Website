@@ -1,4 +1,15 @@
+import { useState } from "react";
+import { useNavigation } from "../../context/NavigationContext";
+import FileUpload from "../FileUpload";
+
 const HeroJobPortal = () => {
+  const [preview, setPreview] = useState(null);
+  const { isAdmin } = useNavigation();
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setPreview(URL.createObjectURL(file));
+    console.log("Selected file:", file);
+  };
   return (
     <div className="bg-[#6A54DF] min-h-screen flex flex-col items-center justify-center p-4 md:pt-[100px] pt-[200px] lg:pt-[200px]">
       <div className="text-center max-w-[700px] mx-auto">
@@ -19,11 +30,28 @@ const HeroJobPortal = () => {
           </button>
         </div>
       </div>
-      <img
-        src="/JobPortalPage/portalHero.svg"
-        alt="Job Opportunities"
-        className="w-full lg:h-[800px] md:px-20 lg:mt-10"
-      />
+      <div className="relative">
+        {preview ? (
+          <img
+            src={preview}
+            alt=" Job Opportunities Preview"
+            className="relative w-[1500px] lg:h-[800px] md:px-20 lg:mt-10"
+          />
+        ) : (
+          <img
+            src="/JobPortalPage/portalHero.svg"
+            alt="Job Opportunities"
+            className="relative w-[1500px] lg:h-[800px] md:px-20 lg:mt-10"
+          />
+        )}
+        {/* Admin file upload section */}
+        {isAdmin && (
+          <div className=" absolute right-1 top-0 md:top-14 md:right-20 ">
+            {" "}
+            <FileUpload handleFileChange={handleFileChange} />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

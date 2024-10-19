@@ -54,7 +54,7 @@ const pricingData = [
 
 const Pricing = () => {
   return (
-    <div className=" relative flex flex-col items-center justify-center py-16  px-4 md:px-12 lg:px-24 overflow-hidden">
+    <div className=" relative flex flex-col items-center justify-center py-16  px-4 md:px-12 lg:px-24">
       {/*  Heading */}
       <h2 className="text-3xl font-extrabold text-center mb-20">
         It’s easy to get started
@@ -66,17 +66,17 @@ const Pricing = () => {
           <div
             key={index}
             className={`relative flex flex-col items-start justify-between z-10 p-8 rounded-lg bg-white 
-          ${
-            index === 1
-              ? "lg:-translate-y-6 shadow-[0px_4.78px_52.63px_0px_#65656540]"
-              : "shadow-lg"
-          }
-          ${
-            index === 2
-              ? "md:col-span-2 md:w-1/2 md:mx-auto lg:col-span-1 lg:w-full lg:mx-0 "
-              : ""
-          }
-          `}
+            ${
+              index === 1
+                ? "lg:-translate-y-6 shadow-[0px_4.78px_52.63px_0px_#65656540]"
+                : "shadow-lg"
+            }
+            ${
+              index === 2
+                ? "md:col-span-2 md:w-1/2 md:mx-auto lg:col-span-1 lg:w-full lg:mx-0 "
+                : ""
+            }
+            `}
           >
             <h3 className="text-2xl font-medium italic mb-2">{plan.title}</h3>
 

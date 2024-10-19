@@ -1,8 +1,12 @@
 import { useState } from "react";
+import FileUpload from "../FileUpload"; // Import the FileUpload component
+import { useNavigation } from "../../context/NavigationContext";
 
 const BestJob = () => {
   const [activeBox, setActiveBox] = useState(0);
-
+  const [image1, setImage1] = useState("/LandingPage/Rectangle.png");
+  const [image2, setImage2] = useState("/LandingPage/Heroimg2.jpg");
+  const { isAdmin } = useNavigation();
   const boxes = [
     {
       id: 0,
@@ -24,12 +28,24 @@ const BestJob = () => {
     },
   ];
 
+  //handle image upload for both images
+  const handleImageUpload = (e, imageSetter) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        imageSetter(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="container mx-auto max-w-[1300px] px-4 py-12">
       <div className="flex flex-col lg:flex-row items-center justify-between lg:space-x-8">
         {/* Left Section */}
         <div className="md:w-full lg:w-1/3 w-full md:text-center lg:text-left mb-8 lg:mb-0">
-          <h2 className=" text-3xl md:text-4xl lg:text-5xl font-bold mb-1 leading-tight">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-1 leading-tight">
             Find the best jobs that define you.
           </h2>
           <p className="text-gray-600 mb-2 md:text-lg">
@@ -39,7 +55,7 @@ const BestJob = () => {
             See new openings &gt;
           </a>
 
-          {/* Boxes (Arranged in a row for medium screens) */}
+          {/* Boxes */}
           <div className="mt-8 flex flex-col md:flex-row md:justify-between lg:flex-col md:space-x-2 space-y-4 md:space-y-0 md:px-6 lg:space-x-0 lg:px-0">
             {boxes.map((box) => (
               <div
@@ -52,7 +68,6 @@ const BestJob = () => {
                 onClick={() => setActiveBox(box.id)}
               >
                 <div className="flex items-center space-x-4">
-                  {/* Icon */}
                   <img
                     src={box.iconSrc}
                     alt={box.title}
@@ -64,7 +79,6 @@ const BestJob = () => {
                           : "none",
                     }}
                   />
-                  {/* Title */}
                   <h3
                     className={`text-xl font-bold ${
                       activeBox === box.id ? "text-[#7950F2]" : "text-black"
@@ -84,18 +98,35 @@ const BestJob = () => {
           </div>
         </div>
 
-        {/* Right Section (Centered for medium screens) */}
-        <div className="w-[330px] h-[300px] md:w-[550px] lg:w-[700px] lg:h-[550px] bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] rounded-xl  ">
+        {/* Right Section */}
+        <div className="w-[330px] h-[300px] md:w-[550px] lg:w-[700px] lg:h-[550px] bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] rounded-xl relative">
+          {/* First Image */}
           <img
-            src="/LandingPage/Rectangle.png"
+            src={image1}
             alt="Job Opportunities"
-            className="relative w-[220px] h-[170px] top-[25px] left-[30px] md:w-[320px] md:left-[50px] lg:top-[47px] lg:left-[70px] lg:w-[440px] lg:h-[300px] rounded-xl "
+            className="relative w-[220px] h-[170px] top-[25px] left-[30px] md:w-[320px] md:left-[50px] lg:top-[47px] lg:left-[70px] lg:w-[440px] lg:h-[300px] rounded-xl"
           />
+          {isAdmin && (
+            <div className="absolute top-10 right-48">
+              <FileUpload
+                handleFileChange={(e) => handleImageUpload(e, setImage1)}
+              />
+            </div>
+          )}
+
+          {/* Second Image */}
           <img
-            src="/LandingPage/Heroimg2.jpg"
+            src={image2}
             alt="Job Opportunities"
             className="relative w-[220px] h-[170px] top-[-68px] left-[80px] md:left-[180px] md:w-[320px] lg:top-[-112px] lg:left-[190px] lg:w-[420px] lg:h-[300px] rounded-xl z-10"
           />
+          {isAdmin && (
+            <div className="absolute right-24  top-48 z-10">
+              <FileUpload
+                handleFileChange={(e) => handleImageUpload(e, setImage2)}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

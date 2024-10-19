@@ -1,6 +1,17 @@
+import { useState } from "react";
+import { useNavigation } from "../../context/NavigationContext";
+import FileUpload from "../FileUpload";
+
 const LaunchBanner = () => {
+  const [preview, setPreview] = useState(null);
+  const { isAdmin } = useNavigation();
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setPreview(URL.createObjectURL(file));
+    console.log("Selected file:", file);
+  };
   return (
-    <div className="flex flex-col md:flex-row  md:max-w-[1400px] md:mx-auto p-3 md:p-8 my-20">
+    <div className="flex flex-col md:flex-row  md:max-w-[1400px] md:mx-auto p-3 md:p-8 my-16 md:my-20">
       {/* Text Section */}
       <div className="flex flex-col justify-center md:w-1/2 p-4">
         <h1 className="text-2xl md:text-4xl font-bold mb-2">
@@ -21,12 +32,27 @@ const LaunchBanner = () => {
       </div>
 
       {/* Image Section */}
-      <div className="md:w-1/2 p-4">
-        <img
-          src="/JobPortalPage/Placeholder Image.png"
-          alt="Career Launch"
-          className="w-full h-[370px] object-cover "
-        />
+      <div className="md:w-1/2 p-4 relative">
+        {preview ? (
+          <img
+            src={preview}
+            alt="Preview"
+            className=" w-[700px] h-[370px] object-cover "
+          />
+        ) : (
+          <img
+            src="/JobPortalPage/Placeholder Image.png"
+            alt="Career Launch"
+            className=" w-[700px] h-[270px] md:h-[370px] object-cover "
+          />
+        )}
+        {/* Admin file upload section */}
+        {isAdmin && (
+          <div className="absolute top-3 right-4 ">
+            {" "}
+            <FileUpload handleFileChange={handleFileChange} />
+          </div>
+        )}
       </div>
     </div>
   );

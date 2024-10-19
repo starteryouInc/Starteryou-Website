@@ -29,7 +29,7 @@ const BetterFuture = () => {
       </p>
 
       {/* Box Container */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-20 py-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-20 py-5 md:py-10">
         {/* Video Box */}
         <div className="relative w-full h-auto">
           <div className="relative overflow-hidden rounded-sm shadow-lg">
@@ -61,7 +61,7 @@ const BetterFuture = () => {
         </div>
 
         {/* Text Box */}
-        <div className="flex flex-col bg-white p-6 justify-center ">
+        <div className="flex flex-col bg-white p-2 md:p-6 justify-center  ">
           <h2 className="text-3xl font-semibold text-start text-[#252B42] pb-3">
             Most trusted in our field
           </h2>
