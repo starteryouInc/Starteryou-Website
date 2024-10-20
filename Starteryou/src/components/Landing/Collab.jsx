@@ -30,7 +30,7 @@ const Collab = () => {
               key={index}
               src={image.src}
               alt={image.alt}
-              className="w-full rounded-xl px-2"
+              className="w-full rounded-lg px-2"
             />
           ))}
         </div>

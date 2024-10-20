@@ -6,6 +6,9 @@ RevampUI is a modern user interface design system built with React and Vite, str
 
 Check out the live version of the project here: [StarterYou Live](https://starteryou.netlify.app/)
 
+**URL for Dev Server:** http://54.196.202.145:8080/
+
+
 ## 📂 Project Structure
 
 The code for the entire project is located inside the `StarterYou` folder. This folder contains all the components, styles, and assets needed for the project.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Use the official Nginx image from Docker Hub
 FROM nginx:alpine
 
@@ -12,4 +13,26 @@ EXPOSE 80
 EXPOSE 443
 
 # Start Nginx server
+=======
+# Use the official Nginx image as a base
+FROM nginx:alpine
+
+# Set the working directory
+WORKDIR /usr/share/nginx/html
+
+# Copy your UI files into the container
+COPY ./dist /usr/share/nginx/html
+
+# Copy your Nginx configuration file
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy SSL certificates into the container (optional if you are using Let's Encrypt)
+#COPY /etc/letsencrypt/live/starteryou.com-002/fullchain1.pem /etc/ssl/certs/fullchain.pem
+#COPY /etc/letsencrypt/live/starteryou.com-002/privkey1.pem /etc/ssl/private/privkey.pem
+
+# Expose port 80 and 443
+EXPOSE 80 443
+
+# Start Nginx
+>>>>>>> 558e0e4747d3ab0fea7f6741a71151bfbe638ef7
 CMD ["nginx", "-g", "daemon off;"]

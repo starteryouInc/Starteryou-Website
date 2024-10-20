@@ -1,3 +1,7 @@
+import { useState } from "react";
+import { useNavigation } from "../../context/NavigationContext";
+import FileUpload from "../FileUpload";
+
 const icons = [
   {
     src: "/LandingPage/Icons/dashboard.svg",
@@ -32,6 +36,14 @@ const icons = [
 ];
 
 const BestBuddy = () => {
+  const [preview, setPreview] = useState(null);
+  const { isAdmin } = useNavigation();
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setPreview(URL.createObjectURL(file));
+    console.log("Selected file:", file);
+  };
+
   return (
     <div className="bg-white py-20 px-4 sm:py-24">
       <div className="md:max-w-3xl lg:max-w-4xl mx-auto text-center">
@@ -84,12 +96,27 @@ const BestBuddy = () => {
         </div>
 
         {/* Image */}
-        <div className="flex justify-center mt-2">
-          <img
-            src="https://via.placeholder.com/900x450"
-            alt="Placeholder"
-            className="w-full max-w-[1316px] h-auto"
-          />
+        <div className="relative flex justify-center mt-2">
+          {preview ? (
+            <img
+              src={preview}
+              alt="Preview"
+              className="w-[900px] h-[300px] md:h-[450px]"
+            />
+          ) : (
+            <img
+              src="/JobPortalPage/Placeholder Image.png"
+              alt="Placeholder"
+              className="w-[900px] h-[300px] md:h-[450px]"
+            />
+          )}
+          {/* Admin file upload section */}
+          {isAdmin && (
+            <div className=" absolute top-0 right-2 ">
+              {" "}
+              <FileUpload handleFileChange={handleFileChange} />
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -38,17 +38,17 @@ const Team = () => {
         Meet Our Team
       </h2>
       {/* <p className="text-gray-600 max-w-[800px] mx-auto  mb-8 md:mb-10">
-          Our team of passionate professionals brings a wealth of expertise to
-          ensure the best experience for our customers. Together, we work towards
-          delivering exceptional service and innovation.
-        </p> */}
+        Our team of passionate professionals brings a wealth of expertise to
+        ensure the best experience for our customers. Together, we work towards
+        delivering exceptional service and innovation.
+      </p> */}
 
       {/* Top row*/}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center max-w-[930px] mx-auto">
         {teamMembers.slice(0, 3).map((member, index) => (
           <div
             key={index}
-            className="flex flex-col items-center bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] p-6 shadow-md h-[350px] rounded-md"
+            className="flex flex-col items-center bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] p-6 shadow-md h-[350px] rounded-md "
           >
             <img
               src={member.imgSrc}
