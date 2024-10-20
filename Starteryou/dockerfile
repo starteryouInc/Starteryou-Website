@@ -1,17 +1,15 @@
-# Use the official Nginx image as a base
+# Use the official Nginx image from Docker Hub
 FROM nginx:alpine
 
-# Set the working directory
-WORKDIR /usr/share/nginx/html
+# Copy your custom Nginx configuration file
+COPY nginx.conf /etc/nginx/nginx.conf
 
-# Copy your UI files into the container
+# Copy the React build files to Nginx's default HTML directory
 COPY ./dist /usr/share/nginx/html
 
-# Copy your Nginx configuration file
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Expose HTTP and HTTPS ports
+EXPOSE 80
+EXPOSE 443
 
-# Expose port 80 and 443
-EXPOSE 80 443
-
-# Start Nginx
+# Start Nginx server
 CMD ["nginx", "-g", "daemon off;"]
