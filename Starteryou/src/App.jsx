@@ -19,6 +19,7 @@ import { UserProvider } from "./context/UserContext";
 import LoginPage from "./components/LoginPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import JobPage from "./pages/JobPage";
 
 const Layout = () => {
   const location = useLocation();
@@ -26,7 +27,7 @@ const Layout = () => {
   // Scroll to top on location change
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [location.pathname]); // This will run on every route change
+  }, [location.pathname]);
 
   return (
     <div className="font-montserrat scroll-smooth">
@@ -37,6 +38,8 @@ const Layout = () => {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/jobs" element={<JobPortalPage />} />
         <Route path="/login" element={<LoginPage />} />
+        {/* Temporary route for jobpage */}
+        <Route path="/job2" element={<JobPage />} />
         {/* Admin Protected Routes */}
         <Route
           path="/admin"
@@ -49,6 +52,11 @@ const Layout = () => {
         <Route
           path="/admin/jobs"
           element={<AdminProtectedRoute element={<JobPortalPage />} />}
+        />
+        {/* Temporary route for jobpage */}
+        <Route
+          path="/admin/job2"
+          element={<AdminProtectedRoute element={<JobPage />} />}
         />
       </Routes>
       {location.pathname !== "/login" && <Footer />}
