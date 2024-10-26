@@ -1,45 +1,80 @@
-- name: Deploy to AWS EC2 via SSH
-  run: |
-    ssh -v -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_IP }} << 'EOF'
-      cd /home/ec2-user/RevampUI/Starteryou # Navigate to the project directory on EC2
+name: Deploy to AWS EC2
 
-      # Pull the latest code changes
-      git pull origin main
+on:
+  push:
+    branches:
+      - main
 
-      # Clean up old Docker images and volumes
-      docker system prune -a --volumes -f
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-      # Check if the old container exists and stop/remove it
-      if [ "$(docker ps -q -f name=starteryou-ui-dev-container)" ]; then
-          echo "Stopping existing container..."
-          docker stop starteryou-ui-dev-container
-      fi
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      if [ "$(docker ps -aq -f name=starteryou-ui-dev-container)" ]; then
-          echo "Removing existing container..."
-          docker rm starteryou-ui-dev-container
-      fi
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16' # Adjust to your Node.js version
 
-      # Check if Nginx is running and using port 8080, then stop it
-      if sudo lsof -i :8080; then
-          echo "Nginx is running on port 8080. Stopping Nginx..."
-          sudo systemctl stop nginx
-      else
-          echo "No service is using port 8080."
-      fi
+      - name: Install dependencies
+        working-directory: Starteryou # Update this if your path is different
+        run: npm install
 
-      # Build the new Docker image
-      docker build -t starteryou-ui-dev . -f /home/ec2-user/RevampUI/Starteryou/Dockerfile
+      - name: Build the app
+        working-directory: Starteryou # Update this if your path is different
+        run: npm run build
 
-      # Run the new Docker image
-      docker run -d -p 8080:8080 --name starteryou-ui-dev-container starteryou-ui-dev
+      - name: Prepare SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_IP }} >> ~/.ssh/known_hosts
 
-      # Check if the container is running
-      if [ "$(docker ps -q -f name=starteryou-ui-dev-container)" ]; then
-          echo "Container is running."
-      else
-          echo "Container failed to start. Checking logs..."
-          docker logs starteryou-ui-dev-container
-          exit 1 # Exit with error if the container is not running
-      fi
-    EOF
+      - name: Deploy to AWS EC2 via SSH
+        run: |
+          ssh -v -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_IP }} << 'EOF'
+            cd /home/ec2-user/RevampUI/Starteryou # Navigate to the project directory on EC2
+
+            # Pull the latest code changes
+            git pull origin main
+
+            # Clean up old Docker images and volumes
+            docker system prune -a --volumes -f
+
+            # Check if the old container exists and stop/remove it
+            if [ "$(docker ps -q -f name=starteryou-ui-dev-container)" ]; then
+                echo "Stopping existing container..."
+                docker stop starteryou-ui-dev-container
+            fi
+
+            if [ "$(docker ps -aq -f name=starteryou-ui-dev-container)" ]; then
+                echo "Removing existing container..."
+                docker rm starteryou-ui-dev-container
+            fi
+
+            # Check if Nginx is running and using port 8080, then stop it
+            if sudo lsof -i :8080; then
+                echo "Nginx is running on port 8080. Stopping Nginx..."
+                sudo systemctl stop nginx
+            else
+                echo "No service is using port 8080."
+            fi
+
+            # Build the new Docker image
+            docker build -t starteryou-ui-dev . -f /home/ec2-user/RevampUI/Starteryou/Dockerfile
+
+            # Run the new Docker image
+            docker run -d -p 8080:8080 --name starteryou-ui-dev-container starteryou-ui-dev
+
+            # Check if the container is running
+            if [ "$(docker ps -q -f name=starteryou-ui-dev-container)" ]; then
+                echo "Container is running."
+            else
+                echo "Container failed to start. Checking logs..."
+                docker logs starteryou-ui-dev-container
+                exit 1 # Exit with error if the container is not running
+            fi
+          EOF
