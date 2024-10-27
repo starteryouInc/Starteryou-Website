@@ -5,8 +5,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { useEffect } from "react";
-import Footer from "./components/Footer";
-import Navbar from "./components/Navbar";
+
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 import JobPortalPage from "./pages/JobPortalPage";
@@ -14,12 +13,16 @@ import {
   NavigationProvider,
   NavigationHandler,
 } from "./context/NavigationContext";
-import AdminProtectedRoute from "./components/AdminProtectedRoute";
+import AdminProtectedRoute from "./components/Common/AdminProtectedRoute";
 import { UserProvider } from "./context/UserContext";
-import LoginPage from "./components/LoginPage";
+import LoginPage from "./components/Auth/LoginPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import JobPage from "./pages/JobPage";
+import EducationPage from "./pages/EducationPage";
+import Navbar from "./components/Common/Navbar";
+import Footer from "./components/Common/Footer";
+import Signup from "./components/Auth/Signup";
 
 const Layout = () => {
   const location = useLocation();
@@ -27,7 +30,7 @@ const Layout = () => {
   // Scroll to top on location change
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [location.pathname]);
+  }, [location.pathname]); // This will run on every route change
 
   return (
     <div className="font-montserrat scroll-smooth">
@@ -38,7 +41,8 @@ const Layout = () => {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/jobs" element={<JobPortalPage />} />
         <Route path="/login" element={<LoginPage />} />
-        {/* Temporary route for jobpage */}
+        <Route path="/education" element={<EducationPage />} />
+        <Route path="/signup" element={<Signup />} />
         <Route path="/job2" element={<JobPage />} />
         {/* Admin Protected Routes */}
         <Route
@@ -53,7 +57,10 @@ const Layout = () => {
           path="/admin/jobs"
           element={<AdminProtectedRoute element={<JobPortalPage />} />}
         />
-        {/* Temporary route for jobpage */}
+        <Route
+          path="/admin/education"
+          element={<AdminProtectedRoute element={<EducationPage />} />}
+        />
         <Route
           path="/admin/job2"
           element={<AdminProtectedRoute element={<JobPage />} />}

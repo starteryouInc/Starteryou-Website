@@ -1,5 +1,6 @@
 import { useState } from "react";
-import FileUpload from "../FileUpload";
+import FileUpload from "../Common/FileUpload";
+
 import { useNavigation } from "../../context/NavigationContext";
 
 const Hero = () => {

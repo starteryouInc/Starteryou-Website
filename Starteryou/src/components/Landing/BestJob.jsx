@@ -1,5 +1,5 @@
 import { useState } from "react";
-import FileUpload from "../FileUpload"; // Import the FileUpload component
+import FileUpload from "../Common/FileUpload";
 import { useNavigation } from "../../context/NavigationContext";
 
 const BestJob = () => {

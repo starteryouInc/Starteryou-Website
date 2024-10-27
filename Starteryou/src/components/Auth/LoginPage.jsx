@@ -2,7 +2,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useUserContext } from "../context/UserContext";
+import { useUserContext } from "../../context/UserContext";
 
 const LoginPage = () => {
   const { setUser } = useUserContext();
@@ -55,19 +55,24 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F0F4FF]">
-      <div className="bg-white p-8 mx-2 md:mx-0 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-semibold mb-6 text-center">Admin Login</h2>
+    <div
+      className="relative w-full lg:h-screen bg-cover bg-center min-h-screen flex items-center justify-center"
+      style={{ backgroundImage: "url(/AboutPage/Aboutbg.svg)" }}
+    >
+      <div className="bg-white p-8 mx-4 md:mx-0 rounded-lg shadow-lg w-full max-w-md border border-gray-200">
+        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
+          Admin Login
+        </h2>
         {lockout && countdown > 0 && (
-          <p className="text-yellow-600 mb-4 text-center">
+          <p className="text-red-600 mb-4 text-center font-semibold">
             Please Wait: {countdown}s
           </p>
         )}
-        <form onSubmit={handleLogin}>
-          <div className="mb-4">
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div>
             <label
               htmlFor="username"
-              className="block text-sm font-medium mb-1"
+              className="block text-sm font-medium text-gray-700 mb-1"
             >
               Username
             </label>
@@ -76,15 +81,15 @@ const LoginPage = () => {
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full p-2 border rounded"
+              className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             />
           </div>
 
-          <div className="mb-4">
+          <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium mb-1"
+              className="block text-sm font-medium text-gray-700 mb-1"
             >
               Password
             </label>
@@ -93,14 +98,14 @@ const LoginPage = () => {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 border rounded"
+              className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+            className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition duration-200 font-semibold disabled:bg-gray-400"
             disabled={lockout}
           >
             Login
