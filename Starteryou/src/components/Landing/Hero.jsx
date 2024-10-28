@@ -1,23 +1,59 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import FileUpload from "../Common/FileUpload";
-
 import { useNavigation } from "../../context/NavigationContext";
 
 const Hero = () => {
+  const { isAdmin } = useNavigation();
+
+  // State variables for each image
   const [image1, setImage1] = useState("/LandingPage/Heroimg3.png");
   const [image2, setImage2] = useState("/LandingPage/Heroimg2.jpg");
   const [image3, setImage3] = useState("/LandingPage/Heroimg3.png");
 
-  const { isAdmin } = useNavigation();
+  // Titles to identify each image in the backend
+  const titles = ["HeroImage1", "HeroImage2", "HeroImage3"];
 
-  const handleImageUpload = (e, setImage) => {
+  // Fetch images by title on component mount
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const responses = await Promise.all(
+          titles.map(async (title) => {
+            const response = await fetch(`http://localhost:5001/api/files/title/${title}`);
+            if (!response.ok) throw new Error("Network response was not ok");
+            const blob = await response.blob();
+            return URL.createObjectURL(blob);
+          })
+        );
+        setImage1(responses[0]);
+        setImage2(responses[1]);
+        setImage3(responses[2]);
+      } catch (error) {
+        console.error("Error fetching images:", error);
+      }
+    };
+    fetchImages();
+  }, []);
+
+  // Handle image update by title
+  const handleImageUpload = async (e, setImage, title) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setImage(event.target.result);
-      };
-      reader.readAsDataURL(file);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("title", title);
+
+    try {
+      const response = await fetch("http://localhost:5001/api/files/update", {
+        method: "PUT",
+        body: formData,
+      });
+      if (!response.ok) throw new Error("Network response was not ok");
+
+      const newImageUrl = URL.createObjectURL(file); // Show new image preview
+      setImage(newImageUrl);
+      console.log(`Image updated successfully for ${title}`);
+    } catch (error) {
+      console.error("Error updating image:", error);
     }
   };
 
@@ -110,7 +146,7 @@ const Hero = () => {
           {isAdmin && (
             <div className="hidden md:block absolute top-20 left-20">
               <FileUpload
-                handleFileChange={(e) => handleImageUpload(e, setImage1)}
+                handleFileChange={(e) => handleImageUpload(e, setImage1, titles[0])}
               />
             </div>
           )}
@@ -126,7 +162,7 @@ const Hero = () => {
           {isAdmin && (
             <div>
               <FileUpload
-                handleFileChange={(e) => handleImageUpload(e, setImage2)}
+                handleFileChange={(e) => handleImageUpload(e, setImage2, titles[1])}
               />
             </div>
           )}
@@ -142,7 +178,7 @@ const Hero = () => {
           {isAdmin && (
             <div className="hidden md:block absolute top-20 right-2">
               <FileUpload
-                handleFileChange={(e) => handleImageUpload(e, setImage3)}
+                handleFileChange={(e) => handleImageUpload(e, setImage3, titles[2])}
               />
             </div>
           )}

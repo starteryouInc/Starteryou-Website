@@ -1,11 +1,58 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
 
-
 const BestJob2 = () => {
-  const [preview, setPreview] = useState(null);
+  const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images
+  const title = 'BesstBudy2';
   const { isAdmin } = useNavigation();
+
+  // Function to fetch a specific file (image) by title
+  const fetchUploadedFile = async () => {
+    try {
+      const response = await fetch(`http://localhost:5001/api/files/title/${title}`); // Fetch by title
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const blob = await response.blob(); // Get the response as a Blob
+      const url = URL.createObjectURL(blob); // Create a local URL for the Blob
+      setUploadedFile(url); // Set the uploaded file data with its local URL
+    } catch (error) {
+      console.error('Error fetching uploaded file:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUploadedFile(); // Fetch the specific image on component mount
+  }, []);
+
+  // Handle file upload
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('title', title); // Include the title for the update
+
+    try {
+      const response = await fetch(`http://localhost:5001/api/files/update`, {
+        method: 'PUT',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      console.log('Image updated successfully:', data);
+
+      setUploadedFile(URL.createObjectURL(file)); // Update the uploaded file state with the new image preview
+    } catch (error) {
+      console.error('Error updating image:', error);
+    }
+  };
+
 
   const boxes = [
     {
@@ -22,21 +69,15 @@ const BestJob2 = () => {
     },
   ];
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setPreview(URL.createObjectURL(file));
-    console.log("Selected file:", file);
-  };
-
   return (
     <div className="container mx-auto max-w-[1300px] px-4 py-12">
       <div className="flex flex-col lg:flex-row items-center justify-between lg:space-x-8">
         {/* Right Section */}
         <div className="relative order-2 lg:order-1 w-[330px] h-[250px] md:w-[500px] lg:w-[700px] lg:h-[550px] bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] rounded-xl overflow-hidden">
-          {preview ? (
+          {uploadedFile ? (
             <img
-              src={preview}
-              alt="Preview"
+              src={uploadedFile} // Use the local URL created from the Blob
+              alt="Uploaded or Preview"
               className="relative w-[340px] h-[180px] top-[35px] left-[30px] md:w-[550px] md:top-[28px] md:left-[50px] lg:top-[78px] lg:left-[70px] lg:w-[680px] lg:h-[400px] rounded-xl"
               style={{ transform: "rotate(-6.44deg)" }}
             />
@@ -56,7 +97,7 @@ const BestJob2 = () => {
         {/* Left Section */}
         <div className="order-1 lg:order-2 md:w-full lg:w-1/3 w-full md:text-center lg:text-left mb-8 lg:mb-0">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-1 leading-tight">
-            Lorem ipsum dolor sit amet.
+            Eww ipsum dolor sit amet.
           </h2>
           <p className="text-gray-600 mb-2 md:text-lg">
             Lorem ipsum dolor sit amet, consectetur adipiscing.
