@@ -1,42 +1,54 @@
-import { useState } from "react";
-import FileUpload from "../Common/FileUpload";
+import { useState, useEffect } from "react";
+import FileUpload from "../Common/FileUpload"
 import { useNavigation } from "../../context/NavigationContext";
 
 const BestJob = () => {
-  const [activeBox, setActiveBox] = useState(0);
+  const { isAdmin } = useNavigation();
   const [image1, setImage1] = useState("/LandingPage/Rectangle.png");
   const [image2, setImage2] = useState("/LandingPage/Heroimg2.jpg");
-  const { isAdmin } = useNavigation();
-  const boxes = [
-    {
-      id: 0,
-      iconSrc: "/LandingPage/Icons/page 1.svg",
-      title: "Lorem Ipsum",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-    },
-    {
-      id: 1,
-      iconSrc: "/LandingPage/Icons/FindJob.svg",
-      title: "Find Jobs",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-    },
-    {
-      id: 2,
-      iconSrc: "/LandingPage/Icons/addJob.svg",
-      title: "Add Jobs",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-    },
-  ];
 
-  //handle image upload for both images
-  const handleImageUpload = (e, imageSetter) => {
+  const titles = ["bestJob1", "bestJob12"]; // Titles to fetch and update each image
+
+  // Fetch each image based on its title
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const responses = await Promise.all(
+          titles.map(async (title) => {
+            const response = await fetch(`http://localhost:5001/api/files/title/${title}`);
+            if (!response.ok) throw new Error("Network response was not ok");
+            const blob = await response.blob();
+            return URL.createObjectURL(blob); // Return image URL
+          })
+        );
+        setImage1(responses[0]);
+        setImage2(responses[1]);
+      } catch (error) {
+        console.error("Error fetching images:", error);
+      }
+    };
+    fetchImages();
+  }, []);
+
+  // Handle image update for each image
+  const handleFileChange = async (e, imageSetter, title) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        imageSetter(reader.result);
-      };
-      reader.readAsDataURL(file);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("title", title); // Set the title for update
+
+    try {
+      const response = await fetch(`http://localhost:5001/api/files/update`, {
+        method: "PUT",
+        body: formData,
+      });
+      if (!response.ok) throw new Error("Network response was not ok");
+
+      const newImageUrl = URL.createObjectURL(file); // Update preview
+      imageSetter(newImageUrl);
+      console.log(`Image updated successfully for ${title}`);
+    } catch (error) {
+      console.error("Error updating image:", error);
     }
   };
 
@@ -54,48 +66,6 @@ const BestJob = () => {
           <a href="#" className="text-[#7950F2] hover:underline font-medium">
             See new openings &gt;
           </a>
-
-          {/* Boxes */}
-          <div className="mt-8 flex flex-col md:flex-row md:justify-between lg:flex-col md:space-x-2 space-y-4 md:space-y-0 md:px-6 lg:space-x-0 lg:px-0">
-            {boxes.map((box) => (
-              <div
-                key={box.id}
-                className={`p-4 rounded-xl cursor-pointer ${
-                  activeBox === box.id
-                    ? "shadow-[0px_10.19px_30.57px_10.19px_#1F23290A]"
-                    : "shadow-none"
-                } md:w-[300px] md:h-[200px] lg:h-auto lg:w-auto`}
-                onClick={() => setActiveBox(box.id)}
-              >
-                <div className="flex items-center space-x-4">
-                  <img
-                    src={box.iconSrc}
-                    alt={box.title}
-                    className="w-8 h-8"
-                    style={{
-                      filter:
-                        activeBox === box.id
-                          ? "invert(29%) sepia(65%) saturate(7461%) hue-rotate(248deg) brightness(88%) contrast(97%)"
-                          : "none",
-                    }}
-                  />
-                  <h3
-                    className={`text-xl font-bold ${
-                      activeBox === box.id ? "text-[#7950F2]" : "text-black"
-                    }`}
-                  >
-                    {box.title}
-                  </h3>
-                </div>
-
-                {activeBox === box.id && (
-                  <p className="mt-4 text-gray-600 text-lg font-thin text-left">
-                    {box.description}
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* Right Section */}
@@ -107,9 +77,9 @@ const BestJob = () => {
             className="relative w-[220px] h-[170px] top-[25px] left-[30px] md:w-[320px] md:left-[50px] lg:top-[47px] lg:left-[70px] lg:w-[440px] lg:h-[300px] rounded-xl"
           />
           {isAdmin && (
-            <div className="absolute top-10 right-48">
+            <div>
               <FileUpload
-                handleFileChange={(e) => handleImageUpload(e, setImage1)}
+                handleFileChange={(e) => handleFileChange(e, setImage1, titles[0])}
               />
             </div>
           )}
@@ -121,9 +91,9 @@ const BestJob = () => {
             className="relative w-[220px] h-[170px] top-[-68px] left-[80px] md:left-[180px] md:w-[320px] lg:top-[-112px] lg:left-[190px] lg:w-[420px] lg:h-[300px] rounded-xl z-10"
           />
           {isAdmin && (
-            <div className="absolute right-24  top-48 z-10">
+            <div className="relative bottom-32">
               <FileUpload
-                handleFileChange={(e) => handleImageUpload(e, setImage2)}
+                handleFileChange={(e) => handleFileChange(e, setImage2, titles[1])}
               />
             </div>
           )}
