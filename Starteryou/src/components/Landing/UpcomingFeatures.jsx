@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Carousel } from "react-responsive-carousel";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
@@ -6,40 +6,79 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 import "./UpcomingFeatures.css";
 import { useNavigation } from "../../context/NavigationContext";
 
+const imageTitles = ["uf1", "uf2", "uf3"]; // Titles for backend storage
+
 const slidesData = [
   {
-    img: "https://via.placeholder.com/800X600",
     title: "Get top Job analysis",
     description:
       "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do",
+    img: "", // Empty initially, will be fetched
   },
   {
-    img: "https://via.placeholder.com/800X600",
     title: "Get top Job analysis",
     description:
       "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do",
+    img: "",
   },
   {
-    img: "https://via.placeholder.com/800X600",
     title: "Get top Job analysis",
     description:
       "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do",
+    img: "",
   },
 ];
 
 const UpcomingFeatures = () => {
   const [slides, setSlides] = useState(slidesData);
   const { isAdmin } = useNavigation();
-  // Handle file change and update the image for the correct slide
-  const handleFileChange = (e, index) => {
-    const file = e.target.files[0];
-    const newImageUrl = URL.createObjectURL(file);
 
-    // Update the image for the specific slide
-    const updatedSlides = slides.map((slide, i) =>
-      i === index ? { ...slide, img: newImageUrl } : slide
-    );
-    setSlides(updatedSlides);
+  // Fetch images for each slide based on its title
+  useEffect(() => {
+    const fetchImages = async () => {
+      const updatedSlides = await Promise.all(
+        slides.map(async (slide, index) => {
+          const title = imageTitles[index];
+          try {
+            const response = await fetch(`http://localhost:5001/api/files/title/${title}`);
+            if (!response.ok) throw new Error("Network response was not ok");
+            const blob = await response.blob();
+            const imgURL = URL.createObjectURL(blob);
+            return { ...slide, img: imgURL }; // Set the image URL for each slide
+          } catch (error) {
+            console.error(`Error fetching image for title ${title}:`, error);
+            return slide;
+          }
+        })
+      );
+      setSlides(updatedSlides);
+    };
+    fetchImages();
+  }, []);
+
+  // Handle file change and update image by title
+  const handleFileChange = async (e, index) => {
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("title", imageTitles[index]); // Update based on title
+
+    try {
+      const response = await fetch("http://localhost:5001/api/files/update", {
+        method: "PUT",
+        body: formData,
+      });
+      if (!response.ok) throw new Error("Network response was not ok");
+
+      // Update the image preview on successful upload
+      const updatedSlides = slides.map((slide, i) =>
+        i === index ? { ...slide, img: URL.createObjectURL(file) } : slide
+      );
+      setSlides(updatedSlides);
+      console.log(`Image updated successfully for ${imageTitles[index]}`);
+    } catch (error) {
+      console.error("Error updating image:", error);
+    }
   };
 
   return (
@@ -71,7 +110,7 @@ const UpcomingFeatures = () => {
               <div key={index} className="relative">
                 {/* Slide Image */}
                 <img
-                  src={slide.img}
+                  src={slide.img || "https://via.placeholder.com/800X600"}
                   className="object-cover mx-auto px-4 lg:px-0"
                   style={{ height: "400px", width: "100%" }}
                   alt={`Slide ${index + 1}`}
