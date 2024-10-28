@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
 
-const DiscoverFuture = () => {
+const UnlockPotential = () => {
   const [preview, setPreview] = useState(null);
   const { isAdmin } = useNavigation();
   const handleFileChange = (e) => {
@@ -14,17 +14,17 @@ const DiscoverFuture = () => {
     {
       id: 1,
       imageSrc: "/JobPortalPage/Vector.svg",
-      text: "Gain insights into company culture and values..",
+      text: "Seamless enrollment process for students and schools.",
     },
     {
       id: 2,
       imageSrc: "/JobPortalPage/Vector.svg",
-      text: "Read authentic employee reviews and experiences.",
+      text: "Personalized dashboards to track progress and achievements",
     },
     {
       id: 3,
       imageSrc: "/JobPortalPage/Vector.svg",
-      text: "Find the right fit for your career.",
+      text: "Engaging community forums for collaboration and support.",
     },
   ];
   return (
@@ -32,14 +32,15 @@ const DiscoverFuture = () => {
       <div className="flex flex-col md:flex-row md:items-center lg:items-center space-y-6 md:space-y-0 md:space-x-6">
         {/* Left Section */}
         <div className="flex-1 bg-white  flex flex-col justify-center">
-          <p className="mb-2">Explore</p>
+          <p className="mb-2">Empower</p>
           <h2 className="text-2xl md:text-4xl font-bold mb-6 text-black max-w-[500px]">
-            Discover Your Future with Top Employers
+            Unlock Your Potential with Our Platform
           </h2>
           <p className="text-black text-base max-w-[470px]">
-            At Starteryou, we provide in-depth profiles of potential employers,
-            showcasing their culture, values, and employee experiences. This
-            empowers you to make informed decisions about where to apply.
+            Our platform connects students with diverse educational
+            opportunities, making it easier to find and enroll in courses that
+            fit their needs. Schools benefit from increased visibility and
+            access to a wider pool of students.
           </p>
           {/* Image and Text Columns */}
           <div className="mt-6 space-y-4">
@@ -56,31 +57,29 @@ const DiscoverFuture = () => {
           </div>
           {/* Buttons */}
           <div className="mt-10 ">
-            <button className="bg-[#D9520E] text-white py-2 px-3 rounded-xl mr-4">
-              Explore
-            </button>
-            <button className="text-black px-4 py-2 rounded-lg  items-center">
+            <button className="bg-white text-black border border-black py-2 px-3  mr-4">
               Learn More
+            </button>
+            <button className="text-black px-4 py-2  items-center">
+              Sign Up
               <span className="ml-2">{">"}</span>
             </button>
           </div>
         </div>
 
         {/* Right Section */}
-        <div className="flex-1 relative bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] rounded-xl overflow-hidden flex justify-center md:items-center">
+        <div className="flex-1 relative   overflow-hidden flex justify-center md:items-center">
           {preview ? (
             <img
               src={preview}
               alt="Preview"
-              className="relative w-[340px] h-[250px] md:w-[550px] md:h-[400px] lg:w-[680px] lg:h-[500px] rounded-xl left-[30px] top-[30px] md:left-[58px] md:top-[80px]"
-              style={{ transform: "rotate(-6.44deg)" }}
+              className="relative w-[340px] h-[250px] md:w-[550px] md:h-[400px] lg:w-[680px] lg:h-[500px]  "
             />
           ) : (
             <img
-              src="/LandingPage/Rectangle.png"
+              src="/JobPortalPage/Placeholder Image.png"
               alt="Job Opportunities"
-              className="relative w-[340px] h-[250px] md:w-[550px] md:h-[400px] lg:w-[680px] lg:h-[500px] rounded-xl left-[30px] top-[30px] md:left-[58px] md:top-[80px]"
-              style={{ transform: "rotate(-6.44deg)" }}
+              className="relative w-[340px] h-[250px] md:w-[550px] md:h-[400px] lg:w-[680px] lg:h-[500px] "
             />
           )}
           {/* Admin file upload section */}
@@ -96,4 +95,4 @@ const DiscoverFuture = () => {
   );
 };
 
-export default DiscoverFuture;
+export default UnlockPotential;

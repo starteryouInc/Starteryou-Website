@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigation } from "../../context/NavigationContext";
-import FileUpload from "../FileUpload";
+import FileUpload from "../Common/FileUpload";
+
 
 const JobListing = () => {
   const [preview, setPreview] = useState(null);

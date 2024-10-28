@@ -53,7 +53,7 @@ const DiscoverPath = () => {
         <h1 className="text-2xl lg:text-4xl font-bold mb-6 md:mb-0 text-black md:text-left md:max-w-[320px] lg:max-w-[600px]">
           Discover Your Path: Opportunities for Students at Your Fingertips
         </h1>
-        <p className="mt-1 md:mt-0 text-black text-base md:text-right md:max-w-[400px] lg:max-w-[540px]">
+        <p className="mt-1 md:mt-0 text-black text-base  md:max-w-[400px] lg:max-w-[540px]">
           Our platform simplifies the job application process for college
           students. With just a few clicks, you can apply for internships and
           part-time jobs that fit your schedule. Say goodbye to complicated

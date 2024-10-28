@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 import PropTypes from "prop-types";
-import { useUserContext } from "../context/UserContext";
+import { useUserContext } from "../../context/UserContext";
 
 const AdminProtectedRoute = ({ element }) => {
   const { user } = useUserContext();
