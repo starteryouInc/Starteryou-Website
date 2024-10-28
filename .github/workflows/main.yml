@@ -18,14 +18,6 @@ jobs:
         with:
           node-version: '16' # Adjust to your Node.js version
 
-      - name: Install dependencies
-        working-directory: Starteryou # Update this if your path is different
-        run: npm install
-
-      - name: Build the app
-        working-directory: Starteryou # Update this if your path is different
-        run: npm run build
-
       - name: Prepare SSH key
         run: |
           mkdir -p ~/.ssh
