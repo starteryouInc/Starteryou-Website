@@ -4,14 +4,14 @@ FROM node:18
 # Set the working directory
 WORKDIR /backend
 
-# Copy the package.json and package-lock.json files
-COPY package*.json ./
+# Copy the package.json and package-lock.json files from the backend folder
+COPY backend/package*.json ./
 
 # Install dependencies
 RUN npm install --no-cache
 
-# Copy the rest of the application code
-COPY . .
+# Copy the rest of the application code from the backend folder
+COPY backend ./
 
 # Expose port 3000
 EXPOSE 3000
