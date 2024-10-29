@@ -1,20 +1,30 @@
-# Use the official Node.js image as the base image
-FROM node:18
+# backend/Dockerfile
+FROM node:18-alpine
 
-# Set the working directory
-WORKDIR /backend
+# Install necessary build tools
+RUN apk add --no-cache python3 make g++
 
-# Copy the package.json and package-lock.json files from the backend folder
-COPY backend/package*.json ./
+# Create app directory
+WORKDIR /usr/src/app
+
+# Copy package files
+COPY package*.json ./
 
 # Install dependencies
-RUN npm install --no-cache
+RUN npm ci --only=production
 
-# Copy the rest of the application code from the backend folder
-COPY backend ./
+# Copy app source
+COPY . .
 
-# Expose port 3000
+# Create volume for uploads
+VOLUME ["/usr/src/app/uploads"]
+
+# Expose port
 EXPOSE 3000
 
-# Start the Node.js server
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+
+# Start command
 CMD ["node", "server.js"]
