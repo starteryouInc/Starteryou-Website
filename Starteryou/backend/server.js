@@ -1,10 +1,11 @@
 // server.js
+require("dotenv").config(); // Add this at the very top
+
 const express = require("express");
 const connectDB = require("./config/db");
 const fileRoutes = require("./routes/fileRoutes");
 const cors = require("cors");
 const mongoose = require("mongoose");
-require("dotenv").config();
 
 const app = express();
 
@@ -13,25 +14,15 @@ mongoose.set("strictQuery", false);
 
 // CORS configuration for production
 const corsOptions = {
-  // Allow multiple origins
-  origin: (origin, callback) => {
-    const allowedOrigins = [
-      process.env.FRONTEND_URL,
-      "http://localhost:8080",
-      "http://54.196.202.145:8080", // Your AWS IP
-      process.env.PRODUCTION_URL,
-    ].filter(Boolean);
-
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+  origin: [
+    process.env.FRONTEND_URL, // This will now correctly read from .env
+    "http://54.196.202.145:8080",
+    "http://localhost:8080",
+    process.env.PRODUCTION_URL,
+  ].filter(Boolean),
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
-  optionsSuccessStatus: 204,
 };
 
 app.use(cors(corsOptions));
