@@ -34,8 +34,12 @@ jobs:
           script: |
             cd /home/ec2-user/RevampUI/Starteryou
             git pull origin develop
-            docker-compose down --remove-orphans  # This stops and removes all containers defined in docker-compose
-            docker system prune -af  # This removes all unused containers, networks, images (both dangling and unreferenced), and optionally, volumes
+
+            # Check if anything is using port 8080 and kill it
+            sudo lsof -i :8080 | awk 'NR!=1 {print $2}' | xargs -r sudo kill -9
+
+            docker-compose down --remove-orphans
+            docker system prune -af
             docker-compose up -d --build
             docker ps
             docker logs starteryou-backend
