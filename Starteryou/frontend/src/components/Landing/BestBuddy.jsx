@@ -2,7 +2,7 @@
 import {useEffect} from "react";
 import {useNavigation} from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
-import {useFileOperations} from "../../../../backend/src/hooks/useFileOperation";
+import {useFileOperation} from "../../../../backend/src/hooks/useFileOperation"
 import {API_CONFIG} from "../../../../backend/config/api";
 
 const icons = [
@@ -41,7 +41,7 @@ const icons = [
 const BestBuddy = () => {
   const title = "bestbuddy";
   const {uploadedFile, fetchUploadedFile, handleFileChange} =
-    useFileOperations(title);
+    useFileOperation(title);
   const {isAdmin} = useNavigation();
 
   useEffect(() => {
