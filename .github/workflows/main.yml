@@ -29,7 +29,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
+          username: ec2-user  # Make sure this matches your EC2 instance's username
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ec2-user/RevampUI/Starteryou
