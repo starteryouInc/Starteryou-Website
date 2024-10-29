@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=production
-      - MONGODB_URI=mongodb://54.196.202.145:27017/your_database_name
+      - MONGODB_URI=mongodb://54.196.202.145:27017/starteryou
       - VITE_BACKEND_URL=http://54.196.202.145:3000 # Add this environment variable
       - PORT=3000
     ports:

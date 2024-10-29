@@ -1,7 +1,7 @@
 // config/db.js
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI, {
+    await mongoose.connect("mongodb://54.196.202.145:27017/starteryou", {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
