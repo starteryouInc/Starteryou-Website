@@ -3,7 +3,7 @@ name: Deploy to AWS EC2
 on:
   push:
     branches:
-      - main
+      - develop
 
 jobs:
   deploy:
@@ -16,75 +16,38 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16' # Adjust to your Node.js version
+          node-version: "18"
 
-      - name: Prepare SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.EC2_IP }} >> ~/.ssh/known_hosts
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Deploy to AWS EC2 via SSH
-        run: |
-          ssh -v -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_IP }} << 'EOF'
-            cd /home/ec2-user/RevampUI/Starteryou # Navigate to the project directory on EC2
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Navigate to project directory
+            cd /home/ec2-user/RevampUI/Starteryou
 
-            # Pull the latest code changes
+            # Pull latest changes
             git pull origin main
 
-            # Clean up old Docker images and volumes
-            docker system prune -a --volumes -f
+            # Stop running containers
+            docker-compose down
 
-            # Check if the old frontend container exists and stop/remove it
-            if [ "$(docker ps -q -f name=starteryou-ui-dev-container)" ]; then
-                echo "Stopping existing frontend container..."
-                docker stop starteryou-ui-dev-container
-            fi
+            # Remove old images
+            docker system prune -af
 
-            if [ "$(docker ps -aq -f name=starteryou-ui-dev-container)" ]; then
-                echo "Removing existing frontend container..."
-                docker rm starteryou-ui-dev-container
-            fi
+            # Build and start containers
+            docker-compose up -d --build
 
-            # Check if the old backend container exists and stop/remove it
-            if [ "$(docker ps -q -f name=starteryou-backend-dev-container)" ]; then
-                echo "Stopping existing backend container..."
-                docker stop starteryou-backend-dev-container
-            fi
-
-            if [ "$(docker ps -aq -f name=starteryou-backend-dev-container)" ]; then
-                echo "Removing existing backend container..."
-                docker rm starteryou-backend-dev-container
-            fi
-
-            # Check if Nginx is running and using port 8080, then stop it
-            if sudo lsof -i :8080; then
-                echo "Nginx is running on port 8080. Stopping Nginx..."
-                sudo systemctl stop nginx
-            else
-                echo "No service is using port 8080."
-            fi
-
-            # Build the new frontend Docker image
-            docker build -t starteryou-ui-dev . -f /home/ec2-user/RevampUI/Starteryou/Dockerfile
-
-            # Build the new backend Docker image
-            docker build -t starteryou-backend-dev . -f /home/ec2-user/RevampUI/Starteryou/backend/Dockerfile
-
-            # Run the new backend container on port 3000
-            docker run -d -p 3000:3000 --name starteryou-backend-dev-container starteryou-backend-dev
-
-            # Run the new frontend container on port 8080
-            docker run -d -p 8080:8080 --name starteryou-ui-dev-container starteryou-ui-dev
-
-            # Check if both containers are running
-            if [ "$(docker ps -q -f name=starteryou-ui-dev-container)" ] && [ "$(docker ps -q -f name=starteryou-backend-dev-container)" ]; then
-                echo "Both frontend and backend containers are running."
-            else
-                echo "One or both containers failed to start. Checking logs..."
-                docker logs starteryou-ui-dev-container || true
-                docker logs starteryou-backend-dev-container || true
-                exit 1 # Exit with error if any container is not running
-            fi
-          EOF
+            # Check container health
+            docker ps
+            docker logs starteryou-backend
+            docker logs starteryou-frontend
