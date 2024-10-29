@@ -29,11 +29,11 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ec2-user  # Make sure this matches your EC2 instance's username
+          username: ec2-user # Make sure this matches your EC2 instance's username
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ec2-user/RevampUI/Starteryou
-            git pull origin main
+            git pull origin develop
             docker-compose down
             docker system prune -af
             docker-compose up -d --build
