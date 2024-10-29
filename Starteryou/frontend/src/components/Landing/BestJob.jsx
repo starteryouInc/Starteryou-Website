@@ -1,8 +1,7 @@
 import {useState, useEffect} from "react";
 import FileUpload from "../Common/FileUpload";
 import {useNavigation} from "../../context/NavigationContext";
-import {API_CONFIG} from "../../config/api";
-
+import {API_CONFIG} from "../../../../backend/config/api";
 const BestJob = () => {
   const {isAdmin} = useNavigation();
   const [image1, setImage1] = useState("/LandingPage/Rectangle.png");

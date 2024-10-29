@@ -1,7 +1,7 @@
 import {useState, useEffect} from "react";
 import FileUpload from "../Common/FileUpload";
 import {useNavigation} from "../../context/NavigationContext";
-import {API_CONFIG} from "../../config/api";
+import {API_CONFIG} from "../../../../backend/config/api";
 
 const Hero = () => {
   const {isAdmin} = useNavigation();
