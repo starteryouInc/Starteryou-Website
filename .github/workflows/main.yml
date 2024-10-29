@@ -29,25 +29,41 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          username: ec2-user  # Make sure this matches your EC2 instance's username
+          key: |
+            -----BEGIN RSA PRIVATE KEY-----
+            MIIEpAIBAAKCAQEAlGawbZVPKpUMaSZLA0R9rLYCXlKicohP4QAK/NYL3db7wVBq
+            wYnkZ6ji6ZSAbiuSUkkUn0DbOiJ7ybm9I9WViLjgTOF+mMGF80vLEX1u7DgFMNdR
+            Pb0LDA13nF5SeJBbaZoWkkUdZ6m8jXBbiEj3q4mwILPNm0NkkxR3KUqHlfrZKU77
+            sf3FqY8SfPaZIltieUoYc+jm9JFgj2K2HzThIi8xyIUbRLdSYLJR7KaOSENlgRq1
+            JxpIdagJfkIK8Cq6w6wPD+mu2vHRBgosSlUI5vomQVHw1Em2tVlGLXpd2cNTtcP9
+            QpNB6obuL3uMPoAdjAf8yV/Ehru3H/shqrqQQwIDAQABAoIBAGoos5kQsFtD2Gb3
+            771cp5J/eV5EOtU30fyg7TtFW6PMgLgfcN8WZ4AH/psdkmo9XSTkBo6N9MW3mVoL
+            NtSFm7z8k+grf0aDWfFbjN7sHgd5Y602unUx4M80axY/GzwH+Hyor/De5FQdxjZf
+            4/qwSAw8KPSb6z9gjHfysfOlzyxn9u0oSg5l21eqKV2aWs7C0/2la4Q4ANNMo7un
+            lnWOp/CwCxO9K+LbcZzwCmt1c+H/5AJxK8mv143G8eP/E7ulQH/+p7qQYMr9H9yx
+            rUyBBV1TDC0GeB8DOWsuAXC+ZxQ3Y8WkrGhMbVah06BVMJRdJLLtHQyGQx8bu+rK
+            NpfaqpECgYEA3fAL3jvbHxJr4Srk+Fb640a0+zfiK3yUD9Xn4RdQj9ElVY6yzIHw
+            JAutWbkznweCeshvWNKHrbJZ50I5MJfzHZk20jgbVbKBjA5vud7LyZCA3DVt8aBP
+            As36ufOdNlfMAh66gYHYn+UduPZlssNXQuPToBZSJVu+UiKwisoMF10CgYEAqy1i
+            ZbB/cr1rHOvfD7wy3Vst3w1UoFg764SHBPfJxXchlQAD3o7XXQdDdpT5eXNiflmg
+            ybBdsj7GlWndaRbqPNMYIyk1+0Mpq9KPyb5hoGm5rrG+rzLIFNYxlRyV36ptDCuV
+            IWMLOKCae3HC1XFX1KOhMLu6cCrPd0d/xGsC7B8CgYEA2eeIH4ixWc6icQ/GhDYS
+            WvffVhDGVWAZl3q0EoLrrGjyuRBEaRrjBuEYMNHv5yJeb+M/v/vlDxvfvXl94UIv
+            h04ZT0mbPQbovvSlqd8gQyVH/+3NpsF5Eg3fMJgKMYL+YM5+3Az6/fLcve/eZif5
+            E0nRTIrd2KQ9NzOsFnjOalkCgYAjmmHv4qDvfYRM1KZlgHBX6AIHdZ9XZmK4Hq1y
+            lBMsdhXPBtzHKpCSsdMPU/b7kss2mm+942fpjfMB2q4JkJGRqxpHHegzZYnCSh5M
+            CMQHeFX9hsyxZe+FnfNcH0Dw72KU+G+hLReFZKoc6NFsUZHCEXKST0l80PqrxXxG
+            nzdRYwKBgQDcuGZ+EsdsgRbCu4jofg7I5/J33sgx531+j81Rg5ZcTOMkTF6Y7NPc
+            0WD9gtlTHlCL3EbdZZZiqdnokqg4XGXvtjwIBcGoL7V0X7n2ksN7Vpuo8gwPkG02
+            uLw0nKV7lF2EzQiI8ujv3OwQoo4d3RpPJnJBz23+FL8eS9y84t3atw==
+            -----END RSA PRIVATE KEY-----
           script: |
-            # Navigate to project directory
             cd /home/ec2-user/RevampUI/Starteryou
-
-            # Pull latest changes
             git pull origin main
-
-            # Stop running containers
             docker-compose down
-
-            # Remove old images
             docker system prune -af
-
-            # Build and start containers
             docker-compose up -d --build
-
-            # Check container health
             docker ps
             docker logs starteryou-backend
             docker logs starteryou-frontend
