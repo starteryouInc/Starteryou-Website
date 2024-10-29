@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { useNavigation } from "../../context/NavigationContext";
-import FileUpload from "../Common/FileUpload"
+import {useState, useEffect} from "react";
+import {useNavigation} from "../../context/NavigationContext";
+import FileUpload from "../Common/FileUpload";
 
 const icons = [
   {
@@ -30,23 +30,25 @@ const icons = [
 ];
 
 const BestJob4 = () => {
-  const { isAdmin } = useNavigation();
+  const {isAdmin} = useNavigation();
   const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images
-  const title = 'bestJob4';
+  const title = "bestJob4";
 
   // Function to fetch a specific file (image) by title
   const fetchUploadedFile = async () => {
     try {
-      const response = await fetch(`http://localhost:5001/api/files/title/${title}`); // Fetch by title
+      const response = await fetch(
+        `http://localhost:3000/api/files/title/${title}`
+      ); // Fetch by title
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error("Network response was not ok");
       }
 
       const blob = await response.blob(); // Get the response as a Blob
       const url = URL.createObjectURL(blob); // Create a local URL for the Blob
       setUploadedFile(url); // Set the uploaded file data with its local URL
     } catch (error) {
-      console.error('Error fetching uploaded file:', error);
+      console.error("Error fetching uploaded file:", error);
     }
   };
 
@@ -58,25 +60,27 @@ const BestJob4 = () => {
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('title', title); // Include the title for the update
+    formData.append("file", file);
+    formData.append("title", title); // Include the title for the update
+    const BACKEND_URL =
+      import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
     try {
-      const response = await fetch(`http://localhost:5001/api/files/update`, {
-        method: 'PUT',
+      const response = await fetch(`${BACKEND_URL}/api/files/update`, {
+        method: "PUT",
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error("Network response was not ok");
       }
 
       const data = await response.json();
-      console.log('Image updated successfully:', data);
+      console.log("Image updated successfully:", data);
 
       setUploadedFile(URL.createObjectURL(file)); // Update the uploaded file state with the new image preview
     } catch (error) {
-      console.error('Error updating image:', error);
+      console.error("Error updating image:", error);
     }
   };
 
@@ -90,17 +94,13 @@ const BestJob4 = () => {
           {/* Icons for small screens */}
           <div className="flex flex-col items-center space-y-4 sm:hidden">
             <div className="flex flex-wrap justify-center space-x-6">
-              {icons.map(({ src, alt, text, link }, index) => (
+              {icons.map(({src, alt, text, link}, index) => (
                 <a
                   href={link}
                   key={index}
                   className="flex items-center mb-4 relative text-[#1F2329]"
                 >
-                  <img
-                    src={src}
-                    alt={alt}
-                    className="w-8 h-8"
-                  />
+                  <img src={src} alt={alt} className="w-8 h-8" />
                   <span className="ml-2 text-[9px] sm:text-sm italic font-light text-[#1F2329]">
                     {text}
                   </span>
@@ -111,7 +111,7 @@ const BestJob4 = () => {
 
           {/* Icons for medium and large screens */}
           <div className="hidden sm:flex flex-wrap justify-center space-x-6">
-            {icons.map(({ src, alt, text }, index) => (
+            {icons.map(({src, alt, text}, index) => (
               <div
                 key={index}
                 className="flex items-center mb-4 relative cursor-pointer text-[#1F2329]"

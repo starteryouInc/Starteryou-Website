@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
-import { useNavigation } from "../../context/NavigationContext";
-import FileUpload from "../Common/FileUpload"
+// src/components/Landing/BestBuddy.jsx
+import {useEffect} from "react";
+import {useNavigation} from "../../context/NavigationContext";
+import FileUpload from "../Common/FileUpload";
+import {useFileOperations} from "../../hooks/useFileOperations";
 
 const icons = [
   {
@@ -36,68 +38,30 @@ const icons = [
 ];
 
 const BestBuddy = () => {
-  const [uploadedFile, setUploadedFile] = useState(null); // Store the uploaded file
-  const title = "bestbuddy"; // Title of the specific image to be fetched/updated
-  const { isAdmin } = useNavigation();
-
-  // Function to fetch a specific file (image) by title
-  const fetchUploadedFile = async () => {
-    try {
-      const response = await fetch(`http://localhost:5001/api/files/title/${title}`); // Fetch by title
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-
-      const blob = await response.blob(); // Get the response as a Blob
-      const url = URL.createObjectURL(blob); // Create a local URL for the Blob
-      setUploadedFile({ title: title, url }); // Set the uploaded file data with its local URL
-    } catch (error) {
-      console.error("Error fetching uploaded file:", error);
-    }
-  };
+  const title = "bestbuddy";
+  const {uploadedFile, fetchUploadedFile, handleFileChange} =
+    useFileOperations(title);
+  const {isAdmin} = useNavigation();
 
   useEffect(() => {
-    fetchUploadedFile(); // Fetch the specific image on component mount
-  }, []);
-
-  // Handle file upload
-  const handleFileChange = async (event) => {
-    const file = event.target.files[0];
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", title); // Include the title in the upload
-    formData.append("uploadedBy", "Employee");
-
-    try {
-      const response = await fetch("http://localhost:5001/api/files/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-
-      const data = await response.json();
-      console.log("File uploaded successfully:", data);
-      setUploadedFile({ title: data.file.title, url: URL.createObjectURL(file) }); // Immediate preview of uploaded file
-    } catch (error) {
-      console.error("Error uploading file:", error);
-    }
-  };
+    fetchUploadedFile();
+  }, [fetchUploadedFile]);
 
   // Handle image update
   const handleUpdateImage = async (event) => {
     const file = event.target.files[0];
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("title", title); // Include the title for the update
+    formData.append("title", title);
 
     try {
-      const response = await fetch(`http://localhost:5001/api/files/update`, {
-        method: "PUT",
-        body: formData,
-      });
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate}`,
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -108,7 +72,7 @@ const BestBuddy = () => {
 
       // Show immediate preview with the new file before re-fetching
       const newUrl = URL.createObjectURL(file);
-      setUploadedFile({ title: data.file.title, url: newUrl });
+      setUploadedFile(newUrl);
 
       // Re-fetch the image using the title after the update
       fetchUploadedFile();
@@ -135,7 +99,7 @@ const BestBuddy = () => {
       <div className="relative flex justify-center mt-2">
         {uploadedFile ? (
           <img
-            src={uploadedFile.url} // Use the local URL created from the Blob
+            src={uploadedFile}
             alt="Uploaded"
             className="w-[900px] h-[300px] md:h-[450px]"
           />
@@ -150,12 +114,12 @@ const BestBuddy = () => {
 
       {/* Upload and Update Buttons */}
       <div className="flex justify-center mt-4">
-        <FileUpload handleFileChange={handleFileChange} /> {/* Upload new image */}
+        <FileUpload handleFileChange={handleFileChange} />
         {isAdmin && (
           <div className="ml-4">
             <input
               type="file"
-              onChange={handleUpdateImage} // Separate handler for updating
+              onChange={handleUpdateImage}
               className="hidden"
               id="updateFileInput"
             />
@@ -167,6 +131,46 @@ const BestBuddy = () => {
             </label>
           </div>
         )}
+      </div>
+
+      {/* Icons Section */}
+      <div className="mt-12 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8 max-w-6xl mx-auto px-4">
+        {icons.map((icon, index) => (
+          <a
+            key={index}
+            href={icon.link}
+            className="flex flex-col items-center text-center group"
+          >
+            <div className="w-12 h-12 mb-3 flex items-center justify-center">
+              <img src={icon.src} alt={icon.alt} className="w-8 h-8" />
+            </div>
+            <span className="text-[#1F2329] text-sm font-medium group-hover:text-blue-600">
+              {icon.text}
+            </span>
+          </a>
+        ))}
+      </div>
+
+      {/* Features Grid */}
+      <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
+        <div className="text-center">
+          <h3 className="text-xl font-semibold mb-2">Feature 1</h3>
+          <p className="text-gray-600">
+            Description of feature 1 and its benefits.
+          </p>
+        </div>
+        <div className="text-center">
+          <h3 className="text-xl font-semibold mb-2">Feature 2</h3>
+          <p className="text-gray-600">
+            Description of feature 2 and its benefits.
+          </p>
+        </div>
+        <div className="text-center">
+          <h3 className="text-xl font-semibold mb-2">Feature 3</h3>
+          <p className="text-gray-600">
+            Description of feature 3 and its benefits.
+          </p>
+        </div>
       </div>
     </div>
   );

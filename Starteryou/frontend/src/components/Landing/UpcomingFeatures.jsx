@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
-import { Carousel } from "react-responsive-carousel";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUpload } from "@fortawesome/free-solid-svg-icons";
+import {useState, useEffect} from "react";
+import {Carousel} from "react-responsive-carousel";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faUpload} from "@fortawesome/free-solid-svg-icons";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import "./UpcomingFeatures.css";
-import { useNavigation } from "../../context/NavigationContext";
+import {useNavigation} from "../../context/NavigationContext";
 
 const imageTitles = ["uf1", "uf2", "uf3"]; // Titles for backend storage
 
@@ -31,7 +31,7 @@ const slidesData = [
 
 const UpcomingFeatures = () => {
   const [slides, setSlides] = useState(slidesData);
-  const { isAdmin } = useNavigation();
+  const {isAdmin} = useNavigation();
 
   // Fetch images for each slide based on its title
   useEffect(() => {
@@ -40,11 +40,13 @@ const UpcomingFeatures = () => {
         slides.map(async (slide, index) => {
           const title = imageTitles[index];
           try {
-            const response = await fetch(`http://localhost:5001/api/files/title/${title}`);
+            const response = await fetch(
+              `http://localhost:3000/api/files/title/${title}`
+            );
             if (!response.ok) throw new Error("Network response was not ok");
             const blob = await response.blob();
             const imgURL = URL.createObjectURL(blob);
-            return { ...slide, img: imgURL }; // Set the image URL for each slide
+            return {...slide, img: imgURL}; // Set the image URL for each slide
           } catch (error) {
             console.error(`Error fetching image for title ${title}:`, error);
             return slide;
@@ -62,9 +64,11 @@ const UpcomingFeatures = () => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("title", imageTitles[index]); // Update based on title
+    const BACKEND_URL =
+      import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
     try {
-      const response = await fetch("http://localhost:5001/api/files/update", {
+      const response = await fetch(`${BACKEND_URL}/api/files/update`, {
         method: "PUT",
         body: formData,
       });
@@ -72,7 +76,7 @@ const UpcomingFeatures = () => {
 
       // Update the image preview on successful upload
       const updatedSlides = slides.map((slide, i) =>
-        i === index ? { ...slide, img: URL.createObjectURL(file) } : slide
+        i === index ? {...slide, img: URL.createObjectURL(file)} : slide
       );
       setSlides(updatedSlides);
       console.log(`Image updated successfully for ${imageTitles[index]}`);
@@ -112,7 +116,7 @@ const UpcomingFeatures = () => {
                 <img
                   src={slide.img || "https://via.placeholder.com/800X600"}
                   className="object-cover mx-auto px-4 lg:px-0"
-                  style={{ height: "400px", width: "100%" }}
+                  style={{height: "400px", width: "100%"}}
                   alt={`Slide ${index + 1}`}
                 />
 

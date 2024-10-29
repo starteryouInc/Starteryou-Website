@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
-import FileUpload from "../Common/FileUpload"
-import { useNavigation } from "../../context/NavigationContext";
+import {useState, useEffect} from "react";
+import FileUpload from "../Common/FileUpload";
+import {useNavigation} from "../../context/NavigationContext";
 
 const BestJob = () => {
-  const { isAdmin } = useNavigation();
+  const {isAdmin} = useNavigation();
   const [image1, setImage1] = useState("/LandingPage/Rectangle.png");
   const [image2, setImage2] = useState("/LandingPage/Heroimg2.jpg");
 
@@ -15,7 +15,9 @@ const BestJob = () => {
       try {
         const responses = await Promise.all(
           titles.map(async (title) => {
-            const response = await fetch(`http://localhost:5001/api/files/title/${title}`);
+            const response = await fetch(
+              `http://localhost:3000/api/files/title/${title}`
+            );
             if (!response.ok) throw new Error("Network response was not ok");
             const blob = await response.blob();
             return URL.createObjectURL(blob); // Return image URL
@@ -36,9 +38,11 @@ const BestJob = () => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("title", title); // Set the title for update
+    const BACKEND_URL =
+      import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
     try {
-      const response = await fetch(`http://localhost:5001/api/files/update`, {
+      const response = await fetch(`${BACKEND_URL}/api/files/update`, {
         method: "PUT",
         body: formData,
       });
@@ -79,7 +83,9 @@ const BestJob = () => {
           {isAdmin && (
             <div>
               <FileUpload
-                handleFileChange={(e) => handleFileChange(e, setImage1, titles[0])}
+                handleFileChange={(e) =>
+                  handleFileChange(e, setImage1, titles[0])
+                }
               />
             </div>
           )}
@@ -93,7 +99,9 @@ const BestJob = () => {
           {isAdmin && (
             <div className="relative bottom-32">
               <FileUpload
-                handleFileChange={(e) => handleFileChange(e, setImage2, titles[1])}
+                handleFileChange={(e) =>
+                  handleFileChange(e, setImage2, titles[1])
+                }
               />
             </div>
           )}

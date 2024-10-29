@@ -1,25 +1,27 @@
-import { useState, useEffect } from "react";
-import { useNavigation } from "../../context/NavigationContext";
-import FileUpload from "../Common/FileUpload"
+import {useState, useEffect} from "react";
+import {useNavigation} from "../../context/NavigationContext";
+import FileUpload from "../Common/FileUpload";
 
 const BestJob2 = () => {
   const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images
-  const title = 'BesstBudy2';
-  const { isAdmin } = useNavigation();
+  const title = "BesstBudy2";
+  const {isAdmin} = useNavigation();
 
   // Function to fetch a specific file (image) by title
   const fetchUploadedFile = async () => {
     try {
-      const response = await fetch(`http://localhost:5001/api/files/title/${title}`); // Fetch by title
+      const response = await fetch(
+        `http://localhost:3000/api/files/title/${title}`
+      ); // Fetch by title
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error("Network response was not ok");
       }
 
       const blob = await response.blob(); // Get the response as a Blob
       const url = URL.createObjectURL(blob); // Create a local URL for the Blob
       setUploadedFile(url); // Set the uploaded file data with its local URL
     } catch (error) {
-      console.error('Error fetching uploaded file:', error);
+      console.error("Error fetching uploaded file:", error);
     }
   };
 
@@ -31,28 +33,29 @@ const BestJob2 = () => {
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('title', title); // Include the title for the update
+    formData.append("file", file);
+    formData.append("title", title); // Include the title for the update
+    const BACKEND_URL =
+      import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
     try {
-      const response = await fetch(`http://localhost:5001/api/files/update`, {
-        method: 'PUT',
+      const response = await fetch(`${BACKEND_URL}/api/files/update`, {
+        method: "PUT",
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error("Network response was not ok");
       }
 
       const data = await response.json();
-      console.log('Image updated successfully:', data);
+      console.log("Image updated successfully:", data);
 
       setUploadedFile(URL.createObjectURL(file)); // Update the uploaded file state with the new image preview
     } catch (error) {
-      console.error('Error updating image:', error);
+      console.error("Error updating image:", error);
     }
   };
-
 
   const boxes = [
     {
@@ -79,14 +82,14 @@ const BestJob2 = () => {
               src={uploadedFile} // Use the local URL created from the Blob
               alt="Uploaded or Preview"
               className="relative w-[340px] h-[180px] top-[35px] left-[30px] md:w-[550px] md:top-[28px] md:left-[50px] lg:top-[78px] lg:left-[70px] lg:w-[680px] lg:h-[400px] rounded-xl"
-              style={{ transform: "rotate(-6.44deg)" }}
+              style={{transform: "rotate(-6.44deg)"}}
             />
           ) : (
             <img
               src="/LandingPage/Rectangle.png"
               alt="Job Opportunities"
               className="relative w-[340px] h-[180px] top-[35px] left-[30px] md:w-[550px] md:top-[28px] md:left-[50px] lg:top-[78px] lg:left-[70px] lg:w-[680px] lg:h-[400px] rounded-xl"
-              style={{ transform: "rotate(-6.44deg)" }}
+              style={{transform: "rotate(-6.44deg)"}}
             />
           )}
 

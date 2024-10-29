@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
-import FileUpload from "../Common/FileUpload"
-import { useNavigation } from "../../context/NavigationContext";
+import {useState, useEffect} from "react";
+import FileUpload from "../Common/FileUpload";
+import {useNavigation} from "../../context/NavigationContext";
 
 const Hero = () => {
-  const { isAdmin } = useNavigation();
+  const {isAdmin} = useNavigation();
 
   // State variables for each image
   const [image1, setImage1] = useState("/LandingPage/Heroimg3.png");
@@ -19,7 +19,9 @@ const Hero = () => {
       try {
         const responses = await Promise.all(
           titles.map(async (title) => {
-            const response = await fetch(`http://localhost:5001/api/files/title/${title}`);
+            const response = await fetch(
+              `http://localhost:3000/api/files/title/${title}`
+            );
             if (!response.ok) throw new Error("Network response was not ok");
             const blob = await response.blob();
             return URL.createObjectURL(blob);
@@ -41,9 +43,11 @@ const Hero = () => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("title", title);
+    const BACKEND_URL =
+      import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
     try {
-      const response = await fetch("http://localhost:5001/api/files/update", {
+      const response = await fetch(`${BACKEND_URL}/api/files/update`, {
         method: "PUT",
         body: formData,
       });
@@ -146,7 +150,9 @@ const Hero = () => {
           {isAdmin && (
             <div className="hidden md:block absolute top-20 left-20">
               <FileUpload
-                handleFileChange={(e) => handleImageUpload(e, setImage1, titles[0])}
+                handleFileChange={(e) =>
+                  handleImageUpload(e, setImage1, titles[0])
+                }
               />
             </div>
           )}
@@ -162,7 +168,9 @@ const Hero = () => {
           {isAdmin && (
             <div>
               <FileUpload
-                handleFileChange={(e) => handleImageUpload(e, setImage2, titles[1])}
+                handleFileChange={(e) =>
+                  handleImageUpload(e, setImage2, titles[1])
+                }
               />
             </div>
           )}
@@ -178,7 +186,9 @@ const Hero = () => {
           {isAdmin && (
             <div className="hidden md:block absolute top-20 right-2">
               <FileUpload
-                handleFileChange={(e) => handleImageUpload(e, setImage3, titles[2])}
+                handleFileChange={(e) =>
+                  handleImageUpload(e, setImage3, titles[2])
+                }
               />
             </div>
           )}
