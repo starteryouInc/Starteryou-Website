@@ -29,25 +29,14 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
+          username: ec2-user  # Make sure this matches your EC2 instance's username
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Navigate to project directory
             cd /home/ec2-user/RevampUI/Starteryou
-
-            # Pull latest changes
             git pull origin main
-
-            # Stop running containers
             docker-compose down
-
-            # Remove old images
             docker system prune -af
-
-            # Build and start containers
             docker-compose up -d --build
-
-            # Check container health
             docker ps
             docker logs starteryou-backend
             docker logs starteryou-frontend
