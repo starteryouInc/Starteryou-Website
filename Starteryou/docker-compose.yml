@@ -1,11 +1,10 @@
-# docker-compose.yml
 version: "3.8"
 
 services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile # This should point to the backend Dockerfile
     container_name: starteryou-backend
     restart: unless-stopped
     environment:
@@ -23,8 +22,8 @@ services:
 
   frontend:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ./frontend # Updated to point to the frontend directory
+      dockerfile: Dockerfile # This should point to the frontend Dockerfile
     container_name: starteryou-frontend
     restart: unless-stopped
     ports:
