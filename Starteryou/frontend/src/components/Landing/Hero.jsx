@@ -1,6 +1,7 @@
 import {useState, useEffect} from "react";
 import FileUpload from "../Common/FileUpload";
 import {useNavigation} from "../../context/NavigationContext";
+import {API_CONFIG} from "../../config/api";
 
 const Hero = () => {
   const {isAdmin} = useNavigation();
@@ -20,7 +21,7 @@ const Hero = () => {
         const responses = await Promise.all(
           titles.map(async (title) => {
             const response = await fetch(
-              `http://localhost:3000/api/files/title/${title}`
+              `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileByTitle(title)}`
             );
             if (!response.ok) throw new Error("Network response was not ok");
             const blob = await response.blob();
@@ -47,10 +48,13 @@ const Hero = () => {
       import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/files/update`, {
-        method: "PUT",
-        body: formData,
-      });
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate}`,
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
       if (!response.ok) throw new Error("Network response was not ok");
 
       const newImageUrl = URL.createObjectURL(file); // Show new image preview
