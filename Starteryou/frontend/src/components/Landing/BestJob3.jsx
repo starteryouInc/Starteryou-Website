@@ -1,6 +1,7 @@
 import {useState, useEffect} from "react"; // Added useEffect import
 import {useNavigation} from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
+import {API_CONFIG} from "../../config/api"; // Import API_CONFIG
 
 const BestJob3 = () => {
   const {isAdmin} = useNavigation();
@@ -11,8 +12,8 @@ const BestJob3 = () => {
   const fetchUploadedFile = async () => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/files/title/${title}`
-      ); // Fetch by title
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileByTitle(title)}`
+      );
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -35,14 +36,15 @@ const BestJob3 = () => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("title", title); // Include the title for the update
-    const BACKEND_URL =
-      import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/files/update`, {
-        method: "PUT",
-        body: formData,
-      });
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate}`,
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Network response was not ok");

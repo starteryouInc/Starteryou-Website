@@ -3,6 +3,7 @@ import {useEffect} from "react";
 import {useNavigation} from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
 import {useFileOperations} from "../../hooks/useFileOperations";
+import {API_CONFIG} from "../../config/api";
 
 const icons = [
   {

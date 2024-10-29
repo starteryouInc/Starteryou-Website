@@ -1,6 +1,7 @@
 import {useState, useEffect} from "react";
 import {useNavigation} from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
+import {API_CONFIG} from "../../config/api"; // Import the API_CONFIG
 
 const BestJob2 = () => {
   const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images
@@ -11,8 +12,8 @@ const BestJob2 = () => {
   const fetchUploadedFile = async () => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/files/title/${title}`
-      ); // Fetch by title
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileByTitle(title)}`
+      ); // Use API_CONFIG for the fetch URL
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -35,14 +36,14 @@ const BestJob2 = () => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("title", title); // Include the title for the update
-    const BACKEND_URL =
-      import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
-
     try {
-      const response = await fetch(`${BACKEND_URL}/api/files/update`, {
-        method: "PUT",
-        body: formData,
-      });
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate}`, // Use API_CONFIG for the fetch URL
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Network response was not ok");
