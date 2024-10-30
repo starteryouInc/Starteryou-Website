@@ -1,7 +1,7 @@
 import {useState, useEffect} from "react";
 import {useNavigation} from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
-import {API_CONFIG} from "../../../../backend/config/api";
+import {API_CONFIG} from "@config/api";
 
 const BestJob2 = () => {
   const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images

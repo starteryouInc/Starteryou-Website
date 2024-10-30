@@ -1,7 +1,7 @@
 import {useState, useEffect} from "react"; // Added useEffect import
 import {useNavigation} from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
-import {API_CONFIG} from "../../../../backend/config/api";
+import {API_CONFIG} from "@config/api";
 
 const BestJob3 = () => {
   const {isAdmin} = useNavigation();
