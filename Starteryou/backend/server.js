@@ -12,10 +12,34 @@ const app = express();
 // Set mongoose options
 mongoose.set("strictQuery", false);
 
+// MongoDB Connection with status messages
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => {
+  console.log('✅ MongoDB Connected Successfully!');
+  console.log(`📊 Database: ${mongoose.connection.name}`);
+  console.log(`🔌 Host: ${mongoose.connection.host}`);
+})
+.catch((error) => {
+  console.error('❌ MongoDB Connection Error:', error);
+  process.exit(1); // Exit process with failure
+});
+
+// Monitor MongoDB connection
+mongoose.connection.on('disconnected', () => {
+  console.log('❌ MongoDB Disconnected');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB Error:', err);
+});
+
 // CORS configuration for production
 const corsOptions = {
   origin: [
-    process.env.FRONTEND_URL, // This will now correctly read from .env
+    process.env.FRONTEND_URL,
     "http://54.196.202.145:8080",
     "http://localhost:8080",
     process.env.PRODUCTION_URL,
@@ -46,12 +70,13 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Health check route
+// Health check route with MongoDB status
 app.get("/health", (req, res) => {
   res.status(200).json({
     status: "OK",
     message: "Server is running",
     environment: process.env.NODE_ENV,
+    mongodb: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'
   });
 });
 
@@ -63,7 +88,7 @@ app.use("*", (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 const server = app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server is running on http://0.0.0.0:${PORT}`);
+  console.log(`🚀 Server is running on http://0.0.0.0:${PORT}`);
 });
 
 // Graceful shutdown

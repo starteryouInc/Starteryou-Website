@@ -6,7 +6,7 @@ const FileMetadata = require("../models/FileMetadata"); // Import the FileMetada
 
 const router = express.Router();
 // Update this line to use the correct MongoDB URI
-const mongoURI = "mongodb://54.196.202.145:27017/starteryou"; // Add database name 'starteryou'
+const mongoURI = "mongodb://54.196.202.145:27017/Starteryou"; // Add database name 'starteryou'
 const conn = mongoose.createConnection(mongoURI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
