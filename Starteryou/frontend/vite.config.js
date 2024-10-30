@@ -8,11 +8,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@backend': path.resolve(__dirname, '../backend/src'),
-      '@config': path.resolve(__dirname, '../backend/config'),  // Points to backend config
-      '@hooks': path.resolve(__dirname, '../backend/src/hooks'),
+      '@hooks': path.resolve(__dirname, './src/hooks'),
       '@components': path.resolve(__dirname, './src/components'),
-      '@utils': path.resolve(__dirname, './src/utils')
+      '@utils': path.resolve(__dirname, './src/utils'),
+      '@config': path.resolve(__dirname, './src/config')
     }
   }
 })
