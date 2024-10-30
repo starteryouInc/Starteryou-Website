@@ -2,7 +2,7 @@
 import {useEffect} from "react";
 import {useNavigation} from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
-import {useFileOperation} from "../../../../backend/src/hooks/useFileOperation"
+import {useFileOperations} from "../../../../backend/src/hooks/useFileOperation"
 import {API_CONFIG} from "../../../../backend/config/api";
 
 const icons = [
