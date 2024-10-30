@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:3000",
+  baseURL: "http://54.196.202.145:3000",
   endpoints: {
     fileUpload: "/api/files/upload",
     fileUpdate: "/api/files/update",
