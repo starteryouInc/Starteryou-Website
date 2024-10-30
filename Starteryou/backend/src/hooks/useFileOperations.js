@@ -1,6 +1,6 @@
 // src/hooks/useFileOperations.js
 import {useState, useCallback} from "react";
-import {API_CONFIG} from "../../../backend/config/api";
+import {API_CONFIG} from "../../config/api";
 
 export const useFileOperations = (title) => {
   const [uploadedFile, setUploadedFile] = useState(null);
