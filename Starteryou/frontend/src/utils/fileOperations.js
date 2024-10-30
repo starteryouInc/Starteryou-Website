@@ -1,5 +1,5 @@
 // src/utils/fileOperations.js
-import {API_CONFIG} from "../config/api";
+import {API_CONFIG} from '@config/api';
 
 export const fetchFileByTitle = async (title) => {
   try {
