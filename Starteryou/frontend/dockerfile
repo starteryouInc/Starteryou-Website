@@ -12,21 +12,17 @@ RUN npm install
 # Copy source
 COPY . .
 
-# Build
+# Build with environment variables
+ARG VITE_BACKEND_URL
+ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
+
 RUN npm run build
 
 # Nginx stage
 FROM nginx:alpine
 
-# Copy built files
 COPY --from=build /app/dist /usr/share/nginx/html
-
-# Copy nginx config
 COPY nginx.conf /etc/nginx/nginx.conf
-
-# Make sure nginx can access the files
-RUN chown -R nginx:nginx /usr/share/nginx/html && \
-    chmod -R 755 /usr/share/nginx/html
 
 EXPOSE 80
 
