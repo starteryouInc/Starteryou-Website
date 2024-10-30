@@ -2,11 +2,15 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile # This should point to the backend Dockerfile
     container_name: starteryou-backend
     restart: unless-stopped
-    env_file:
-      - .env  # Use the root .env file
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://54.196.202.145:27017/starteryou
+      - FRONTEND_URL=http://54.196.202.145:8080
+      - VITE_BACKEND_URL=http://54.196.202.145:3000 # Add this environment variable
+      - PORT=3000
     ports:
       - "3000:3000"
     volumes:
@@ -17,16 +21,14 @@ services:
 
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: ./frontend # Updated to point to the frontend directory
+      dockerfile: Dockerfile # This should point to the frontend Dockerfile
     container_name: starteryou-frontend
     restart: unless-stopped
     ports:
-      - "8080:80"  # Assuming you're using Nginx
-    env_file:
-      - .env  # Use the root .env file
+      - "8080:8080"
     environment:
-      - VITE_BACKEND_URL=${VITE_BACKEND_URL}  # Reference from .env file
+      - BACKEND_URL=http://54.196.202.145:3000
     depends_on:
       - backend
     networks:

@@ -44,6 +44,8 @@ const Hero = () => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("title", title);
+    const BACKEND_URL =
+      import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
     try {
       const response = await fetch(
