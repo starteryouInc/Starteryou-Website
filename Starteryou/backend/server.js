@@ -38,21 +38,18 @@ mongoose.connection.on('error', (err) => {
 
 // CORS configuration for production
 // In server.js
-const corsOptions = {
-  origin: [
-    "http://54.196.202.145:8080",  // Your frontend URL
-    "http://54.196.202.145:3000",  // Your backend URL
-    "http://localhost:8080",
-    "http://localhost:3000"
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-};
+// CORS configuration with credentials
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin);
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', true);
+  next();
+});
 
-// Add OPTIONS preflight
-app.options('*', cors(corsOptions));
-app.use(cors(corsOptions));
+app.options('*', (req, res) => {
+  res.sendStatus(200);
+});
 
 // Middleware
 app.use(express.json({limit: "50mb"}));
