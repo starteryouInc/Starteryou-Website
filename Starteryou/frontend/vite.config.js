@@ -9,6 +9,7 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       '@backend': path.resolve(__dirname, '../backend/src'),
+      '@config': path.resolve(__dirname, '../backend/config'),  // Points to backend config
       '@hooks': path.resolve(__dirname, '../backend/src/hooks'),
       '@components': path.resolve(__dirname, './src/components'),
       '@utils': path.resolve(__dirname, './src/utils')
