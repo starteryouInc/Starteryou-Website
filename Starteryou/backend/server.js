@@ -37,18 +37,21 @@ mongoose.connection.on('error', (err) => {
 });
 
 // CORS configuration for production
+// In server.js
 const corsOptions = {
   origin: [
-    process.env.FRONTEND_URL,
-    "http://54.196.202.145:8080",
+    "http://54.196.202.145:8080",  // Your frontend URL
+    "http://54.196.202.145:3000",  // Your backend URL
     "http://localhost:8080",
-    process.env.PRODUCTION_URL,
-  ].filter(Boolean),
-  methods: ["GET", "POST", "PUT", "DELETE"],
+    "http://localhost:3000"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
+  credentials: true
 };
 
+// Add OPTIONS preflight
+app.options('*', cors(corsOptions));
 app.use(cors(corsOptions));
 
 // Middleware
