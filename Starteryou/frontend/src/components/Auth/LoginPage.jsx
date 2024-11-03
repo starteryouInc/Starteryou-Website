@@ -1,11 +1,11 @@
-import { toast } from "react-toastify";
+import {toast} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { useUserContext } from "../../context/UserContext";
+import {useNavigate} from "react-router-dom";
+import {useState} from "react";
+import {useUserContext} from "../../context/UserContext";
 
 const LoginPage = () => {
-  const { setUser } = useUserContext();
+  const {setUser} = useUserContext();
   const navigate = useNavigate();
 
   const [username, setUsername] = useState("");
@@ -24,7 +24,7 @@ const LoginPage = () => {
     }
 
     if (username === "admin" && password === "admin098") {
-      setUser({ isAdmin: true });
+      setUser({isAdmin: true});
       toast.success("Login successful!");
       setAttempts(0);
       setCountdown(0);
@@ -57,7 +57,7 @@ const LoginPage = () => {
   return (
     <div
       className="relative w-full lg:h-screen bg-cover bg-center min-h-screen flex items-center justify-center"
-      style={{ backgroundImage: "url(/AboutPage/Aboutbg.svg)" }}
+      style={{backgroundImage: "url(/AboutPage/Aboutbg.svg)"}}
     >
       <div className="bg-white p-8 mx-4 md:mx-0 rounded-lg shadow-lg w-full max-w-md border border-gray-200">
         <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
