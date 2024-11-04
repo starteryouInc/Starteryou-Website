@@ -6,8 +6,8 @@ services:
     container_name: starteryou-backend
     restart: unless-stopped
     environment:
-      - NODE_ENV=production
-      - MONGODB_URI=mongodb://54.196.202.145:27017/starteryou
+      - NODE_ENV=development
+      - MONGODB_URI=${MONGODB_URI}
       - FRONTEND_URL=http://54.196.202.145:8080
       - VITE_BACKEND_URL=http://54.196.202.145:3000 # Add this environment variable
       - PORT=3000
