@@ -3,6 +3,7 @@ import "react-toastify/dist/ReactToastify.css";
 import {useNavigate} from "react-router-dom";
 import {useState} from "react";
 import {useUserContext} from "../../context/UserContext";
+import {API_CONFIG} from "@config/api";
 
 const LoginPage = () => {
   const {setUser} = useUserContext();
@@ -15,7 +16,7 @@ const LoginPage = () => {
   const [countdown, setCountdown] = useState(0);
   const lockoutDuration = 30;
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
     if (lockout) {
@@ -23,34 +24,49 @@ const LoginPage = () => {
       return;
     }
 
-    if (username === "admin" && password === "admin098") {
-      setUser({isAdmin: true});
-      toast.success("Login successful!");
-      setAttempts(0);
-      setCountdown(0);
+    try {
+      const response = await fetch(`${API_CONFIG.baseURL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({username, password}),
+      });
 
-      navigate("/admin");
-    } else {
-      setAttempts((prev) => prev + 1);
-      toast.error("Invalid username or password");
+      const data = await response.json();
 
-      if (attempts + 1 >= 3) {
-        setLockout(true);
-        setCountdown(lockoutDuration);
-        toast.error("Too many failed attempts");
+      if (response.ok) {
+        setUser({isAdmin: data.user.isAdmin});
+        toast.success("Login successful!");
+        setAttempts(0);
+        setCountdown(0);
 
-        const timer = setInterval(() => {
-          setCountdown((prev) => {
-            if (prev <= 1) {
-              clearInterval(timer);
-              setLockout(false);
-              setAttempts(0);
-              return 0;
-            }
-            return prev - 1;
-          });
-        }, 1000);
+        navigate("/admin");
+      } else {
+        setAttempts((prev) => prev + 1);
+        toast.error("Invalid username or password");
+
+        if (attempts + 1 >= 3) {
+          setLockout(true);
+          setCountdown(lockoutDuration);
+          toast.error("Too many failed attempts");
+
+          const timer = setInterval(() => {
+            setCountdown((prev) => {
+              if (prev <= 1) {
+                clearInterval(timer);
+                setLockout(false);
+                setAttempts(0);
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+        }
       }
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error("An error occurred during login");
     }
   };
 

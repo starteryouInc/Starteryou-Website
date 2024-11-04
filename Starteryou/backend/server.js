@@ -6,48 +6,53 @@ const connectDB = require("./config/db");
 const fileRoutes = require("./routes/fileRoutes");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 
 // Set mongoose options
 mongoose.set("strictQuery", false);
 
+// Auth routes
+app.use("/api/auth", authRoutes);
+
 // MongoDB Connection with status messages
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => {
-  console.log('✅ MongoDB Connected Successfully!');
-  console.log(`📊 Database: ${mongoose.connection.name}`);
-  console.log(`🔌 Host: ${mongoose.connection.host}`);
-})
-.catch((error) => {
-  console.error('❌ MongoDB Connection Error:', error);
-  process.exit(1); // Exit process with failure
-});
+mongoose
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("✅ MongoDB Connected Successfully!");
+    console.log(`📊 Database: ${mongoose.connection.name}`);
+    console.log(`🔌 Host: ${mongoose.connection.host}`);
+  })
+  .catch((error) => {
+    console.error("❌ MongoDB Connection Error:", error);
+    process.exit(1); // Exit process with failure
+  });
 
 // Monitor MongoDB connection
-mongoose.connection.on('disconnected', () => {
-  console.log('❌ MongoDB Disconnected');
+mongoose.connection.on("disconnected", () => {
+  console.log("❌ MongoDB Disconnected");
 });
 
-mongoose.connection.on('error', (err) => {
-  console.error('MongoDB Error:', err);
+mongoose.connection.on("error", (err) => {
+  console.error("MongoDB Error:", err);
 });
 
 // CORS configuration for production
 // In server.js
 // CORS configuration with credentials
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin);
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.header('Access-Control-Allow-Credentials', true);
+  res.header("Access-Control-Allow-Origin", req.headers.origin);
+  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", true);
   next();
 });
 
-app.options('*', (req, res) => {
+app.options("*", (req, res) => {
   res.sendStatus(200);
 });
 
@@ -76,7 +81,8 @@ app.get("/health", (req, res) => {
     status: "OK",
     message: "Server is running",
     environment: process.env.NODE_ENV,
-    mongodb: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'
+    mongodb:
+      mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
   });
 });
 
