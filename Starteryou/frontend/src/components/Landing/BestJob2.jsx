@@ -1,60 +1,118 @@
-import {useState, useEffect} from "react";
-import {useNavigation} from "../../context/NavigationContext";
+import { useState, useEffect, useCallback } from "react";
+import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
-import {API_CONFIG} from "@config/api";
+import { API_CONFIG } from "@config/api";
+import { toast } from "react-toastify";
 
 const BestJob2 = () => {
-  const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images
-  const title = "BesstBudy2";
-  const {isAdmin} = useNavigation();
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const title = "SmartML";
+  const { isAdmin } = useNavigation();
 
-  // Function to fetch a specific file (image) by title
+  const cleanupFileUrl = useCallback(() => {
+    if (uploadedFile) {
+      URL.revokeObjectURL(uploadedFile);
+    }
+  }, [uploadedFile]);
+
   const fetchUploadedFile = async () => {
     try {
+      setLoading(true);
+      setError(null);
+      cleanupFileUrl();
+
       const response = await fetch(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileByTitle(title)}`
-      ); // Use API_CONFIG for the fetch URL
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`,
+        {
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          },
+        }
+      );
+      
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        if (response.status === 404) {
+          throw new Error("Image not found");
+        }
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Failed to fetch: ${response.statusText}`);
       }
 
-      const blob = await response.blob(); // Get the response as a Blob
-      const url = URL.createObjectURL(blob); // Create a local URL for the Blob
-      setUploadedFile(url); // Set the uploaded file data with its local URL
+      const blob = await response.blob();
+      if (blob.size === 0) {
+        throw new Error("Empty image received");
+      }
+
+      const url = URL.createObjectURL(blob);
+      setUploadedFile(url);
     } catch (error) {
       console.error("Error fetching uploaded file:", error);
+      setError(error.message || "Failed to load image");
+      toast.error(error.message || "Failed to load image");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchUploadedFile(); // Fetch the specific image on component mount
-  }, []);
+    fetchUploadedFile();
+    return cleanupFileUrl;
+  }, [cleanupFileUrl]);
 
-  // Handle file upload
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", title); // Include the title for the update
+    if (!file) return;
+
     try {
+      if (!file.type.startsWith('image/')) {
+        toast.error("Please select an image file");
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("File size should be less than 5MB");
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("title", title);
+      formData.append("uploadedBy", "admin");
+
       const response = await fetch(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate}`, // Use API_CONFIG for the fetch URL
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`,
         {
           method: "PUT",
           body: formData,
         }
       );
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        throw new Error(data.message || "Failed to update file");
       }
 
-      const data = await response.json();
-      console.log("Image updated successfully:", data);
+      toast.success("Image updated successfully");
 
-      setUploadedFile(URL.createObjectURL(file)); // Update the uploaded file state with the new image preview
+      cleanupFileUrl();
+      const previewUrl = URL.createObjectURL(file);
+      setUploadedFile(previewUrl);
+
+      setTimeout(fetchUploadedFile, 1000);
+
     } catch (error) {
-      console.error("Error updating image:", error);
+      console.error("Error updating file:", error);
+      setError(error.message || "Failed to update file");
+      toast.error(error.message || "Failed to update file");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -78,24 +136,49 @@ const BestJob2 = () => {
       <div className="flex flex-col lg:flex-row items-center justify-between lg:space-x-8">
         {/* Right Section */}
         <div className="relative order-2 lg:order-1 w-[330px] h-[250px] md:w-[500px] lg:w-[700px] lg:h-[550px] bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] rounded-xl overflow-hidden">
+          {loading ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#6853E3] border-t-transparent"></div>
+            </div>
+          ) : null}
+
           {uploadedFile ? (
             <img
-              src={uploadedFile} // Use the local URL created from the Blob
-              alt="Uploaded or Preview"
+              src={uploadedFile}
+              alt="Uploaded Preview"
               className="relative w-[340px] h-[180px] top-[35px] left-[30px] md:w-[550px] md:top-[28px] md:left-[50px] lg:top-[78px] lg:left-[70px] lg:w-[680px] lg:h-[400px] rounded-xl"
-              style={{transform: "rotate(-6.44deg)"}}
+              style={{ transform: "rotate(-6.44deg)" }}
+              onError={() => {
+                setError("Failed to load image");
+                setUploadedFile(null);
+              }}
             />
           ) : (
             <img
               src="/LandingPage/Rectangle.png"
               alt="Job Opportunities"
               className="relative w-[340px] h-[180px] top-[35px] left-[30px] md:w-[550px] md:top-[28px] md:left-[50px] lg:top-[78px] lg:left-[70px] lg:w-[680px] lg:h-[400px] rounded-xl"
-              style={{transform: "rotate(-6.44deg)"}}
+              style={{ transform: "rotate(-6.44deg)" }}
             />
           )}
 
           {/* Admin file upload section */}
-          {isAdmin && <FileUpload handleFileChange={handleFileChange} />}
+          {isAdmin && (
+            <FileUpload handleFileChange={handleFileChange} />
+          )}
+
+          {/* Error display */}
+          {error && (
+            <div className="absolute top-16 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-md shadow-md">
+              <p>{error}</p>
+              <button 
+                onClick={fetchUploadedFile}
+                className="text-[#6853E3] text-sm hover:underline mt-1"
+              >
+                Try Again
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Left Section */}

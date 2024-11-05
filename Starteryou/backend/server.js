@@ -1,104 +1,145 @@
 // server.js
-require("dotenv").config(); // Add this at the very top
-
 const express = require("express");
-const connectDB = require("./config/db");
-const fileRoutes = require("./routes/fileRoutes");
-const cors = require("cors");
 const mongoose = require("mongoose");
+const cors = require("cors");
+const path = require("path");
+const { mountRoutes } = require("./routes"); // Main routes including API docs
+const fileRoutes = require("./routes/fileRoutes"); // File handling routes
+const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
+require("dotenv").config();
 
+// Initialize express app
 const app = express();
 
-// Set mongoose options
+// Basic middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// API Request Logger Middleware
+const requestLogger = (req, res, next) => {
+  const timestamp = new Date().toISOString();
+  const method = req.method;
+  const url = req.url;
+  const ip = req.ip;
+  console.log(`[${timestamp}] ${method} ${url} - IP: ${ip}`);
+  next();
+};
+
+app.use(requestLogger);
+
+// Mount routes
+app.use('/api/files', fileRoutes);
+app.use('/api/system', verificationRoutes);
+mountRoutes(app); // This mounts the main routes including API docs
+
+// MongoDB Connection Configuration
 mongoose.set("strictQuery", false);
 
-// MongoDB Connection with status messages
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => {
-  console.log('✅ MongoDB Connected Successfully!');
-  console.log(`📊 Database: ${mongoose.connection.name}`);
-  console.log(`🔌 Host: ${mongoose.connection.host}`);
-})
-.catch((error) => {
-  console.error('❌ MongoDB Connection Error:', error);
-  process.exit(1); // Exit process with failure
-});
+if (!process.env.MONGODB_URI) {
+  console.error("❌ MONGODB_URI is not set in .env file");
+  process.exit(1);
+}
+
+// MongoDB Connection with retries
+const connectWithRetry = () => {
+  console.log("Attempting to connect to MongoDB...");
+  mongoose
+    .connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000,
+      retryWrites: true,
+    })
+    .then(() => {
+      console.log("✅ MongoDB Connected Successfully!");
+      console.log(`📊 Database: ${mongoose.connection.db.databaseName}`);
+      console.log(`🔌 Host: ${mongoose.connection.host}`);
+    })
+    .catch((error) => {
+      console.error("❌ MongoDB Connection Error:", error);
+      console.log("Retrying connection in 5 seconds...");
+      setTimeout(connectWithRetry, 5000);
+    });
+};
+
+// Initial connection attempt
+connectWithRetry();
 
 // Monitor MongoDB connection
-mongoose.connection.on('disconnected', () => {
-  console.log('❌ MongoDB Disconnected');
+mongoose.connection.on("disconnected", () => {
+  console.log("❌ MongoDB Disconnected. Attempting to reconnect...");
+  connectWithRetry();
 });
 
-mongoose.connection.on('error', (err) => {
-  console.error('MongoDB Error:', err);
+mongoose.connection.on("error", (err) => {
+  console.error("MongoDB Error:", err);
+  if (err.name === "MongoNetworkError") {
+    connectWithRetry();
+  }
 });
-
-// CORS configuration for production
-// In server.js
-// CORS configuration with credentials
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin);
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.header('Access-Control-Allow-Credentials', true);
-  next();
-});
-
-app.options('*', (req, res) => {
-  res.sendStatus(200);
-});
-
-// Middleware
-app.use(express.json({limit: "50mb"}));
-app.use(express.urlencoded({extended: true, limit: "50mb"}));
-
-// Routes
-app.use("/api/files", fileRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error("Error:", err.stack);
+  console.error('Error:', err.stack);
   res.status(500).json({
-    error: "Internal Server Error",
-    message:
-      process.env.NODE_ENV === "development"
-        ? err.message
-        : "Something went wrong",
+    success: false,
+    message: err.message || 'Internal Server Error'
   });
 });
 
-// Health check route with MongoDB status
-app.get("/health", (req, res) => {
-  res.status(200).json({
-    status: "OK",
-    message: "Server is running",
-    environment: process.env.NODE_ENV,
-    mongodb: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'
+// Handle 404 routes - This should be the last middleware
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found',
+    availableEndpoints: {
+      docs: '/api/docs',
+      health: '/health',
+      files: '/api/files/*',
+      system: '/api/system/*'
+    }
   });
 });
 
-// Handle undefined routes
-app.use("*", (req, res) => {
-  res.status(404).json({message: "Route not found"});
-});
-
+// Start the Express server
 const PORT = process.env.PORT || 3000;
-
-const server = app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 Server is running on http://0.0.0.0:${PORT}`);
+app.listen(PORT, () => {
+  console.log(`
+🚀 Server is running on port ${PORT}
+📚 API Documentation: http://localhost:${PORT}/api/docs
+📋 Postman Collection: http://localhost:${PORT}/api/docs/postman
+💻 Health Check: http://localhost:${PORT}/health
+⚙️ File Verification: http://localhost:${PORT}/api/system/verify-all
+🔧 Environment: ${process.env.NODE_ENV || "development"}
+  `);
 });
 
-// Graceful shutdown
-process.on("SIGTERM", () => {
-  console.log("SIGTERM signal received: closing HTTP server");
-  server.close(() => {
-    console.log("HTTP server closed");
-    mongoose.connection.close(false, () => {
-      console.log("MongoDB connection closed");
-      process.exit(0);
-    });
-  });
+// Graceful shutdown handler
+const gracefulShutdown = async () => {
+  console.log("\n🔄 Received shutdown signal. Starting graceful shutdown...");
+  
+  try {
+    await mongoose.connection.close();
+    console.log("✅ MongoDB connection closed.");
+    process.exit(0);
+  } catch (err) {
+    console.error("❌ Error during shutdown:", err);
+    process.exit(1);
+  }
+};
+
+// Handle shutdown signals
+process.on("SIGTERM", gracefulShutdown);
+process.on("SIGINT", gracefulShutdown);
+process.on("uncaughtException", (err) => {
+  console.error("❌ Uncaught Exception:", err);
+  gracefulShutdown();
 });
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("❌ Unhandled Rejection at:", promise, "reason:", reason);
+  gracefulShutdown();
+});
+
+module.exports = app;
