@@ -42,7 +42,6 @@ if (!process.env.MONGODB_URI) {
   process.exit(1);
 }
 
-// MongoDB Connection with retries
 const connectWithRetry = () => {
   console.log("Attempting to connect to MongoDB...");
   mongoose
@@ -54,8 +53,16 @@ const connectWithRetry = () => {
     })
     .then(() => {
       console.log("✅ MongoDB Connected Successfully!");
-      console.log(`📊 Database: ${mongoose.connection.db.databaseName}`);
-      console.log(`🔌 Host: ${mongoose.connection.host}`);
+      // Accessing `databaseName` and `host` safely after connection is established
+      const db = mongoose.connection.db;
+      const host = mongoose.connection.host;
+
+      if (db && host) {
+        console.log(`📊 Database: ${db.databaseName}`);
+        console.log(`🔌 Host: ${host}`);
+      } else {
+        console.warn("⚠️ Database or host information is not available.");
+      }
     })
     .catch((error) => {
       console.error("❌ MongoDB Connection Error:", error);
@@ -63,6 +70,7 @@ const connectWithRetry = () => {
       setTimeout(connectWithRetry, 5000);
     });
 };
+
 
 // Initial connection attempt
 connectWithRetry();
