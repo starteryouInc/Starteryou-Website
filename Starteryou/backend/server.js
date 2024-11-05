@@ -1,24 +1,45 @@
 // server.js
 const express = require("express");
 const mongoose = require("mongoose");
-const fileRoutes = require("./routes/fileRoutes");
 const cors = require("cors");
+const path = require("path");
+const { mountRoutes } = require("./routes"); // Main routes including API docs
+const fileRoutes = require("./routes/fileRoutes"); // File handling routes
+const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 require("dotenv").config();
 
+// Initialize express app
 const app = express();
 
-// Middleware
+// Basic middleware
 app.use(cors());
 app.use(express.json());
-app.use("/api/files", fileRoutes); // Assuming this is your route
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Set mongoose options
+// API Request Logger Middleware
+const requestLogger = (req, res, next) => {
+  const timestamp = new Date().toISOString();
+  const method = req.method;
+  const url = req.url;
+  const ip = req.ip;
+  console.log(`[${timestamp}] ${method} ${url} - IP: ${ip}`);
+  next();
+};
+
+app.use(requestLogger);
+
+// Mount routes
+app.use('/api/files', fileRoutes);
+app.use('/api/system', verificationRoutes);
+mountRoutes(app); // This mounts the main routes including API docs
+
+// MongoDB Connection Configuration
 mongoose.set("strictQuery", false);
 
-// Validate MongoDB URI
 if (!process.env.MONGODB_URI) {
   console.error("❌ MONGODB_URI is not set in .env file");
-  process.exit(1); // Exit the process if no URI is provided
+  process.exit(1);
 }
 
 // MongoDB Connection with retries
@@ -28,7 +49,7 @@ const connectWithRetry = () => {
     .connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 5000, // Timeout after 5s
+      serverSelectionTimeoutMS: 5000,
       retryWrites: true,
     })
     .then(() => {
@@ -59,8 +80,66 @@ mongoose.connection.on("error", (err) => {
   }
 });
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err.stack);
+  res.status(500).json({
+    success: false,
+    message: err.message || 'Internal Server Error'
+  });
+});
+
+// Handle 404 routes - This should be the last middleware
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found',
+    availableEndpoints: {
+      docs: '/api/docs',
+      health: '/health',
+      files: '/api/files/*',
+      system: '/api/system/*'
+    }
+  });
+});
+
 // Start the Express server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
+  console.log(`
+🚀 Server is running on port ${PORT}
+📚 API Documentation: http://localhost:${PORT}/api/docs
+📋 Postman Collection: http://localhost:${PORT}/api/docs/postman
+💻 Health Check: http://localhost:${PORT}/health
+⚙️ File Verification: http://localhost:${PORT}/api/system/verify-all
+🔧 Environment: ${process.env.NODE_ENV || "development"}
+  `);
 });
+
+// Graceful shutdown handler
+const gracefulShutdown = async () => {
+  console.log("\n🔄 Received shutdown signal. Starting graceful shutdown...");
+  
+  try {
+    await mongoose.connection.close();
+    console.log("✅ MongoDB connection closed.");
+    process.exit(0);
+  } catch (err) {
+    console.error("❌ Error during shutdown:", err);
+    process.exit(1);
+  }
+};
+
+// Handle shutdown signals
+process.on("SIGTERM", gracefulShutdown);
+process.on("SIGINT", gracefulShutdown);
+process.on("uncaughtException", (err) => {
+  console.error("❌ Uncaught Exception:", err);
+  gracefulShutdown();
+});
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("❌ Unhandled Rejection at:", promise, "reason:", reason);
+  gracefulShutdown();
+});
+
+module.exports = app;

@@ -1,302 +1,382 @@
-// fileRoutes.js
+// routes/fileRoutes.js
 const express = require("express");
 const multer = require("multer");
-const {GridFSBucket, ObjectId} = require("mongodb");
 const mongoose = require("mongoose");
+const { ObjectId } = require("mongodb");
 const FileMetadata = require("../models/FileMetadata");
 require("dotenv").config();
 
 const router = express.Router();
-const mongoURI = process.env.MONGODB_URI;
 
-// Connection and bucket setup
-const conn = mongoose.createConnection(mongoURI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
+// Setup GridFS bucket
 let bucket;
+const setupBucket = () => {
+    if (!mongoose.connection.db) {
+        console.log("Waiting for MongoDB connection...");
+        return;
+    }
+    try {
+        bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+            bucketName: "uploads"
+        });
+        console.log("✅ GridFS bucket initialized");
+    } catch (error) {
+        console.error("❌ GridFS bucket initialization error:", error);
+    }
+};
 
-conn.once("open", () => {
-  console.log("GridFS Connection opened successfully");
-  try {
-    bucket = new GridFSBucket(conn.db, {bucketName: "uploads"});
-    console.log("GridFS Bucket 'uploads' initialized successfully");
-  } catch (error) {
-    console.error("Error creating GridFS bucket:", error);
-  }
-});
+// Initialize bucket when MongoDB connects
+mongoose.connection.once("open", setupBucket);
 
-conn.on("error", (err) => {
-  console.error("GridFS Connection error:", err);
-});
-
-// Memory storage for multer
+// Configure multer
 const storage = multer.memoryStorage();
-const upload = multer({storage});
+const upload = multer({
+    storage,
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+    fileFilter: (req, file, cb) => {
+        // Optional: Add file type validation here
+        cb(null, true);
+    }
+});
 
-// File upload route
+// Helper function to ensure bucket is initialized
+const ensureBucket = async () => {
+    if (!bucket) {
+        setupBucket();
+        if (!bucket) {
+            throw new Error("Storage system not initialized");
+        }
+    }
+    return bucket;
+};
+
+// POST: Upload file
 router.post("/upload", upload.single("file"), async (req, res) => {
-  if (!bucket) {
-    return res
-      .status(500)
-      .json({message: "File storage system not initialized"});
-  }
+    try {
+        // Validate request
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: "No file uploaded"
+            });
+        }
 
-  if (!req.file) {
-    return res.status(400).json({message: "No file uploaded"});
-  }
+        if (!req.body.title) {
+            return res.status(400).json({
+                success: false,
+                message: "Title is required"
+            });
+        }
 
-  const {buffer, originalname} = req.file;
-  const {title, uploadedBy} = req.body;
+        // Get bucket
+        const gridFsBucket = await ensureBucket();
 
-  if (!uploadedBy) {
-    return res
-      .status(400)
-      .json({message: 'The "uploadedBy" field is required'});
-  }
+        // Check for existing file
+        const existingFile = await FileMetadata.findOne({ title: req.body.title });
+        if (existingFile) {
+            return res.status(400).json({
+                success: false,
+                message: "File with this title already exists"
+            });
+        }
 
-  if (!title) {
-    return res.status(400).json({message: 'The "title" field is required'});
-  }
-
-  try {
-    const uploadStream = bucket.openUploadStream(originalname);
-    uploadStream.on("finish", async (file) => {
-      try {
-        const fileMetadata = new FileMetadata({
-          title,
-          originalFilename: originalname,
-          uploadedBy,
-          gridFsFileId: file._id,
+        // Create upload stream with metadata
+        const uploadStream = gridFsBucket.openUploadStream(req.file.originalname, {
+            contentType: req.file.mimetype,
+            metadata: {
+                title: req.body.title,
+                uploadedBy: req.body.uploadedBy || "unknown"
+            }
         });
+
+        // Upload file
+        return new Promise((resolve, reject) => {
+            uploadStream.end(req.file.buffer, async (error) => {
+                if (error) {
+                    return reject(error);
+                }
+
+                try {
+                    // Create metadata document
+                    const fileMetadata = new FileMetadata({
+                        title: req.body.title,
+                        originalFilename: req.file.originalname,
+                        uploadedBy: req.body.uploadedBy || "unknown",
+                        contentType: req.file.mimetype,
+                        size: req.file.size,
+                        gridFsFileId: uploadStream.id
+                    });
+
+                    await fileMetadata.save();
+
+                    res.status(201).json({
+                        success: true,
+                        message: "File uploaded successfully",
+                        metadata: fileMetadata
+                    });
+                    resolve();
+                } catch (err) {
+                    // Cleanup uploaded file if metadata save fails
+                    try {
+                        await gridFsBucket.delete(uploadStream.id);
+                    } catch (deleteError) {
+                        console.error("Cleanup error:", deleteError);
+                    }
+                    reject(err);
+                }
+            });
+        });
+
+    } catch (error) {
+        console.error("Upload error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error uploading file",
+            error: error.message
+        });
+    }
+});
+
+// PUT: Update file
+router.put("/update/:title", upload.single("file"), async (req, res) => {
+    try {
+        console.log("Update request for:", req.params.title);
+        console.log("Update data:", req.body);
+
+        const gridFsBucket = await ensureBucket();
+        
+        // Find existing file
+        const fileMetadata = await FileMetadata.findOne({ title: req.params.title });
+        if (!fileMetadata) {
+            return res.status(404).json({
+                success: false,
+                message: "File not found"
+            });
+        }
+
+        // If updating title, check if new title exists
+        if (req.body.newTitle && req.body.newTitle !== req.params.title) {
+            const existingFile = await FileMetadata.findOne({ 
+                title: req.body.newTitle,
+                _id: { $ne: fileMetadata._id }
+            });
+            if (existingFile) {
+                return res.status(400).json({
+                    success: false,
+                    message: "New title already exists"
+                });
+            }
+        }
+
+        // Handle file update if new file is provided
+        if (req.file) {
+            try {
+                // Delete old file
+                await gridFsBucket.delete(new ObjectId(fileMetadata.gridFsFileId));
+            } catch (error) {
+                console.warn("Warning: Error deleting old file:", error);
+            }
+
+            // Upload new file
+            const uploadStream = gridFsBucket.openUploadStream(req.file.originalname, {
+                contentType: req.file.mimetype
+            });
+
+            await new Promise((resolve, reject) => {
+                uploadStream.end(req.file.buffer, (error) => {
+                    if (error) reject(error);
+                    else resolve();
+                });
+            });
+
+            // Update file metadata
+            fileMetadata.gridFsFileId = uploadStream.id;
+            fileMetadata.originalFilename = req.file.originalname;
+            fileMetadata.contentType = req.file.mimetype;
+            fileMetadata.size = req.file.size;
+        }
+
+        // Update other metadata
+        if (req.body.newTitle) {
+            fileMetadata.title = req.body.newTitle;
+        }
+        if (req.body.uploadedBy) {
+            fileMetadata.uploadedBy = req.body.uploadedBy;
+        }
+
         await fileMetadata.save();
-        res.status(201).json({
-          file: {
-            _id: file._id,
-            filename: originalname,
-            title,
-          },
+
+        res.json({
+            success: true,
+            message: "File updated successfully",
+            metadata: fileMetadata
         });
-      } catch (error) {
-        console.error("Error saving metadata:", error);
-        res.status(500).json({message: "Error saving file metadata"});
-      }
-    });
 
-    uploadStream.on("error", (error) => {
-      console.error("Error during upload:", error);
-      res.status(500).json({message: error.message});
-    });
-
-    uploadStream.end(buffer);
-  } catch (error) {
-    console.error("Error initializing upload:", error);
-    res.status(500).json({message: "Error initializing file upload"});
-  }
+    } catch (error) {
+        console.error("Update error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error updating file",
+            error: error.message
+        });
+    }
 });
 
-// File retrieval route
-router.get("/title/:title", async (req, res) => {
-  if (!bucket) {
-    return res
-      .status(500)
-      .json({message: "File storage system not initialized"});
-  }
-
-  const {title} = req.params;
-
-  try {
-    const metadata = await FileMetadata.findOne({title});
-    if (!metadata) {
-      console.log(`Metadata not found for title: ${title}`);
-      return res.status(404).json({message: "File metadata not found"});
-    }
-
-    console.log(
-      `Metadata found for title: ${title}, GridFS ID: ${metadata.gridFsFileId}`
-    );
-
-    if (!ObjectId.isValid(metadata.gridFsFileId)) {
-      console.log(`Invalid GridFS ID: ${metadata.gridFsFileId}`);
-      await FileMetadata.deleteOne({_id: metadata._id});
-      return res.status(404).json({message: "Invalid file reference"});
-    }
-
-    // Check if the file exists in GridFS
-    const file = await bucket
-      .find({_id: new ObjectId(metadata.gridFsFileId)})
-      .toArray();
-    if (file.length === 0) {
-      console.log(`File not found in GridFS for ID: ${metadata.gridFsFileId}`);
-      await FileMetadata.deleteOne({_id: metadata._id});
-      return res.status(404).json({message: "File not found in GridFS"});
-    }
-
-    console.log(`Opening download stream for file: ${metadata.gridFsFileId}`);
-    const readStream = bucket.openDownloadStream(
-      new ObjectId(metadata.gridFsFileId)
-    );
-
-    readStream.on("error", async (error) => {
-      console.error(
-        `Error reading file stream for ${metadata.gridFsFileId}:`,
-        error
-      );
-      if (error.code === "ENOENT" || error.message.includes("FileNotFound")) {
-        console.log(
-          `Deleting metadata for missing file: ${metadata.gridFsFileId}`
-        );
-        await FileMetadata.deleteOne({_id: metadata._id});
-        return res.status(404).json({message: "File not found in GridFS"});
-      }
-      res.status(500).json({message: "Error retrieving file"});
-    });
-
-    res.set("Content-Type", "application/octet-stream");
-    res.set(
-      `Content-Disposition`,
-      `attachment; filename="${metadata.originalFilename}"`
-    );
-    readStream.pipe(res);
-  } catch (error) {
-    console.error("Error fetching file by title:", error);
-    res.status(500).json({message: error.message});
-  }
-});
-
-// List all files route
+// GET: List all files
 router.get("/list", async (req, res) => {
-  try {
-    const files = await FileMetadata.find().lean();
-    const filesWithGridFSCheck = await Promise.all(
-      files.map(async (file) => {
-        const exists = await bucket
-          .find({_id: new ObjectId(file.gridFsFileId)})
-          .hasNext();
-        return {...file, existsInGridFS: exists};
-      })
-    );
-    res.json(filesWithGridFSCheck);
-  } catch (error) {
-    console.error("Error listing files:", error);
-    res.status(500).json({message: "Error listing files"});
-  }
+    try {
+        const files = await FileMetadata.find({})
+            .sort({ createdAt: -1 })
+            .select('-__v') // Exclude version field
+            .lean(); // Convert to plain objects
+
+        res.json({
+            success: true,
+            count: files.length,
+            files: files
+        });
+    } catch (error) {
+        console.error("List error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error retrieving files",
+            error: error.message
+        });
+    }
 });
 
-// Update file route
-router.put("/update", upload.single("file"), async (req, res) => {
-  console.log("Update route called");
-  if (!bucket) {
-    console.log("Bucket not initialized");
-    return res
-      .status(500)
-      .json({message: "File storage system not initialized"});
-  }
+// GET: Download file
+router.get("/download/:title", async (req, res) => {
+    try {
+        const gridFsBucket = await ensureBucket();
 
-  const {id, title, uploadedBy} = req.body;
-  console.log("Request body:", {id, title, uploadedBy});
+        // Find file metadata
+        const fileMetadata = await FileMetadata.findOne({ title: req.params.title });
+        if (!fileMetadata) {
+            return res.status(404).json({
+                success: false,
+                message: "File not found"
+            });
+        }
 
-  if (!id) {
-    console.log("File ID missing");
-    return res.status(400).json({message: "File ID is required"});
-  }
+        // Verify file exists in GridFS
+        const file = await mongoose.connection.db
+            .collection("uploads.files")
+            .findOne({ _id: new ObjectId(fileMetadata.gridFsFileId) });
 
-  try {
-    console.log("Finding existing file");
-    const existingFile = await FileMetadata.findById(id);
+        if (!file) {
+            // Clean up orphaned metadata
+            await FileMetadata.deleteOne({ _id: fileMetadata._id });
+            return res.status(404).json({
+                success: false,
+                message: "File data not found"
+            });
+        }
 
-    if (!existingFile) {
-      console.log("File not found");
-      return res.status(404).json({message: "File not found"});
-    }
-
-    console.log("Existing file found:", existingFile);
-
-    // Update metadata
-    if (title) existingFile.title = title;
-    if (uploadedBy) existingFile.uploadedBy = uploadedBy;
-
-    // If a new file is uploaded, replace the old one
-    if (req.file) {
-      console.log("New file uploaded, replacing old one");
-      const {buffer, originalname} = req.file;
-
-      // Delete old file from GridFS
-      console.log("Deleting old file from GridFS");
-      await bucket.delete(new ObjectId(existingFile.gridFsFileId));
-
-      // Upload new file
-      console.log("Uploading new file");
-      const uploadStream = bucket.openUploadStream(originalname);
-      uploadStream.end(buffer);
-
-      await new Promise((resolve, reject) => {
-        uploadStream.on("finish", async (file) => {
-          console.log("New file upload finished");
-          existingFile.originalFilename = originalname;
-          existingFile.gridFsFileId = file._id;
-          resolve();
+        // Set headers
+        res.set({
+            'Content-Type': fileMetadata.contentType || 'application/octet-stream',
+            'Content-Disposition': `attachment; filename="${fileMetadata.originalFilename}"`,
+            'Content-Length': fileMetadata.size
         });
-        uploadStream.on("error", (error) => {
-          console.error("Error during file upload:", error);
-          reject(error);
+
+        // Stream file
+        const downloadStream = gridFsBucket.openDownloadStream(new ObjectId(fileMetadata.gridFsFileId));
+
+        downloadStream.on('error', (error) => {
+            console.error("Download stream error:", error);
+            if (!res.headersSent) {
+                res.status(500).json({
+                    success: false,
+                    message: "Error streaming file"
+                });
+            }
         });
-      });
+
+        downloadStream.pipe(res);
+
+    } catch (error) {
+        console.error("Download error:", error);
+        if (!res.headersSent) {
+            res.status(500).json({
+                success: false,
+                message: "Error downloading file",
+                error: error.message
+            });
+        }
     }
-
-    console.log("Saving updated file metadata");
-    await existingFile.save();
-
-    console.log("File update successful");
-    res.status(200).json({
-      message: "File updated successfully",
-      file: {
-        _id: existingFile._id,
-        filename: existingFile.originalFilename,
-        title: existingFile.title,
-      },
-    });
-  } catch (error) {
-    console.error("Error updating file:", error);
-    res
-      .status(500)
-      .json({message: "Error updating file", error: error.message});
-  }
 });
 
-// Delete file route
-router.delete("/:id", async (req, res) => {
-  if (!bucket) {
-    return res
-      .status(500)
-      .json({message: "File storage system not initialized"});
-  }
+// DELETE: Remove specific file
+router.delete("/delete/:title", async (req, res) => {
+    try {
+        const gridFsBucket = await ensureBucket();
+        
+        // Find file metadata
+        const fileMetadata = await FileMetadata.findOne({ title: req.params.title });
+        if (!fileMetadata) {
+            return res.status(404).json({
+                success: false,
+                message: "File not found"
+            });
+        }
 
-  const {id} = req.params;
+        // Delete file from GridFS
+        try {
+            await gridFsBucket.delete(new ObjectId(fileMetadata.gridFsFileId));
+        } catch (error) {
+            console.warn(`Warning: Error deleting GridFS file: ${fileMetadata.gridFsFileId}`, error);
+        }
 
-  try {
-    const fileMetadata = await FileMetadata.findById(id);
-    if (!fileMetadata) {
-      console.log(`File metadata not found for ID: ${id}`);
-      return res.status(404).json({message: "File metadata not found"});
+        // Delete metadata
+        await FileMetadata.deleteOne({ _id: fileMetadata._id });
+
+        res.json({
+            success: true,
+            message: "File deleted successfully"
+        });
+    } catch (error) {
+        console.error("Delete error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error deleting file",
+            error: error.message
+        });
     }
+});
 
-    console.log(`Deleting file metadata for ID: ${id}`);
-    await FileMetadata.deleteOne({_id: id});
-
-    if (ObjectId.isValid(fileMetadata.gridFsFileId)) {
-      console.log(
-        `Deleting file from GridFS for ID: ${fileMetadata.gridFsFileId}`
-      );
-      await bucket.delete(new ObjectId(fileMetadata.gridFsFileId));
+// DELETE: Remove all files (for cleanup)
+router.delete("/cleanup", async (req, res) => {
+    try {
+        const gridFsBucket = await ensureBucket();
+        
+        // Get all files
+        const files = await FileMetadata.find({});
+        
+        // Delete each file
+        for (const file of files) {
+            try {
+                await gridFsBucket.delete(new ObjectId(file.gridFsFileId));
+            } catch (error) {
+                console.warn(`Failed to delete GridFS file: ${file.gridFsFileId}`, error);
+            }
+        }
+        
+        // Delete all metadata
+        await FileMetadata.deleteMany({});
+        
+        res.json({
+            success: true,
+            message: "All files cleaned up successfully"
+        });
+    } catch (error) {
+        console.error("Cleanup error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error during cleanup",
+            error: error.message
+        });
     }
-
-    res.status(200).json({message: "File deleted successfully"});
-  } catch (error) {
-    console.error("Error deleting file:", error);
-    res.status(500).json({message: "Error deleting file"});
-  }
 });
 
 module.exports = router;
