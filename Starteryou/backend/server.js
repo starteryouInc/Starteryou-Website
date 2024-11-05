@@ -3,7 +3,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
-const { mountRoutes } = require("./routes"); // Main routes including API docs
+const {mountRoutes} = require("./routes"); // Main routes including API docs
 const fileRoutes = require("./routes/fileRoutes"); // File handling routes
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 require("dotenv").config();
@@ -14,8 +14,8 @@ const app = express();
 // Basic middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.urlencoded({extended: true}));
+app.use(express.static(path.join(__dirname, "public")));
 
 // API Request Logger Middleware
 const requestLogger = (req, res, next) => {
@@ -30,8 +30,8 @@ const requestLogger = (req, res, next) => {
 app.use(requestLogger);
 
 // Mount routes
-app.use('/api/files', fileRoutes);
-app.use('/api/system', verificationRoutes);
+app.use("/api/files", fileRoutes);
+app.use("/api/system", verificationRoutes);
 mountRoutes(app); // This mounts the main routes including API docs
 
 // MongoDB Connection Configuration
@@ -49,7 +49,9 @@ const connectWithRetry = () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       serverSelectionTimeoutMS: 5000,
-      retryWrites: true,
+      socketTimeoutMS: 45000,
+      family: 4,
+      connectTimeoutMS: 10000,
     })
     .then(() => {
       console.log("✅ MongoDB Connected Successfully!");
@@ -71,7 +73,6 @@ const connectWithRetry = () => {
     });
 };
 
-
 // Initial connection attempt
 connectWithRetry();
 
@@ -90,10 +91,10 @@ mongoose.connection.on("error", (err) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error('Error:', err.stack);
+  console.error("Error:", err.stack);
   res.status(500).json({
     success: false,
-    message: err.message || 'Internal Server Error'
+    message: err.message || "Internal Server Error",
   });
 });
 
@@ -101,13 +102,13 @@ app.use((err, req, res, next) => {
 app.use((req, res) => {
   res.status(404).json({
     success: false,
-    message: 'Route not found',
+    message: "Route not found",
     availableEndpoints: {
-      docs: '/api/docs',
-      health: '/health',
-      files: '/api/files/*',
-      system: '/api/system/*'
-    }
+      docs: "/api/docs",
+      health: "/health",
+      files: "/api/files/*",
+      system: "/api/system/*",
+    },
   });
 });
 
@@ -127,7 +128,7 @@ app.listen(PORT, () => {
 // Graceful shutdown handler
 const gracefulShutdown = async () => {
   console.log("\n🔄 Received shutdown signal. Starting graceful shutdown...");
-  
+
   try {
     await mongoose.connection.close();
     console.log("✅ MongoDB connection closed.");
