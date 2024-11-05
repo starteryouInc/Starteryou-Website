@@ -18,6 +18,8 @@ services:
       - /usr/src/app/node_modules
     networks:
       - starteryou-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   frontend:
     build:
