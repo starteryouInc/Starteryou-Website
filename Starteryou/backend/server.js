@@ -49,8 +49,10 @@ const connectWithRetry = () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       serverSelectionTimeoutMS: 5000,
-      retryWrites: true,
-    })
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      family: 4,
+      connectTimeoutMS: 10000,    })
     .then(() => {
       console.log("✅ MongoDB Connected Successfully!");
       // Accessing `databaseName` and `host` safely after connection is established
