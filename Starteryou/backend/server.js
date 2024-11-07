@@ -8,6 +8,7 @@ const fileRoutes = require("./routes/fileRoutes"); // File handling routes
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 require("dotenv").config();
 
+// test
 // Initialize express app
 const app = express();
 
