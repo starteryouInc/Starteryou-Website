@@ -9,38 +9,37 @@ const BestJob2 = () => {
   const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images
   const title = "starteryou-v2";
 
-  // Function to fetch a specific file (image) by title
+  // Function to fetch image
   const fetchUploadedFile = async () => {
     try {
+      console.log('Fetching file with title:', title); // Debug log
       const response = await fetch(
-        `${API_CONFIG.baseURL}/api/files/download/${title}`
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`  // Note the concatenation
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
 
-      const blob = await response.blob(); // Get the response as a Blob
-      const url = URL.createObjectURL(blob); // Create a local URL for the Blob
-      setUploadedFile(url); // Set the uploaded file data with its local URL
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      setUploadedFile(url);
     } catch (error) {
       console.error("Error fetching uploaded file:", error);
     }
   };
 
-  useEffect(() => {
-    fetchUploadedFile(); // Fetch the specific image on component mount
-  }, []);
-
-  // Handle file upload
+  // Handle file update
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("title", title); // Include the title for the update
+    formData.append("title", title);
+    formData.append("uploadedBy", "admin-updated");
 
     try {
+      console.log('Updating file with title:', title); // Debug log
       const response = await fetch(
-        `${API_CONFIG.baseURL}/api/files/update/${title}`,
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`,  // Note the concatenation
         {
           method: "PUT",
           body: formData,
@@ -54,12 +53,12 @@ const BestJob2 = () => {
       const data = await response.json();
       console.log("Image updated successfully:", data);
 
-      setUploadedFile(URL.createObjectURL(file)); // Update the uploaded file state with the new image preview
+      setUploadedFile(URL.createObjectURL(file));
+      setTimeout(fetchUploadedFile, 1000); // Refetch to ensure we have the latest version
     } catch (error) {
       console.error("Error updating image:", error);
     }
   };
-
   const boxes = [
     {
       id: 0,
