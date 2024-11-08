@@ -5,14 +5,15 @@ import { API_CONFIG } from "@config/api";
 import { toast } from "react-toastify";
 
 const BestJob2 = () => {
-  const {isAdmin} = useNavigation();
+  const { isAdmin } = useNavigation();
   const [uploadedFile, setUploadedFile] = useState(null);
-  const [loading, setLoading] = useState(false);  // Add loading state
-  const [error, setError] = useState(null);  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const title = "starteryou-v2";
 
   // Function to fetch image
   const fetchUploadedFile = async () => {
+    setLoading(true); // Start loading
     try {
       const response = await fetch(
         `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`
@@ -24,8 +25,12 @@ const BestJob2 = () => {
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       setUploadedFile(url);
+      setError(null); // Reset error state on successful fetch
     } catch (error) {
       console.error("Error fetching uploaded file:", error);
+      setError("Failed to load image");
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
@@ -37,7 +42,9 @@ const BestJob2 = () => {
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     const formData = new FormData();
-    formData.append("file", file);  // Only sending the file
+    formData.append("file", file); // Only sending the file
+
+    setLoading(true); // Start loading
 
     try {
       const response = await fetch(
@@ -57,13 +64,17 @@ const BestJob2 = () => {
 
       // Update the display
       setUploadedFile(URL.createObjectURL(file));
-      
-      // Optional: Fetch the updated image from server
+
+      // Optional: Fetch the updated image from the server
       setTimeout(fetchUploadedFile, 1000);
     } catch (error) {
       console.error("Error updating image:", error);
+      setError("Error updating image");
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
+
   const boxes = [
     {
       id: 0,

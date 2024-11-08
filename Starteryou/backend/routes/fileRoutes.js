@@ -245,7 +245,7 @@ router.get("/list", async (req, res) => {
     }
 });
 
-// GET: Download file
+// GET: Download file (now displays inline)
 router.get("/download/:title", async (req, res) => {
     try {
         const gridFsBucket = await ensureBucket();
@@ -273,10 +273,10 @@ router.get("/download/:title", async (req, res) => {
             });
         }
 
-        // Set headers
+        // Set headers for inline display
         res.set({
             'Content-Type': fileMetadata.contentType || 'application/octet-stream',
-            'Content-Disposition': `attachment; filename="${fileMetadata.originalFilename}"`,
+            'Content-Disposition': `inline; filename="${fileMetadata.originalFilename}"`,
             'Content-Length': fileMetadata.size
         });
 
@@ -306,6 +306,7 @@ router.get("/download/:title", async (req, res) => {
         }
     }
 });
+
 
 // DELETE: Remove specific file
 router.delete("/delete/:title", async (req, res) => {
