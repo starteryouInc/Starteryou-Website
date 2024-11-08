@@ -1,72 +1,57 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
 import { API_CONFIG } from "@config/api";
 import { toast } from "react-toastify";
 
 const BestJob2 = () => {
+  const {isAdmin} = useNavigation();
   const [uploadedFile, setUploadedFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const title = "SmartML";
-  const { isAdmin } = useNavigation();
 
-  const cleanupFileUrl = useCallback(() => {
-    if (uploadedFile) {
-      URL.revokeObjectURL(uploadedFile);
-    }
-  }, [uploadedFile]);
-
+  // Function to fetch image by title
   const fetchUploadedFile = async () => {
     try {
       setLoading(true);
-      setError(null);
-      cleanupFileUrl();
-
       const response = await fetch(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`,
-        {
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          },
-        }
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileByTitle(title)}`
       );
-      
       if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error("Image not found");
-        }
-        const errorData = await response.json();
-        throw new Error(errorData.message || `Failed to fetch: ${response.statusText}`);
+        throw new Error("Network response was not ok");
       }
 
       const blob = await response.blob();
-      if (blob.size === 0) {
-        throw new Error("Empty image received");
-      }
-
       const url = URL.createObjectURL(blob);
       setUploadedFile(url);
     } catch (error) {
       console.error("Error fetching uploaded file:", error);
-      setError(error.message || "Failed to load image");
-      toast.error(error.message || "Failed to load image");
+      setError(error.message);
+      toast.error("Failed to load image");
     } finally {
       setLoading(false);
     }
   };
 
+  // Fetch image on component mount
   useEffect(() => {
     fetchUploadedFile();
-    return cleanupFileUrl;
-  }, [cleanupFileUrl]);
+    // Cleanup URL on unmount
+    return () => {
+      if (uploadedFile) {
+        URL.revokeObjectURL(uploadedFile);
+      }
+    };
+  }, []);
 
+  // Handle file update
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
     try {
+      // Validate file
       if (!file.type.startsWith('image/')) {
         toast.error("Please select an image file");
         return;
@@ -86,31 +71,33 @@ const BestJob2 = () => {
       formData.append("uploadedBy", "admin");
 
       const response = await fetch(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`,
+        `${API_CONFIG.baseURL}/api/files/update/${title}`,
         {
           method: "PUT",
           body: formData,
         }
       );
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.message || "Failed to update file");
+        throw new Error("Failed to update image");
       }
 
+      const data = await response.json();
+      console.log("Image updated successfully:", data);
       toast.success("Image updated successfully");
 
-      cleanupFileUrl();
-      const previewUrl = URL.createObjectURL(file);
-      setUploadedFile(previewUrl);
-
+      // Update preview
+      if (uploadedFile) {
+        URL.revokeObjectURL(uploadedFile);
+      }
+      setUploadedFile(URL.createObjectURL(file));
+      
+      // Fetch updated file
       setTimeout(fetchUploadedFile, 1000);
-
     } catch (error) {
-      console.error("Error updating file:", error);
-      setError(error.message || "Failed to update file");
-      toast.error(error.message || "Failed to update file");
+      console.error("Error updating image:", error);
+      setError(error.message);
+      toast.error("Failed to update image");
     } finally {
       setLoading(false);
     }
@@ -134,18 +121,20 @@ const BestJob2 = () => {
   return (
     <div className="container mx-auto max-w-[1300px] px-4 py-12">
       <div className="flex flex-col lg:flex-row items-center justify-between lg:space-x-8">
-        {/* Right Section */}
+        {/* Image Display Section */}
         <div className="relative order-2 lg:order-1 w-[330px] h-[250px] md:w-[500px] lg:w-[700px] lg:h-[550px] bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] rounded-xl overflow-hidden">
-          {loading ? (
+          {/* Loading Spinner */}
+          {loading && (
             <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#6853E3] border-t-transparent"></div>
             </div>
-          ) : null}
+          )}
 
+          {/* Main Image */}
           {uploadedFile ? (
             <img
               src={uploadedFile}
-              alt="Uploaded Preview"
+              alt="Current Image"
               className="relative w-[340px] h-[180px] top-[35px] left-[30px] md:w-[550px] md:top-[28px] md:left-[50px] lg:top-[78px] lg:left-[70px] lg:w-[680px] lg:h-[400px] rounded-xl"
               style={{ transform: "rotate(-6.44deg)" }}
               onError={() => {
@@ -156,18 +145,18 @@ const BestJob2 = () => {
           ) : (
             <img
               src="/LandingPage/Rectangle.png"
-              alt="Job Opportunities"
+              alt="Default Image"
               className="relative w-[340px] h-[180px] top-[35px] left-[30px] md:w-[550px] md:top-[28px] md:left-[50px] lg:top-[78px] lg:left-[70px] lg:w-[680px] lg:h-[400px] rounded-xl"
               style={{ transform: "rotate(-6.44deg)" }}
             />
           )}
 
-          {/* Admin file upload section */}
+          {/* Admin Update Control */}
           {isAdmin && (
             <FileUpload handleFileChange={handleFileChange} />
           )}
 
-          {/* Error display */}
+          {/* Error Display */}
           {error && (
             <div className="absolute top-16 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-md shadow-md">
               <p>{error}</p>
@@ -181,7 +170,7 @@ const BestJob2 = () => {
           )}
         </div>
 
-        {/* Left Section */}
+        {/* Content Section */}
         <div className="order-1 lg:order-2 md:w-full lg:w-1/3 w-full md:text-center lg:text-left mb-8 lg:mb-0">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-1 leading-tight">
             Eww ipsum dolor sit amet.
@@ -193,7 +182,7 @@ const BestJob2 = () => {
             Request for demo &gt;
           </a>
 
-          {/* Boxes */}
+          {/* Feature Boxes */}
           <div className="mt-8 flex flex-col md:flex-row md:justify-between lg:flex-col md:space-x-2 space-y-4 md:space-y-0 md:px-10 lg:space-x-0 lg:px-0">
             {boxes.map((box) => (
               <div
