@@ -6,15 +6,16 @@ import { toast } from "react-toastify";
 
 const BestJob2 = () => {
   const {isAdmin} = useNavigation();
-  const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [loading, setLoading] = useState(false);  // Add loading state
+  const [error, setError] = useState(null);  
   const title = "starteryou-v2";
 
   // Function to fetch image
   const fetchUploadedFile = async () => {
     try {
-      console.log('Fetching file with title:', title); // Debug log
       const response = await fetch(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`  // Note the concatenation
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -28,18 +29,19 @@ const BestJob2 = () => {
     }
   };
 
-  // Handle file update
+  useEffect(() => {
+    fetchUploadedFile();
+  }, []);
+
+  // Handle file update - simplified to update only the image
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", title);
-    formData.append("uploadedBy", "admin-updated");
+    formData.append("file", file);  // Only sending the file
 
     try {
-      console.log('Updating file with title:', title); // Debug log
       const response = await fetch(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`,  // Note the concatenation
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`,
         {
           method: "PUT",
           body: formData,
@@ -53,8 +55,11 @@ const BestJob2 = () => {
       const data = await response.json();
       console.log("Image updated successfully:", data);
 
+      // Update the display
       setUploadedFile(URL.createObjectURL(file));
-      setTimeout(fetchUploadedFile, 1000); // Refetch to ensure we have the latest version
+      
+      // Optional: Fetch the updated image from server
+      setTimeout(fetchUploadedFile, 1000);
     } catch (error) {
       console.error("Error updating image:", error);
     }
