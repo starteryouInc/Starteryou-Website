@@ -228,6 +228,8 @@ router.get("/list", async (req, res) => {
 // GET: Download file (displays inline)
 router.get("/download/:title", async (req, res) => {
     try {
+        console.log(`Download attempt for: ${req.params.title}`);
+        console.log(`Client IP: ${req.ip}`);
         const gridFsBucket = await ensureBucket();
 
         // Find file metadata
