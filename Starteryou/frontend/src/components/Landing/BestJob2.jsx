@@ -11,18 +11,19 @@ const BestJob2 = () => {
   const [loading, setLoading] = useState(false); // Loading state for image fetching and uploading
   const [error, setError] = useState(null); // Error state for handling errors
 
-  // Function to fetch a specific file (image) by title
   const fetchUploadedFile = async () => {
     setLoading(true); // Start loading
     try {
       const response = await fetch(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}` // Fetch by title using API_CONFIG
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-
+  
       const blob = await response.blob(); // Get the response as a Blob
+      console.log("Fetched blob:", blob); // Log the blob to ensure it's valid
+  
       const url = URL.createObjectURL(blob); // Create a local URL for the Blob
       setUploadedFile(url); // Set the uploaded file data with its local URL
       setError(null); // Reset error state on successful fetch
@@ -33,6 +34,7 @@ const BestJob2 = () => {
       setLoading(false); // Stop loading
     }
   };
+  
 
   useEffect(() => {
     fetchUploadedFile(); // Fetch the specific image on component mount
