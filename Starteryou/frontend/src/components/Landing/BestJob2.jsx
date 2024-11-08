@@ -6,49 +6,38 @@ import { toast } from "react-toastify";
 
 const BestJob2 = () => {
   const { isAdmin } = useNavigation();
-  const [uploadedFile, setUploadedFile] = useState(null); // State for the uploaded image
-  const title = "starteryou-v2"; // Title for fetching and uploading
-  const [loading, setLoading] = useState(false); // Loading state
-  const [error, setError] = useState(null); // Error state
-  const [hasFetched, setHasFetched] = useState(false); // Flag to track fetch status
+  const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images
+  const title = "starteryou-v2"; // Set the title for fetching and uploading
+  const [error, setError] = useState(null); // Error state for handling errors
+  const [hasFetchedOnce, setHasFetchedOnce] = useState(false); // State to track fetch attempt
 
   const fetchUploadedFile = async () => {
-    setLoading(true); // Start loading
+    if (hasFetchedOnce) return; // Prevent fetching again if already attempted
+
     try {
       const response = await fetch(
         `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`
       );
+      
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-  
-      const blob = await response.blob(); // Get the response as a Blob
-      console.log("Fetched blob:", blob); // Log the blob
 
+      const blob = await response.blob(); // Get the response as a Blob
       const url = URL.createObjectURL(blob); // Create a local URL for the Blob
-      setUploadedFile(url); // Set the Blob URL
-      setError(null); // Reset error state
+      setUploadedFile(url); // Set the uploaded file data with its local URL
+      setError(null); // Reset error state on successful fetch
     } catch (error) {
       console.error("Error fetching uploaded file:", error);
       setError("Failed to load image"); // Set error message
     } finally {
-      setLoading(false); // Stop loading
+      setHasFetchedOnce(true); // Mark as fetch attempt made
     }
   };
 
   useEffect(() => {
-    if (!hasFetched) {
-      fetchUploadedFile(); // Fetch the specific image on component mount
-      setHasFetched(true); // Set the flag to true after the first fetch
-    }
-
-    // Cleanup function to revoke the Blob URL
-    return () => {
-      if (uploadedFile) {
-        URL.revokeObjectURL(uploadedFile); // Revoke the URL only when it's not needed
-      }
-    };
-  }, [hasFetched, uploadedFile]);
+    fetchUploadedFile(); // Fetch the specific image on component mount
+  }, []);
 
   // Handle file upload
   const handleFileChange = async (event) => {
@@ -56,8 +45,6 @@ const BestJob2 = () => {
     const formData = new FormData();
     formData.append("file", file); // Append the file to the FormData
     formData.append("title", title); // Include the title for the update
-
-    setLoading(true); // Start loading
 
     try {
       const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`, {
@@ -72,29 +59,34 @@ const BestJob2 = () => {
       const data = await response.json();
       console.log("Image updated successfully:", data);
 
-      // Create a new Blob URL for the newly uploaded file
-      setUploadedFile(URL.createObjectURL(file)); // Set the new image preview
+      setUploadedFile(URL.createObjectURL(file)); // Update the uploaded file state with the new image preview
       setError(null); // Reset error state on successful upload
     } catch (error) {
       console.error("Error updating image:", error);
       setError("Error updating image"); // Set error message
-    } finally {
-      setLoading(false); // Stop loading
     }
   };
+
+  const boxes = [
+    {
+      id: 0,
+      iconSrc: "/LandingPage/Icons/page 1.svg",
+      title: "Lorem Ipsum",
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+    },
+    {
+      id: 1,
+      iconSrc: "/LandingPage/Icons/userr.svg",
+      title: "Learn from the best",
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+    },
+  ];
 
   return (
     <div className="container mx-auto max-w-[1300px] px-4 py-12">
       <div className="flex flex-col lg:flex-row items-center justify-between lg:space-x-8">
         {/* Image Display Section */}
         <div className="relative order-2 lg:order-1 w-[330px] h-[250px] md:w-[500px] lg:w-[700px] lg:h-[550px] bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] rounded-xl overflow-hidden">
-          {/* Loading Spinner */}
-          {loading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#6853E3] border-t-transparent"></div>
-            </div>
-          )}
-
           {/* Main Image */}
           {uploadedFile ? (
             <img
