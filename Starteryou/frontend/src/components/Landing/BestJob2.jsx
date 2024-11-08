@@ -6,15 +6,12 @@ import { toast } from "react-toastify";
 
 const BestJob2 = () => {
   const {isAdmin} = useNavigation();
-  const [uploadedFile, setUploadedFile] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images
   const title = "starteryou-v2";
 
-  // Function to fetch image by title
+  // Function to fetch a specific file (image) by title
   const fetchUploadedFile = async () => {
     try {
-      setLoading(true);
       const response = await fetch(
         `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileByTitle(title)}`
       );
@@ -22,56 +19,28 @@ const BestJob2 = () => {
         throw new Error("Network response was not ok");
       }
 
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      setUploadedFile(url);
+      const blob = await response.blob(); // Get the response as a Blob
+      const url = URL.createObjectURL(blob); // Create a local URL for the Blob
+      setUploadedFile(url); // Set the uploaded file data with its local URL
     } catch (error) {
       console.error("Error fetching uploaded file:", error);
-      setError(error.message);
-      toast.error("Failed to load image");
-    } finally {
-      setLoading(false);
     }
   };
 
-  // Fetch image on component mount
   useEffect(() => {
-    fetchUploadedFile();
-    // Cleanup URL on unmount
-    return () => {
-      if (uploadedFile) {
-        URL.revokeObjectURL(uploadedFile);
-      }
-    };
+    fetchUploadedFile(); // Fetch the specific image on component mount
   }, []);
 
-  // Handle file update
+  // Handle file upload
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
-    if (!file) return;
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("title", title); // Include the title for the update
 
     try {
-      // Validate file
-      if (!file.type.startsWith('image/')) {
-        toast.error("Please select an image file");
-        return;
-      }
-
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("File size should be less than 5MB");
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("title", title);
-      formData.append("uploadedBy", "admin");
-
       const response = await fetch(
-        `${API_CONFIG.baseURL}/api/files/update/${title}`,
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate}/${title}`,
         {
           method: "PUT",
           body: formData,
@@ -79,27 +48,15 @@ const BestJob2 = () => {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to update image");
+        throw new Error("Network response was not ok");
       }
 
       const data = await response.json();
       console.log("Image updated successfully:", data);
-      toast.success("Image updated successfully");
 
-      // Update preview
-      if (uploadedFile) {
-        URL.revokeObjectURL(uploadedFile);
-      }
-      setUploadedFile(URL.createObjectURL(file));
-      
-      // Fetch updated file
-      setTimeout(fetchUploadedFile, 1000);
+      setUploadedFile(URL.createObjectURL(file)); // Update the uploaded file state with the new image preview
     } catch (error) {
       console.error("Error updating image:", error);
-      setError(error.message);
-      toast.error("Failed to update image");
-    } finally {
-      setLoading(false);
     }
   };
 
