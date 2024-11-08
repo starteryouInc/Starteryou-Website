@@ -32,15 +32,27 @@ jobs:
           username: ec2-user # Make sure this matches your EC2 instance's username
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            set -e  # Stop execution on error
+
             cd /home/ec2-user/RevampUI/Starteryou
             git pull origin develop
 
             # Check if anything is using port 8080 and kill it
-            sudo lsof -i :8080 | awk 'NR!=1 {print $2}' | xargs -r sudo kill -9
+            if sudo lsof -i :8080; then
+              sudo lsof -i :8080 | awk 'NR!=1 {print $2}' | xargs -r sudo kill -9
+            fi
 
-            docker-compose down --remove-orphans
-            docker system prune -af
+            # Remove old containers, volumes, and images
+            docker-compose down --volumes --remove-orphans
+            docker system prune -af --volumes
+
+            # Restart containers
             docker-compose up -d --build
+
+            # Show Docker container status and logs
             docker ps
             docker logs starteryou-backend
             docker logs starteryou-frontend
+
+            # Check available disk space
+            df -h
