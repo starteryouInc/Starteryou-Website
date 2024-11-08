@@ -10,6 +10,7 @@ const BestJob2 = () => {
   const title = "starteryou-v2"; // Set the title for fetching and uploading
   const [loading, setLoading] = useState(false); // Loading state for image fetching and uploading
   const [error, setError] = useState(null); // Error state for handling errors
+  const [hasFetched, setHasFetched] = useState(false); // Flag to track if fetch has been attempted
 
   const fetchUploadedFile = async () => {
     setLoading(true); // Start loading
@@ -36,7 +37,10 @@ const BestJob2 = () => {
   };
 
   useEffect(() => {
-    fetchUploadedFile(); // Fetch the specific image on component mount
+    if (!hasFetched) {
+      fetchUploadedFile(); // Fetch the specific image on component mount
+      setHasFetched(true); // Set the flag to true after the first fetch
+    }
 
     // Cleanup function to revoke the Blob URL
     return () => {
@@ -44,7 +48,7 @@ const BestJob2 = () => {
         URL.revokeObjectURL(uploadedFile);
       }
     };
-  }, []);
+  }, [hasFetched, uploadedFile]);
 
   // Handle file upload
   const handleFileChange = async (event) => {
@@ -68,6 +72,7 @@ const BestJob2 = () => {
       const data = await response.json();
       console.log("Image updated successfully:", data);
 
+      // Create a new Blob URL for the newly uploaded file
       setUploadedFile(URL.createObjectURL(file)); // Update the uploaded file state with the new image preview
       setError(null); // Reset error state on successful upload
     } catch (error) {
