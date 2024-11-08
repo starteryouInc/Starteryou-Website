@@ -20,10 +20,10 @@ const BestJob2 = () => {
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-  
+
       const blob = await response.blob(); // Get the response as a Blob
       console.log("Fetched blob:", blob); // Log the blob to ensure it's valid
-  
+
       const url = URL.createObjectURL(blob); // Create a local URL for the Blob
       setUploadedFile(url); // Set the uploaded file data with its local URL
       setError(null); // Reset error state on successful fetch
@@ -34,10 +34,16 @@ const BestJob2 = () => {
       setLoading(false); // Stop loading
     }
   };
-  
 
   useEffect(() => {
     fetchUploadedFile(); // Fetch the specific image on component mount
+
+    // Cleanup function to revoke the Blob URL
+    return () => {
+      if (uploadedFile) {
+        URL.revokeObjectURL(uploadedFile);
+      }
+    };
   }, []);
 
   // Handle file upload
@@ -71,7 +77,6 @@ const BestJob2 = () => {
       setLoading(false); // Stop loading
     }
   };
-
 
   const boxes = [
     {
