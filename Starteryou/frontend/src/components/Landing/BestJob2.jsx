@@ -6,54 +6,52 @@ import { toast } from "react-toastify";
 
 const BestJob2 = () => {
   const { isAdmin } = useNavigation();
-  const [uploadedFile, setUploadedFile] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const title = "starteryou-v2";
+  const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images
+  const title = "starteryou-v2"; // Set the title for fetching and uploading
+  const [loading, setLoading] = useState(false); // Loading state for image fetching and uploading
+  const [error, setError] = useState(null); // Error state for handling errors
 
-  // Function to fetch image
+  // Function to fetch a specific file (image) by title
   const fetchUploadedFile = async () => {
     setLoading(true); // Start loading
     try {
       const response = await fetch(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}` // Fetch by title using API_CONFIG
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
 
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      setUploadedFile(url);
+      const blob = await response.blob(); // Get the response as a Blob
+      const url = URL.createObjectURL(blob); // Create a local URL for the Blob
+      setUploadedFile(url); // Set the uploaded file data with its local URL
       setError(null); // Reset error state on successful fetch
     } catch (error) {
       console.error("Error fetching uploaded file:", error);
-      setError("Failed to load image");
+      setError("Failed to load image"); // Set error message
     } finally {
       setLoading(false); // Stop loading
     }
   };
 
   useEffect(() => {
-    fetchUploadedFile();
+    fetchUploadedFile(); // Fetch the specific image on component mount
   }, []);
 
-  // Handle file update - simplified to update only the image
+  // Handle file upload
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     const formData = new FormData();
-    formData.append("file", file); // Only sending the file
+    formData.append("file", file); // Append the file to the FormData
+    formData.append("title", title); // Include the title for the update
 
     setLoading(true); // Start loading
 
     try {
-      const response = await fetch(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`,
-        {
-          method: "PUT",
-          body: formData,
-        }
-      );
+      const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`, {
+        method: "PUT",
+        body: formData,
+      });
 
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -62,18 +60,16 @@ const BestJob2 = () => {
       const data = await response.json();
       console.log("Image updated successfully:", data);
 
-      // Update the display
-      setUploadedFile(URL.createObjectURL(file));
-
-      // Optional: Fetch the updated image from the server
-      setTimeout(fetchUploadedFile, 1000);
+      setUploadedFile(URL.createObjectURL(file)); // Update the uploaded file state with the new image preview
+      setError(null); // Reset error state on successful upload
     } catch (error) {
       console.error("Error updating image:", error);
-      setError("Error updating image");
+      setError("Error updating image"); // Set error message
     } finally {
       setLoading(false); // Stop loading
     }
   };
+
 
   const boxes = [
     {
