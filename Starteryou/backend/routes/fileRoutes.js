@@ -137,7 +137,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     }
 });
 
-// PUT: Update file
+/// PUT: Update file
 router.put("/update/:title", upload.single("file"), async (req, res) => {
     try {
         console.log("Update request for:", req.params.title);
@@ -154,25 +154,12 @@ router.put("/update/:title", upload.single("file"), async (req, res) => {
             });
         }
 
-        // If updating title, check if new title exists
-        if (req.body.newTitle && req.body.newTitle !== req.params.title) {
-            const existingFile = await FileMetadata.findOne({ 
-                title: req.body.newTitle,
-                _id: { $ne: fileMetadata._id }
-            });
-            if (existingFile) {
-                return res.status(400).json({
-                    success: false,
-                    message: "New title already exists"
-                });
-            }
-        }
-
         // Handle file update if new file is provided
         if (req.file) {
             try {
                 // Delete old file
                 await gridFsBucket.delete(new ObjectId(fileMetadata.gridFsFileId));
+                console.log('Old file deleted successfully:', fileMetadata.gridFsFileId);
             } catch (error) {
                 console.warn("Warning: Error deleting old file:", error);
             }
@@ -196,14 +183,7 @@ router.put("/update/:title", upload.single("file"), async (req, res) => {
             fileMetadata.size = req.file.size;
         }
 
-        // Update other metadata
-        if (req.body.newTitle) {
-            fileMetadata.title = req.body.newTitle;
-        }
-        if (req.body.uploadedBy) {
-            fileMetadata.uploadedBy = req.body.uploadedBy;
-        }
-
+        // Save the unchanged metadata
         await fileMetadata.save();
 
         res.json({
@@ -245,7 +225,7 @@ router.get("/list", async (req, res) => {
     }
 });
 
-// GET: Download file (now displays inline)
+// GET: Download file (displays inline)
 router.get("/download/:title", async (req, res) => {
     try {
         const gridFsBucket = await ensureBucket();
@@ -306,7 +286,6 @@ router.get("/download/:title", async (req, res) => {
         }
     }
 });
-
 
 // DELETE: Remove specific file
 router.delete("/delete/:title", async (req, res) => {
