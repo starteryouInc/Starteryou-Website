@@ -9,7 +9,7 @@ const BestJob2 = () => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const title = "SmartML";
+  const title = "starteryou-v2";
 
   // Function to fetch image by title
   const fetchUploadedFile = async () => {
