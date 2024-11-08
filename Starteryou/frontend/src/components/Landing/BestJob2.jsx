@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 
 const BestJob2 = () => {
   const { isAdmin } = useNavigation();
-  const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images
+  const [uploadedFile, setUploadedFile] = useState(null); // For both uploaded and previewed images
   const title = "starteryou-v2"; // Set the title for fetching and uploading
   const [loading, setLoading] = useState(false); // Loading state for image fetching and uploading
   const [error, setError] = useState(null); // Error state for handling errors
@@ -21,10 +21,10 @@ const BestJob2 = () => {
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-
+  
       const blob = await response.blob(); // Get the response as a Blob
       console.log("Fetched blob:", blob); // Log the blob to ensure it's valid
-
+  
       const url = URL.createObjectURL(blob); // Create a local URL for the Blob
       setUploadedFile(url); // Set the uploaded file data with its local URL
       setError(null); // Reset error state on successful fetch
