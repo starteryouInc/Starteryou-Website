@@ -13,7 +13,7 @@ const BestJob2 = () => {
   const fetchUploadedFile = async () => {
     try {
       const response = await fetch(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileByTitle(title)}`
+        `${API_CONFIG.baseURL}/api/files/download/${title}`
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -40,7 +40,7 @@ const BestJob2 = () => {
 
     try {
       const response = await fetch(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate}/${title}`,
+        `${API_CONFIG.baseURL}/api/files/update/${title}`,
         {
           method: "PUT",
           body: formData,
