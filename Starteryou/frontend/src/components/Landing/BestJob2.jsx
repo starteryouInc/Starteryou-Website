@@ -6,11 +6,11 @@ import { toast } from "react-toastify";
 
 const BestJob2 = () => {
   const { isAdmin } = useNavigation();
-  const [uploadedFile, setUploadedFile] = useState(null); // For both uploaded and previewed images
-  const title = "starteryou-v2"; // Set the title for fetching and uploading
-  const [loading, setLoading] = useState(false); // Loading state for image fetching and uploading
-  const [error, setError] = useState(null); // Error state for handling errors
-  const [hasFetched, setHasFetched] = useState(false); // Flag to track if fetch has been attempted
+  const [uploadedFile, setUploadedFile] = useState(null); // State for the uploaded image
+  const title = "starteryou-v2"; // Title for fetching and uploading
+  const [loading, setLoading] = useState(false); // Loading state
+  const [error, setError] = useState(null); // Error state
+  const [hasFetched, setHasFetched] = useState(false); // Flag to track fetch status
 
   const fetchUploadedFile = async () => {
     setLoading(true); // Start loading
@@ -23,11 +23,11 @@ const BestJob2 = () => {
       }
   
       const blob = await response.blob(); // Get the response as a Blob
-      console.log("Fetched blob:", blob); // Log the blob to ensure it's valid
-  
+      console.log("Fetched blob:", blob); // Log the blob
+
       const url = URL.createObjectURL(blob); // Create a local URL for the Blob
-      setUploadedFile(url); // Set the uploaded file data with its local URL
-      setError(null); // Reset error state on successful fetch
+      setUploadedFile(url); // Set the Blob URL
+      setError(null); // Reset error state
     } catch (error) {
       console.error("Error fetching uploaded file:", error);
       setError("Failed to load image"); // Set error message
@@ -45,7 +45,7 @@ const BestJob2 = () => {
     // Cleanup function to revoke the Blob URL
     return () => {
       if (uploadedFile) {
-        URL.revokeObjectURL(uploadedFile);
+        URL.revokeObjectURL(uploadedFile); // Revoke the URL only when it's not needed
       }
     };
   }, [hasFetched, uploadedFile]);
@@ -73,7 +73,7 @@ const BestJob2 = () => {
       console.log("Image updated successfully:", data);
 
       // Create a new Blob URL for the newly uploaded file
-      setUploadedFile(URL.createObjectURL(file)); // Update the uploaded file state with the new image preview
+      setUploadedFile(URL.createObjectURL(file)); // Set the new image preview
       setError(null); // Reset error state on successful upload
     } catch (error) {
       console.error("Error updating image:", error);
@@ -82,21 +82,6 @@ const BestJob2 = () => {
       setLoading(false); // Stop loading
     }
   };
-
-  const boxes = [
-    {
-      id: 0,
-      iconSrc: "/LandingPage/Icons/page 1.svg",
-      title: "Lorem Ipsum",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-    },
-    {
-      id: 1,
-      iconSrc: "/LandingPage/Icons/userr.svg",
-      title: "Learn from the best",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-    },
-  ];
 
   return (
     <div className="container mx-auto max-w-[1300px] px-4 py-12">
