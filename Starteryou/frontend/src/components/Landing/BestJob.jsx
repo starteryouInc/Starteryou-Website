@@ -100,6 +100,48 @@ const BestJob = () => {
           <a href="#" className="text-[#7950F2] hover:underline font-medium">
             See new openings &gt;
           </a>
+
+          {/* Boxes */}
+          <div className="mt-8 flex flex-col md:flex-row md:justify-between lg:flex-col md:space-x-2 space-y-4 md:space-y-0 md:px-6 lg:space-x-0 lg:px-0">
+            {boxes.map((box) => (
+              <div
+                key={box.id}
+                className={`p-4 rounded-xl cursor-pointer ${
+                  activeBox === box.id
+                    ? "shadow-[0px_10.19px_30.57px_10.19px_#1F23290A]"
+                    : "shadow-none"
+                } md:w-[300px] md:h-[200px] lg:h-auto lg:w-auto`}
+                onClick={() => setActiveBox(box.id)}
+              >
+                <div className="flex items-center space-x-4">
+                  <img
+                    src={box.iconSrc}
+                    alt={box.title}
+                    className="w-8 h-8"
+                    style={{
+                      filter:
+                        activeBox === box.id
+                          ? "invert(29%) sepia(65%) saturate(7461%) hue-rotate(248deg) brightness(88%) contrast(97%)"
+                          : "none",
+                    }}
+                  />
+                  <h3
+                    className={`text-xl font-bold ${
+                      activeBox === box.id ? "text-[#7950F2]" : "text-black"
+                    }`}
+                  >
+                    {box.title}
+                  </h3>
+                </div>
+
+                {activeBox === box.id && (
+                  <p className="mt-4 text-gray-600 text-lg font-thin text-left">
+                    {box.description}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Right Section */}
@@ -113,7 +155,7 @@ const BestJob = () => {
           {isAdmin && (
             <div>
               <FileUpload
-                handleFileChange={(e) => handleFileChange(e, titles[0])}
+                handleFileChange={(e) => handleImageUpload(e, setImage1)}
               />
             </div>
           )}
@@ -125,9 +167,9 @@ const BestJob = () => {
             className="relative w-[220px] h-[170px] top-[-68px] left-[80px] md:left-[180px] md:w-[320px] lg:top-[-112px] lg:left-[190px] lg:w-[420px] lg:h-[300px] rounded-xl z-10"
           />
           {isAdmin && (
-            <div className="relative bottom-32">
+            <div className="relative bottom-32 ">
               <FileUpload
-                handleFileChange={(e) => handleFileChange(e, titles[1])}
+                handleFileChange={(e) => handleImageUpload(e, setImage2)}
               />
             </div>
           )}
