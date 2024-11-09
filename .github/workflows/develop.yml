@@ -29,30 +29,32 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ec2-user # Make sure this matches your EC2 instance's username
+          username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e  # Stop execution on error
 
             cd /home/ec2-user/Starteryou-Website/Starteryou
-            git pull origin develop
+            git fetch --depth 1 origin develop
+            git reset --hard origin/develop
 
-            # Check if anything is using port 8080 and kill it
+            # Only kill processes if the port is in use
             if sudo lsof -i :8080; then
               sudo lsof -i :8080 | awk 'NR!=1 {print $2}' | xargs -r sudo kill -9
             fi
 
-            # Remove old containers, volumes, and images
-            docker-compose down --volumes --remove-orphans
-            docker system prune -af --volumes
+            # Stop containers without full pruning
+            docker-compose down --remove-orphans
 
-            # Restart containers
+            # Start containers with cached layers
             docker-compose up -d --build
 
-            # Show Docker container status and logs
+            # Check container status
             docker ps
-            docker logs starteryou-backend
-            docker logs starteryou-frontend
 
-            # Check available disk space
+            # Show logs for main services
+            docker logs starteryou-backend || true
+            docker logs starteryou-frontend || true
+
+            # Show disk space
             df -h
