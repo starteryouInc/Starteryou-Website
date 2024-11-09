@@ -13,7 +13,7 @@ const Hero = () => {
   const [image3, setImage3] = useState("/LandingPage/Heroimg3.png");
 
   // Titles to identify each image in the backend
-  const titles = ["image1", "image2", "image3"]; // Different titles for each image
+  const titles = ["starteryou-v2", "starteryou-v2", "starteryou-v2"]; // Different titles for each image
 
   // Fetch images by title on component mount
   useEffect(() => {
