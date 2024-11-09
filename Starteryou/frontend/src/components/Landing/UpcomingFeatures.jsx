@@ -2,6 +2,10 @@ import {useState, useEffect} from "react";
 import FileUpload from "../Common/FileUpload";
 import {useNavigation} from "../../context/NavigationContext";
 import {API_CONFIG} from "@config/api";
+import { Carousel } from "react-responsive-carousel";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUpload } from "@fortawesome/free-solid-svg-icons";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
 
 // Titles for backend storage
 
