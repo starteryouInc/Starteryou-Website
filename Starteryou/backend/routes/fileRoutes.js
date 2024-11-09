@@ -225,7 +225,6 @@ router.get("/list", async (req, res) => {
     }
 });
 
-// GET: Download file (displays inline)
 router.get("/download/:title", async (req, res) => {
     try {
         console.log(`Download attempt for: ${req.params.title}`);
@@ -255,10 +254,14 @@ router.get("/download/:title", async (req, res) => {
             });
         }
 
+        // Sanitize and encode filename to avoid invalid characters
+        const sanitizedFilename = fileMetadata.originalFilename.replace(/[^\x20-\x7E]/g, ''); // Remove non-ASCII characters
+        const encodedFilename = encodeURIComponent(sanitizedFilename); // URL encode to handle special characters
+
         // Set headers for inline display
         res.set({
             'Content-Type': fileMetadata.contentType || 'application/octet-stream',
-            'Content-Disposition': `inline; filename="${fileMetadata.originalFilename}"`,
+            'Content-Disposition': `inline; filename="${encodedFilename}"`,
             'Content-Length': fileMetadata.size
         });
 
@@ -288,6 +291,7 @@ router.get("/download/:title", async (req, res) => {
         }
     }
 });
+
 
 // DELETE: Remove specific file
 router.delete("/delete/:title", async (req, res) => {
