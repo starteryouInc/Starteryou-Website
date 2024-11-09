@@ -137,7 +137,7 @@ const BestBuddy = () => {
           <div className="ml-4">
             <input
               type="file"
-              onChange={handleUpdateImage}
+              onChange={handleFileChange}
               className="hidden"
               id="updateFileInput"
             />
