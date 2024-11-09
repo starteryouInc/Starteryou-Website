@@ -33,7 +33,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e  # Stop execution on error
-            cd /home/ec2-user/RevampUI/Starteryou
+            cd /home/ec2-user/Starteryou-Website/Starteryou
             git pull origin main
 
             # Ensure Docker is running
