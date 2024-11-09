@@ -34,7 +34,7 @@ jobs:
           script: |
             set -e  # Stop execution on error
 
-            cd /home/ec2-user/RevampUI/Starteryou
+            cd /home/ec2-user/Starteryou-Website/Starteryou
             git pull origin develop
 
             # Check if anything is using port 8080 and kill it
