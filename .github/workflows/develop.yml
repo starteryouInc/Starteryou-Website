@@ -32,21 +32,25 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            set -e  # Stop execution on error
-            cd /home/ec2-user/Starteryou-Website/Starteryou
-            git pull origin main
-
+            set -e
+            # Navigate to project directory or clone if it doesn't exist
+            if [ ! -d "/home/ec2-user/Starteryou-Website/Starteryou" ]; then
+              mkdir -p /home/ec2-user/Starteryou-Website
+              cd /home/ec2-user/Starteryou-Website
+              git clone https://github.com/starteryouInc/Starteryou-Website.git -b develop Starteryou
+            else
+              cd /home/ec2-user/Starteryou-Website/Starteryou
+              # Pull changes from develop branch, handling any divergences
+              git pull origin develop --ff-only || git pull origin develop --rebase
+            fi
+          
             # Ensure Docker is running
             sudo systemctl start docker || sudo systemctl restart docker
-
-            # Bring down any existing containers and clean up resources
+            # Clean up old containers and rebuild
             docker-compose down --volumes --remove-orphans
             docker system prune -af --volumes
-
-            # Rebuild and restart containers
             docker-compose up -d --build
-
-            # Show Docker container status and logs
             docker ps
             docker logs starteryou-backend
             docker logs starteryou-frontend
+
