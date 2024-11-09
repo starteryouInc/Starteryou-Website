@@ -8,6 +8,7 @@ const BestJob = () => {
   const [image2, setImage2] = useState("/LandingPage/Heroimg2.jpg");
   const [error, setError] = useState(null); // Error state for handling errors
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false); // State to track if fetch attempt is made
+
   const titles = ["starteryou-v2", "starteryou-v2"];
   
   // Fetch uploaded files for each image (image1 and image2)
@@ -17,7 +18,7 @@ const BestJob = () => {
     try {
       // Fetch the image1
       const response1 = await fetch(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload("image1")}`
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload("starteryou-v2")}`
       );
       if (!response1.ok) {
         throw new Error("Network response was not ok for image1");
@@ -28,7 +29,7 @@ const BestJob = () => {
   
       // Fetch the image2
       const response2 = await fetch(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload("image2")}`
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload("starteryou-v2")}`
       );
       if (!response2.ok) {
         throw new Error("Network response was not ok for image2");
