@@ -3,59 +3,88 @@ import FileUpload from "../Common/FileUpload";
 import {useNavigation} from "../../context/NavigationContext";
 import {API_CONFIG} from "@config/api";
 const BestJob = () => {
-  const {isAdmin} = useNavigation();
+  const { isAdmin } = useNavigation();
   const [image1, setImage1] = useState("/LandingPage/Rectangle.png");
   const [image2, setImage2] = useState("/LandingPage/Heroimg2.jpg");
-
-  const titles = ["bestJob1", "bestJob12"]; // Titles to fetch and update each image
-
-  // Fetch each image based on its title
-  useEffect(() => {
-    const fetchImages = async () => {
-      try {
-        const responses = await Promise.all(
-          titles.map(async (title) => {
-            const response = await fetch(
-              `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileByTitle(title)}`
-            );
-            if (!response.ok) throw new Error("Network response was not ok");
-            const blob = await response.blob();
-            return URL.createObjectURL(blob); // Return image URL
-          })
-        );
-        setImage1(responses[0]);
-        setImage2(responses[1]);
-      } catch (error) {
-        console.error("Error fetching images:", error);
+  const [error, setError] = useState(null); // Error state for handling errors
+  const [hasFetchedOnce, setHasFetchedOnce] = useState(false); // State to track if fetch attempt is made
+  
+  // Fetch uploaded files for each image (image1 and image2)
+  const fetchUploadedImages = async () => {
+    if (hasFetchedOnce) return; // Prevent fetching again if already attempted
+  
+    try {
+      // Fetch the image1
+      const response1 = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload("image1")}`
+      );
+      if (!response1.ok) {
+        throw new Error("Network response was not ok for image1");
       }
-    };
-    fetchImages();
+      const blob1 = await response1.blob(); // Get the response as a Blob
+      const url1 = URL.createObjectURL(blob1); // Create a local URL for the Blob
+      setImage1(url1); // Set the uploaded image1 URL
+  
+      // Fetch the image2
+      const response2 = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload("image2")}`
+      );
+      if (!response2.ok) {
+        throw new Error("Network response was not ok for image2");
+      }
+      const blob2 = await response2.blob(); // Get the response as a Blob
+      const url2 = URL.createObjectURL(blob2); // Create a local URL for the Blob
+      setImage2(url2); // Set the uploaded image2 URL
+  
+      setError(null); // Reset error state on successful fetch
+    } catch (error) {
+      console.error("Error fetching uploaded images:", error);
+      setError("Failed to load images"); // Set error message
+    } finally {
+      setHasFetchedOnce(true); // Mark as fetch attempt made
+    }
+  };
+  
+  useEffect(() => {
+    fetchUploadedImages(); // Fetch images on component mount
   }, []);
-
-  // Handle image update for each image
-  const handleFileChange = async (e, imageSetter, title) => {
-    const file = e.target.files[0];
+  
+  // Handle file upload for each image
+  const handleFileChange = async (event, imageType) => {
+    const file = event.target.files[0];
     const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", title); // Set the title for update
+    formData.append("file", file); // Append the file to the FormData
+    formData.append("title", imageType); // Include the title for the update
+  
     try {
       const response = await fetch(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate}`,
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(imageType)}`,
         {
           method: "PUT",
           body: formData,
         }
       );
-      if (!response.ok) throw new Error("Network response was not ok");
-
-      const newImageUrl = URL.createObjectURL(file); // Update preview
-      imageSetter(newImageUrl);
-      console.log(`Image updated successfully for ${title}`);
+  
+      if (!response.ok) {
+        throw new Error(`Error updating image for ${imageType}`);
+      }
+  
+      const data = await response.json();
+      console.log(`Image updated successfully for ${imageType}:`, data);
+  
+      // Update the specific image URL in the state
+      if (imageType === "image1") {
+        setImage1(URL.createObjectURL(file));
+      } else if (imageType === "image2") {
+        setImage2(URL.createObjectURL(file));
+      }
+  
+      setError(null); // Reset error state on successful upload
     } catch (error) {
-      console.error("Error updating image:", error);
+      console.error(`Error updating image for ${imageType}:`, error);
+      setError(`Error updating image for ${imageType}`); // Set error message
     }
   };
-
   return (
     <div className="container mx-auto max-w-[1300px] px-4 py-12">
       <div className="flex flex-col lg:flex-row items-center justify-between lg:space-x-8">
@@ -83,9 +112,7 @@ const BestJob = () => {
           {isAdmin && (
             <div>
               <FileUpload
-                handleFileChange={(e) =>
-                  handleFileChange(e, setImage1, titles[0])
-                }
+                handleFileChange={(e) => handleFileChange(e, titles[0])}
               />
             </div>
           )}
@@ -99,9 +126,7 @@ const BestJob = () => {
           {isAdmin && (
             <div className="relative bottom-32">
               <FileUpload
-                handleFileChange={(e) =>
-                  handleFileChange(e, setImage2, titles[1])
-                }
+                handleFileChange={(e) => handleFileChange(e, titles[1])}
               />
             </div>
           )}
