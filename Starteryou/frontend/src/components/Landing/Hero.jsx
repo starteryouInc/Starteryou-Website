@@ -1,10 +1,11 @@
-import {useState, useEffect} from "react";
+import { useState, useEffect } from "react";
+import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
-import {useNavigation} from "../../context/NavigationContext";
-import {API_CONFIG} from "@config/api";
+import { API_CONFIG } from "@config/api";
+import { toast } from "react-toastify";
 
 const Hero = () => {
-  const {isAdmin} = useNavigation();
+  const { isAdmin } = useNavigation();
 
   // State variables for each image
   const [image1, setImage1] = useState("/LandingPage/Heroimg3.png");
@@ -12,7 +13,7 @@ const Hero = () => {
   const [image3, setImage3] = useState("/LandingPage/Heroimg3.png");
 
   // Titles to identify each image in the backend
-  const titles = ["HeroImage1", "HeroImage2", "HeroImage3"];
+  const titles = ["image1", "image2", "image3"]; // Different titles for each image
 
   // Fetch images by title on component mount
   useEffect(() => {
@@ -33,6 +34,7 @@ const Hero = () => {
         setImage3(responses[2]);
       } catch (error) {
         console.error("Error fetching images:", error);
+        toast.error("Failed to load images");  // Show error toast
       }
     };
     fetchImages();
@@ -44,8 +46,6 @@ const Hero = () => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("title", title);
-    const BACKEND_URL =
-      import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
     try {
       const response = await fetch(
@@ -59,9 +59,10 @@ const Hero = () => {
 
       const newImageUrl = URL.createObjectURL(file); // Show new image preview
       setImage(newImageUrl);
-      console.log(`Image updated successfully for ${title}`);
+      toast.success(`Image updated successfully for ${title}`); // Success toast
     } catch (error) {
       console.error("Error updating image:", error);
+      toast.error(`Error updating image for ${title}`);  // Error toast
     }
   };
 
