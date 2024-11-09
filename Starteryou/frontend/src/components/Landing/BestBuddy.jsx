@@ -1,5 +1,5 @@
 // src/components/Landing/BestBuddy.jsx
-import {useEffect} from "react";
+import {useEffect,useState} from "react";
 import {useNavigation} from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
 import { useFileOperations } from '@hooks/useFileOperations'
