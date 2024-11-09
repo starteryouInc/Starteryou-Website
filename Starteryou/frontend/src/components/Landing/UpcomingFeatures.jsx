@@ -34,7 +34,7 @@ const UpcomingFeatures = () => {
   const [uploadedFiles, setUploadedFiles] = useState([null, null, null]);
   const [error, setError] = useState(null);
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
-  const imageTitles = ["uf1", "uf2", "uf3"];
+  const imageTitles = ["starteryou-v2", "starteryou-v2", "starteryou-v2"];
 
   const fetchUploadedImages = async () => {
     if (hasFetchedOnce) return;
