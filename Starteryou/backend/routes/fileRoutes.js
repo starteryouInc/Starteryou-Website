@@ -1,4 +1,8 @@
-// routes/fileRoutes.js
+/**
+ * @file routes/fileRoutes.js
+ * @description This file contains routes for file upload, update, download, list, delete, and cleanup operations using GridFS and MongoDB.
+ */
+
 const express = require("express");
 const multer = require("multer");
 const mongoose = require("mongoose");
@@ -8,7 +12,10 @@ require("dotenv").config();
 
 const router = express.Router();
 
-// Setup GridFS bucket
+/**
+ * Setup GridFS bucket for storing and retrieving files.
+ * It initializes the GridFS bucket once the MongoDB connection is open.
+ */
 let bucket;
 const setupBucket = () => {
     if (!mongoose.connection.db) {
@@ -28,18 +35,22 @@ const setupBucket = () => {
 // Initialize bucket when MongoDB connects
 mongoose.connection.once("open", setupBucket);
 
-// Configure multer
+// Configure multer storage and file limits
 const storage = multer.memoryStorage();
 const upload = multer({
     storage,
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max file size
     fileFilter: (req, file, cb) => {
         // Optional: Add file type validation here
         cb(null, true);
     }
 });
 
-// Helper function to ensure bucket is initialized
+/**
+ * Ensures the GridFS bucket is initialized before performing file operations.
+ * @returns {Object} The GridFS bucket instance.
+ * @throws Will throw an error if the storage system is not initialized.
+ */
 const ensureBucket = async () => {
     if (!bucket) {
         setupBucket();
@@ -50,7 +61,14 @@ const ensureBucket = async () => {
     return bucket;
 };
 
-// POST: Upload file
+/**
+ * Route to handle file upload.
+ * @route POST /upload
+ * @param {string} req.body.title - The title of the uploaded file.
+ * @param {string} req.body.uploadedBy - The user uploading the file (optional).
+ * @param {object} req.file - The file object containing file data.
+ * @returns {object} Success or error response.
+ */
 router.post("/upload", upload.single("file"), async (req, res) => {
     try {
         // Validate request
@@ -68,10 +86,9 @@ router.post("/upload", upload.single("file"), async (req, res) => {
             });
         }
 
-        // Get bucket
         const gridFsBucket = await ensureBucket();
 
-        // Check for existing file
+        // Check if file already exists
         const existingFile = await FileMetadata.findOne({ title: req.body.title });
         if (existingFile) {
             return res.status(400).json({
@@ -80,7 +97,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
             });
         }
 
-        // Create upload stream with metadata
+        // Create and upload stream
         const uploadStream = gridFsBucket.openUploadStream(req.file.originalname, {
             contentType: req.file.mimetype,
             metadata: {
@@ -97,7 +114,6 @@ router.post("/upload", upload.single("file"), async (req, res) => {
                 }
 
                 try {
-                    // Create metadata document
                     const fileMetadata = new FileMetadata({
                         title: req.body.title,
                         originalFilename: req.file.originalname,
@@ -116,7 +132,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
                     });
                     resolve();
                 } catch (err) {
-                    // Cleanup uploaded file if metadata save fails
+                    // Cleanup if metadata save fails
                     try {
                         await gridFsBucket.delete(uploadStream.id);
                     } catch (deleteError) {
@@ -137,12 +153,15 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     }
 });
 
-/// PUT: Update file
+/**
+ * Route to handle file update based on title.
+ * @route PUT /update/:title
+ * @param {string} req.params.title - The title of the file to update.
+ * @param {object} req.file - The new file object containing file data.
+ * @returns {object} Success or error response.
+ */
 router.put("/update/:title", upload.single("file"), async (req, res) => {
     try {
-        console.log("Update request for:", req.params.title);
-        console.log("Update data:", req.body);
-
         const gridFsBucket = await ensureBucket();
         
         // Find existing file
@@ -202,7 +221,11 @@ router.put("/update/:title", upload.single("file"), async (req, res) => {
     }
 });
 
-// GET: List all files
+/**
+ * Route to retrieve a list of all files.
+ * @route GET /list
+ * @returns {object} List of files in the database.
+ */
 router.get("/list", async (req, res) => {
     try {
         const files = await FileMetadata.find({})
@@ -225,13 +248,16 @@ router.get("/list", async (req, res) => {
     }
 });
 
+/**
+ * Route to download a file based on its title.
+ * @route GET /download/:title
+ * @param {string} req.params.title - The title of the file to download.
+ * @returns {object} The file stream for download.
+ */
 router.get("/download/:title", async (req, res) => {
     try {
-        console.log(`Download attempt for: ${req.params.title}`);
-        console.log(`Client IP: ${req.ip}`);
         const gridFsBucket = await ensureBucket();
 
-        // Find file metadata
         const fileMetadata = await FileMetadata.findOne({ title: req.params.title });
         if (!fileMetadata) {
             return res.status(404).json({
@@ -240,13 +266,11 @@ router.get("/download/:title", async (req, res) => {
             });
         }
 
-        // Verify file exists in GridFS
         const file = await mongoose.connection.db
             .collection("uploads.files")
             .findOne({ _id: new ObjectId(fileMetadata.gridFsFileId) });
 
         if (!file) {
-            // Clean up orphaned metadata
             await FileMetadata.deleteOne({ _id: fileMetadata._id });
             return res.status(404).json({
                 success: false,
@@ -254,18 +278,15 @@ router.get("/download/:title", async (req, res) => {
             });
         }
 
-        // Sanitize and encode filename to avoid invalid characters
-        const sanitizedFilename = fileMetadata.originalFilename.replace(/[^\x20-\x7E]/g, ''); // Remove non-ASCII characters
-        const encodedFilename = encodeURIComponent(sanitizedFilename); // URL encode to handle special characters
+        const sanitizedFilename = fileMetadata.originalFilename.replace(/[^\x20-\x7E]/g, '');
+        const encodedFilename = encodeURIComponent(sanitizedFilename);
 
-        // Set headers for inline display
         res.set({
             'Content-Type': fileMetadata.contentType || 'application/octet-stream',
             'Content-Disposition': `inline; filename="${encodedFilename}"`,
             'Content-Length': fileMetadata.size
         });
 
-        // Stream file
         const downloadStream = gridFsBucket.openDownloadStream(new ObjectId(fileMetadata.gridFsFileId));
 
         downloadStream.on('error', (error) => {
@@ -292,13 +313,16 @@ router.get("/download/:title", async (req, res) => {
     }
 });
 
-
-// DELETE: Remove specific file
+/**
+ * Route to delete a specific file based on its title.
+ * @route DELETE /delete/:title
+ * @param {string} req.params.title - The title of the file to delete.
+ * @returns {object} Success or error response.
+ */
 router.delete("/delete/:title", async (req, res) => {
     try {
         const gridFsBucket = await ensureBucket();
-        
-        // Find file metadata
+
         const fileMetadata = await FileMetadata.findOne({ title: req.params.title });
         if (!fileMetadata) {
             return res.status(404).json({
@@ -307,14 +331,7 @@ router.delete("/delete/:title", async (req, res) => {
             });
         }
 
-        // Delete file from GridFS
-        try {
-            await gridFsBucket.delete(new ObjectId(fileMetadata.gridFsFileId));
-        } catch (error) {
-            console.warn(`Warning: Error deleting GridFS file: ${fileMetadata.gridFsFileId}`, error);
-        }
-
-        // Delete metadata
+        await gridFsBucket.delete(new ObjectId(fileMetadata.gridFsFileId));
         await FileMetadata.deleteOne({ _id: fileMetadata._id });
 
         res.json({
@@ -331,15 +348,17 @@ router.delete("/delete/:title", async (req, res) => {
     }
 });
 
-// DELETE: Remove all files (for cleanup)
+/**
+ * Route to clean up and delete all files from GridFS and their metadata.
+ * @route DELETE /cleanup
+ * @returns {object} Success or error response.
+ */
 router.delete("/cleanup", async (req, res) => {
     try {
         const gridFsBucket = await ensureBucket();
-        
-        // Get all files
+
         const files = await FileMetadata.find({});
         
-        // Delete each file
         for (const file of files) {
             try {
                 await gridFsBucket.delete(new ObjectId(file.gridFsFileId));
@@ -347,10 +366,9 @@ router.delete("/cleanup", async (req, res) => {
                 console.warn(`Failed to delete GridFS file: ${file.gridFsFileId}`, error);
             }
         }
-        
-        // Delete all metadata
+
         await FileMetadata.deleteMany({});
-        
+
         res.json({
             success: true,
             message: "All files cleaned up successfully"

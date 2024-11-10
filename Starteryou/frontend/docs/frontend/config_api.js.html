@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: config/api.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: config/api.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module API_CONFIG
+ * @description Configuration object for API endpoints and base URL
+ * Provides centralized management of API routes for file operations
+ */
+
+/**
+ * @typedef {Object} APIEndpoints
+ * @property {function(string): string} fileByTitle - Generates endpoint to fetch file by title
+ * @property {string} fileUpload - Endpoint for uploading new files
+ * @property {function(string): string} fileDownload - Generates endpoint to download file by title
+ * @property {function(string): string} fileUpdate - Generates endpoint to update file by title
+ * @property {function(string): string} fileDelete - Generates endpoint to delete file by title
+ * @property {string} fileList - Endpoint to list all files
+ * @property {string} fileCleanup - Endpoint for cleanup operations
+ */
+
+/**
+ * @type {Object} API_CONFIG
+ * @property {string} baseURL - Base URL for the API server
+ * @property {APIEndpoints} endpoints - Object containing all API endpoint configurations
+ * @description
+ * Central configuration object for API interactions.
+ * Includes base URL and endpoint definitions for all file operations.
+ * 
+ * Usage examples:
+ * ```javascript
+ * // Fetch file by title
+ * fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileByTitle('example')}`)
+ * 
+ * // Upload new file
+ * fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpload}`, {
+ *   method: 'POST',
+ *   body: formData
+ * })
+ * 
+ * // Update existing file
+ * fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate('example')}`, {
+ *   method: 'PUT',
+ *   body: formData
+ * })
+ * ```
+ */
+export const API_CONFIG = {
+  /**
+   * @constant {string} baseURL
+   * @description Base URL for all API requests
+   */
+  baseURL: "http://54.196.202.145:3000",
+
+  /**
+   * @constant {APIEndpoints} endpoints
+   * @description Object containing all API endpoint configurations
+   */
+  endpoints: {
+    /**
+     * @function fileByTitle
+     * @param {string} title - Title identifier for the file
+     * @returns {string} Endpoint URL for fetching file by title
+     */
+    fileByTitle: (title) => `/api/files/download/${title}`,
+
+    /**
+     * @constant {string} fileUpload
+     * @description Endpoint for uploading new files
+     */
+    fileUpload: "/api/files/upload",
+
+    /**
+     * @function fileDownload
+     * @param {string} title - Title identifier for the file
+     * @returns {string} Endpoint URL for downloading file
+     */
+    fileDownload: (title) => `/api/files/download/${title}`,
+
+    /**
+     * @function fileUpdate
+     * @param {string} title - Title identifier for the file
+     * @returns {string} Endpoint URL for updating file
+     */
+    fileUpdate: (title) => `/api/files/update/${title}`,
+
+    /**
+     * @function fileDelete
+     * @param {string} title - Title identifier for the file
+     * @returns {string} Endpoint URL for deleting file
+     */
+    fileDelete: (title) => `/api/files/delete/${title}`,
+
+    /**
+     * @constant {string} fileList
+     * @description Endpoint for listing all files
+     */
+    fileList: "/api/files/list",
+
+    /**
+     * @constant {string} fileCleanup
+     * @description Endpoint for cleanup operations
+     */
+    fileCleanup: "/api/files/cleanup"
+  }
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-API_CONFIG.html">API_CONFIG</a></li><li><a href="module-Banner.html">Banner</a></li><li><a href="module-BestBuddy.html">BestBuddy</a></li><li><a href="module-BestJob.html">BestJob</a></li><li><a href="module-BestJob2.html">BestJob2</a></li><li><a href="module-BestJob3.html">BestJob3</a></li><li><a href="module-BestJob4.html">BestJob4</a></li><li><a href="module-Blog.html">Blog</a></li><li><a href="module-Collab.html">Collab</a></li><li><a href="module-Contact.html">Contact</a></li><li><a href="module-Hero.html">Hero</a></li><li><a href="module-Pricing.html">Pricing</a></li><li><a href="module-UpcomingFeatures.html">UpcomingFeatures</a></li><li><a href="module-useFileOperations.html">useFileOperations</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Nov 10 2024 16:05:25 GMT-0500 (Eastern Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,10 +1,55 @@
-// src/hooks/useFileOperations.js
+/**
+ * @module useFileOperations
+ * @description A custom React hook for managing file operations including fetching and updating files
+ */
+
 import {useState, useCallback} from "react";
 import {API_CONFIG} from "@config/api";
 
+/**
+ * @typedef {Object} FileOperationsReturn
+ * @property {string|null} uploadedFile - URL of the currently uploaded file
+ * @property {function(): Promise<void>} fetchUploadedFile - Function to fetch the file
+ * @property {function(Event): Promise<void>} handleFileChange - Function to handle file uploads
+ */
+
+/**
+ * Custom hook for managing file operations with the backend API
+ * 
+ * @param {string} title - Title identifier for the file being managed
+ * @returns {FileOperationsReturn} Object containing file state and operations
+ * 
+ * @example
+ * function MyComponent() {
+ *   const { uploadedFile, fetchUploadedFile, handleFileChange } = useFileOperations("example-file");
+ *
+ *   useEffect(() => {
+ *     fetchUploadedFile();
+ *   }, []);
+ *
+ *   return (
+ *     <div>
+ *       {uploadedFile && <img src={uploadedFile} alt="Uploaded file" />}
+ *       <input type="file" onChange={handleFileChange} />
+ *     </div>
+ *   );
+ * }
+ */
 export const useFileOperations = (title) => {
+  /**
+   * State for storing the URL of the uploaded file
+   * @type {string|null}
+   */
   const [uploadedFile, setUploadedFile] = useState(null);
 
+  /**
+   * Fetches the file from the backend using the provided title
+   * Creates a local URL for the fetched blob
+   * 
+   * @function
+   * @async
+   * @returns {Promise<void>}
+   */
   const fetchUploadedFile = useCallback(async () => {
     try {
       const response = await fetch(
@@ -21,6 +66,15 @@ export const useFileOperations = (title) => {
     }
   }, [title]);
 
+  /**
+   * Handles file upload events and updates the file on the backend
+   * Updates local state with the new file URL on success
+   * 
+   * @function
+   * @async
+   * @param {Event} event - The file input change event
+   * @returns {Promise<void>}
+   */
   const handleFileChange = useCallback(
     async (event) => {
       const file = event.target.files[0];
@@ -53,3 +107,15 @@ export const useFileOperations = (title) => {
 
   return {uploadedFile, fetchUploadedFile, handleFileChange};
 };
+
+/**
+ * @typedef {Object} UploadResponse
+ * @property {string} message - Response message from the server
+ * @property {string} url - URL of the uploaded file
+ */
+
+/**
+ * @typedef {Object} FileError
+ * @property {string} message - Error message
+ * @property {number} status - HTTP status code
+ */

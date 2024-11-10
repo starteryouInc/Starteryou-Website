@@ -1,3 +1,9 @@
+/**
+ * @module UpcomingFeatures
+ * @description A React component that displays a carousel of upcoming features
+ * with image management capabilities
+ */
+
 import {useState, useEffect} from "react";
 import FileUpload from "../Common/FileUpload";
 import {useNavigation} from "../../context/NavigationContext";
@@ -7,41 +13,78 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 
-// Titles for backend storage
+/**
+ * @typedef {Object} Slide
+ * @property {string} title - The title of the feature
+ * @property {string} description - Description of the feature
+ * @property {string} img - Image URL for the feature
+ */
 
+/**
+ * @type {Slide[]}
+ */
 const slidesData = [
   {
     title: "Get top Job analysis",
-    description:
-      "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do",
-    img: "", // Empty initially, will be fetched
-  },
-  {
-    title: "Get top Job analysis",
-    description:
-      "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do",
+    description: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do",
     img: "",
   },
   {
     title: "Get top Job analysis",
-    description:
-      "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do",
+    description: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do",
+    img: "",
+  },
+  {
+    title: "Get top Job analysis",
+    description: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do",
     img: "",
   },
 ];
+
+/**
+ * @type {string[]}
+ */
+const imageTitles = ["starteryou-v2", "starteryou-v2", "starteryou-v2"];
+
+/**
+ * Upcoming Features component that displays a carousel of features with image management
+ * @returns {JSX.Element} The rendered component
+ */
 const UpcomingFeatures = () => {
   const { isAdmin } = useNavigation();
+  
+  /**
+   * State for storing uploaded image URLs
+   * @type {Array<string|null>}
+   */
   const [uploadedFiles, setUploadedFiles] = useState([null, null, null]);
+  
+  /**
+   * State for storing error messages
+   * @type {string|null}
+   */
   const [error, setError] = useState(null);
+  
+  /**
+   * State to track if initial fetch has been made
+   * @type {boolean}
+   */
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
-  const imageTitles = ["starteryou-v2", "starteryou-v2", "starteryou-v2"];
 
+  /**
+   * Fetches all carousel images from the backend
+   * @async
+   * @function
+   * @returns {Promise<void>}
+   */
   const fetchUploadedImages = async () => {
     if (hasFetchedOnce) return;
 
     try {
       const filePromises = imageTitles.map(async (title, index) => {
-        const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`);
+        const response = await fetch(
+          `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`
+        );
         if (!response.ok) throw new Error(`Network response was not ok for ${title}`);
 
         const blob = await response.blob();
@@ -65,10 +108,19 @@ const UpcomingFeatures = () => {
     }
   };
 
+  // Initialize images on component mount
   useEffect(() => {
     fetchUploadedImages();
   }, []);
 
+  /**
+   * Handles file upload for a specific image slot
+   * @async
+   * @function
+   * @param {Event} event - The file input change event
+   * @param {string} imageType - The type/identifier of the image being updated
+   * @returns {Promise<void>}
+   */
   const handleFileChange = async (event, imageType) => {
     const file = event.target.files[0];
     const formData = new FormData();
@@ -100,7 +152,9 @@ const UpcomingFeatures = () => {
   return (
     <div className="w-full py-16">
       <div className="max-w-6xl mx-auto text-center">
-        <h2 className="text-3xl md:text-4xl font-medium mb-8 md:mb-12">Upcoming Features</h2>
+        <h2 className="text-3xl md:text-4xl font-medium mb-8 md:mb-12">
+          Upcoming Features
+        </h2>
         <div className="w-full mx-auto max-w-[800px]">
           <Carousel
             showArrows={false}
@@ -120,6 +174,7 @@ const UpcomingFeatures = () => {
                   style={{ height: "400px", width: "100%" }}
                   alt={`Slide ${index + 1}`}
                 />
+                {/* Admin Upload Controls */}
                 {isAdmin && (
                   <div className="absolute top-4 right-4">
                     <label htmlFor={`file-upload-${index}`} className="cursor-pointer">
@@ -136,6 +191,7 @@ const UpcomingFeatures = () => {
                     />
                   </div>
                 )}
+                {/* Slide Content */}
                 <div className="text-center mt-4 px-4">
                   <h3 className="text-2xl font-bold">{slide.title}</h3>
                   <p className="text-lg mt-2 text-[#767676]">{slide.description}</p>

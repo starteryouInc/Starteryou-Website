@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/Landing/Hero.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/Landing/Hero.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module Hero
+ * @description A React component that displays a hero section with multiple manageable images
+ */
+
+import { useState, useEffect } from "react";
+import { useNavigation } from "../../context/NavigationContext";
+import FileUpload from "../Common/FileUpload";
+import { API_CONFIG } from "@config/api";
+import { toast } from "react-toastify";
+
+/**
+ * @typedef {Object} ImageData
+ * @property {string} title - Title of the image
+ * @property {string} url - URL of the image
+ */
+
+/**
+ * Hero component
+ * @returns {JSX.Element} Rendered hero section
+ */
+const Hero = () => {
+  const { isAdmin } = useNavigation();
+
+  /**
+   * @type {string}
+   */
+  const [image1, setImage1] = useState("/LandingPage/Heroimg3.png");
+
+  /**
+   * @type {string}
+   */
+  const [image2, setImage2] = useState("/LandingPage/Heroimg2.jpg");
+
+  /**
+   * @type {string}
+   */
+  const [image3, setImage3] = useState("/LandingPage/Heroimg3.png");
+
+  /**
+   * @type {Array&lt;string>}
+   */
+  const titles = ["starteryou-v2", "starteryou-v2", "starteryou-v2"];
+
+  /**
+   * Fetches all images from the server
+   * @async
+   * @returns {Promise&lt;void>}
+   */
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const responses = await Promise.all(
+          titles.map(async (title) => {
+            const response = await fetch(
+              `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileByTitle(title)}`
+            );
+            if (!response.ok) throw new Error("Network response was not ok");
+            const blob = await response.blob();
+            return URL.createObjectURL(blob);
+          })
+        );
+        setImage1(responses[0]);
+        setImage2(responses[1]);
+        setImage3(responses[2]);
+      } catch (error) {
+        console.error("Error fetching images:", error);
+        toast.error("Failed to load images");
+      }
+    };
+    fetchImages();
+  }, []);
+
+  /**
+   * Handles image upload for a specific image slot
+   * @async
+   * @param {Event} e - File input change event
+   * @param {Function} setImage - State setter function for the target image
+   * @param {string} title - Title identifier for the image
+   */
+  const handleImageUpload = async (e, setImage, title) => {
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("title", title);
+
+    try {
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate}`,
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
+      if (!response.ok) throw new Error("Network response was not ok");
+
+      const newImageUrl = URL.createObjectURL(file);
+      setImage(newImageUrl);
+      toast.success(`Image updated successfully for ${title}`);
+    } catch (error) {
+      console.error("Error updating image:", error);
+      toast.error(`Error updating image for ${title}`);
+    }
+  };
+
+  return (
+    &lt;section className="relative w-full min-h-screen bg-[#2700D3] flex flex-col justify-center items-center text-center text-white px-4 overflow-hidden">
+      {/* Background glow effect */}
+      &lt;div
+        className="absolute z-0"
+        style={{
+          width: "807px",
+          height: "700px",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          background: "#E5F1FF",
+          filter: "blur(100px)",
+          opacity: "0.8",
+        }}
+      >&lt;/div>
+
+      {/* Main Background overlay */}
+      &lt;div className="absolute inset-0 top-0 w-full h-full bg-[radial-gradient(circle_farthest-side_at_50%_-150%,_rgba(229,241,255,1),_#2700D3),linear-gradient(to_bottom,_#2700D3,_rgba(229,241,255,1))] opacity-80 z-1">&lt;/div>
+
+      {/* Content Section */}
+      &lt;div className="relative z-10">
+        &lt;h1 className="text-5xl font-bold mb-4">Collaborate Together&lt;/h1>
+        &lt;p className="text-xl mb-8">
+          Lorem ipsum dolor sit amet, consectetuer adipiscing elit...
+        &lt;/p>
+        &lt;div className="flex justify-center space-x-4">
+          &lt;button className="bg-white text-blue-600 px-6 py-2 rounded">
+            Try for free
+          &lt;/button>
+          &lt;button className="bg-blue-600 text-white px-6 py-2 rounded">
+            Get Demo
+          &lt;/button>
+        &lt;/div>
+
+        {/* Image Section */}
+        &lt;div className="relative mt-16">
+          &lt;div className="flex justify-center space-x-8">
+            &lt;div className="w-1/3">
+              &lt;img
+                src={image1}
+                alt="Feature 1"
+                className="w-full h-64 object-cover rounded"
+              />
+              {isAdmin &amp;&amp; (
+                &lt;FileUpload
+                  handleFileChange={(e) => handleImageUpload(e, setImage1, titles[0])}
+                />
+              )}
+            &lt;/div>
+            &lt;div className="w-1/3">
+              &lt;img
+                src={image2}
+                alt="Feature 2"
+                className="w-full h-64 object-cover rounded"
+              />
+              {isAdmin &amp;&amp; (
+                &lt;FileUpload
+                  handleFileChange={(e) => handleImageUpload(e, setImage2, titles[1])}
+                />
+              )}
+            &lt;/div>
+            &lt;div className="w-1/3">
+              &lt;img
+                src={image3}
+                alt="Feature 3"
+                className="w-full h-64 object-cover rounded"
+              />
+              {isAdmin &amp;&amp; (
+                &lt;FileUpload
+                  handleFileChange={(e) => handleImageUpload(e, setImage3, titles[2])}
+                />
+              )}
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    &lt;/section>
+  );
+};
+
+export default Hero;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-API_CONFIG.html">API_CONFIG</a></li><li><a href="module-Banner.html">Banner</a></li><li><a href="module-BestBuddy.html">BestBuddy</a></li><li><a href="module-BestJob.html">BestJob</a></li><li><a href="module-BestJob2.html">BestJob2</a></li><li><a href="module-BestJob3.html">BestJob3</a></li><li><a href="module-BestJob4.html">BestJob4</a></li><li><a href="module-Blog.html">Blog</a></li><li><a href="module-Collab.html">Collab</a></li><li><a href="module-Contact.html">Contact</a></li><li><a href="module-Hero.html">Hero</a></li><li><a href="module-Pricing.html">Pricing</a></li><li><a href="module-UpcomingFeatures.html">UpcomingFeatures</a></li><li><a href="module-useFileOperations.html">useFileOperations</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Nov 10 2024 16:05:25 GMT-0500 (Eastern Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Module: FileMetadata</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Module: FileMetadata</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        
+            
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>FileMetadata Model for storing information about uploaded files.</p>
+<p>This model represents metadata for a file stored in GridFS, including details like:</p>
+<ul>
+<li><code>title</code>: The title of the file</li>
+<li><code>originalFilename</code>: The original name of the file</li>
+<li><code>uploadedBy</code>: The user who uploaded the file</li>
+<li><code>createdAt</code>: Timestamp of when the file was uploaded (default is the current time)</li>
+<li><code>gridFsFileId</code>: The unique identifier of the file in GridFS (used to retrieve the actual file)</li>
+</ul>
+<p>The model uses MongoDB with Mongoose to store file metadata and supports the following indexes:</p>
+<ul>
+<li>A unique index on <code>title</code> to prevent duplicate file uploads with the same title.</li>
+<li>An index on <code>gridFsFileId</code> for faster retrieval of files based on their GridFS ID.</li>
+</ul></div>
+        
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_FileMetadata.js.html">models/FileMetadata.js</a>, <a href="models_FileMetadata.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="~createdAt"><span class="type-signature">(inner) </span>createdAt<span class="type-signature"> :Date</span></h4>
+
+
+
+
+<div class="description">
+    <p>The timestamp when the file was uploaded.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Date</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-default">Default Value:</dt>
+    <dd class="tag-default"><ul class="dummy">
+            <li>Date.now</li>
+        </ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_FileMetadata.js.html">models/FileMetadata.js</a>, <a href="models_FileMetadata.js.html#line48">line 48</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="~gridFsFileId"><span class="type-signature">(inner) </span>gridFsFileId<span class="type-signature"> :mongoose.Schema.Types.ObjectId</span></h4>
+
+
+
+
+<div class="description">
+    <p>The ObjectId of the file in GridFS.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">mongoose.Schema.Types.ObjectId</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_FileMetadata.js.html">models/FileMetadata.js</a>, <a href="models_FileMetadata.js.html#line55">line 55</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="~originalFilename"><span class="type-signature">(inner) </span>originalFilename<span class="type-signature"> :string</span></h4>
+
+
+
+
+<div class="description">
+    <p>The original filename of the uploaded file.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_FileMetadata.js.html">models/FileMetadata.js</a>, <a href="models_FileMetadata.js.html#line34">line 34</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="~title"><span class="type-signature">(inner) </span>title<span class="type-signature"> :string</span></h4>
+
+
+
+
+<div class="description">
+    <p>The title of the file.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_FileMetadata.js.html">models/FileMetadata.js</a>, <a href="models_FileMetadata.js.html#line27">line 27</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="~uploadedBy"><span class="type-signature">(inner) </span>uploadedBy<span class="type-signature"> :string</span></h4>
+
+
+
+
+<div class="description">
+    <p>The user who uploaded the file.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_FileMetadata.js.html">models/FileMetadata.js</a>, <a href="models_FileMetadata.js.html#line41">line 41</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-FileMetadata.html">FileMetadata</a></li><li><a href="module-MongoTester.html">MongoTester</a></li><li><a href="module-apiLogger.html">apiLogger</a></li><li><a href="module-apiRoutes.html">apiRoutes</a></li><li><a href="module-server.html">server</a></li><li><a href="module-testMongo.html">testMongo</a></li><li><a href="module-verificationRoutes.html">verificationRoutes</a></li></ul><h3>Classes</h3><ul><li><a href="module-MongoTester-MongoTester.html">MongoTester</a></li></ul><h3>Global</h3><ul><li><a href="global.html#bucket">bucket</a></li><li><a href="global.html#ensureBucket">ensureBucket</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Nov 10 2024 16:41:16 GMT-0500 (Eastern Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

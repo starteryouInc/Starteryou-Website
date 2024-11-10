@@ -1,24 +1,34 @@
-// server.js
+/**
+ * Express server setup for handling file management and system verification routes.
+ * 
+ * This script initializes an Express server, connects to MongoDB, sets up routes for file management 
+ * (upload, download, etc.), and system verification (file integrity checks). It also includes error handling, 
+ * connection retries, logging, and graceful shutdown functionality.
+ * 
+ * @module server
+ */
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
-const {mountRoutes} = require("./routes"); // Main routes including API docs
+const { mountRoutes } = require("./routes"); // Main routes including API docs
 const fileRoutes = require("./routes/fileRoutes"); // File handling routes
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 require("dotenv").config();
 
-
 // Initialize express app
 const app = express();
 
-// Basic middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({extended: true}));
-app.use(express.static(path.join(__dirname, "public")));
-
-// API Request Logger Middleware
+/**
+ * Middleware to log incoming API requests.
+ * Logs the HTTP method, URL, and the client IP.
+ * 
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @param {Function} next - The next middleware function to call.
+ * @returns {void}
+ */
 const requestLogger = (req, res, next) => {
   const timestamp = new Date().toISOString();
   const method = req.method;
@@ -29,6 +39,12 @@ const requestLogger = (req, res, next) => {
 };
 
 app.use(requestLogger);
+
+// Basic middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "public")));
 
 // Mount routes
 app.use("/api/files", fileRoutes);
@@ -43,6 +59,12 @@ if (!process.env.MONGODB_URI) {
   process.exit(1);
 }
 
+/**
+ * Function to connect to MongoDB with retries in case of failure.
+ * 
+ * @async
+ * @returns {Promise<void>} Resolves once the connection is established, or retries if it fails.
+ */
 const connectWithRetry = () => {
   console.log("Attempting to connect to MongoDB...");
   mongoose
@@ -52,10 +74,10 @@ const connectWithRetry = () => {
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
       family: 4,
-      connectTimeoutMS: 10000,    })
+      connectTimeoutMS: 10000,
+    })
     .then(() => {
       console.log("✅ MongoDB Connected Successfully!");
-      // Accessing `databaseName` and `host` safely after connection is established
       const db = mongoose.connection.db;
       const host = mongoose.connection.host;
 
@@ -89,7 +111,16 @@ mongoose.connection.on("error", (err) => {
   }
 });
 
-// Error handling middleware
+/**
+ * Middleware to handle errors.
+ * Responds with a JSON object containing error details.
+ * 
+ * @param {Object} err - The error object.
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @param {Function} next - The next middleware function to call.
+ * @returns {void}
+ */
 app.use((err, req, res, next) => {
   console.error("Error:", err.stack);
   res.status(500).json({
@@ -125,7 +156,12 @@ app.listen(PORT, () => {
   `);
 });
 
-// Graceful shutdown handler
+/**
+ * Graceful shutdown handler to close MongoDB connection and exit process.
+ * 
+ * @async
+ * @returns {Promise<void>} Resolves when the server shuts down gracefully.
+ */
 const gracefulShutdown = async () => {
   console.log("\n🔄 Received shutdown signal. Starting graceful shutdown...");
 

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: BestBuddy.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: BestBuddy.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module BestBuddy
+ * @description A React component that displays career-related features and allows image management
+ */
+
+import { useState, useEffect } from "react";
+import { useNavigation } from "../../context/NavigationContext";
+import FileUpload from "../Common/FileUpload";
+import { API_CONFIG } from "@config/api";
+import { toast } from "react-toastify";
+
+/**
+ * @constant {Array&lt;Object>} icons
+ * @description Array of navigation icons with their properties
+ * @property {string} src - Source path of the icon image
+ * @property {string} alt - Alternative text for the icon
+ * @property {string} text - Display text for the icon
+ * @property {string} link - Navigation link for the icon
+ */
+const icons = [
+  {
+    src: "/LandingPage/Icons/dashboard.svg",
+    alt: "Dashboard Icon",
+    text: "Dashboard",
+    link: "/dashboard",
+  },
+  {
+    src: "/LandingPage/Icons/social.svg",
+    alt: "Settings Icon",
+    text: "Teams and socials",
+    link: "/teams-socials",
+  },
+  {
+    src: "/LandingPage/Icons/user-square.svg",
+    alt: "User Icon",
+    text: "Job Profile",
+    link: "/job-profile",
+  },
+  {
+    src: "/LandingPage/Icons/subscribe.svg",
+    alt: "Analytics Icon",
+    text: "Subscription Management",
+    link: "/subscription-management",
+  },
+  {
+    src: "/LandingPage/Icons/Setting.png",
+    alt: "Tools Icon",
+    text: "Lorem ipsum",
+    link: "/lorem-ipsum",
+  },
+];
+
+/**
+ * @function BestBuddy
+ * @description Main component that displays career-related features and handles image upload functionality
+ * @returns {JSX.Element} Rendered component
+ */
+const BestBuddy = () => {
+  const { isAdmin } = useNavigation();
+  
+  /**
+   * @type {[string|null, Function]} uploadedFile
+   * @description State for storing the uploaded file URL
+   */
+  const [uploadedFile, setUploadedFile] = useState(null);
+  
+  /**
+   * @constant {string} title
+   * @description Title identifier for the uploaded image
+   */
+  const title = "starteryou-v2";
+  
+  /**
+   * @type {[string|null, Function]} error
+   * @description State for storing error messages
+   */
+  const [error, setError] = useState(null);
+  
+  /**
+   * @type {[boolean, Function]} hasFetchedOnce
+   * @description State to track if initial fetch has been attempted
+   */
+  const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
+
+  /**
+   * @async
+   * @function fetchUploadedFile
+   * @description Fetches the previously uploaded file from the server
+   * @returns {Promise&lt;void>}
+   */
+  const fetchUploadedFile = async () => {
+    if (hasFetchedOnce) return;
+
+    try {
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`
+      );
+      
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      setUploadedFile(url);
+      setError(null);
+    } catch (error) {
+      console.error("Error fetching uploaded file:", error);
+      setError("Failed to load image");
+    } finally {
+      setHasFetchedOnce(true);
+    }
+  };
+
+  // Fetch image on component mount
+  useEffect(() => {
+    fetchUploadedFile();
+  }, []);
+
+  /**
+   * @async
+   * @function handleFileChange
+   * @description Handles file upload and updates the image on the server
+   * @param {React.ChangeEvent&lt;HTMLInputElement>} event - The file input change event
+   * @returns {Promise&lt;void>}
+   */
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("title", title);
+
+    try {
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`,
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const data = await response.json();
+      console.log("Image updated successfully:", data);
+
+      setUploadedFile(URL.createObjectURL(file));
+      setError(null);
+    } catch (error) {
+      console.error("Error updating image:", error);
+      setError("Error updating image");
+    }
+  };
+
+  return (
+    &lt;div className="bg-white py-20 px-4 sm:py-24">
+      &lt;div className="md:max-w-3xl lg:max-w-4xl mx-auto text-center">
+        &lt;h2 className="text-3xl sm:text-4xl md:text-5xl font-bold lg:font-extrabold text-[#1F2329] mb-6">
+          The best buddy for your career
+        &lt;/h2>
+        &lt;p className="text-[#1F2329] text-base font-light sm:text-lg md:text-xl leading-relaxed max-w-4xl mx-auto">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+          aliquip ex ea commodo consequat.
+        &lt;/p>
+      &lt;/div>
+
+      {/* Display the uploaded file */}
+      &lt;div className="relative flex justify-center mt-2">
+        {uploadedFile ? (
+          &lt;img
+            src={uploadedFile}
+            alt="Uploaded"
+            className="w-[900px] h-[300px] md:h-[450px]"
+          />
+        ) : (
+          &lt;img
+            src="/JobPortalPage/Placeholder Image.png"
+            alt="Placeholder"
+            className="w-[900px] h-[300px] md:h-[450px]"
+          />
+        )}
+      &lt;/div>
+
+      {/* Upload and Update Buttons */}
+      &lt;div className="flex justify-center mt-4">
+        &lt;FileUpload handleFileChange={handleFileChange} />
+        {isAdmin &amp;&amp; (
+          &lt;div className="ml-4">
+            &lt;input
+              type="file"
+              onChange={handleFileChange}
+              className="hidden"
+              id="updateFileInput"
+            />
+            &lt;label
+              htmlFor="updateFileInput"
+              className="cursor-pointer bg-blue-500 text-white py-2 px-4 rounded"
+            >
+              Update Image
+            &lt;/label>
+          &lt;/div>
+        )}
+      &lt;/div>
+
+      {/* Icons Section */}
+      &lt;div className="mt-12 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8 max-w-6xl mx-auto px-4">
+        {icons.map((icon, index) => (
+          &lt;a
+            key={index}
+            href={icon.link}
+            className="flex flex-col items-center text-center group"
+          >
+            &lt;div className="w-12 h-12 mb-3 flex items-center justify-center">
+              &lt;img src={icon.src} alt={icon.alt} className="w-8 h-8" />
+            &lt;/div>
+            &lt;span className="text-[#1F2329] text-sm font-medium group-hover:text-blue-600">
+              {icon.text}
+            &lt;/span>
+          &lt;/a>
+        ))}
+      &lt;/div>
+
+      {/* Features Grid */}
+      &lt;div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
+        &lt;div className="text-center">
+          &lt;h3 className="text-xl font-semibold mb-2">Feature 1&lt;/h3>
+          &lt;p className="text-gray-600">
+            Description of feature 1 and its benefits.
+          &lt;/p>
+        &lt;/div>
+        &lt;div className="text-center">
+          &lt;h3 className="text-xl font-semibold mb-2">Feature 2&lt;/h3>
+          &lt;p className="text-gray-600">
+            Description of feature 2 and its benefits.
+          &lt;/p>
+        &lt;/div>
+        &lt;div className="text-center">
+          &lt;h3 className="text-xl font-semibold mb-2">Feature 3&lt;/h3>
+          &lt;p className="text-gray-600">
+            Description of feature 3 and its benefits.
+          &lt;/p>
+        &lt;/div>
+      &lt;/div>
+    &lt;/div>
+  );
+};
+
+export default BestBuddy;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-BestBuddy.html">BestBuddy</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Nov 10 2024 15:35:23 GMT-0500 (Eastern Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

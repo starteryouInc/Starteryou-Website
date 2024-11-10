@@ -1,0 +1,19 @@
+{
+  "source": {
+    "include": ["src"],
+    "includePattern": ".+\\.(jsx?|tsx?)$",
+    "excludePattern": "(node_modules|docs)"
+  },
+  "plugins": [
+    "plugins/markdown",
+    "node_modules/jsdoc-typescript"
+  ],
+  "tags": {
+    "allowUnknownTags": true
+  },
+  "opts": {
+    "destination": "./docs/frontend",
+    "recurse": true,
+    "verbose": true
+  }
+}

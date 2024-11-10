@@ -1,20 +1,41 @@
+/**
+ * @module Contact
+ * @description A React component that renders a contact form with decorative imagery
+ * Features a visually rich layout with background images, decorative elements,
+ * and a comprehensive contact form with multiple input fields and contact preferences
+ */
+
+/**
+ * @function Contact
+ * @description Renders a contact section with a form overlay on a decorative background
+ * The component includes:
+ * - Main background image with gradient overlays
+ * - Multiple decorative floating images
+ * - A centered contact form with various input fields
+ * - Contact preference selection
+ * - Responsive design considerations
+ * @returns {JSX.Element} A contact section with form and decorative elements
+ */
 const Contact = () => {
   return (
     <div className="relative bg-white mb-20 overflow-hidden">
-      {/* Main Image */}
+      {/* Background Image Section */}
       <div className="w-full h-[500px] lg:h-[570px] z-10 ">
+        {/* Main Background Image */}
         <img
           src="/LandingPage/Rectangle_contact.svg"
           alt="Contact"
           className="w-full h-full object-cover"
         />
-        {/* Circle on Top Left */}
+        {/* Decorative Gradient Circles */}
+        {/* Top Left Gradient Circle */}
         <div className="hidden md:block absolute top-[-2.5rem] left-[-1.75rem] w-[35rem] h-[38rem] blur-[100px] z-0 rounded-full bg-[#3D43CFB2] overflow-auto opacity-[0.2]"></div>
-        {/* Circle on Top Right */}
+        {/* Top Right Gradient Circle */}
         <div className="hidden md:block absolute top-5 right-5 w-[30rem] h-[30rem] blur-[60px] z-0 rounded-full bg-[#C791F24D] overflow-auto opacity-[0.5]"></div>
       </div>
 
-      {/* Rotated image */}
+      {/* Decorative Floating Images */}
+      {/* Left Side Large Image */}
       <div className="hidden md:block absolute left-[31px] top-[439px] z-20 transform rotate-[0.37deg] lg:left-[60px] lg:top-[550px]">
         <img
           src="/LandingPage/Rectangle_cont2.svg"
@@ -22,7 +43,7 @@ const Contact = () => {
           className="w-24 lg:w-32 h-20 object-cover"
         />
       </div>
-      {/* Smaller left side image */}
+      {/* Left Side Small Image */}
       <div className="hidden md:block absolute left-[12px] top-[505px] z-20 transform rotate-[0.37deg] lg:left-[30px] lg:top-[620px]">
         <img
           src="/LandingPage/Rectangle_cont2.svg"
@@ -30,7 +51,7 @@ const Contact = () => {
           className="w-20 h-10 object-cover"
         />
       </div>
-      {/* Right side image */}
+      {/* Right Side Large Image */}
       <div className="hidden md:block absolute right-[31px] top-[354px] z-20 transform rotate-[0.37deg] lg:right-[50px] lg:top-[370px]">
         <img
           src="/LandingPage/Rectangle_cont2.svg"
@@ -38,7 +59,7 @@ const Contact = () => {
           className="w-24 lg:w-32 h-20 object-cover"
         />
       </div>
-      {/* Smaller Rightside image */}
+      {/* Right Side Small Image */}
       <div className="hidden md:block absolute right-[70px] top-[420px] z-20 transform rotate-[0.37deg] lg:right-[130px] lg:top-[440px]">
         <img
           src="/LandingPage/Rectangle_cont2.svg"
@@ -46,12 +67,13 @@ const Contact = () => {
           className="w-20 h-10 object-cover"
         />
       </div>
-      {/* Contact form */}
+
+      {/* Contact Form Section */}
       <div className="container mx-auto px-4 mt-[-20rem]">
         <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-8 relative z-0">
           <h2 className="text-3xl font-normal text-center mb-6">Contact Us</h2>
           <form className="space-y-6">
-            {/* Name Input */}
+            {/* Personal Information Inputs */}
             <div>
               <input
                 type="text"
@@ -59,8 +81,6 @@ const Contact = () => {
                 placeholder="Enter your name"
               />
             </div>
-
-            {/* Email Input */}
             <div>
               <input
                 type="email"
@@ -68,8 +88,6 @@ const Contact = () => {
                 placeholder="Enter your email address"
               />
             </div>
-
-            {/* Phone Number Input */}
             <div>
               <input
                 type="tel"
@@ -77,8 +95,6 @@ const Contact = () => {
                 placeholder="Enter your phone number"
               />
             </div>
-
-            {/* Location Input */}
             <div>
               <input
                 type="text"
@@ -96,7 +112,7 @@ const Contact = () => {
               ></textarea>
             </div>
 
-            {/* Preferred Contact Method */}
+            {/* Contact Preference Selection */}
             <div>
               <p className="text-lg font-extralight mb-2">
                 Preferred contact method
@@ -125,7 +141,7 @@ const Contact = () => {
               </div>
             </div>
 
-            {/* Button */}
+            {/* Submit Button */}
             <div className="text-center">
               <button
                 type="submit"
