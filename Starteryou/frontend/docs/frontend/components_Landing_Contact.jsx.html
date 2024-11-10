@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/Landing/Contact.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/Landing/Contact.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module Contact
+ * @description A React component that renders a contact form with decorative imagery
+ * Features a visually rich layout with background images, decorative elements,
+ * and a comprehensive contact form with multiple input fields and contact preferences
+ */
+
+/**
+ * @function Contact
+ * @description Renders a contact section with a form overlay on a decorative background
+ * The component includes:
+ * - Main background image with gradient overlays
+ * - Multiple decorative floating images
+ * - A centered contact form with various input fields
+ * - Contact preference selection
+ * - Responsive design considerations
+ * @returns {JSX.Element} A contact section with form and decorative elements
+ */
+const Contact = () => {
+  return (
+    &lt;div className="relative bg-white mb-20 overflow-hidden">
+      {/* Background Image Section */}
+      &lt;div className="w-full h-[500px] lg:h-[570px] z-10 ">
+        {/* Main Background Image */}
+        &lt;img
+          src="/LandingPage/Rectangle_contact.svg"
+          alt="Contact"
+          className="w-full h-full object-cover"
+        />
+        {/* Decorative Gradient Circles */}
+        {/* Top Left Gradient Circle */}
+        &lt;div className="hidden md:block absolute top-[-2.5rem] left-[-1.75rem] w-[35rem] h-[38rem] blur-[100px] z-0 rounded-full bg-[#3D43CFB2] overflow-auto opacity-[0.2]">&lt;/div>
+        {/* Top Right Gradient Circle */}
+        &lt;div className="hidden md:block absolute top-5 right-5 w-[30rem] h-[30rem] blur-[60px] z-0 rounded-full bg-[#C791F24D] overflow-auto opacity-[0.5]">&lt;/div>
+      &lt;/div>
+
+      {/* Decorative Floating Images */}
+      {/* Left Side Large Image */}
+      &lt;div className="hidden md:block absolute left-[31px] top-[439px] z-20 transform rotate-[0.37deg] lg:left-[60px] lg:top-[550px]">
+        &lt;img
+          src="/LandingPage/Rectangle_cont2.svg"
+          alt="Small Rotated"
+          className="w-24 lg:w-32 h-20 object-cover"
+        />
+      &lt;/div>
+      {/* Left Side Small Image */}
+      &lt;div className="hidden md:block absolute left-[12px] top-[505px] z-20 transform rotate-[0.37deg] lg:left-[30px] lg:top-[620px]">
+        &lt;img
+          src="/LandingPage/Rectangle_cont2.svg"
+          alt="Smaller Rotated"
+          className="w-20 h-10 object-cover"
+        />
+      &lt;/div>
+      {/* Right Side Large Image */}
+      &lt;div className="hidden md:block absolute right-[31px] top-[354px] z-20 transform rotate-[0.37deg] lg:right-[50px] lg:top-[370px]">
+        &lt;img
+          src="/LandingPage/Rectangle_cont2.svg"
+          alt="Small Rotated"
+          className="w-24 lg:w-32 h-20 object-cover"
+        />
+      &lt;/div>
+      {/* Right Side Small Image */}
+      &lt;div className="hidden md:block absolute right-[70px] top-[420px] z-20 transform rotate-[0.37deg] lg:right-[130px] lg:top-[440px]">
+        &lt;img
+          src="/LandingPage/Rectangle_cont2.svg"
+          alt="Smaller Rotated"
+          className="w-20 h-10 object-cover"
+        />
+      &lt;/div>
+
+      {/* Contact Form Section */}
+      &lt;div className="container mx-auto px-4 mt-[-20rem]">
+        &lt;div className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-8 relative z-0">
+          &lt;h2 className="text-3xl font-normal text-center mb-6">Contact Us&lt;/h2>
+          &lt;form className="space-y-6">
+            {/* Personal Information Inputs */}
+            &lt;div>
+              &lt;input
+                type="text"
+                className="w-full px-4 py-2 border bg-[#F5F5FF] border-gray-300 rounded-md"
+                placeholder="Enter your name"
+              />
+            &lt;/div>
+            &lt;div>
+              &lt;input
+                type="email"
+                className="w-full px-4 py-2 border bg-[#F5F5FF] border-gray-300 rounded-md"
+                placeholder="Enter your email address"
+              />
+            &lt;/div>
+            &lt;div>
+              &lt;input
+                type="tel"
+                className="w-full px-4 py-2 border bg-[#F5F5FF] border-gray-300 rounded-md"
+                placeholder="Enter your phone number"
+              />
+            &lt;/div>
+            &lt;div>
+              &lt;input
+                type="text"
+                className="w-full px-4 py-2 border bg-[#F5F5FF] border-gray-300 rounded-md"
+                placeholder="Enter your location"
+              />
+            &lt;/div>
+
+            {/* Message Input */}
+            &lt;div>
+              &lt;textarea
+                rows="4"
+                className="w-full px-4 py-2 border bg-[#F5F5FF] border-gray-300 rounded-md"
+                placeholder="Go ahead, we are listening..."
+              >&lt;/textarea>
+            &lt;/div>
+
+            {/* Contact Preference Selection */}
+            &lt;div>
+              &lt;p className="text-lg font-extralight mb-2">
+                Preferred contact method
+              &lt;/p>
+              &lt;div className="flex space-x-6">
+                &lt;div className="flex items-center">
+                  &lt;input
+                    type="checkbox"
+                    id="phone"
+                    className="mr-2 w-5 h-5 text-[#7950F2] border-gray-300 rounded focus:ring-[#7950F2] checked:bg-[#7950F2]"
+                  />
+                  &lt;label htmlFor="phone" className="text-sm">
+                    Phone
+                  &lt;/label>
+                &lt;/div>
+                &lt;div className="flex items-center">
+                  &lt;input
+                    type="checkbox"
+                    id="email"
+                    className="mr-2 w-5 h-5 text-[#7950F2] border-gray-300 rounded focus:ring-[#7950F2] checked:bg-[#7950F2]"
+                  />
+                  &lt;label htmlFor="email" className="text-sm">
+                    Email
+                  &lt;/label>
+                &lt;/div>
+              &lt;/div>
+            &lt;/div>
+
+            {/* Submit Button */}
+            &lt;div className="text-center">
+              &lt;button
+                type="submit"
+                className="w-full bg-[#D9502E] text-white px-4 py-2 rounded-md font-extrabold text-lg leading-relaxed shadow"
+              >
+                Submit
+              &lt;/button>
+            &lt;/div>
+          &lt;/form>
+        &lt;/div>
+      &lt;/div>
+    &lt;/div>
+  );
+};
+
+export default Contact;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-API_CONFIG.html">API_CONFIG</a></li><li><a href="module-Banner.html">Banner</a></li><li><a href="module-BestBuddy.html">BestBuddy</a></li><li><a href="module-BestJob.html">BestJob</a></li><li><a href="module-BestJob2.html">BestJob2</a></li><li><a href="module-BestJob3.html">BestJob3</a></li><li><a href="module-BestJob4.html">BestJob4</a></li><li><a href="module-Blog.html">Blog</a></li><li><a href="module-Collab.html">Collab</a></li><li><a href="module-Contact.html">Contact</a></li><li><a href="module-Hero.html">Hero</a></li><li><a href="module-Pricing.html">Pricing</a></li><li><a href="module-UpcomingFeatures.html">UpcomingFeatures</a></li><li><a href="module-useFileOperations.html">useFileOperations</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Nov 10 2024 16:05:25 GMT-0500 (Eastern Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

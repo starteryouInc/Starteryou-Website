@@ -1,9 +1,38 @@
+/**
+ * @module Blog
+ * @description A React component that displays blog posts in a carousel format
+ * with category filtering
+ */
+
 import { useState } from "react";
 
+/**
+ * @typedef {Object} BlogPost
+ * @property {string} img - URL of the blog post image
+ * @property {string} title - Title of the blog post
+ * @property {string} date - Publication date
+ * @property {string} category - Post category
+ * @property {string} text - Post description
+ */
+
+/**
+ * Blog component
+ * @returns {JSX.Element} Rendered blog section
+ */
 const Blog = () => {
+  /**
+   * @type {string}
+   */
   const [activeLink, setActiveLink] = useState("View All");
+
+  /**
+   * @type {number}
+   */
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  /**
+   * @type {string[]}
+   */
   const links = [
     "View All",
     "Lorem Ipsum",
@@ -12,6 +41,9 @@ const Blog = () => {
     "Euismod",
   ];
 
+  /**
+   * @type {BlogPost[]}
+   */
   const blogBoxes = [
     {
       img: "/LandingPage/Blogimg1.png",
@@ -57,10 +89,18 @@ const Blog = () => {
     },
   ];
 
+  /**
+   * Navigates to the previous blog post
+   * @function
+   */
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev === 0 ? blogBoxes.length - 1 : prev - 1));
   };
 
+  /**
+   * Navigates to the next blog post
+   * @function
+   */
   const handleNext = () => {
     setCurrentIndex((prev) => (prev === blogBoxes.length - 1 ? 0 : prev + 1));
   };
@@ -114,7 +154,6 @@ const Blog = () => {
                 alt="Blog"
                 className="w-full h-[300px] md:h-[350px] object-cover mb-4"
               />
-              {/* Blur effect container */}
               <div className="absolute inset-0 bg-[#FFFFFF66] backdrop-filter backdrop-blur-[7px] h-[25%] flex items-center justify-between p-4 top-[12.1rem] md:top-[14.9rem]">
                 <div className="flex flex-col">
                   <span className="text-white font-bold text-base md:text-lg">

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/Landing/Blog.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/Landing/Blog.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module Blog
+ * @description A React component that displays blog posts in a carousel format
+ * with category filtering
+ */
+
+import { useState } from "react";
+
+/**
+ * @typedef {Object} BlogPost
+ * @property {string} img - URL of the blog post image
+ * @property {string} title - Title of the blog post
+ * @property {string} date - Publication date
+ * @property {string} category - Post category
+ * @property {string} text - Post description
+ */
+
+/**
+ * Blog component
+ * @returns {JSX.Element} Rendered blog section
+ */
+const Blog = () => {
+  /**
+   * @type {string}
+   */
+  const [activeLink, setActiveLink] = useState("View All");
+
+  /**
+   * @type {number}
+   */
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  /**
+   * @type {string[]}
+   */
+  const links = [
+    "View All",
+    "Lorem Ipsum",
+    "Sed Diam",
+    "Consectetur",
+    "Euismod",
+  ];
+
+  /**
+   * @type {BlogPost[]}
+   */
+  const blogBoxes = [
+    {
+      img: "/LandingPage/Blogimg1.png",
+      title: "Lorem ipsum dolor",
+      date: "20 Jan 2023",
+      category: "Development",
+      text: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do.",
+    },
+    {
+      img: "/LandingPage/Blogimg2.png",
+      title: "Sed diam nonummy",
+      date: "21 Jan 2023",
+      category: "Design",
+      text: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do.",
+    },
+    {
+      img: "/LandingPage/Blogimg1.png",
+      title: "Consectetur adipiscing",
+      date: "22 Jan 2023",
+      category: "Marketing",
+      text: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do.",
+    },
+    {
+      img: "/LandingPage/Blogimg2.png",
+      title: "Lorem ipsum dolor",
+      date: "23 Jan 2023",
+      category: "Development",
+      text: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do.",
+    },
+    {
+      img: "/LandingPage/Blogimg1.png",
+      title: "Research insights",
+      date: "24 Jan 2023",
+      category: "Research",
+      text: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do.",
+    },
+    {
+      img: "/LandingPage/Blogimg2.png",
+      title: "Latest trends",
+      date: "25 Jan 2023",
+      category: "Development",
+      text: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do.",
+    },
+  ];
+
+  /**
+   * Navigates to the previous blog post
+   * @function
+   */
+  const handlePrev = () => {
+    setCurrentIndex((prev) => (prev === 0 ? blogBoxes.length - 1 : prev - 1));
+  };
+
+  /**
+   * Navigates to the next blog post
+   * @function
+   */
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev === blogBoxes.length - 1 ? 0 : prev + 1));
+  };
+
+  return (
+    &lt;div className="max-w-[1440px] mx-auto px-4 py-12 " id="blog">
+      &lt;div className="md:flex justify-between items-start">
+        &lt;div className="md:w-2/3">
+          &lt;h2 className="text-3xl font-bold md:text-4xl md:font-extrabold mb-4 text-left">
+            Our Blogs
+          &lt;/h2>
+          &lt;p className="text-[#121417] font-normal max-w-[600px] mt-2 italic text-left">
+            Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam
+            nonummy nibh euismod tincidunt ut laoreet do.
+          &lt;/p>
+        &lt;/div>
+
+        &lt;div className="mt-4 md:mt-0">
+          &lt;button className="bg-[#D9502E] text-white py-2 px-4 rounded-lg">
+            Show All
+          &lt;/button>
+        &lt;/div>
+      &lt;/div>
+
+      &lt;div className="mt-8">
+        &lt;div className="flex flex-col sm:flex-row justify-start sm:space-x-4 space-y-4 sm:space-y-0">
+          {links.map((link, index) => (
+            &lt;button
+              key={index}
+              onClick={() => setActiveLink(link)}
+              className={`py-2 px-4 text-sm md:text-base font-medium transition-colors duration-300 ${
+                activeLink === link
+                  ? "bg-[#D6E4FF] text-blue-700 rounded-lg md:rounded-t-lg md:rounded-b-none"
+                  : "text-gray-700 hover:text-blue-500"
+              }`}
+            >
+              {link}
+            &lt;/button>
+          ))}
+        &lt;/div>
+        &lt;hr className="border-t border-gray-300 mt-4 md:mt-0" />
+      &lt;/div>
+
+      &lt;div className="flex justify-center items-center mt-8 space-x-6">
+        {blogBoxes
+          .slice(currentIndex, currentIndex + (window.innerWidth &lt; 768 ? 1 : 2))
+          .map((box, index) => (
+            &lt;div key={index} className="relative w-full md:w-1/2">
+              &lt;img
+                src={box.img}
+                alt="Blog"
+                className="w-full h-[300px] md:h-[350px] object-cover mb-4"
+              />
+              &lt;div className="absolute inset-0 bg-[#FFFFFF66] backdrop-filter backdrop-blur-[7px] h-[25%] flex items-center justify-between p-4 top-[12.1rem] md:top-[14.9rem]">
+                &lt;div className="flex flex-col">
+                  &lt;span className="text-white font-bold text-base md:text-lg">
+                    {box.title}
+                  &lt;/span>
+                  &lt;span className="text-white font-thin text-sm">
+                    {box.date}
+                  &lt;/span>
+                &lt;/div>
+                &lt;span className="text-white font-bold text-base md:text-lg">
+                  {box.category}
+                &lt;/span>
+              &lt;/div>
+
+              &lt;p className="text-[#767676] mb-4">{box.text}&lt;/p>
+              &lt;a
+                href="#"
+                className="text-black font-semibold md:font-extrabold uppercase hover:underline"
+              >
+                Read Post
+                &lt;img
+                  src="/LandingPage/Icons/postarrow.svg"
+                  alt="icon"
+                  className="inline ml-1 w-4 h-4"
+                />
+              &lt;/a>
+            &lt;/div>
+          ))}
+      &lt;/div>
+
+      &lt;div className="relative flex justify-between items-center mt-8">
+        &lt;button
+          onClick={handlePrev}
+          className="bg-[#D6E4FF] p-4 rounded-full"
+          style={{ width: "50px", height: "50px" }}
+        >
+          &lt;img
+            src="/LandingPage/Icons/Previous_arrow.svg"
+            alt="Previous"
+            className="w-4 h-4"
+          />
+        &lt;/button>
+
+        &lt;button
+          onClick={handleNext}
+          className="bg-[#D6E4FF] p-4 rounded-full"
+          style={{ width: "50px", height: "50px" }}
+        >
+          &lt;img
+            src="/LandingPage/Icons/Next_arrow.svg"
+            alt="Next"
+            className="w-4 h-4"
+          />
+        &lt;/button>
+      &lt;/div>
+    &lt;/div>
+  );
+};
+
+export default Blog;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-API_CONFIG.html">API_CONFIG</a></li><li><a href="module-Banner.html">Banner</a></li><li><a href="module-BestBuddy.html">BestBuddy</a></li><li><a href="module-BestJob.html">BestJob</a></li><li><a href="module-BestJob2.html">BestJob2</a></li><li><a href="module-BestJob3.html">BestJob3</a></li><li><a href="module-BestJob4.html">BestJob4</a></li><li><a href="module-Blog.html">Blog</a></li><li><a href="module-Collab.html">Collab</a></li><li><a href="module-Contact.html">Contact</a></li><li><a href="module-Hero.html">Hero</a></li><li><a href="module-Pricing.html">Pricing</a></li><li><a href="module-UpcomingFeatures.html">UpcomingFeatures</a></li><li><a href="module-useFileOperations.html">useFileOperations</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Nov 10 2024 16:05:25 GMT-0500 (Eastern Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

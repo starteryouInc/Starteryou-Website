@@ -1,160 +1,203 @@
-import {useState, useEffect} from "react";
-import {useNavigation} from "../../context/NavigationContext";
-import FileUpload from "../Common/FileUpload";
-import {API_CONFIG} from "@config/api";
+/**
+ * @module BestJob4
+ * @description A React component that displays job listings with image management capabilities
+ */
 
-const icons = [
+import {useState, useEffect} from "react";
+import FileUpload from "../Common/FileUpload";
+import {useNavigation} from "../../context/NavigationContext";
+import {API_CONFIG} from "@config/api";
+import { Carousel } from "react-responsive-carousel";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUpload } from "@fortawesome/free-solid-svg-icons";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
+
+/**
+ * @typedef {Object} SlideData
+ * @property {string} title - Title of the slide
+ * @property {string} description - Description text
+ * @property {string} img - Image URL
+ */
+
+/**
+ * @type {SlideData[]}
+ */
+const slidesData = [
   {
-    src: "/LandingPage/Icons/dashboard.svg",
-    alt: "Dashboard Icon",
-    text: "Home Page",
-    link: "/dashboard",
+    title: "Get top Job analysis",
+    description: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do",
+    img: "",
   },
   {
-    src: "/LandingPage/Icons/social.svg",
-    alt: "Settings Icon",
-    text: "School Magazines",
-    link: "/teams-socials",
+    title: "Get top Job analysis",
+    description: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do",
+    img: "",
   },
   {
-    src: "/LandingPage/Icons/user-square.svg",
-    alt: "User Icon",
-    text: "XXXXXXXXXXXX",
-    link: "/job-profile",
-  },
-  {
-    src: "/LandingPage/Icons/subscribe.svg",
-    alt: "Analytics Icon",
-    text: "XXXXXXXXXXXX",
-    link: "/subscription-management",
+    title: "Get top Job analysis",
+    description: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do",
+    img: "",
   },
 ];
 
+/**
+ * BestJob4 component
+ * @returns {JSX.Element} Rendered component
+ */
 const BestJob4 = () => {
   const { isAdmin } = useNavigation();
-  const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images
-  const title = "starteryou-v2"; // Set the title for fetching and uploading
-  const [error, setError] = useState(null); // Error state for handling errors
-  const [hasFetchedOnce, setHasFetchedOnce] = useState(false); // State to track fetch attempt
 
-  const fetchUploadedFile = async () => {
-    if (hasFetchedOnce) return; // Prevent fetching again if already attempted
+  /**
+   * State for uploaded files
+   * @type {Array<string|null>}
+   */
+  const [uploadedFiles, setUploadedFiles] = useState([null, null, null]);
+
+  /**
+   * State for error handling
+   * @type {string|null}
+   */
+  const [error, setError] = useState(null);
+
+  /**
+   * State to track initial fetch
+   * @type {boolean}
+   */
+  const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
+
+  /**
+   * Image identifiers for backend storage
+   * @type {Array<string>}
+   */
+  const imageTitles = ["starteryou-v2", "starteryou-v2", "starteryou-v2"];
+
+  /**
+   * Fetches images from the server
+   * @async
+   * @function
+   * @returns {Promise<void>}
+   */
+  const fetchUploadedImages = async () => {
+    if (hasFetchedOnce) return;
 
     try {
-      const response = await fetch(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`
-      );
-      
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
+      const filePromises = imageTitles.map(async (title, index) => {
+        const response = await fetch(
+          `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`
+        );
+        if (!response.ok) throw new Error(`Network response was not ok for ${title}`);
 
-      const blob = await response.blob(); // Get the response as a Blob
-      const url = URL.createObjectURL(blob); // Create a local URL for the Blob
-      setUploadedFile(url); // Set the uploaded file data with its local URL
-      setError(null); // Reset error state on successful fetch
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        return { index, url };
+      });
+
+      const fetchedImages = await Promise.all(filePromises);
+      const updatedFiles = [...uploadedFiles];
+      fetchedImages.forEach(({ index, url }) => {
+        updatedFiles[index] = url;
+      });
+
+      setUploadedFiles(updatedFiles);
+      setError(null);
     } catch (error) {
-      console.error("Error fetching uploaded file:", error);
-      setError("Failed to load image"); // Set error message
+      console.error("Error fetching uploaded images:", error);
+      setError("Failed to load images");
     } finally {
-      setHasFetchedOnce(true); // Mark as fetch attempt made
+      setHasFetchedOnce(true);
     }
   };
 
+  // Initialize images on component mount
   useEffect(() => {
-    fetchUploadedFile(); // Fetch the specific image on component mount
+    fetchUploadedImages();
   }, []);
 
-  // Handle file upload
-  const handleFileChange = async (event) => {
+  /**
+   * Handles file upload
+   * @async
+   * @function
+   * @param {Event} event - File input change event
+   * @param {string} imageType - Image identifier
+   * @returns {Promise<void>}
+   */
+  const handleFileChange = async (event, imageType) => {
     const file = event.target.files[0];
     const formData = new FormData();
-    formData.append("file", file); // Append the file to the FormData
-    formData.append("title", title); // Include the title for the update
+    formData.append("file", file);
+    formData.append("title", imageType);
 
     try {
-      const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`, {
-        method: "PUT",
-        body: formData,
-      });
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(imageType)}`,
+        { 
+          method: "PUT", 
+          body: formData 
+        }
+      );
 
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
+      if (!response.ok) throw new Error(`Error updating image for ${imageType}`);
 
       const data = await response.json();
-      console.log("Image updated successfully:", data);
+      console.log(`Image updated successfully for ${imageType}:`, data);
 
-      setUploadedFile(URL.createObjectURL(file)); // Update the uploaded file state with the new image preview
-      setError(null); // Reset error state on successful upload
+      const updatedFiles = [...uploadedFiles];
+      const index = imageTitles.indexOf(imageType);
+      updatedFiles[index] = URL.createObjectURL(file);
+      setUploadedFiles(updatedFiles);
+      setError(null);
     } catch (error) {
-      console.error("Error updating image:", error);
-      setError("Error updating image"); // Set error message
+      console.error(`Error updating image for ${imageType}:`, error);
+      setError(`Error updating image for ${imageType}`);
     }
   };
 
   return (
-    <div className="flex items-center justify-center py-16 lg:mt-20 px-4 lg:px-0">
-      <div className="max-w-[1200px] h-auto w-full text-center">
-        <p className="text-3xl sm:text-4xl md:text-5xl font-bold lg:font-extrabold text-[#1F2329] mb-6">
-          idly samber masala vada
-        </p>
-        <div className="flex flex-col items-center mt-10">
-          {/* Icons for small screens */}
-          <div className="flex flex-col items-center space-y-4 sm:hidden">
-            <div className="flex flex-wrap justify-center space-x-6">
-              {icons.map(({src, alt, text, link}, index) => (
-                <a
-                  href={link}
-                  key={index}
-                  className="flex items-center mb-4 relative text-[#1F2329]"
-                >
-                  <img src={src} alt={alt} className="w-8 h-8" />
-                  <span className="ml-2 text-[9px] sm:text-sm italic font-light text-[#1F2329]">
-                    {text}
-                  </span>
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Icons for medium and large screens */}
-          <div className="hidden sm:flex flex-wrap justify-center space-x-6">
-            {icons.map(({src, alt, text}, index) => (
-              <div
-                key={index}
-                className="flex items-center mb-4 relative cursor-pointer text-[#1F2329]"
-              >
+    <div className="w-full py-16">
+      <div className="max-w-6xl mx-auto text-center">
+        <h2 className="text-3xl md:text-4xl font-medium mb-8 md:mb-12">Upcoming Features</h2>
+        <div className="w-full mx-auto max-w-[800px]">
+          <Carousel
+            showArrows={false}
+            showThumbs={false}
+            infiniteLoop={true}
+            autoPlay={true}
+            interval={3000}
+            showStatus={false}
+            emulateTouch={true}
+            swipeable={true}
+          >
+            {slidesData.map((slide, index) => (
+              <div key={index} className="relative">
                 <img
-                  src={src}
-                  alt={alt}
-                  className="w-[20px] h-[20px] md:w-[20px] md:h-[20px]"
+                  src={uploadedFiles[index] || "https://via.placeholder.com/800X600"}
+                  className="object-cover mx-auto px-4 lg:px-0"
+                  style={{ height: "400px", width: "100%" }}
+                  alt={`Slide ${index + 1}`}
                 />
-                <span className="ml-2 text-[9px] sm:text-sm italic text-[#1F2329]">
-                  {text}
-                </span>
+                {isAdmin && (
+                  <div className="absolute top-4 right-4">
+                    <label htmlFor={`file-upload-${index}`} className="cursor-pointer">
+                      <div className="w-12 h-12 rounded-full bg-blue-700 text-white flex items-center justify-center hover:bg-blue-600 transition-colors duration-300">
+                        <FontAwesomeIcon icon={faUpload} size="lg" />
+                      </div>
+                    </label>
+                    <input
+                      id={`file-upload-${index}`}
+                      type="file"
+                      onChange={(e) => handleFileChange(e, imageTitles[index])}
+                      className="hidden"
+                      aria-label="Upload Image"
+                    />
+                  </div>
+                )}
+                <div className="text-center mt-4 px-4">
+                  <h3 className="text-2xl font-bold">{slide.title}</h3>
+                  <p className="text-lg mt-2 text-[#767676]">{slide.description}</p>
+                </div>
               </div>
             ))}
-          </div>
-
-          {/* Image */}
-          <div className="w-[330px] h-[250px] md:w-[550px] lg:w-[1020px] lg:h-[550px] bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] rounded-t-2xl rounded-b-none overflow-hidden relative flex items-center justify-center lg:mt-5">
-            {uploadedFile ? (
-              <img
-                src={uploadedFile}
-                alt="Uploaded Image"
-                className="relative w-[235px] h-[220px] top-[25px] md:w-[380px] md:h-[200px] lg:w-[900px] lg:h-[460px] lg:top-[50px] object-cover rounded-t-2xl rounded-b-none"
-              />
-            ) : (
-              <img
-                src="/LandingPage/Rectangle.png"
-                alt="Placeholder"
-                className="relative w-[235px] h-[220px] top-[25px] md:w-[380px] md:h-[200px] lg:w-[900px] lg:h-[460px] lg:top-[50px] object-cover rounded-t-2xl rounded-b-none"
-              />
-            )}
-            {/* Admin file upload section */}
-            {isAdmin && <FileUpload handleFileChange={handleFileChange} />}
-          </div>
+          </Carousel>
         </div>
       </div>
     </div>

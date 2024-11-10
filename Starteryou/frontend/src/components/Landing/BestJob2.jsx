@@ -1,18 +1,56 @@
-import { useState, useEffect } from "react";
-import { useNavigation } from "../../context/NavigationContext";
+/**
+ * @module BestJob2
+ * @description A React component that displays promotional content with 
+ * image upload functionality and error handling
+ */
+
+import {useState, useEffect} from "react";
+import {useNavigation} from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
-import { API_CONFIG } from "@config/api";
-import { toast } from "react-toastify";
+import {API_CONFIG} from "@config/api";
+
+/**
+ * @typedef {Object} BestJob2State
+ * @property {string|null} uploadedFile - URL of the uploaded file
+ * @property {string|null} error - Error message if any
+ * @property {boolean} hasFetchedOnce - Track if file has been fetched
+ */
 
 const BestJob2 = () => {
   const { isAdmin } = useNavigation();
-  const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images
-  const title = "starteryou-v2"; // Set the title for fetching and uploading
-  const [error, setError] = useState(null); // Error state for handling errors
-  const [hasFetchedOnce, setHasFetchedOnce] = useState(false); // State to track fetch attempt
 
+  /**
+   * Uploaded file URL state
+   * @type {string|null}
+   */
+  const [uploadedFile, setUploadedFile] = useState(null);
+
+  /**
+   * Title identifier for file operations
+   * @type {string}
+   */
+  const title = "starteryou-v2";
+
+  /**
+   * Error message state
+   * @type {string|null}
+   */
+  const [error, setError] = useState(null);
+
+  /**
+   * Fetch tracking state
+   * @type {boolean}
+   */
+  const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
+
+  /**
+   * Fetches file from the server
+   * @async
+   * @function
+   * @returns {Promise<void>}
+   */
   const fetchUploadedFile = async () => {
-    if (hasFetchedOnce) return; // Prevent fetching again if already attempted
+    if (hasFetchedOnce) return;
 
     try {
       const response = await fetch(
@@ -23,34 +61,44 @@ const BestJob2 = () => {
         throw new Error("Network response was not ok");
       }
 
-      const blob = await response.blob(); // Get the response as a Blob
-      const url = URL.createObjectURL(blob); // Create a local URL for the Blob
-      setUploadedFile(url); // Set the uploaded file data with its local URL
-      setError(null); // Reset error state on successful fetch
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      setUploadedFile(url);
+      setError(null);
     } catch (error) {
       console.error("Error fetching uploaded file:", error);
-      setError("Failed to load image"); // Set error message
+      setError("Failed to load image");
     } finally {
-      setHasFetchedOnce(true); // Mark as fetch attempt made
+      setHasFetchedOnce(true);
     }
   };
 
+  // Initialize file on component mount
   useEffect(() => {
-    fetchUploadedFile(); // Fetch the specific image on component mount
+    fetchUploadedFile();
   }, []);
 
-  // Handle file upload
+  /**
+   * Handles file upload
+   * @async
+   * @function
+   * @param {Event} event - File input change event
+   * @returns {Promise<void>}
+   */
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     const formData = new FormData();
-    formData.append("file", file); // Append the file to the FormData
-    formData.append("title", title); // Include the title for the update
+    formData.append("file", file);
+    formData.append("title", title);
 
     try {
-      const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`, {
-        method: "PUT",
-        body: formData,
-      });
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`,
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -58,104 +106,71 @@ const BestJob2 = () => {
 
       const data = await response.json();
       console.log("Image updated successfully:", data);
-
-      setUploadedFile(URL.createObjectURL(file)); // Update the uploaded file state with the new image preview
-      setError(null); // Reset error state on successful upload
+      setUploadedFile(URL.createObjectURL(file));
+      setError(null);
     } catch (error) {
       console.error("Error updating image:", error);
-      setError("Error updating image"); // Set error message
+      setError("Error updating image");
     }
   };
 
-  const boxes = [
-    {
-      id: 0,
-      iconSrc: "/LandingPage/Icons/page 1.svg",
-      title: "Lorem Ipsum",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-    },
-    {
-      id: 1,
-      iconSrc: "/LandingPage/Icons/userr.svg",
-      title: "Learn from the best",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-    },
-  ];
+  /**
+   * Feature box data
+   * @type {Object}
+   */
+  const box = {
+    id: 0,
+    iconSrc: "/LandingPage/Icons/pen.png",
+    title: "Lorem Ipsum",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  };
 
   return (
-    <div className="container mx-auto max-w-[1300px] px-4 py-12">
+    <div className="container mx-auto max-w-[1200px] px-4 py-12 md:mb-10">
       <div className="flex flex-col lg:flex-row items-center justify-between lg:space-x-8">
-        {/* Image Display Section */}
-        <div className="relative order-2 lg:order-1 w-[330px] h-[250px] md:w-[500px] lg:w-[700px] lg:h-[550px] bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] rounded-xl overflow-hidden">
-          {/* Main Image */}
-          {uploadedFile ? (
-            <img
-              src={uploadedFile}
-              alt="Current Image"
-              className="relative w-[340px] h-[180px] top-[35px] left-[30px] md:w-[550px] md:top-[28px] md:left-[50px] lg:top-[78px] lg:left-[70px] lg:w-[680px] lg:h-[400px] rounded-xl"
-              style={{ transform: "rotate(-6.44deg)" }}
-              onError={() => {
-                setError("Failed to load image");
-                setUploadedFile(null);
-              }}
-            />
-          ) : (
-            <img
-              src="/LandingPage/Rectangle.png"
-              alt="Default Image"
-              className="relative w-[340px] h-[180px] top-[35px] left-[30px] md:w-[550px] md:top-[28px] md:left-[50px] lg:top-[78px] lg:left-[70px] lg:w-[680px] lg:h-[400px] rounded-xl"
-              style={{ transform: "rotate(-6.44deg)" }}
-            />
-          )}
-
-          {/* Admin Update Control */}
-          {isAdmin && (
-            <FileUpload handleFileChange={handleFileChange} />
-          )}
-
-          {/* Error Display */}
-          {error && (
-            <div className="absolute top-16 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-md shadow-md">
-              <p>{error}</p>
-              <button 
-                onClick={fetchUploadedFile}
-                className="text-[#6853E3] text-sm hover:underline mt-1"
-              >
-                Try Again
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Content Section */}
-        <div className="order-1 lg:order-2 md:w-full lg:w-1/3 w-full md:text-center lg:text-left mb-8 lg:mb-0">
+        {/* Left Section */}
+        <div className="md:w-full lg:w-1/2 w-full md:text-center lg:text-left mb-8 lg:mb-0">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-1 leading-tight">
-            Eww ipsum dolor sit amet.
+            Rohit ipsum dolor sit amet consectetur adipiscing.
           </h2>
-          <p className="text-gray-600 mb-2 md:text-lg">
-            Lorem ipsum dolor sit amet, consectetur adipiscing.
+          <p className="text-gray-600 mb-2 md:text-lg font-light">
+            Let us handle the grunt work so you can do the fun stuff.
           </p>
           <a href="#" className="text-[#7950F2] hover:underline font-medium">
             Request for demo &gt;
           </a>
 
-          {/* Feature Boxes */}
-          <div className="mt-8 flex flex-col md:flex-row md:justify-between lg:flex-col md:space-x-2 space-y-4 md:space-y-0 md:px-10 lg:space-x-0 lg:px-0">
-            {boxes.map((box) => (
-              <div
-                key={box.id}
-                className="p-4 rounded-xl cursor-pointer shadow-none md:w-[300px] md:h-[200px] lg:h-auto lg:w-auto"
-              >
-                <div className="flex items-center space-x-4">
-                  <img src={box.iconSrc} alt={box.title} className="w-8 h-8" />
-                  <h3 className="text-xl font-bold text-black">{box.title}</h3>
-                </div>
-                <p className="mt-4 text-gray-600 text-lg font-thin text-left">
-                  {box.description}
-                </p>
-              </div>
-            ))}
+          {/* Box */}
+          <div className="mt-8 p-4 rounded-xl shadow-[0px_10.19px_30.57px_10.19px_#1F23290A] md:w-[600px] md:mx-auto lg:h-auto lg:mx-0 lg:max-w-[500px]">
+            <div className="flex items-center space-x-4">
+              <img src={box.iconSrc} alt={box.title} className="w-8 h-8" />
+              <h3 className="text-xl font-bold text-[#7950F2]">{box.title}</h3>
+            </div>
+            <p className="mt-4 text-[#646A73] text-base font-light text-left">
+              {box.description}
+            </p>
           </div>
+        </div>
+
+        {/* Right Section */}
+        <div className="relative w-[330px] h-[300px] md:w-[550px] lg:w-[700px] lg:h-[550px] bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] rounded-xl overflow-hidden">
+          {uploadedFile ? (
+            <img
+              src={uploadedFile}
+              alt="Preview"
+              className="relative w-[340px] h-[190px] top-[66px] left-[-48px] md:w-[480px] md:h-[200px] md:top-[71px] md:left-[-20px] lg:top-[78px] lg:left-[-70px] lg:w-[680px] lg:h-[400px] rounded-xl"
+              style={{transform: "rotate(-10.22deg)"}}
+            />
+          ) : (
+            <img
+              src="/LandingPage/Rectangle.png"
+              alt="Job Opportunities"
+              className="relative w-[340px] h-[190px] top-[66px] left-[-48px] md:w-[480px] md:h-[200px] md:top-[71px] md:left-[-20px] lg:top-[78px] lg:left-[-70px] lg:w-[680px] lg:h-[400px] rounded-xl"
+              style={{transform: "rotate(-10.22deg)"}}
+            />
+          )}
+          {/* Admin file upload section */}
+          {isAdmin && <FileUpload handleFileChange={handleFileChange} />}
         </div>
       </div>
     </div>

@@ -1,12 +1,39 @@
-// backend/utils/mongoTester.js
+/**
+ * MongoTester class to test MongoDB connection, database operations, and network connectivity.
+ * 
+ * This utility class helps in verifying MongoDB connection and performing basic operations like
+ * write, read, and cleanup. It also provides network connectivity tests to ensure that the 
+ * MongoDB server is reachable from the application.
+ * 
+ * @module MongoTester
+ */
+
 const mongoose = require("mongoose");
 
+/**
+ * MongoTester class to handle MongoDB connection testing, basic database operations, 
+ * and network connectivity checks.
+ * 
+ * @class
+ */
 class MongoTester {
+  /**
+   * Creates an instance of MongoTester.
+   * 
+   * @param {string} uri - MongoDB URI to connect to the database. Defaults to `process.env.MONGODB_URI`.
+   */
   constructor(uri) {
     this.uri = uri || process.env.MONGODB_URI;
     this.isConnected = false;
   }
 
+  /**
+   * Tests the connection to the MongoDB server by attempting to connect and performing basic operations.
+   * 
+   * @async
+   * @returns {Promise<Object>} A promise that resolves to the connection status and details.
+   * @throws {Error} Throws error if the connection fails.
+   */
   async testConnection() {
     console.log("\n🔍 Testing MongoDB Connection...");
     console.log("URI:", this.uri);
@@ -58,6 +85,13 @@ class MongoTester {
     }
   }
 
+  /**
+   * Tests basic database operations: write, read, and cleanup.
+   * 
+   * @async
+   * @returns {Promise<void>} Resolves when the operations are successful.
+   * @throws {Error} Throws error if any of the operations fail.
+   */
   async testDatabaseOperations() {
     try {
       // Create temporary collection
@@ -70,11 +104,11 @@ class MongoTester {
       );
 
       // Test write
-      await TestModel.create({test: "connection_test", timestamp: new Date()});
+      await TestModel.create({ test: "connection_test", timestamp: new Date() });
       console.log("✅ Write operation successful");
 
       // Test read
-      await TestModel.findOne({test: "connection_test"});
+      await TestModel.findOne({ test: "connection_test" });
       console.log("✅ Read operation successful");
 
       // Cleanup
@@ -86,6 +120,13 @@ class MongoTester {
     }
   }
 
+  /**
+   * Tests network connectivity by attempting to connect to the specified MongoDB host and port.
+   * 
+   * @async
+   * @returns {Promise<Object>} A promise that resolves with the network connectivity status.
+   * @throws {Error} Throws error if the URI format is invalid.
+   */
   async testNetworkConnectivity() {
     try {
       const url = new URL(this.uri);
@@ -131,6 +172,12 @@ class MongoTester {
     }
   }
 
+  /**
+   * Prints troubleshooting guide based on the error encountered during MongoDB connection.
+   * 
+   * @param {Object} error - The error object returned by the failed connection attempt.
+   * @returns {void}
+   */
   printTroubleshootingGuide(error) {
     console.log("\n🔧 Troubleshooting Guide:");
 

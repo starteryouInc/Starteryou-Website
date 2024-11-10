@@ -1,9 +1,39 @@
-// routes/index.js
+/**
+ * API Routes for file management and system management endpoints.
+ * 
+ * This file contains routes and documentation for the following:
+ * - File Management API: APIs for file upload, download, update, delete, etc.
+ * - System Management API: APIs for system health and file verification.
+ * 
+ * The file uses Express router to define and serve the following endpoints:
+ * - File management routes (e.g., upload, download, update, delete)
+ * - System management routes (e.g., health check, file integrity check)
+ * - API documentation and Postman collection export.
+ * 
+ * @module apiRoutes
+ */
+
 const express = require('express');
 const router = express.Router();
 const fileRoutes = require('./fileRoutes');
 
 // Store all API endpoints and their descriptions
+/**
+ * @typedef {Object} Endpoint
+ * @property {string} method - The HTTP method (GET, POST, PUT, DELETE).
+ * @property {string} path - The URL path for the endpoint.
+ * @property {string} description - A description of the endpoint's purpose.
+ * @property {Object} [requestBody] - The request body, if applicable.
+ * @property {Object} responses - The possible responses for the endpoint.
+ * @property {Object} example - An example request, typically in `curl` format.
+ */
+
+/**
+ * Array of API endpoint groups.
+ * @type {Array<Object>}
+ * @property {string} group - The name of the API group (e.g., "File Management").
+ * @property {Array<Endpoint>} endpoints - The list of endpoints for this group.
+ */
 const apiEndpoints = [
   // File Management APIs
   {
@@ -227,9 +257,20 @@ const apiEndpoints = [
 ];
 
 // Mount file routes
+/**
+ * Mounts the file management routes and system routes to the Express app.
+ * 
+ * @param {Object} app - The Express app instance.
+ * @returns {void}
+ */
 router.use('/api/files', fileRoutes);
 
-// API documentation endpoint with enhanced information
+/**
+ * API documentation endpoint that returns all available endpoints and their details.
+ * 
+ * @route GET /api/docs
+ * @returns {Object} API documentation including endpoint descriptions, usage examples, and Postman collection.
+ */
 router.get('/api/docs', (req, res) => {
   const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
   
@@ -254,7 +295,12 @@ router.get('/api/docs', (req, res) => {
   });
 });
 
-// Postman collection export endpoint
+/**
+ * Endpoint that generates and serves the Postman collection for easy testing of the API.
+ * 
+ * @route GET /api/docs/postman
+ * @returns {Object} A Postman collection JSON for importing into Postman.
+ */
 router.get('/api/docs/postman', (req, res) => {
   const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
   
@@ -288,6 +334,11 @@ router.get('/api/docs/postman', (req, res) => {
 module.exports = { 
   router, 
   apiEndpoints,
+  /**
+   * Mounts the routes to the Express app
+   * 
+   * @param {Object} app - The Express app instance
+   */
   mountRoutes: (app) => {
     app.use('/', router);
     console.log('✅ Routes mounted successfully');

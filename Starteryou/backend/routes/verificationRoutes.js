@@ -1,11 +1,27 @@
-// routes/verificationRoutes.js
+/**
+ * Verification Routes for managing file metadata and GridFS health.
+ * 
+ * This module provides routes for verifying and repairing files stored in GridFS,
+ * checking metadata, and ensuring file integrity.
+ * 
+ * @module verificationRoutes
+ */
+
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const { ObjectId } = require("mongodb");
 const FileMetadata = require("../models/FileMetadata");
 
-// GET: Verify specific file
+/**
+ * Route to verify the integrity of a specific file by its title.
+ * Checks whether the file exists in GridFS, whether it has associated chunks,
+ * and whether it is healthy (i.e., has file data and chunks).
+ * 
+ * @route GET /api/system/verify/:title
+ * @param {string} req.params.title - The title of the file to verify.
+ * @returns {Object} JSON response with the file's verification details and health status.
+ */
 router.get("/verify/:title", async (req, res) => {
     try {
         // Find metadata
@@ -59,7 +75,14 @@ router.get("/verify/:title", async (req, res) => {
     }
 });
 
-// GET: Verify all files
+/**
+ * Route to verify the integrity of all files.
+ * Checks whether each file exists in GridFS, has chunks, and its overall health.
+ * Provides a summary of healthy and problematic files.
+ * 
+ * @route GET /api/system/verify-all
+ * @returns {Object} JSON response with a summary of all file verification results.
+ */
 router.get("/verify-all", async (req, res) => {
     try {
         const files = await FileMetadata.find({});
@@ -117,7 +140,15 @@ router.get("/verify-all", async (req, res) => {
     }
 });
 
-// POST: Repair file
+/**
+ * Route to repair a file's metadata if it's found to be missing information.
+ * The file's metadata will be updated with missing information from GridFS (if available),
+ * or orphaned metadata will be cleaned up if the file no longer exists in GridFS.
+ * 
+ * @route POST /api/system/repair/:title
+ * @param {string} req.params.title - The title of the file to repair.
+ * @returns {Object} JSON response indicating whether the file was repaired or orphaned metadata was deleted.
+ */
 router.post("/repair/:title", async (req, res) => {
     try {
         const metadata = await FileMetadata.findOne({ title: req.params.title });

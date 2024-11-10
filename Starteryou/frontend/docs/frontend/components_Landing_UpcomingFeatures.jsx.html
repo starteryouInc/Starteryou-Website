@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/Landing/UpcomingFeatures.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/Landing/UpcomingFeatures.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module UpcomingFeatures
+ * @description A React component that displays a carousel of upcoming features
+ * with image management capabilities
+ */
+
+import {useState, useEffect} from "react";
+import FileUpload from "../Common/FileUpload";
+import {useNavigation} from "../../context/NavigationContext";
+import {API_CONFIG} from "@config/api";
+import { Carousel } from "react-responsive-carousel";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUpload } from "@fortawesome/free-solid-svg-icons";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
+
+/**
+ * @typedef {Object} Slide
+ * @property {string} title - The title of the feature
+ * @property {string} description - Description of the feature
+ * @property {string} img - Image URL for the feature
+ */
+
+/**
+ * @type {Slide[]}
+ */
+const slidesData = [
+  {
+    title: "Get top Job analysis",
+    description: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do",
+    img: "",
+  },
+  {
+    title: "Get top Job analysis",
+    description: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do",
+    img: "",
+  },
+  {
+    title: "Get top Job analysis",
+    description: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do",
+    img: "",
+  },
+];
+
+/**
+ * @type {string[]}
+ */
+const imageTitles = ["starteryou-v2", "starteryou-v2", "starteryou-v2"];
+
+/**
+ * Upcoming Features component that displays a carousel of features with image management
+ * @returns {JSX.Element} The rendered component
+ */
+const UpcomingFeatures = () => {
+  const { isAdmin } = useNavigation();
+  
+  /**
+   * State for storing uploaded image URLs
+   * @type {Array&lt;string|null>}
+   */
+  const [uploadedFiles, setUploadedFiles] = useState([null, null, null]);
+  
+  /**
+   * State for storing error messages
+   * @type {string|null}
+   */
+  const [error, setError] = useState(null);
+  
+  /**
+   * State to track if initial fetch has been made
+   * @type {boolean}
+   */
+  const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
+
+  /**
+   * Fetches all carousel images from the backend
+   * @async
+   * @function
+   * @returns {Promise&lt;void>}
+   */
+  const fetchUploadedImages = async () => {
+    if (hasFetchedOnce) return;
+
+    try {
+      const filePromises = imageTitles.map(async (title, index) => {
+        const response = await fetch(
+          `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`
+        );
+        if (!response.ok) throw new Error(`Network response was not ok for ${title}`);
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        return { index, url };
+      });
+
+      const fetchedImages = await Promise.all(filePromises);
+      const updatedFiles = [...uploadedFiles];
+      fetchedImages.forEach(({ index, url }) => {
+        updatedFiles[index] = url;
+      });
+
+      setUploadedFiles(updatedFiles);
+      setError(null);
+    } catch (error) {
+      console.error("Error fetching uploaded images:", error);
+      setError("Failed to load images");
+    } finally {
+      setHasFetchedOnce(true);
+    }
+  };
+
+  // Initialize images on component mount
+  useEffect(() => {
+    fetchUploadedImages();
+  }, []);
+
+  /**
+   * Handles file upload for a specific image slot
+   * @async
+   * @function
+   * @param {Event} event - The file input change event
+   * @param {string} imageType - The type/identifier of the image being updated
+   * @returns {Promise&lt;void>}
+   */
+  const handleFileChange = async (event, imageType) => {
+    const file = event.target.files[0];
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("title", imageType);
+
+    try {
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(imageType)}`,
+        { method: "PUT", body: formData }
+      );
+
+      if (!response.ok) throw new Error(`Error updating image for ${imageType}`);
+
+      const data = await response.json();
+      console.log(`Image updated successfully for ${imageType}:`, data);
+
+      const updatedFiles = [...uploadedFiles];
+      const index = imageTitles.indexOf(imageType);
+      updatedFiles[index] = URL.createObjectURL(file);
+      setUploadedFiles(updatedFiles);
+      setError(null);
+    } catch (error) {
+      console.error(`Error updating image for ${imageType}:`, error);
+      setError(`Error updating image for ${imageType}`);
+    }
+  };
+
+  return (
+    &lt;div className="w-full py-16">
+      &lt;div className="max-w-6xl mx-auto text-center">
+        &lt;h2 className="text-3xl md:text-4xl font-medium mb-8 md:mb-12">
+          Upcoming Features
+        &lt;/h2>
+        &lt;div className="w-full mx-auto max-w-[800px]">
+          &lt;Carousel
+            showArrows={false}
+            showThumbs={false}
+            infiniteLoop={true}
+            autoPlay={true}
+            interval={3000}
+            showStatus={false}
+            emulateTouch={true}
+            swipeable={true}
+          >
+            {slidesData.map((slide, index) => (
+              &lt;div key={index} className="relative">
+                &lt;img
+                  src={uploadedFiles[index] || "https://via.placeholder.com/800X600"}
+                  className="object-cover mx-auto px-4 lg:px-0"
+                  style={{ height: "400px", width: "100%" }}
+                  alt={`Slide ${index + 1}`}
+                />
+                {/* Admin Upload Controls */}
+                {isAdmin &amp;&amp; (
+                  &lt;div className="absolute top-4 right-4">
+                    &lt;label htmlFor={`file-upload-${index}`} className="cursor-pointer">
+                      &lt;div className="w-12 h-12 rounded-full bg-blue-700 text-white flex items-center justify-center hover:bg-blue-600 transition-colors duration-300">
+                        &lt;FontAwesomeIcon icon={faUpload} size="lg" />
+                      &lt;/div>
+                    &lt;/label>
+                    &lt;input
+                      id={`file-upload-${index}`}
+                      type="file"
+                      onChange={(e) => handleFileChange(e, imageTitles[index])}
+                      className="hidden"
+                      aria-label="Upload Image"
+                    />
+                  &lt;/div>
+                )}
+                {/* Slide Content */}
+                &lt;div className="text-center mt-4 px-4">
+                  &lt;h3 className="text-2xl font-bold">{slide.title}&lt;/h3>
+                  &lt;p className="text-lg mt-2 text-[#767676]">{slide.description}&lt;/p>
+                &lt;/div>
+              &lt;/div>
+            ))}
+          &lt;/Carousel>
+        &lt;/div>
+      &lt;/div>
+    &lt;/div>
+  );
+};
+
+export default UpcomingFeatures;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-API_CONFIG.html">API_CONFIG</a></li><li><a href="module-Banner.html">Banner</a></li><li><a href="module-BestBuddy.html">BestBuddy</a></li><li><a href="module-BestJob.html">BestJob</a></li><li><a href="module-BestJob2.html">BestJob2</a></li><li><a href="module-BestJob3.html">BestJob3</a></li><li><a href="module-BestJob4.html">BestJob4</a></li><li><a href="module-Blog.html">Blog</a></li><li><a href="module-Collab.html">Collab</a></li><li><a href="module-Contact.html">Contact</a></li><li><a href="module-Hero.html">Hero</a></li><li><a href="module-Pricing.html">Pricing</a></li><li><a href="module-UpcomingFeatures.html">UpcomingFeatures</a></li><li><a href="module-useFileOperations.html">useFileOperations</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Nov 10 2024 16:05:25 GMT-0500 (Eastern Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

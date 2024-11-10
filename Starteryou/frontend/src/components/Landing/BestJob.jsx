@@ -1,63 +1,111 @@
+/**
+ * @module BestJob
+ * @description A React component that manages and displays job-related content 
+ * with multiple image upload functionality and error handling
+ */
+
 import {useState, useEffect} from "react";
-import FileUpload from "../Common/FileUpload";
 import {useNavigation} from "../../context/NavigationContext";
+import FileUpload from "../Common/FileUpload";
 import {API_CONFIG} from "@config/api";
+
+/**
+ * @typedef {Object} ImageData
+ * @property {string} image1 - First image URL
+ * @property {string} image2 - Second image URL
+ * @property {string|null} error - Error message if any
+ * @property {boolean} hasFetchedOnce - Track if images have been fetched
+ */
+
 const BestJob = () => {
   const { isAdmin } = useNavigation();
-  const [image1, setImage1] = useState("/LandingPage/Rectangle.png");
-  const [image2, setImage2] = useState("/LandingPage/Heroimg2.jpg");
-  const [error, setError] = useState(null); // Error state for handling errors
-  const [hasFetchedOnce, setHasFetchedOnce] = useState(false); // State to track if fetch attempt is made
 
+  /**
+   * First image URL state
+   * @type {string}
+   */
+  const [image1, setImage1] = useState("/LandingPage/Rectangle.png");
+
+  /**
+   * Second image URL state
+   * @type {string}
+   */
+  const [image2, setImage2] = useState("/LandingPage/Heroimg2.jpg");
+
+  /**
+   * Error message state
+   * @type {string|null}
+   */
+  const [error, setError] = useState(null);
+
+  /**
+   * Fetch tracking state
+   * @type {boolean}
+   */
+  const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
+
+  /**
+   * Image identifiers for backend
+   * @type {string[]}
+   */
   const titles = ["starteryou-v2", "starteryou-v2"];
-  
-  // Fetch uploaded files for each image (image1 and image2)
-  const fetchUploadedImages = async () => {
-    if (hasFetchedOnce) return; // Prevent fetching again if already attempted
-  
+
+  /**
+   * Fetches images from the server
+   * @async
+   * @function
+   * @returns {Promise<void>}
+   */
+  const fetchImages = async () => {
+    if (hasFetchedOnce) return;
+
     try {
-      // Fetch the image1
+      // Fetch first image
       const response1 = await fetch(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload("starteryou-v2")}`
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(titles[0])}`
       );
-      if (!response1.ok) {
-        throw new Error("Network response was not ok for image1");
-      }
-      const blob1 = await response1.blob(); // Get the response as a Blob
-      const url1 = URL.createObjectURL(blob1); // Create a local URL for the Blob
-      setImage1(url1); // Set the uploaded image1 URL
-  
-      // Fetch the image2
+      if (!response1.ok) throw new Error("Network response was not ok for image1");
+      const blob1 = await response1.blob();
+      const url1 = URL.createObjectURL(blob1);
+      setImage1(url1);
+
+      // Fetch second image
       const response2 = await fetch(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload("starteryou-v2")}`
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(titles[1])}`
       );
-      if (!response2.ok) {
-        throw new Error("Network response was not ok for image2");
-      }
-      const blob2 = await response2.blob(); // Get the response as a Blob
-      const url2 = URL.createObjectURL(blob2); // Create a local URL for the Blob
-      setImage2(url2); // Set the uploaded image2 URL
-  
-      setError(null); // Reset error state on successful fetch
+      if (!response2.ok) throw new Error("Network response was not ok for image2");
+      const blob2 = await response2.blob();
+      const url2 = URL.createObjectURL(blob2);
+      setImage2(url2);
+
+      setError(null);
     } catch (error) {
       console.error("Error fetching uploaded images:", error);
-      setError("Failed to load images"); // Set error message
+      setError("Failed to load images");
     } finally {
-      setHasFetchedOnce(true); // Mark as fetch attempt made
+      setHasFetchedOnce(true);
     }
   };
-  
+
+  // Initialize images on component mount
   useEffect(() => {
-    fetchUploadedImages(); // Fetch images on component mount
+    fetchImages();
   }, []);
-  
-  // Handle file upload for each image
+
+  /**
+   * Handles file upload for specified image
+   * @async
+   * @function
+   * @param {Event} event - File input change event
+   * @param {string} imageType - Image identifier
+   * @returns {Promise<void>}
+   */
   const handleFileChange = async (event, imageType) => {
     const file = event.target.files[0];
     const formData = new FormData();
-    formData.append("file", file); // Append the file to the FormData
-    formData.append("title", imageType); // Include the title for the update
-  
+    formData.append("file", file);
+    formData.append("title", imageType);
+
     try {
       const response = await fetch(
         `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(imageType)}`,
@@ -66,27 +114,26 @@ const BestJob = () => {
           body: formData,
         }
       );
-  
-      if (!response.ok) {
-        throw new Error(`Error updating image for ${imageType}`);
-      }
-  
+
+      if (!response.ok) throw new Error(`Error updating image for ${imageType}`);
+
       const data = await response.json();
       console.log(`Image updated successfully for ${imageType}:`, data);
-  
-      // Update the specific image URL in the state
-      if (imageType === "image1") {
+
+      // Update specific image state
+      if (imageType === titles[0]) {
         setImage1(URL.createObjectURL(file));
-      } else if (imageType === "image2") {
+      } else {
         setImage2(URL.createObjectURL(file));
       }
-  
-      setError(null); // Reset error state on successful upload
+
+      setError(null);
     } catch (error) {
       console.error(`Error updating image for ${imageType}:`, error);
-      setError(`Error updating image for ${imageType}`); // Set error message
+      setError(`Error updating image for ${imageType}`);
     }
   };
+
   return (
     <div className="container mx-auto max-w-[1300px] px-4 py-12">
       <div className="flex flex-col lg:flex-row items-center justify-between lg:space-x-8">
