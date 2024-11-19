@@ -34,7 +34,7 @@ const Hero = () => {
         setImage3(responses[2]);
       } catch (error) {
         console.error("Error fetching images:", error);
-        toast.error("Failed to load images");  // Show error toast
+        toast.error("Failed to load images"); // Show error toast
       }
     };
     fetchImages();
@@ -62,7 +62,7 @@ const Hero = () => {
       toast.success(`Image updated successfully for ${title}`); // Success toast
     } catch (error) {
       console.error("Error updating image:", error);
-      toast.error(`Error updating image for ${title}`);  // Error toast
+      toast.error(`Error updating image for ${title}`); // Error toast
     }
   };
 
@@ -97,7 +97,7 @@ const Hero = () => {
 
       {/* Main Heading */}
       <h1 className="font-bold text-[40px] sm:text-[64px] leading-tight text-black uppercase z-10 pt-[190px]">
-        Collaborate Together - 1
+        Collaborate Together
       </h1>
 
       {/* doodle2 */}

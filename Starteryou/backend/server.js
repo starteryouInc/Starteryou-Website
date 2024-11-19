@@ -3,11 +3,11 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
-const {mountRoutes} = require("./routes"); // Main routes including API docs
+const { mountRoutes } = require("./routes"); // Main routes including API docs
 const fileRoutes = require("./routes/fileRoutes"); // File handling routes
+const textRoutes = require("./routes/textRoutes");
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 require("dotenv").config();
-
 
 // Initialize express app
 const app = express();
@@ -15,7 +15,7 @@ const app = express();
 // Basic middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
 // API Request Logger Middleware
@@ -34,7 +34,8 @@ app.use(requestLogger);
 app.use("/api/files", fileRoutes);
 app.use("/api/system", verificationRoutes);
 mountRoutes(app); // This mounts the main routes including API docs
-
+//Text routes
+app.use("/api", textRoutes); // Add the prefix here
 // MongoDB Connection Configuration
 mongoose.set("strictQuery", false);
 
@@ -52,7 +53,8 @@ const connectWithRetry = () => {
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
       family: 4,
-      connectTimeoutMS: 10000,    })
+      connectTimeoutMS: 10000,
+    })
     .then(() => {
       console.log("✅ MongoDB Connected Successfully!");
       // Accessing `databaseName` and `host` safely after connection is established
