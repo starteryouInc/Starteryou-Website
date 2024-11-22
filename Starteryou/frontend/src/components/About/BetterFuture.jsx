@@ -8,6 +8,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 
+/**
+ * `BetterFuture` Component
+ *
+ * A component that displays a video with play/pause functionality, dynamic heading and paragraph content, and allows admins to edit and save the content.
+ * The content is fetched from an API on mount, and updates are saved back to the API.
+ */
 const BetterFuture = () => {
   // State to control video play/pause
   const [isPlaying, setIsPlaying] = useState(false);
@@ -35,7 +41,10 @@ const BetterFuture = () => {
   // Check if the user is an admin
   const { isAdmin } = useNavigation();
 
-  // Fetch text content from the API when the component mounts
+  /**
+   * Fetches the text content from the backend API.
+   * Updates the heading and paragraph states with the fetched data.
+   */
   useEffect(() => {
     const fetchTextContent = async () => {
       try {
@@ -55,7 +64,9 @@ const BetterFuture = () => {
     fetchTextContent(); // Trigger the fetch function
   }, []); // Dependency array is empty, so this runs only once
 
-  // Toggle play/pause for the video
+  /**
+   * Toggles the play/pause state of the video.
+   */
   const handlePlayPause = () => {
     if (isPlaying) {
       videoRef.current.pause(); // Pause video if playing
@@ -65,12 +76,17 @@ const BetterFuture = () => {
     setIsPlaying(!isPlaying); // Toggle play state
   };
 
-  // Toggle editing mode
+  /**
+   * Toggles the edit mode for the content (heading and paragraphs).
+   */
   const handleEditToggle = () => {
     setIsEditing(!isEditing);
   };
 
-  // Save updated content to the API
+  /**
+   * Saves the updated content to the backend API.
+   * Sends the content and paragraphs to the backend.
+   */
   const saveContent = async () => {
     try {
       await axios.put("http://localhost:3000/api/text", {
@@ -227,7 +243,7 @@ const BetterFuture = () => {
                         className="text-xl text-left font-semibold text-[#252B42] border border-gray-300 p-2 rounded w-full"
                       />
                       <textarea
-                        value={paragraphs[titleIndex + 1]} // Description input
+                        value={paragraphs[titleIndex + 1]} // Paragraph input
                         onChange={(e) => {
                           const updated = [...paragraphs];
                           updated[titleIndex + 1] = e.target.value;
@@ -251,18 +267,18 @@ const BetterFuture = () => {
               </div>
             ))}
           </div>
+
+          {/* Save Button for admins */}
+          {isAdmin && isEditing && (
+            <button
+              onClick={saveContent} // Save changes to API
+              className="mt-6 px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-md"
+            >
+              Save
+            </button>
+          )}
         </div>
       </div>
-
-      {/* Save button for editing */}
-      {isEditing && (
-        <button
-          onClick={saveContent} // Save changes to API
-          className="mt-6 px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-md"
-        >
-          Save Changes
-        </button>
-      )}
     </div>
   );
 };

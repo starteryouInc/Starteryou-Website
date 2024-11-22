@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const fileRoutes = require("./fileRoutes");
-
+const textRoutes = require("./textRoutes.js");
 // Store all API endpoints and their descriptions
 const apiEndpoints = [
   // File Management APIs
@@ -224,35 +224,162 @@ const apiEndpoints = [
       },
     ],
   },
+  // Text Content Management APIs
+  {
+    group: "Text Content Management",
+    endpoints: [
+      {
+        method: "GET",
+        path: "/api/text",
+        description: "Retrieve text content for a specific component",
+        parameters: {
+          component: {
+            in: "query",
+            required: true,
+            type: "string",
+            description: "Name of the component to retrieve content for",
+          },
+        },
+        responses: {
+          200: {
+            description: "Content retrieved successfully",
+            content: {
+              component: "string",
+              content: "string",
+              paragraphs: ["string"],
+              createdAt: "date",
+              updatedAt: "date",
+            },
+          },
+          400: {
+            description: "Missing component parameter",
+          },
+          404: {
+            description: "Content not found for the specified component",
+          },
+          500: {
+            description: "Server error during retrieval",
+          },
+        },
+        example: {
+          curl: 'curl "http://localhost:5000/api/text?component=OurMission"',
+        },
+      },
+      {
+        method: "PUT",
+        path: "/api/text",
+        description: "Update or create text content for a specific component",
+        requestBody: {
+          type: "application/json",
+          fields: {
+            component: {
+              type: "string",
+              required: true,
+              description: "Name of the component to update",
+            },
+            content: {
+              type: "string",
+              required: false,
+              description: "Text content to update (optional)",
+            },
+            paragraphs: {
+              type: ["string"],
+              required: false,
+              description: "Paragraphs to update (optional)",
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: "Content updated successfully",
+            content: {
+              component: "string",
+              content: "string",
+              paragraphs: ["string"],
+              createdAt: "date",
+              updatedAt: "date",
+            },
+          },
+          400: {
+            description: "Invalid request body",
+          },
+          500: {
+            description: "Server error during update",
+          },
+        },
+        example: {
+          curl: `curl -X PUT http://localhost:5000/api/text \
+          -H "Content-Type: application/json" \
+          -d '{"component": "OurMission", "content": "New content here", "paragraphs": ["Updated paragraph 1", "Updated paragraph 2"]}'`,
+        },
+      },
+      {
+        method: "DELETE",
+        path: "/api/text",
+        description: "Delete text content for a specific component",
+        parameters: {
+          component: {
+            in: "query",
+            required: true,
+            type: "string",
+            description: "Name of the component to delete",
+          },
+        },
+        responses: {
+          200: {
+            description: "Content deleted successfully",
+          },
+          400: {
+            description: "Missing component parameter",
+          },
+          404: {
+            description: "Content not found for the specified component",
+          },
+          500: {
+            description: "Server error during deletion",
+          },
+        },
+        example: {
+          curl: 'curl -X DELETE "http://localhost:5000/api/text?component=OurMission"',
+        },
+      },
+    ],
+  },
 ];
 
-// Mount file routes
+// Mount routes
 router.use("/api/files", fileRoutes);
+router.use("/api/text", textRoutes);
 
+// API documentation endpoint with enhanced information
 // API documentation endpoint with enhanced information
 router.get("/api/docs", (req, res) => {
   const baseUrl =
     process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
 
   res.json({
-    title: "File Management API Documentation",
+    title: "Enhanced API Documentation",
     version: "1.0.0",
     baseUrl,
-    description: "API for managing file uploads with metadata using GridFS",
+    description:
+      "API for managing files and text content with metadata using GridFS",
     totalEndpoints: apiEndpoints.reduce(
       (total, group) => total + group.endpoints.length,
       0
     ),
     apiGroups: apiEndpoints,
     generalNotes: [
-      "All file operations use titles as unique identifiers",
-      "Maximum file size: 10MB",
-      "Supported file types: All",
-      "Authentication: Not implemented (add as needed)",
-      "Rate limiting: Not implemented (add as needed)",
+      "Components are used as unique identifiers for text content.",
+      "All file operations use titles as unique identifiers.",
+      "Maximum file size: 10MB.",
+      "Supported file types: All (e.g., PDFs, images, videos).",
+      "Authentication: Not implemented (add as needed).",
+      "Rate limiting: Not implemented (add as needed).",
+      "Data persistence: Uses MongoDB with GridFS for file storage.",
     ],
     postmanCollection: {
-      description: "Import the Postman collection for easy testing",
+      description:
+        "Import the Postman collection for easy API testing and exploration.",
       url: `${baseUrl}/api/docs/postman`,
     },
   });
@@ -265,8 +392,8 @@ router.get("/api/docs/postman", (req, res) => {
 
   const postmanCollection = {
     info: {
-      name: "File Management API",
-      description: "API collection for file management system",
+      name: "File & Text Management API",
+      description: "API collection for managing files and text content.",
       schema:
         "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     },
@@ -277,7 +404,7 @@ router.get("/api/docs/postman", (req, res) => {
           method: endpoint.method,
           url: {
             raw: `${baseUrl}${endpoint.path}`,
-            host: [baseUrl],
+            host: [baseUrl.replace(/https?:\/\//, "").split(":")[0]], // Host only
             path: endpoint.path.split("/").filter(Boolean),
           },
           description: endpoint.description,

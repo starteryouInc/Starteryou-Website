@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "docs": "jsdoc -c jsdoc.conf.json",
+    "docs:frontend": "jsdoc -c jsdoc.conf.json",
+    "docs:backend": "swagger-ui-express",
+    "docs:generate": "npm run docs:frontend && npm run docs:backend"
   },
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^6.6.0",

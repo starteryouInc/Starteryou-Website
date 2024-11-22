@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: TechTeam.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: TechTeam.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * `TechTeam` component that displays information about the tech team, including an editable header, intro paragraph,
  * and team member details. The content can be fetched from an API and saved back with editing enabled only for admins.
  *
@@ -96,7 +124,7 @@ const TechTeam = () => {
 
   /**
    * Team member data array.
-   * @type {Array<{imgSrc: string, position: string, name: string, about: string}>}
+   * @type {Array&lt;{imgSrc: string, position: string, name: string, about: string}>}
    */
   const teamMembers = [
     {
@@ -114,13 +142,13 @@ const TechTeam = () => {
   ];
 
   return (
-    <div className="flex flex-col items-center py-12 px-4">
+    &lt;div className="flex flex-col items-center py-12 px-4">
       {/* Header Section */}
-      <div className="flex items-center justify-center mb-4">
+      &lt;div className="flex items-center justify-center mb-4">
         {/* Editable content header */}
-        <h2 className="text-2xl text-[#252B42] md:text-4xl font-bold text-center mr-2">
+        &lt;h2 className="text-2xl text-[#252B42] md:text-4xl font-bold text-center mr-2">
           {isEditing ? (
-            <input
+            &lt;input
               type="text"
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -129,22 +157,22 @@ const TechTeam = () => {
           ) : (
             content
           )}
-        </h2>
+        &lt;/h2>
 
         {/* Edit/Save button visible to admin */}
-        {isAdmin && (
-          <FontAwesomeIcon
+        {isAdmin &amp;&amp; (
+          &lt;FontAwesomeIcon
             icon={isEditing ? faSave : faPencilAlt} // Toggle icon based on editing state
             className="text-blue-500 cursor-pointer"
             onClick={isEditing ? saveContent : () => setIsEditing(true)} // Handle click events
           />
         )}
-      </div>
+      &lt;/div>
 
       {/* Intro Paragraph Section */}
-      <p className="text-center text-[#737373] mb-10 max-w-lg">
+      &lt;p className="text-center text-[#737373] mb-10 max-w-lg">
         {isEditing ? (
-          <textarea
+          &lt;textarea
             value={paragraphs[0] || ""}
             onChange={(e) =>
               setParagraphs((prev) => {
@@ -159,26 +187,26 @@ const TechTeam = () => {
           paragraphs[0] ||
           "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
         )}
-      </p>
+      &lt;/p>
 
       {/* Team Members Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+      &lt;div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
         {teamMembers.map((member, index) => (
-          <div
+          &lt;div
             key={index}
             className="flex flex-col items-center p-6 bg-white max-w-sm"
           >
             {/* Member Image */}
-            <img
+            &lt;img
               src={member.imgSrc}
               alt={member.name}
               className="w-24 h-24 rounded-full mb-4"
             />
 
             {/* Member Details */}
-            <h3 className="text-xl font-semibold text-[#2C9DDD]">
+            &lt;h3 className="text-xl font-semibold text-[#2C9DDD]">
               {isEditing ? (
-                <input
+                &lt;input
                   type="text"
                   value={paragraphs[index * 3 + 1] || ""}
                   onChange={(e) =>
@@ -193,11 +221,11 @@ const TechTeam = () => {
               ) : (
                 member.position
               )}
-            </h3>
+            &lt;/h3>
 
-            <p className="text-lg font-semibold text-[#252B42]">
+            &lt;p className="text-lg font-semibold text-[#252B42]">
               {isEditing ? (
-                <input
+                &lt;input
                   type="text"
                   value={paragraphs[index * 3 + 2] || ""}
                   onChange={(e) =>
@@ -212,11 +240,11 @@ const TechTeam = () => {
               ) : (
                 member.name
               )}
-            </p>
+            &lt;/p>
 
-            <p className="text-center text-[#737373] mt-2">
+            &lt;p className="text-center text-[#737373] mt-2">
               {isEditing ? (
-                <textarea
+                &lt;textarea
                   value={paragraphs[index * 3 + 3] || ""}
                   onChange={(e) =>
                     setParagraphs((prev) => {
@@ -230,12 +258,35 @@ const TechTeam = () => {
               ) : (
                 member.about
               )}
-            </p>
-          </div>
+            &lt;/p>
+          &lt;/div>
         ))}
-      </div>
-    </div>
+      &lt;/div>
+    &lt;/div>
   );
 };
 
 export default TechTeam;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-BetterFuture.html">BetterFuture</a></li><li><a href="module-OurVision.html">OurVision</a></li></ul><h3>Global</h3><ul><li><a href="global.html#HeroAbout">HeroAbout</a></li><li><a href="global.html#OurMission">OurMission</a></li><li><a href="global.html#Team">Team</a></li><li><a href="global.html#TechTeam">TechTeam</a></li><li><a href="global.html#saveContent">saveContent</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri Nov 22 2024 11:43:58 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
