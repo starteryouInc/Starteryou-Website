@@ -1,4 +1,32 @@
-import { useState, useEffect } from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Team.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Team.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { useState, useEffect } from "react";
 import axios from "axios";
 import { FiEdit2 } from "react-icons/fi";
 import { useNavigation } from "../../context/NavigationContext";
@@ -12,13 +40,13 @@ import { useNavigation } from "../../context/NavigationContext";
  * @component
  * @example
  * return (
- *   <Team />
+ *   &lt;Team />
  * )
  */
 const Team = () => {
   /**
    * Initial data for team members. Used as fallback if no data is fetched.
-   * @type {Array<Object>}
+   * @type {Array&lt;Object>}
    * @property {string} imgSrc - The image source URL of the team member.
    * @property {string} position - The position or title of the team member.
    * @property {string} name - The name of the team member.
@@ -82,7 +110,7 @@ const Team = () => {
               params: { component: member.position },
             });
 
-            if (response.data && response.data.component) {
+            if (response.data &amp;&amp; response.data.component) {
               return {
                 imgSrc: response.data.image || member.imgSrc, // Use fetched image or fallback to initial.
                 position: response.data.component,
@@ -142,65 +170,65 @@ const Team = () => {
   };
 
   return (
-    <div className="bg-white py-20 px-4 text-center">
-      <h2 className="text-2xl text-[#252B42] md:text-4xl font-bold mb-8 md:mb-10">
+    &lt;div className="bg-white py-20 px-4 text-center">
+      &lt;h2 className="text-2xl text-[#252B42] md:text-4xl font-bold mb-8 md:mb-10">
         Meet Our Team
-      </h2>
+      &lt;/h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center max-w-[930px] mx-auto">
+      &lt;div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center max-w-[930px] mx-auto">
         {teamMembers.map((member, index) => (
-          <div
+          &lt;div
             key={index}
             className="flex flex-col items-center bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] p-6 shadow-md h-[350px] rounded-md relative"
           >
-            <img
+            &lt;img
               src={member.imgSrc}
               alt={member.name}
               className="w-28 h-28 rounded-full object-cover mb-4"
             />
-            <h3 className="text-xl font-semibold text-[#D9502E] mb-2">
+            &lt;h3 className="text-xl font-semibold text-[#D9502E] mb-2">
               {member.position}
-            </h3>
+            &lt;/h3>
 
             {editingIndex === index ? (
-              <>
-                <input
+              &lt;>
+                &lt;input
                   className="text-lg font-semibold border-b-2 border-[#252B42] mb-2 outline-none"
                   value={editingData.name}
                   onChange={(e) =>
                     setEditingData({ ...editingData, name: e.target.value })
                   }
                 />
-                <textarea
+                &lt;textarea
                   className="text-gray-600 border-b-2 border-[#252B42] w-full outline-none"
                   value={editingData.about}
                   onChange={(e) =>
                     setEditingData({ ...editingData, about: e.target.value })
                   }
                 />
-                <button
+                &lt;button
                   className="mt-4 bg-[#252B42] text-white py-1 px-4 rounded"
                   onClick={() => saveUpdatedData(index)}
                 >
                   Save
-                </button>
-                <button
+                &lt;/button>
+                &lt;button
                   className="mt-2 text-red-500"
                   onClick={() => setEditingIndex(null)}
                 >
                   Cancel
-                </button>
-              </>
+                &lt;/button>
+              &lt;/>
             ) : (
-              <>
-                <p className="text-lg mb-3 font-semibold text-[#252B42]">
+              &lt;>
+                &lt;p className="text-lg mb-3 font-semibold text-[#252B42]">
                   {member.name}
-                </p>
-                <p className="text-gray-600">{member.about}</p>
-              </>
+                &lt;/p>
+                &lt;p className="text-gray-600">{member.about}&lt;/p>
+              &lt;/>
             )}
-            {isAdmin && (
-              <FiEdit2
+            {isAdmin &amp;&amp; (
+              &lt;FiEdit2
                 className="absolute top-4 right-4 text-[#252B42] cursor-pointer"
                 onClick={() => {
                   setEditingIndex(index);
@@ -208,11 +236,34 @@ const Team = () => {
                 }}
               />
             )}
-          </div>
+          &lt;/div>
         ))}
-      </div>
-    </div>
+      &lt;/div>
+    &lt;/div>
   );
 };
 
 export default Team;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-BetterFuture.html">BetterFuture</a></li><li><a href="module-OurVision.html">OurVision</a></li></ul><h3>Global</h3><ul><li><a href="global.html#HeroAbout">HeroAbout</a></li><li><a href="global.html#OurMission">OurMission</a></li><li><a href="global.html#Team">Team</a></li><li><a href="global.html#TechTeam">TechTeam</a></li><li><a href="global.html#saveContent">saveContent</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri Nov 22 2024 11:43:58 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

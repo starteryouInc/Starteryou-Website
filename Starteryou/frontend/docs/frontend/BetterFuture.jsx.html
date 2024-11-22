@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: BetterFuture.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: BetterFuture.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * BetterFuture Component
+ *
+ * A dynamic and editable component that includes a video player and text sections.
+ * This component allows toggling between view and edit modes for content updates,
+ * and integrates with an API to fetch and save text content.
+ *
+ * @module BetterFuture
+ * @requires react
+ * @requires axios
+ * @requires FontAwesomeIcon
+ * @requires useNavigation
+ */
+
+import { useState, useEffect, useRef } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useNavigation } from "../../context/NavigationContext";
+import {
+  faPlay,
+  faPause,
+  faPencilAlt,
+} from "@fortawesome/free-solid-svg-icons";
+import axios from "axios";
+
+/**
+ * Main functional component for BetterFuture.
+ *
+ * @function BetterFuture
+ * @returns {JSX.Element} Rendered BetterFuture component.
+ */
+const BetterFuture = () => {
+  /**
+   * State to control the play/pause state of the video.
+   * @type {boolean}
+   */
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  /**
+   * State to manage the main heading text content.
+   * @type {string}
+   */
+  const [content, setContent] = useState("Build Better Future");
+
+  /**
+   * State to manage the paragraph contents displayed in the component.
+   * @type {string[]}
+   */
+  const [paragraphs, setParagraphs] = useState([
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "Most trusted in our field",
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "Title 1",
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    "Title 2",
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  ]);
+
+  /**
+   * State to toggle between view and edit modes.
+   * @type {boolean}
+   */
+  const [isEditing, setIsEditing] = useState(false);
+
+  /**
+   * Reference to the video element for controlling playback.
+   * @type {React.RefObject&lt;HTMLVideoElement>}
+   */
+  const videoRef = useRef(null);
+
+  /**
+   * Checks if the user is an admin from the NavigationContext.
+   * @type {boolean}
+   */
+  const { isAdmin } = useNavigation();
+
+  /**
+   * Fetches the text content for the component from the API when the component mounts.
+   * Updates the content and paragraphs state with the fetched data.
+   *
+   * @function fetchTextContent
+   * @async
+   */
+  useEffect(() => {
+    const fetchTextContent = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/text", {
+          params: { component: "BetterFuture" },
+        });
+
+        const { content, paragraphs } = response.data;
+        setContent(content || "Build Better Future");
+        setParagraphs(paragraphs || []);
+      } catch (error) {
+        console.error("Error fetching text content:", error);
+      }
+    };
+
+    fetchTextContent();
+  }, []);
+
+  /**
+   * Toggles the play/pause state of the video and updates the isPlaying state.
+   *
+   * @function handlePlayPause
+   */
+  const handlePlayPause = () => {
+    if (isPlaying) {
+      videoRef.current.pause();
+    } else {
+      videoRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  /**
+   * Toggles between editing and viewing modes by updating the isEditing state.
+   *
+   * @function handleEditToggle
+   */
+  const handleEditToggle = () => {
+    setIsEditing(!isEditing);
+  };
+
+  /**
+   * Saves the updated content and paragraphs to the API.
+   * Exits edit mode upon successful save.
+   *
+   * @function saveContent
+   * @async
+   */
+  const saveContent = async () => {
+    try {
+      await axios.put("http://localhost:3000/api/text", {
+        component: "BetterFuture",
+        content: content.trim(),
+        paragraphs: paragraphs.map((para) => para.trim()),
+      });
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error saving content:", error);
+    }
+  };
+
+  return (
+    &lt;div className="max-w-[1300px] mx-auto text-center p-6 pt-24 md:pb-12">
+      {/* Heading Section */}
+      &lt;div className="relative">
+        {isEditing ? (
+          &lt;input
+            type="text"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="text-4xl font-bold md:font-extrabold mb-4 text-[#252B42] border border-gray-300 p-2 rounded w-full"
+          />
+        ) : (
+          &lt;h1 className="text-4xl font-bold md:font-extrabold mb-4 text-[#252B42]">
+            {content}
+          &lt;/h1>
+        )}
+
+        {isAdmin &amp;&amp; (
+          &lt;FontAwesomeIcon
+            icon={faPencilAlt}
+            onClick={handleEditToggle}
+            className="absolute top-0 right-0 text-gray-500 cursor-pointer"
+          />
+        )}
+      &lt;/div>
+
+      {/* Description Section */}
+      {isEditing ? (
+        &lt;textarea
+          value={paragraphs[0]}
+          onChange={(e) =>
+            setParagraphs((prev) => {
+              const updated = [...prev];
+              updated[0] = e.target.value;
+              return updated;
+            })
+          }
+          className="text-[#737373] mb-8 md:mb-14 max-w-[600px] mx-auto border border-gray-300 p-2 rounded w-full"
+          rows={4}
+        />
+      ) : (
+        &lt;p className="text-[#737373] mb-8 md:mb-14 max-w-[600px] mx-auto">
+          {paragraphs[0]}
+        &lt;/p>
+      )}
+
+      {/* Content Section with Video and Text */}
+      &lt;div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-20 py-5 md:py-10">
+        &lt;div className="relative w-full h-auto">
+          &lt;div className="relative overflow-hidden rounded-sm shadow-lg">
+            &lt;video
+              ref={videoRef}
+              className="w-full h-[300px] md:h-[400px] object-cover"
+              controls={false}
+            >
+              &lt;source
+                src="/AboutPage/8471681-sd_640_338_25fps.mp4"
+                type="video/mp4"
+              />
+              Your browser does not support the video tag.
+            &lt;/video>
+            &lt;button
+              onClick={handlePlayPause}
+              className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-25 hover:bg-opacity-50 transition-all duration-300"
+            >
+              &lt;div className="bg-blue-500 w-16 h-16 rounded-full flex items-center justify-center">
+                &lt;FontAwesomeIcon
+                  icon={isPlaying ? faPause : faPlay}
+                  className="text-white text-2xl"
+                />
+              &lt;/div>
+            &lt;/button>
+          &lt;/div>
+        &lt;/div>
+        &lt;div className="flex flex-col bg-white p-2 md:p-6 justify-center">
+          &lt;h2 className="text-3xl font-semibold text-start text-[#252B42] pb-3">
+            {paragraphs[1]}
+          &lt;/h2>
+          &lt;p className="text-[#737373] text-start max-w-[400px] text-base pb-6">
+            {paragraphs[2]}
+          &lt;/p>
+        &lt;/div>
+      &lt;/div>
+
+      {isEditing &amp;&amp; (
+        &lt;button
+          onClick={saveContent}
+          className="mt-6 px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-md"
+        >
+          Save Changes
+        &lt;/button>
+      )}
+    &lt;/div>
+  );
+};
+
+export default BetterFuture;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-BetterFuture.html">BetterFuture</a></li><li><a href="module-OurVision.html">OurVision</a></li></ul><h3>Global</h3><ul><li><a href="global.html#HeroAbout">HeroAbout</a></li><li><a href="global.html#OurMission">OurMission</a></li><li><a href="global.html#Team">Team</a></li><li><a href="global.html#TechTeam">TechTeam</a></li><li><a href="global.html#saveContent">saveContent</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri Nov 22 2024 11:43:58 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
