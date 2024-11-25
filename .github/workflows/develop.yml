@@ -25,35 +25,27 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Add SSH private key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-
-      - name: Configure SSH
-        run: |
-          touch ~/.ssh/config
-          echo "Host *" >> ~/.ssh/config
-          echo "    StrictHostKeyChecking no" >> ~/.ssh/config
-
+      # Step 1: Fetch SSL certificates from the DB server
       - name: Fetch SSL certificates from DB server
+        env:
+          DB_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}    # Private key for DB server
+          DB_EC2_USER: ${{ secrets.DB_EC2_USER }}      # User for DB server
+          DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}      # IP/Hostname for DB server
         run: |
           mkdir -p ./mongodb-certs
-          scp ${{ secrets.EC2_USER }}@${{ secrets.DB_EC2_HOST }}:/etc/ssl/mongodb/ca.crt ./mongodb-certs/
-          scp ${{ secrets.EC2_USER }}@${{ secrets.DB_EC2_HOST }}:/etc/ssl/mongodb/server.pem ./mongodb-certs/
+          scp -i "$DB_SSH_KEY" $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/ca.crt ./mongodb-certs/
+          scp -i "$DB_SSH_KEY" $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/server.pem ./mongodb-certs/
 
+      # Step 2: Deploy to the application server
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}  # Private key for deployment server
+          EC2_USER: ${{ secrets.EC2_USER }}          # User for deployment server
+          EC2_HOST: ${{ secrets.EC2_HOST }}          # IP/Hostname for deployment server
+        run: |
+          ssh -i "$DEPLOY_SSH_KEY" $EC2_USER@$EC2_HOST "
             set -e
-
-            # Navigate to project directory or clone if it doesn't exist
-            if [ ! -d "/home/ec2-user/Starteryou-Website/Starteryou" ]; then
+            if [ ! -d /home/ec2-user/Starteryou-Website/Starteryou ]; then
               mkdir -p /home/ec2-user/Starteryou-Website
               cd /home/ec2-user/Starteryou-Website
               git clone https://github.com/starteryouInc/Starteryou-Website.git -b develop Starteryou
@@ -61,18 +53,21 @@ jobs:
               cd /home/ec2-user/Starteryou-Website/Starteryou
               git pull origin develop --ff-only || git pull origin develop --rebase
             fi
-
-            # Ensure Docker is running
             sudo systemctl start docker || sudo systemctl restart docker
-
-            # Clean up old containers and rebuild
             docker-compose down --volumes --remove-orphans
             docker system prune -af --volumes
             docker-compose up -d --build
+          "
 
-            # Verify running containers
+      # Step 3: Verify deployment logs
+      - name: Verify Docker logs
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+        run: |
+          ssh -i "$DEPLOY_SSH_KEY" $EC2_USER@$EC2_HOST "
             docker ps
-
-            # Check logs for backend and frontend
             docker logs starteryou-backend
             docker logs starteryou-frontend
+          "
