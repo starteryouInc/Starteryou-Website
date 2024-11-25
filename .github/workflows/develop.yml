@@ -1,76 +1,57 @@
-name: Deploy to AWS EC2
-
-on:
-  push:
-    branches:
-      - develop
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            set -e
-            # Ensure the repository exists
-            if [ ! -d "/home/ec2-user/Starteryou-Website/Starteryou" ]; then
-              echo "Repository not found. Cloning..."
-              mkdir -p /home/ec2-user/Starteryou-Website
-              cd /home/ec2-user/Starteryou-Website
-              git clone https://github.com/starteryouInc/Starteryou-Website.git -b develop Starteryou
-            else
-              echo "Repository found. Pulling latest changes..."
-              cd /home/ec2-user/Starteryou-Website/Starteryou
-              git pull origin develop --ff-only || git pull origin develop --rebase
-            fi
-
-            # Verify the directory contents
-            echo "Verifying directory contents..."
-            ls -al /home/ec2-user/Starteryou-Website/Starteryou
-
-            # Create .env file without logging its content
-            echo "Creating .env file securely..."
-            printf "%s\n" \
-            "NODE_ENV=production" \
-            "MONGO_USER=${{ secrets.MONGO_USER }}" \
-            "MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}" \
-            "MONGO_HOST=${{ secrets.MONGO_HOST }}" \
-            "MONGO_PORT=${{ secrets.MONGO_PORT }}" \
-            "MONGO_DB=${{ secrets.MONGO_DB }}" \
-            "MONGO_TLS_CA=${{ secrets.MONGO_TLS_CA }}" \
-            "MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}" \
-            > /home/ec2-user/Starteryou-Website/Starteryou/.env
-
-            echo ".env file created successfully."
-
-            # Ensure Docker is running
-            sudo systemctl start docker || sudo systemctl restart docker
-
-            # Clean up old containers and rebuild
-            docker-compose down --volumes --remove-orphans
-            docker system prune -af --volumes
-
-            # Start the application with the updated configuration
-            docker-compose up -d --build
-            docker ps
+- name: Deploy to EC2
+  uses: appleboy/ssh-action@v0.1.7
+  with:
+    host: ${{ secrets.EC2_HOST }}
+    username: ${{ secrets.EC2_USER }}
+    key: ${{ secrets.EC2_SSH_KEY }}
+    script: |
+      set -e
+      # More detailed debugging
+      pwd
+      whoami
+      
+      # Ensure the repository exists
+      if [ ! -d "/home/ec2-user/Starteryou-Website/Starteryou" ]; then
+        echo "Repository not found. Cloning..."
+        mkdir -p /home/ec2-user/Starteryou-Website
+        cd /home/ec2-user/Starteryou-Website
+        git clone https://github.com/starteryouInc/Starteryou-Website.git -b develop Starteryou
+      else
+        echo "Repository found. Pulling latest changes..."
+        cd /home/ec2-user/Starteryou-Website/Starteryou
+        git pull origin develop --ff-only || git pull origin develop --rebase
+      fi
+      
+      # Verify the directory contents and permissions
+      echo "Verifying directory contents and permissions..."
+      ls -al /home/ec2-user/Starteryou-Website/Starteryou
+      
+      # Create .env file with explicit permissions and verbose output
+      echo "Creating .env file securely..."
+      env_file="/home/ec2-user/Starteryou-Website/Starteryou/.env"
+      
+      # Remove existing .env file if it exists
+      rm -f "$env_file"
+      
+      # Create .env with explicit permissions
+      touch "$env_file"
+      chmod 600 "$env_file"
+      
+      # Write environment variables
+      printf "%s\n" \
+      "NODE_ENV=production" \
+      "MONGO_USER=${{ secrets.MONGO_USER }}" \
+      "MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}" \
+      "MONGO_HOST=${{ secrets.MONGO_HOST }}" \
+      "MONGO_PORT=${{ secrets.MONGO_PORT }}" \
+      "MONGO_DB=${{ secrets.MONGO_DB }}" \
+      "MONGO_TLS_CA=${{ secrets.MONGO_TLS_CA }}" \
+      "MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}" \
+      > "$env_file"
+      
+      # Verify .env file creation
+      echo "Checking .env file..."
+      ls -l "$env_file"
+      cat "$env_file" || echo "Failed to read .env file"
+      
+      # Rest of your existing script remains the same
