@@ -1,36 +1,35 @@
 # backend/Dockerfile
+
 FROM node:18-alpine
 
 # Install necessary build tools and copy tools
 RUN apk add --no-cache python3 make g++ openssh-client
 
-# Create app directory and SSL directory
+# Create app directory
 WORKDIR /usr/src/app
-RUN mkdir -p /etc/ssl/mongodb
-
-# Copy SSL certificates from host to container
-COPY ./mongodb-certs/ca.crt /etc/ssl/mongodb/
-COPY ./mongodb-certs/server.pem /etc/ssl/mongodb/
-
-# Set proper permissions for SSL certificates
-RUN chmod 644 /etc/ssl/mongodb/ca.crt && \
-    chmod 600 /etc/ssl/mongodb/server.pem && \
-    chmod 755 /etc/ssl/mongodb
 
 # Copy package files
 COPY package*.json ./
 
 # Install all dependencies
-RUN npm install
+RUN npm install --only=production
 
 # Copy app source
 COPY . .
 
-# Create volume for uploads
-VOLUME ["/usr/src/app/uploads"]
+# Create a directory for SSL certificates
+RUN mkdir -p /etc/ssl/mongodb
+RUN chmod 755 /etc/ssl/mongodb
 
 # Expose port
 EXPOSE 3000
+
+# Set environment variables for SSL certificates
+ENV MONGO_TLS_CERT=/etc/ssl/mongodb/server.pem
+ENV MONGO_TLS_CA=/etc/ssl/mongodb/ca.crt
+
+# Volume for uploads
+VOLUME ["/usr/src/app/uploads"]
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s \
