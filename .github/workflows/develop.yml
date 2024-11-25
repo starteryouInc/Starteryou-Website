@@ -25,7 +25,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Set up environment variables
+      - name: Set up environment variables for CI
         run: |
           echo "MONGO_USER=${{ secrets.MONGO_USER }}" >> $GITHUB_ENV
           echo "MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}" >> $GITHUB_ENV
@@ -48,6 +48,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
+            # Navigate to project directory or clone if it doesn't exist
             if [ ! -d "/home/ec2-user/Starteryou-Website/Starteryou" ]; then
               mkdir -p /home/ec2-user/Starteryou-Website
               cd /home/ec2-user/Starteryou-Website
@@ -56,9 +57,28 @@ jobs:
               cd /home/ec2-user/Starteryou-Website/Starteryou
               git pull origin develop --ff-only || git pull origin develop --rebase
             fi
+
+            # Create an .env file dynamically on the server
+            echo "Creating .env file..."
+            cat <<EOT > .env
+            NODE_ENV=production
+            MONGO_USER=${{ secrets.MONGO_USER }}
+            MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
+            MONGO_HOST=${{ secrets.MONGO_HOST }}
+            MONGO_PORT=${{ secrets.MONGO_PORT }}
+            MONGO_DB=${{ secrets.MONGO_DB }}
+            MONGO_TLS_CA=${{ secrets.MONGO_TLS_CA }}
+            MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}
+            EOT
+
+            # Ensure Docker is running
             sudo systemctl start docker || sudo systemctl restart docker
+            
+            # Clean up old containers and rebuild
             docker-compose down --volumes --remove-orphans
             docker system prune -af --volumes
+            
+            # Start the application with the updated configuration
             docker-compose up -d --build
             docker ps
             docker logs starteryou-backend
