@@ -58,6 +58,10 @@ jobs:
               git pull origin develop --ff-only || git pull origin develop --rebase
             fi
 
+            # List the contents of the directory to verify the docker-compose.yml file
+            echo "Listing the contents of the directory:"
+            ls -al /home/ec2-user/Starteryou-Website/Starteryou
+
             # Create an .env file dynamically on the server
             echo "Creating .env file..."
             cat <<EOT > /home/ec2-user/Starteryou-Website/Starteryou/.env
@@ -73,11 +77,11 @@ jobs:
 
             # Ensure Docker is running
             sudo systemctl start docker || sudo systemctl restart docker
-            
+
             # Clean up old containers and rebuild
             docker-compose down --volumes --remove-orphans
             docker system prune -af --volumes
-            
+
             # Start the application with the updated configuration
             docker-compose up -d --build
             docker ps
