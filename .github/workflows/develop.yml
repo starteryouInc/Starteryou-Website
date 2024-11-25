@@ -48,18 +48,17 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
-            # Check if the repository exists
+            # Ensure that the repository is cloned properly
             if [ ! -d "/home/ec2-user/Starteryou-Website/Starteryou/.git" ]; then
-              echo "Cloning the repository..."
-              mkdir -p /home/ec2-user/Starteryou-Website
-              cd /home/ec2-user/Starteryou-Website
-              git clone https://github.com/starteryouInc/Starteryou-Website.git -b develop Starteryou
+              echo "Repository not found, cloning the repository..."
+              git clone -b develop https://github.com/starteryouInc/Starteryou-Website.git /home/ec2-user/Starteryou-Website/Starteryou
             else
-              echo "Repository already exists. Pulling the latest changes..."
+              echo "Repository already exists, pulling latest changes..."
               cd /home/ec2-user/Starteryou-Website/Starteryou
               git fetch origin
               git reset --hard origin/develop
             fi
+
             # List the contents of the directory to verify the docker-compose.yml file
             echo "Listing the contents of the directory:"
             ls -al /home/ec2-user/Starteryou-Website/Starteryou
