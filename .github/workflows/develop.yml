@@ -25,6 +25,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Set up environment variables
+        run: |
+          echo "MONGO_USER=${{ secrets.MONGO_USER }}" >> $GITHUB_ENV
+          echo "MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}" >> $GITHUB_ENV
+          echo "MONGO_HOST=${{ secrets.MONGO_HOST }}" >> $GITHUB_ENV
+          echo "MONGO_PORT=${{ secrets.MONGO_PORT }}" >> $GITHUB_ENV
+          echo "MONGO_DB=${{ secrets.MONGO_DB }}" >> $GITHUB_ENV
+          echo "MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}" >> $GITHUB_ENV
+          echo "MONGO_TLS_CA=${{ secrets.MONGO_TLS_CA }}" >> $GITHUB_ENV
+
       - name: Fetch SSL certificates from DB server
         env:
           DB_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}    # Private key for DB server
