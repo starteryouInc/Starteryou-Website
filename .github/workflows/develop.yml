@@ -57,7 +57,6 @@ jobs:
               cd /home/ec2-user/Starteryou-Website/Starteryou
               git pull origin develop --ff-only || git pull origin develop --rebase
             fi
-
             # List the contents of the directory to verify the docker-compose.yml file
             echo "Listing the contents of the directory:"
             ls -al /home/ec2-user/Starteryou-Website/Starteryou
