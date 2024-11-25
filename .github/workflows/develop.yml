@@ -49,16 +49,15 @@ jobs:
           script: |
             set -e
             # Ensure that the repository is cloned properly
-            if [ ! -d "/home/ec2-user/Starteryou-Website/Starteryou/.git" ]; then
-              echo "Repository not found, cloning the repository..."
-              git clone -b develop https://github.com/starteryouInc/Starteryou-Website.git /home/ec2-user/Starteryou-Website/Starteryou
+            # Navigate to project directory or clone if it doesn't exist
+            if [ ! -d "/home/ec2-user/Starteryou-Website/Starteryou" ]; then
+              mkdir -p /home/ec2-user/Starteryou-Website
+              cd /home/ec2-user/Starteryou-Website
+              git clone https://github.com/starteryouInc/Starteryou-Website.git -b develop Starteryou
             else
-              echo "Repository already exists, pulling latest changes..."
               cd /home/ec2-user/Starteryou-Website/Starteryou
-              git fetch origin
-              git reset --hard origin/develop
+              git pull origin develop --ff-only || git pull origin develop --rebase
             fi
-
             # List the contents of the directory to verify the docker-compose.yml file
             echo "Listing the contents of the directory:"
             ls -al /home/ec2-user/Starteryou-Website/Starteryou
