@@ -40,18 +40,22 @@ jobs:
           # Create the folder for storing SSL certificates
           mkdir -p ./mongodb-certs
 
+          # Create a temporary file for the SSH private key and set its permissions
+          echo "$DB_SSH_KEY" > ~/db_key.pem
+          chmod 600 ~/db_key.pem
+
           # Temporarily change permissions on the DB server to allow access to the files
           echo "Changing permissions on DB server for certificate files..."
-          ssh -i "$DB_SSH_KEY" $DB_EC2_USER@$DB_EC2_HOST "sudo chmod 644 /etc/ssl/mongodb/ca.crt /etc/ssl/mongodb/server.pem"
+          ssh -i ~/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo chmod 644 /etc/ssl/mongodb/ca.crt /etc/ssl/mongodb/server.pem"
 
           # Fetch the SSL certificates from the DB server
           echo "Copying SSL certificates..."
-          scp -i "$DB_SSH_KEY" $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/ca.crt ./mongodb-certs/
-          scp -i "$DB_SSH_KEY" $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/server.pem ./mongodb-certs/
+          scp -i ~/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/ca.crt ./mongodb-certs/
+          scp -i ~/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/server.pem ./mongodb-certs/
 
           # Revert the permissions on the DB server after copying the certificates
           echo "Reverting permissions on DB server..."
-          ssh -i "$DB_SSH_KEY" $DB_EC2_USER@$DB_EC2_HOST "sudo chmod 600 /etc/ssl/mongodb/server.pem /etc/ssl/mongodb/ca.crt"
+          ssh -i ~/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo chmod 600 /etc/ssl/mongodb/server.pem /etc/ssl/mongodb/ca.crt"
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7  # Use a stable version of the ssh-action
