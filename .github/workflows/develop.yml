@@ -60,7 +60,7 @@ jobs:
 
             # Create an .env file dynamically on the server
             echo "Creating .env file..."
-            cat <<EOT > .env
+            cat <<EOT > /home/ec2-user/Starteryou-Website/Starteryou/.env
             NODE_ENV=production
             MONGO_USER=${{ secrets.MONGO_USER }}
             MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
