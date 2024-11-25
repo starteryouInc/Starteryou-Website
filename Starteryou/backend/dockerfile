@@ -1,5 +1,4 @@
 # backend/Dockerfile
-
 FROM node:18-alpine
 
 # Install necessary build tools and copy tools
@@ -8,23 +7,31 @@ RUN apk add --no-cache python3 make g++ openssh-client
 # Create app directory
 WORKDIR /usr/src/app
 
-# Copy package files
+# Copy package files first for better caching
 COPY package*.json ./
 
 # Install all dependencies
 RUN npm install --only=production
 
-# Copy app source
-COPY . .
+# Create directories for SSL certificates and ensure proper permissions
+RUN mkdir -p /etc/ssl/mongodb /usr/src/app/uploads \
+    && chmod 755 /etc/ssl/mongodb \
+    && chmod 755 /usr/src/app/uploads
 
-# Create a directory for SSL certificates
-RUN mkdir -p /etc/ssl/mongodb
-RUN chmod 755 /etc/ssl/mongodb
+# Copy .env file explicitly
+COPY .env* ./
+
+# Copy application source
+COPY . .
 
 # Expose port
 EXPOSE 3000
 
-# Set environment variables for SSL certificates
+# Set default environment variables
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# Explicitly set TLS paths
 ENV MONGO_TLS_CERT=/etc/ssl/mongodb/server.pem
 ENV MONGO_TLS_CA=/etc/ssl/mongodb/ca.crt
 
@@ -35,5 +42,9 @@ VOLUME ["/usr/src/app/uploads"]
 HEALTHCHECK --interval=30s --timeout=3s \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
 
-# Start command
-CMD ["node", "server.js"]
+# Debug step to verify environment
+RUN echo "Listing .env file:" && ls -l .env* || true
+RUN echo "Showing non-sensitive .env contents:" && cat .env | grep -v -E "PASSWORD|SECRET|TOKEN" || true
+
+# Start command with potential environment debugging
+CMD ["sh", "-c", "echo 'Environment Variables:' && env | sort && node server.js"]
