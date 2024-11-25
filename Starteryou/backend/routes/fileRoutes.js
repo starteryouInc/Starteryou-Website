@@ -7,16 +7,27 @@ const FileMetadata = require("../models/FileMetadata");
 require("dotenv").config();
 
 const router = express.Router();
+const mongoUser = encodeURIComponent(process.env.MONGO_USER);
+const mongoPassword = encodeURIComponent(process.env.MONGO_PASSWORD);
+const mongoHost = process.env.MONGO_HOST;
+const mongoPort = process.env.MONGO_PORT;
+const mongoDb = process.env.MONGO_DB;
+const mongoAuthSource = process.env.MONGO_AUTH_SOURCE;
+const mongoTls = process.env.MONGO_TLS === "true";
+const mongoTlsCert = process.env.MONGO_TLS_CERT;
+const mongoTlsCa = process.env.MONGO_TLS_CA;
+
+const mongoUri = `mongodb://${mongoUser}:${mongoPassword}@${mongoHost}:${mongoPort}/${mongoDb}?authSource=${mongoAuthSource}&tls=${mongoTls}&tlsCertificateKeyFile=${mongoTlsCert}&tlsCAFile=${mongoTlsCa}`;
 
 // Setup GridFS bucket
 let bucket;
 const setupBucket = () => {
-    if (!mongoose.connection.db) {
+    if (!mongoUri) {
         console.log("Waiting for MongoDB connection...");
         return;
     }
     try {
-        bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+        bucket = new mongoose.mongo.GridFSBucket(mongoUri, {
             bucketName: "uploads"
         });
         console.log("✅ GridFS bucket initialized");
@@ -241,7 +252,7 @@ router.get("/download/:title", async (req, res) => {
         }
 
         // Verify file exists in GridFS
-        const file = await mongoose.connection.db
+        const file = await mongoUri
             .collection("uploads.files")
             .findOne({ _id: new ObjectId(fileMetadata.gridFsFileId) });
 
