@@ -25,49 +25,56 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # Step 1: Fetch SSL certificates from the DB server
       - name: Fetch SSL certificates from DB server
         env:
           DB_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}    # Private key for DB server
           DB_EC2_USER: ${{ secrets.DB_EC2_USER }}      # User for DB server
           DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}      # IP/Hostname for DB server
         run: |
+          # Add DB server to known hosts to avoid host verification failure
+          ssh-keyscan -H $DB_EC2_HOST >> ~/.ssh/known_hosts
+
+          # Create the folder for storing SSL certificates
           mkdir -p ./mongodb-certs
+
+          # Temporarily change permissions on the DB server to allow access to the files
+          echo "Changing permissions on DB server for certificate files..."
+          ssh -i "$DB_SSH_KEY" $DB_EC2_USER@$DB_EC2_HOST "sudo chmod 644 /etc/ssl/mongodb/ca.crt /etc/ssl/mongodb/server.pem"
+
+          # Fetch the SSL certificates from the DB server
+          echo "Copying SSL certificates..."
           scp -i "$DB_SSH_KEY" $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/ca.crt ./mongodb-certs/
           scp -i "$DB_SSH_KEY" $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/server.pem ./mongodb-certs/
 
-      # Step 2: Deploy to the application server
+          # Revert the permissions on the DB server after copying the certificates
+          echo "Reverting permissions on DB server..."
+          ssh -i "$DB_SSH_KEY" $DB_EC2_USER@$DB_EC2_HOST "sudo chmod 600 /etc/ssl/mongodb/server.pem /etc/ssl/mongodb/ca.crt"
+
       - name: Deploy to EC2
-        env:
-          DEPLOY_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}  # Private key for deployment server
-          EC2_USER: ${{ secrets.EC2_USER }}          # User for deployment server
-          EC2_HOST: ${{ secrets.EC2_HOST }}          # IP/Hostname for deployment server
-        run: |
-          ssh -i "$DEPLOY_SSH_KEY" $EC2_USER@$EC2_HOST "
+        uses: appleboy/ssh-action@v0.1.7  # Use a stable version of the ssh-action
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
             set -e
-            if [ ! -d /home/ec2-user/Starteryou-Website/Starteryou ]; then
+            # Navigate to project directory or clone if it doesn't exist
+            if [ ! -d "/home/ec2-user/Starteryou-Website/Starteryou" ]; then
               mkdir -p /home/ec2-user/Starteryou-Website
               cd /home/ec2-user/Starteryou-Website
               git clone https://github.com/starteryouInc/Starteryou-Website.git -b develop Starteryou
             else
               cd /home/ec2-user/Starteryou-Website/Starteryou
+              # Pull changes from develop branch, handling any divergences
               git pull origin develop --ff-only || git pull origin develop --rebase
             fi
+          
+            # Ensure Docker is running
             sudo systemctl start docker || sudo systemctl restart docker
+            # Clean up old containers and rebuild
             docker-compose down --volumes --remove-orphans
             docker system prune -af --volumes
             docker-compose up -d --build
-          "
-
-      # Step 3: Verify deployment logs
-      - name: Verify Docker logs
-        env:
-          DEPLOY_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-          EC2_USER: ${{ secrets.EC2_USER }}
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-        run: |
-          ssh -i "$DEPLOY_SSH_KEY" $EC2_USER@$EC2_HOST "
             docker ps
             docker logs starteryou-backend
             docker logs starteryou-frontend
-          "
