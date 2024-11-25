@@ -31,6 +31,9 @@ jobs:
           DB_EC2_USER: ${{ secrets.DB_EC2_USER }}      # User for DB server
           DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}      # IP/Hostname for DB server
         run: |
+          # Ensure the .ssh directory exists
+          mkdir -p ~/.ssh
+
           # Add DB server to known hosts to avoid host verification failure
           ssh-keyscan -H $DB_EC2_HOST >> ~/.ssh/known_hosts
 
