@@ -6,37 +6,68 @@ services:
       dockerfile: Dockerfile
     container_name: starteryou-backend
     restart: unless-stopped
-    # Explicitly load .env file
+    
+    # Multiple environment loading methods
     env_file:
       - .env
+    
     environment:
-      # Override or supplement .env variables if needed
+      # Core environment configuration
       - NODE_ENV=production
+      - PORT=3000
+      
+      # Frontend-related URLs
       - FRONTEND_URL=http://54.196.202.145:8080
       - VITE_BACKEND_URL=http://54.196.202.145:3000
-      - PORT=3000
-      # Keep environment variable mapping
-      - MONGO_USER=${MONGO_USER}
-      - MONGO_PASSWORD=${MONGO_PASSWORD}
-      - MONGO_HOST=${MONGO_HOST}
-      - MONGO_PORT=${MONGO_PORT}
-      - MONGO_DB=${MONGO_DB}
-      - MONGO_TLS_CERT=${MONGO_TLS_CERT}
-      - MONGO_TLS_CA=${MONGO_TLS_CA}
-    ports:
-      - "3000:3000"
+      
+      # MongoDB Configuration with fallback to .env
+      - MONGO_USER=${MONGO_USER:-${MONGO_USER}}
+      - MONGO_PASSWORD=${MONGO_PASSWORD:-${MONGO_PASSWORD}}
+      - MONGO_HOST=${MONGO_HOST:-${MONGO_HOST}}
+      - MONGO_PORT=${MONGO_PORT:-${MONGO_PORT}}
+      - MONGO_DB=${MONGO_DB:-${MONGO_DB}}
+      - MONGO_TLS_CERT=${MONGO_TLS_CERT:-${MONGO_TLS_CERT}}
+      - MONGO_TLS_CA=${MONGO_TLS_CA:-${MONGO_TLS_CA}}
+    
+    # Enhanced volume mappings
     volumes:
+      # Bind mount the entire backend directory
       - ./backend:/usr/src/app
+      
+      # Mount SSL keys and certificates
       - ./keys:/usr/src/app/keys
+      
+      # Persistent node_modules
       - /usr/src/app/node_modules
+      
       # Explicitly mount .env file
       - ./.env:/usr/src/app/.env
+      
+      # Mount SSL certificates
+      - /etc/ssl/mongodb:/etc/ssl/mongodb:ro
+      
+      # Uploads volume
+      - ./backend/uploads:/usr/src/app/uploads
+    
+    ports:
+      - "3000:3000"
+    
     networks:
       - starteryou-network
+    
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    
     depends_on:
       - tunnel
+    
+    # Optional healthcheck
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   tunnel:
     image: alpine:latest
