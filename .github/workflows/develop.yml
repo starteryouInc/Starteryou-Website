@@ -81,8 +81,8 @@ jobs:
             MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}
             EOT
 
-            # Check if the .env file is created correctly
-            cat /home/ec2-user/Starteryou-Website/Starteryou/.env
+            # Confirm that the .env file was created (without printing sensitive data)
+            echo ".env file created at /home/ec2-user/Starteryou-Website/Starteryou/.env"
 
             # Ensure Docker is running
             sudo systemctl start docker || sudo systemctl restart docker
