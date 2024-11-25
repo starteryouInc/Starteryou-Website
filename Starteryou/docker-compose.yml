@@ -12,8 +12,13 @@ services:
       - FRONTEND_URL=http://54.196.202.145:8080
       - VITE_BACKEND_URL=http://54.196.202.145:3000
       - PORT=3000
-    env_file:
-      - .env  # Ensures the env file is passed into the container
+      - MONGO_USER=${{ secrets.MONGO_USER }}
+      - MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
+      - MONGO_HOST=${{ secrets.MONGO_HOST }}
+      - MONGO_PORT=${{ secrets.MONGO_PORT }}
+      - MONGO_DB=${{ secrets.MONGO_DB }}
+      - MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}
+      - MONGO_TLS_CA=${{ secrets.MONGO_TLS_CA }}
     ports:
       - "3000:3000"
     volumes:
