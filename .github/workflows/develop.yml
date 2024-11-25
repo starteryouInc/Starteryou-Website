@@ -25,8 +25,26 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Add SSH private key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Configure SSH
+        run: |
+          touch ~/.ssh/config
+          echo "Host *" >> ~/.ssh/config
+          echo "    StrictHostKeyChecking no" >> ~/.ssh/config
+
+      - name: Fetch SSL certificates from DB server
+        run: |
+          mkdir -p ./mongodb-certs
+          scp ${{ secrets.EC2_USER }}@${{ secrets.DB_EC2_HOST }}:/etc/ssl/mongodb/ca.crt ./mongodb-certs/
+          scp ${{ secrets.EC2_USER }}@${{ secrets.DB_EC2_HOST }}:/etc/ssl/mongodb/server.pem ./mongodb-certs/
+
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@v0.1.7  # Use a specific stable version
+        uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
@@ -41,29 +59,18 @@ jobs:
               git clone https://github.com/starteryouInc/Starteryou-Website.git -b develop Starteryou
             else
               cd /home/ec2-user/Starteryou-Website/Starteryou
-              # Pull changes from develop branch, handling any divergences
               git pull origin develop --ff-only || git pull origin develop --rebase
             fi
-          
+
             # Ensure Docker is running
             sudo systemctl start docker || sudo systemctl restart docker
-
-            # Fetch SSL certificates from the database server
-            echo "Fetching SSL certificates from ${DB_EC2_HOST}..."
-            mkdir -p ./mongodb-certs
-            scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.DB_EC2_HOST }}:/etc/ssl/mongodb/ca.crt ./mongodb-certs/
-            scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.DB_EC2_HOST }}:/etc/ssl/mongodb/server.pem ./mongodb-certs/
-
-            # Set proper permissions for SSL certificates
-            chmod 644 ./mongodb-certs/ca.crt
-            chmod 600 ./mongodb-certs/server.pem
 
             # Clean up old containers and rebuild
             docker-compose down --volumes --remove-orphans
             docker system prune -af --volumes
             docker-compose up -d --build
 
-            # Verify containers
+            # Verify running containers
             docker ps
 
             # Check logs for backend and frontend
