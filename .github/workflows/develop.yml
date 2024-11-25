@@ -33,6 +33,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
+
             # Navigate to project directory or clone if it doesn't exist
             if [ ! -d "/home/ec2-user/Starteryou-Website/Starteryou" ]; then
               mkdir -p /home/ec2-user/Starteryou-Website
@@ -46,11 +47,25 @@ jobs:
           
             # Ensure Docker is running
             sudo systemctl start docker || sudo systemctl restart docker
+
+            # Fetch SSL certificates from the database server
+            echo "Fetching SSL certificates from ${DB_EC2_HOST}..."
+            mkdir -p ./mongodb-certs
+            scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.DB_EC2_HOST }}:/etc/ssl/mongodb/ca.crt ./mongodb-certs/
+            scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.DB_EC2_HOST }}:/etc/ssl/mongodb/server.pem ./mongodb-certs/
+
+            # Set proper permissions for SSL certificates
+            chmod 644 ./mongodb-certs/ca.crt
+            chmod 600 ./mongodb-certs/server.pem
+
             # Clean up old containers and rebuild
             docker-compose down --volumes --remove-orphans
             docker system prune -af --volumes
             docker-compose up -d --build
+
+            # Verify containers
             docker ps
+
+            # Check logs for backend and frontend
             docker logs starteryou-backend
             docker logs starteryou-frontend
-
