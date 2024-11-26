@@ -30,7 +30,7 @@ services:
       - MONGO_TLS=${MONGO_TLS:-${MONGO_TLS}}
       - MONGO_TLS_CA=${MONGO_TLS_CA:-${MONGO_TLS_CA}}
       - MONGO_TLS_CERT=${MONGO_TLS_CERT:-${MONGO_TLS_CERT}}
-      - MONGO_APP_NAME= ${MONGO_APP_NAME:-${MONGO_APP_NAME }}
+      - MONGO_APP_NAME= ${MONGO_APP_NAME:-${MONGO_APP_NAME}}
 
     
     # Enhanced volume mappings
