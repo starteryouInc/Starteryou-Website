@@ -12,18 +12,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
       - name: Add SSL Certificates via Secrets
         env:
           DB_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
@@ -51,8 +39,31 @@ jobs:
           # Revert the permissions on the DB server after copying the certificates
           echo "Reverting permissions on DB server..."
           ssh -i ~/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo chmod 600 /etc/ssl/mongodb/server.pem /etc/ssl/mongodb/ca.crt"
+          # Write MongoDB TLS certificates to the local cert folder
           echo "$MONGO_TLS_CA" > ./mongodb-certs/ca.crt
           echo "$MONGO_TLS_CERT" > ./mongodb-certs/server.pem
+
+          # Ensure the certificates are copied successfully
+          if [ ! -f "./mongodb-certs/ca.crt" ]; then
+            echo "Error: ca.crt not found!"
+            exit 1
+          fi
+          if [ ! -f "./mongodb-certs/server.pem" ]; then
+            echo "Error: server.pem not found!"
+            exit 1
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7
