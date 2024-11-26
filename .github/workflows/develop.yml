@@ -1,4 +1,5 @@
 name: Deploy to AWS EC2
+
 on:
   push:
     branches:
@@ -23,29 +24,35 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Download SSL Certificates from Database Server
+      - name: Add SSL Certificates via Secrets
         env:
-          DB_EC2_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
+          DB_SSH_KEY: ${{ secrets.DB_SSH_KEY }}
           DB_EC2_USER: ${{ secrets.DB_EC2_USER }}
           DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}
+          MONGO_TLS_CA: ${{ secrets.MONGO_TLS_CA }}
+          MONGO_TLS_CERT: ${{ secrets.MONGO_TLS_CERT }}
         run: |
-          # Prepare SSH
+          # Ensure the .ssh directory exists
           mkdir -p ~/.ssh
-          echo "$DB_EC2_SSH_KEY" > ~/.ssh/db_server_key
-          chmod 600 ~/.ssh/db_server_key
+          # Add DB server to known hosts to avoid host verification failure
           ssh-keyscan -H $DB_EC2_HOST >> ~/.ssh/known_hosts
-
-          # Create local directory for SSL certificates
-          mkdir -p ./keys/mongodb-ssl
-
-          # Archive and Download SSL Certificates
-          ssh -i ~/.ssh/db_server_key $DB_EC2_USER@$DB_EC2_HOST "sudo tar -czf /tmp/mongodb-ssl.tar.gz -C /etc/ssl mongodb"
-          scp -i ~/.ssh/db_server_key $DB_EC2_USER@$DB_EC2_HOST:/tmp/mongodb-ssl.tar.gz ./keys/mongodb-ssl/
-          tar -xzf ./keys/mongodb-ssl/mongodb-ssl.tar.gz -C ./keys/mongodb-ssl/
-
-          # Verify SSL Files
-          echo "Listing SSL certificates:"
-          ls -l ./keys/mongodb-ssl/mongodb/
+          # Create the folder for storing SSL certificates
+          mkdir -p ./mongodb-certs
+          # Create a temporary file for the SSH private key and set its permissions
+          echo "$DB_SSH_KEY" > ~/db_key.pem
+          chmod 600 ~/db_key.pem
+          # Temporarily change permissions on the DB server to allow access to the files
+          echo "Changing permissions on DB server for certificate files..."
+          ssh -i ~/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo chmod 644 /etc/ssl/mongodb/ca.crt /etc/ssl/mongodb/server.pem"
+          # Fetch the SSL certificates from the DB server
+          echo "Copying SSL certificates..."
+          scp -i ~/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/ca.crt ./mongodb-certs/
+          scp -i ~/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/server.pem ./mongodb-certs/
+          # Revert the permissions on the DB server after copying the certificates
+          echo "Reverting permissions on DB server..."
+          ssh -i ~/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo chmod 600 /etc/ssl/mongodb/server.pem /etc/ssl/mongodb/ca.crt"
+          echo "$MONGO_TLS_CA" > ./mongodb-certs/ca.crt
+          echo "$MONGO_TLS_CERT" > ./mongodb-certs/server.pem
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7
@@ -85,7 +92,7 @@ jobs:
 
             log "Copying SSL certificates..."
             mkdir -p "$REPO_DIR/keys/mongodb-ssl"
-            cp -r ./keys/mongodb-ssl/* "$REPO_DIR/keys/mongodb-ssl/"
+            cp -r ./mongodb-certs/* "$REPO_DIR/keys/mongodb-ssl/"
             chmod 644 "$REPO_DIR/keys/mongodb-ssl/"*
 
             log "Creating .env file..."
@@ -101,7 +108,7 @@ jobs:
             MONGO_PORT=${{ secrets.MONGO_PORT }}
             MONGO_DB=${{ secrets.MONGO_DB }}
             MONGO_AUTH_SOURCE=${{ secrets.MONGO_AUTH_SOURCE }}
-            MONGO_TLS=${{ secrets.MONGO_TLS }}
+            MONGO_TLS=true
             MONGO_TLS_CA=${{ secrets.MONGO_TLS_CA }}
             MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}
             MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}
