@@ -23,33 +23,29 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # New step to copy SSL certificates
-      - name: Prepare SSL Certificates
+      - name: Download SSL Certificates from Database Server
         env:
-          DB_SERVER_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
-          DB_SERVER_USER: ${{ secrets.DB_EC2_USER }}
-          DB_SERVER_HOST: ${{ secrets.DB_EC2_HOST }}
+          DB_EC2_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
+          DB_EC2_USER: ${{ secrets.DB_EC2_USER }}
+          DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}
         run: |
-          # Create SSH directory
+          # Prepare SSH
           mkdir -p ~/.ssh
-          
-          # Write SSH key to file
-          echo "$DB_SERVER_SSH_KEY" > ~/.ssh/db_server_key
+          echo "$DB_EC2_SSH_KEY" > ~/.ssh/db_server_key
           chmod 600 ~/.ssh/db_server_key
-          
-          # Add server to known hosts
-          ssh-keyscan -H $DB_SERVER_HOST >> ~/.ssh/known_hosts
-          
+          ssh-keyscan -H $DB_EC2_HOST >> ~/.ssh/known_hosts
+
           # Create local directory for SSL certificates
           mkdir -p ./keys/mongodb-ssl
-          
-          # Copy SSL certificates
-          scp -i ~/.ssh/db_server_key \
-              -o StrictHostKeyChecking=no \
-              $DB_SERVER_USER@$DB_SERVER_HOST: etc/ssl/mongodb/ \
-              ./keys/mongodb-ssl/
-          
-          # Set appropriate permissions
+
+          # Download SSL certificates using SFTP/SCP
+          sftp -i ~/.ssh/db_server_key $DB_EC2_USER@$DB_EC2_HOST << EOF
+            get /path/to/mongodb/ssl/* ./keys/mongodb-ssl/
+            bye
+          EOF
+
+          # List downloaded files and set permissions
+          ls -l ./keys/mongodb-ssl
           chmod 644 ./keys/mongodb-ssl/*
 
       - name: Deploy to EC2
@@ -106,8 +102,7 @@ jobs:
             cp -r /home/ec2-user/actions-runner/_work/Starteryou-Website/Starteryou-Website/keys/mongodb-ssl/* "$REPO_DIR/keys/mongodb-ssl/"
             chmod 644 "$REPO_DIR/keys/mongodb-ssl"/*
 
-            # Rest of the existing deployment script remains the same...
-            # Create .env file
+            # Create .env file securely
             log "Creating .env file..."
             rm -f "$ENV_FILE"
             touch "$ENV_FILE"
