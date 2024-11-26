@@ -40,7 +40,7 @@ jobs:
 
           # Download SSL certificates using SFTP/SCP
           sftp -i ~/.ssh/db_server_key $DB_EC2_USER@$DB_EC2_HOST << EOF
-            get /path/to/mongodb/ssl/* ./keys/mongodb-ssl/
+            get /etc/ssl/mongodb/ ./keys/mongodb-ssl/
             bye
           EOF
 
