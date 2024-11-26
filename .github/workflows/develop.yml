@@ -103,7 +103,7 @@ jobs:
 
             log "Copying SSL certificates..."
             mkdir -p "$REPO_DIR/keys/mongodb-ssl"
-            cp -r ./mongodb-certs/* "$REPO_DIR/keys/mongodb-ssl/"
+            cp -r ./mongodb-certs/ "$REPO_DIR/keys/mongodb-ssl/"
             chmod 644 "$REPO_DIR/keys/mongodb-ssl/"*
 
             log "Creating .env file..."
