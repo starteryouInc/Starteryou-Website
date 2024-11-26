@@ -38,24 +38,15 @@ jobs:
           # Create local directory for SSL certificates
           mkdir -p ./keys/mongodb-ssl
 
-          # Use SSH to archive and download files with sudo
-          echo "Archiving SSL certificates on remote server..."
+          # Archive and Download SSL Certificates
           ssh -i ~/.ssh/db_server_key $DB_EC2_USER@$DB_EC2_HOST "sudo tar -czf /tmp/mongodb-ssl.tar.gz -C /etc/ssl mongodb"
-
-          echo "Downloading archived SSL certificates..."
           scp -i ~/.ssh/db_server_key $DB_EC2_USER@$DB_EC2_HOST:/tmp/mongodb-ssl.tar.gz ./keys/mongodb-ssl/
-
-          echo "Extracting archived SSL certificates locally..."
           tar -xzf ./keys/mongodb-ssl/mongodb-ssl.tar.gz -C ./keys/mongodb-ssl/
 
-          # Set appropriate permissions
-          chmod 644 ./keys/mongodb-ssl/mongodb/*
-          
-          # Verify downloaded files
+          # Verify SSL Files
           echo "Listing SSL certificates:"
           ls -l ./keys/mongodb-ssl/mongodb/
-  
-  
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7
         env:
@@ -69,60 +60,41 @@ jobs:
             set -e
             set -o pipefail
 
-            # Logging function
-            log() {
-              echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"
-            }
-
-            # Error handling function
-            handle_error() {
-              log "Error occurred on line $1"
-              exit 1
-            }
+            log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"; }
+            handle_error() { log "Error occurred on line $1"; exit 1; }
             trap 'handle_error $LINENO' ERR
 
-            # Project configuration
             PROJECT_ROOT="/home/ec2-user/Starteryou-Website"
             REPO_DIR="${PROJECT_ROOT}/Starteryou"
             ENV_FILE="${REPO_DIR}/.env"
 
-            # Ensure project root exists
-            log "Ensuring project root directory exists..."
+            log "Ensuring project root exists..."
             mkdir -p "$PROJECT_ROOT"
             cd "$PROJECT_ROOT"
 
-            # Repository management
             log "Managing repository..."
             if [ ! -d "$REPO_DIR" ]; then
-              log "Repository not found. Cloning..."
+              log "Cloning repository..."
               git clone https://github.com/starteryouInc/Starteryou-Website.git -b develop Starteryou
             else
-              log "Repository found. Updating..."
+              log "Pulling latest changes..."
               cd "$REPO_DIR"
               git fetch origin develop
               git reset --hard origin/develop
             fi
 
-            # Create keys directory and copy SSL certificates
-            log "Preparing SSL certificates..."
+            log "Copying SSL certificates..."
             mkdir -p "$REPO_DIR/keys/mongodb-ssl"
-            # Copy SSL certificates from GitHub Actions workspace
-            cp -r /home/ec2-user/actions-runner/_work/Starteryou-Website/Starteryou-Website/keys/mongodb-ssl/* "$REPO_DIR/keys/mongodb-ssl/"
-            chmod 644 "$REPO_DIR/keys/mongodb-ssl"/*
+            cp -r ./keys/mongodb-ssl/* "$REPO_DIR/keys/mongodb-ssl/"
+            chmod 644 "$REPO_DIR/keys/mongodb-ssl/"*
 
-            # Create .env file securely
             log "Creating .env file..."
             rm -f "$ENV_FILE"
             touch "$ENV_FILE"
             chmod 600 "$ENV_FILE"
 
-            # Write environment variables
-            log "Writing environment variables..."
             cat > "$ENV_FILE" << EOF
-            # Application Environment
             NODE_ENV=production
-
-            # MongoDB Configuration
             MONGO_USER=${{ secrets.MONGO_USER }}
             MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
             MONGO_HOST=${{ secrets.MONGO_HOST }}
@@ -135,21 +107,17 @@ jobs:
             MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}
             EOF
 
-            # Ensure Docker is running
-            log "Ensuring Docker is running..."
+            log "Restarting Docker..."
             sudo systemctl start docker || sudo systemctl restart docker
 
-            # Clean up old containers and resources
             log "Cleaning up old Docker resources..."
             docker-compose down --volumes --remove-orphans
             docker system prune -af --volumes
 
-            # Rebuild and start application
-            log "Rebuilding and starting application..."
+            log "Building and starting Docker containers..."
             docker-compose up -d --build
 
-            # Verify containers
-            log "Verifying running containers..."
+            log "Verifying containers..."
             docker ps
 
             log "Deployment completed successfully!"
