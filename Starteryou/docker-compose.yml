@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 services:
   backend:
     build:
@@ -48,7 +48,7 @@ services:
       - ./.env:/usr/src/app/.env
       
       # Mount SSL certificates
-      - /etc/ssl/mongodb:/etc/ssl/mongodb:ro
+      - ./keys/mongodb-ssl:/etc/ssl/mongodb:ro  # Changed this line
       
       # Uploads volume
       - ./backend/uploads:/usr/src/app/uploads
@@ -87,7 +87,7 @@ services:
       - starteryou-network
     volumes:
       - ./keys:/keys
-      - /etc/ssl/mongodb:/etc/ssl/mongodb:ro,z
+      - ./keys/mongodb-ssl:/etc/ssl/mongodb:ro  # Changed this line
 
   frontend:
     build:

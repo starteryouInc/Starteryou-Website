@@ -23,6 +23,35 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      # New step to copy SSL certificates
+      - name: Prepare SSL Certificates
+        env:
+          DB_SERVER_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
+          DB_SERVER_USER: ${{ secrets.DB_EC2_USER }}
+          DB_SERVER_HOST: ${{ secrets.DB_EC2_HOST }}
+        run: |
+          # Create SSH directory
+          mkdir -p ~/.ssh
+          
+          # Write SSH key to file
+          echo "$DB_SERVER_SSH_KEY" > ~/.ssh/db_server_key
+          chmod 600 ~/.ssh/db_server_key
+          
+          # Add server to known hosts
+          ssh-keyscan -H $DB_SERVER_HOST >> ~/.ssh/known_hosts
+          
+          # Create local directory for SSL certificates
+          mkdir -p ./keys/mongodb-ssl
+          
+          # Copy SSL certificates
+          scp -i ~/.ssh/db_server_key \
+              -o StrictHostKeyChecking=no \
+              $DB_SERVER_USER@$DB_SERVER_HOST:/path/to/mongodb/ssl/* \
+              ./keys/mongodb-ssl/
+          
+          # Set appropriate permissions
+          chmod 644 ./keys/mongodb-ssl/*
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7
         env:
@@ -70,13 +99,15 @@ jobs:
               git reset --hard origin/develop
             fi
 
-            # Verify repository
-            log "Verifying repository contents..."
-            cd "$REPO_DIR"
-            pwd
-            ls -la
+            # Create keys directory and copy SSL certificates
+            log "Preparing SSL certificates..."
+            mkdir -p "$REPO_DIR/keys/mongodb-ssl"
+            # Copy SSL certificates from GitHub Actions workspace
+            cp -r /home/ec2-user/actions-runner/_work/Starteryou-Website/Starteryou-Website/keys/mongodb-ssl/* "$REPO_DIR/keys/mongodb-ssl/"
+            chmod 644 "$REPO_DIR/keys/mongodb-ssl"/*
 
-            # Create .env file securely
+            # Rest of the existing deployment script remains the same...
+            # Create .env file
             log "Creating .env file..."
             rm -f "$ENV_FILE"
             touch "$ENV_FILE"
@@ -94,21 +125,12 @@ jobs:
             MONGO_HOST=${{ secrets.MONGO_HOST }}
             MONGO_PORT=${{ secrets.MONGO_PORT }}
             MONGO_DB=${{ secrets.MONGO_DB }}
-            MONGO_AUTH_SOURCE: ${{ secrets.MONGO_AUTH_SOURCE }}
+            MONGO_AUTH_SOURCE=${{ secrets.MONGO_AUTH_SOURCE }}
             MONGO_TLS=${{ secrets.MONGO_TLS }}
             MONGO_TLS_CA=${{ secrets.MONGO_TLS_CA }}
             MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}
-            MONGO_APP_NAME: ${{ secrets.MONGO_APP_NAME }}
-
-            # Additional Environment Variables can be added here
-            # EXAMPLE_VAR=example_value
+            MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}
             EOF
-
-            # Verify .env file
-            log "Verifying .env file..."
-            ls -l "$ENV_FILE"
-            echo "Environment file contents (without sensitive data):"
-            grep -v -E "MONGO_PASSWORD|MONGO_TLS_CA|MONGO_TLS_CERT" "$ENV_FILE"
 
             # Ensure Docker is running
             log "Ensuring Docker is running..."
