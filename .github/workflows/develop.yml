@@ -66,7 +66,6 @@ jobs:
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7  # Use a stable version of the ssh-action
-        uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
