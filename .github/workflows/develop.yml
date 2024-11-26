@@ -83,7 +83,7 @@ jobs:
               git pull origin develop --ff-only || git pull origin develop --rebase
             fi
           
-            # Ensure Docker is running
+            # Ensure Docker is runnings
             sudo systemctl start docker || sudo systemctl restart docker
             # Clean up old containers and rebuild
             docker-compose down --volumes --remove-orphans
