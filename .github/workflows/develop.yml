@@ -46,7 +46,7 @@ jobs:
           # Copy SSL certificates
           scp -i ~/.ssh/db_server_key \
               -o StrictHostKeyChecking=no \
-              $DB_SERVER_USER@$DB_SERVER_HOST: etc/ssl/mongodb/* \
+              $DB_SERVER_USER@$DB_SERVER_HOST: etc/ssl/mongodb/ \
               ./keys/mongodb-ssl/
           
           # Set appropriate permissions
