@@ -42,7 +42,7 @@ jobs:
           # Write MongoDB TLS certificates to the local cert folder
           echo "$MONGO_TLS_CA" > ./mongodb-certs/ca.crt
           echo "$MONGO_TLS_CERT" > ./mongodb-certs/server.pem
-
+        
           # Ensure the certificates are copied successfully
           if [ ! -f "./mongodb-certs/ca.crt" ]; then
             echo "Error: ca.crt not found!"
@@ -77,7 +77,6 @@ jobs:
             #!/bin/bash
             set -e
             set -o pipefail
-
             log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"; }
             handle_error() { log "Error occurred on line $1"; exit 1; }
             trap 'handle_error $LINENO' ERR
@@ -101,10 +100,18 @@ jobs:
               git reset --hard origin/develop
             fi
 
-            log "Copying SSL certificates..."
-            mkdir -p "$REPO_DIR/keys/mongodb-ssl"
-            cp -r ./mongodb-certs/ "$REPO_DIR/keys/mongodb-ssl/"
-            chmod 644 "$REPO_DIR/keys/mongodb-ssl/"*
+            log "Checking if mongodb-certs directory exists..."
+            ls -al ./mongodb-certs
+
+            if [ -d "./mongodb-certs" ]; then
+              log "Copying SSL certificates..."
+              mkdir -p "$REPO_DIR/keys/mongodb-ssl"
+              cp -r ./mongodb-certs/ "$REPO_DIR/keys/mongodb-ssl/"
+              chmod 644 "$REPO_DIR/keys/mongodb-ssl/"*
+            else
+              log "Error: mongodb-certs directory not found!"
+              exit 1
+            fi
 
             log "Creating .env file..."
             rm -f "$ENV_FILE"
