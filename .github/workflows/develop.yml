@@ -34,12 +34,12 @@ jobs:
           echo "MONGO_DB=${{ secrets.MONGO_DB }}" >> $GITHUB_ENV
           echo "MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}" >> $GITHUB_ENV
           echo "MONGO_TLS_CA=${{ secrets.MONGO_TLS_CA }}" >> $GITHUB_ENV
+
       - name: Fetch SSL certificates from DB server
         env:
           DB_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}    # Private key for DB server
           DB_EC2_USER: ${{ secrets.DB_EC2_USER }}      # User for DB server
           DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}      # IP/Hostname for DB server
-      - name: Add SSL Certificates via Secrets
         run: |
           # Ensure the .ssh directory exists
           mkdir -p ~/.ssh
@@ -62,7 +62,8 @@ jobs:
           ssh -i ~/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo chmod 600 /etc/ssl/mongodb/server.pem /etc/ssl/mongodb/ca.crt"
           echo "${{ secrets.MONGO_TLS_CA }}" > ./mongodb-certs/ca.crt
           echo "${{ secrets.MONGO_TLS_CERT }}" > ./mongodb-certs/server.pem
-        shell: bash
+          # Clean up SSH key
+          rm -f ~/db_key.pem
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7  # Use a stable version of the ssh-action
@@ -83,8 +84,8 @@ jobs:
               git pull origin develop --ff-only || git pull origin develop --rebase
             fi
           
-            # Ensure Docker is runnings
-            sudo systemctl start docker || sudo systemctl restart docker
+            # Ensure Docker is running
+            sudo systemctl restart docker
             # Clean up old containers and rebuild
             docker-compose down --volumes --remove-orphans
             docker system prune -af --volumes
