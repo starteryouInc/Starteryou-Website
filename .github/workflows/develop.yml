@@ -38,16 +38,21 @@ jobs:
           # Create local directory for SSL certificates
           mkdir -p ./keys/mongodb-ssl
 
-          # Download SSL certificates using SFTP/SCP
-          sftp -i ~/.ssh/db_server_key $DB_EC2_USER@$DB_EC2_HOST << EOF
-            get /etc/ssl/mongodb/ ./keys/mongodb-ssl/
-            bye
-          EOF
+          # Check if the directory exists and download recursively if it does
+          echo "Checking if /etc/ssl/mongodb exists on the remote server..."
+          if ssh -i ~/.ssh/db_server_key $DB_EC2_USER@$DB_EC2_HOST "[ -d /etc/ssl/mongodb ]"; then
+            echo "/etc/ssl/mongodb found. Downloading recursively using SCP..."
+            scp -i ~/.ssh/db_server_key -r $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/* ./keys/mongodb-ssl/
+          else
+            echo "Error: /etc/ssl/mongodb does not exist or is not a directory on the remote server."
+            exit 1
+          fi
 
           # List downloaded files and set permissions
+          echo "Listing downloaded files..."
           ls -l ./keys/mongodb-ssl
           chmod 644 ./keys/mongodb-ssl/*
-
+  
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7
         env:
