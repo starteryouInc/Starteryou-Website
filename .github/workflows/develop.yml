@@ -94,8 +94,11 @@ jobs:
             MONGO_HOST=${{ secrets.MONGO_HOST }}
             MONGO_PORT=${{ secrets.MONGO_PORT }}
             MONGO_DB=${{ secrets.MONGO_DB }}
+            MONGO_AUTH_SOURCE: ${{ secrets.MONGO_AUTH_SOURCE }}
+            MONGO_TLS=${{ secrets.MONGO_TLS }}
             MONGO_TLS_CA=${{ secrets.MONGO_TLS_CA }}
             MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}
+            MONGO_APP_NAME: ${{ secrets.MONGO_APP_NAME }}
 
             # Additional Environment Variables can be added here
             # EXAMPLE_VAR=example_value
