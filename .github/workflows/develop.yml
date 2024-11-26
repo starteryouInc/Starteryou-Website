@@ -8,17 +8,38 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Add SSL Certificates via Secrets
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Set up environment variables
+        run: |
+          echo "MONGO_USER=${{ secrets.MONGO_USER }}" >> $GITHUB_ENV
+          echo "MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}" >> $GITHUB_ENV
+          echo "MONGO_HOST=${{ secrets.MONGO_HOST }}" >> $GITHUB_ENV
+          echo "MONGO_PORT=${{ secrets.MONGO_PORT }}" >> $GITHUB_ENV
+          echo "MONGO_DB=${{ secrets.MONGO_DB }}" >> $GITHUB_ENV
+          echo "MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}" >> $GITHUB_ENV
+          echo "MONGO_TLS_CA=${{ secrets.MONGO_TLS_CA }}" >> $GITHUB_ENV
+      - name: Fetch SSL certificates from DB server
         env:
-          DB_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
-          DB_EC2_USER: ${{ secrets.DB_EC2_USER }}
-          DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}
-          MONGO_TLS_CA: ${{ secrets.MONGO_TLS_CA }}
-          MONGO_TLS_CERT: ${{ secrets.MONGO_TLS_CERT }}
+          DB_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}    # Private key for DB server
+          DB_EC2_USER: ${{ secrets.DB_EC2_USER }}      # User for DB server
+          DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}      # IP/Hostname for DB server
+      - name: Add SSL Certificates via Secrets
         run: |
           # Ensure the .ssh directory exists
           mkdir -p ~/.ssh
@@ -39,110 +60,33 @@ jobs:
           # Revert the permissions on the DB server after copying the certificates
           echo "Reverting permissions on DB server..."
           ssh -i ~/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo chmod 600 /etc/ssl/mongodb/server.pem /etc/ssl/mongodb/ca.crt"
-          # Write MongoDB TLS certificates to the local cert folder
-          echo "$MONGO_TLS_CA" > ./mongodb-certs/ca.crt
-          echo "$MONGO_TLS_CERT" > ./mongodb-certs/server.pem
-        
-          # Ensure the certificates are copied successfully
-          if [ ! -f "./mongodb-certs/ca.crt" ]; then
-            echo "Error: ca.crt not found!"
-            exit 1
-          fi
-          if [ ! -f "./mongodb-certs/server.pem" ]; then
-            echo "Error: server.pem not found!"
-            exit 1
-          fi
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          echo "${{ secrets.MONGO_TLS_CA }}" > ./mongodb-certs/ca.crt
+          echo "${{ secrets.MONGO_TLS_CERT }}" > ./mongodb-certs/server.pem
+        shell: bash
 
       - name: Deploy to EC2
+        uses: appleboy/ssh-action@v0.1.7  # Use a stable version of the ssh-action
         uses: appleboy/ssh-action@v0.1.7
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            #!/bin/bash
             set -e
-            set -o pipefail
-            log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"; }
-            handle_error() { log "Error occurred on line $1"; exit 1; }
-            trap 'handle_error $LINENO' ERR
-
-            PROJECT_ROOT="/home/ec2-user/Starteryou-Website"
-            REPO_DIR="${PROJECT_ROOT}/Starteryou"
-            ENV_FILE="${REPO_DIR}/.env"
-
-            log "Ensuring project root exists..."
-            mkdir -p "$PROJECT_ROOT"
-            cd "$PROJECT_ROOT"
-
-            log "Managing repository..."
-            if [ ! -d "$REPO_DIR" ]; then
-              log "Cloning repository..."
+            # Navigate to project directory or clone if it doesn't exist
+            if [ ! -d "/home/ec2-user/Starteryou-Website/Starteryou" ]; then
+              mkdir -p /home/ec2-user/Starteryou-Website
+              cd /home/ec2-user/Starteryou-Website
               git clone https://github.com/starteryouInc/Starteryou-Website.git -b develop Starteryou
             else
-              log "Pulling latest changes..."
-              cd "$REPO_DIR"
-              git fetch origin develop
-              git reset --hard origin/develop
+              cd /home/ec2-user/Starteryou-Website/Starteryou
+              # Pull changes from develop branch, handling any divergences
+              git pull origin develop --ff-only || git pull origin develop --rebase
             fi
-
-            log "Checking if mongodb-certs directory exists..."
-            ls -al ./mongodb-certs
-
-            if [ -d "./mongodb-certs" ]; then
-              log "Copying SSL certificates..."
-              mkdir -p "$REPO_DIR/keys/mongodb-ssl"
-              cp -r ./mongodb-certs/ "$REPO_DIR/keys/mongodb-ssl/"
-              chmod 644 "$REPO_DIR/keys/mongodb-ssl/"*
-            else
-              log "Error: mongodb-certs directory not found!"
-              exit 1
-            fi
-
-            log "Creating .env file..."
-            rm -f "$ENV_FILE"
-            touch "$ENV_FILE"
-            chmod 600 "$ENV_FILE"
-
-            cat > "$ENV_FILE" << EOF
-            NODE_ENV=production
-            MONGO_USER=${{ secrets.MONGO_USER }}
-            MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
-            MONGO_HOST=${{ secrets.MONGO_HOST }}
-            MONGO_PORT=${{ secrets.MONGO_PORT }}
-            MONGO_DB=${{ secrets.MONGO_DB }}
-            MONGO_AUTH_SOURCE=${{ secrets.MONGO_AUTH_SOURCE }}
-            MONGO_TLS=true
-            MONGO_TLS_CA=${{ secrets.MONGO_TLS_CA }}
-            MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}
-            MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}
-            EOF
-
-            log "Restarting Docker..."
+          
+            # Ensure Docker is running
             sudo systemctl start docker || sudo systemctl restart docker
-
-            log "Cleaning up old Docker resources..."
+            # Clean up old containers and rebuild
             docker-compose down --volumes --remove-orphans
             docker system prune -af --volumes
-
-            log "Building and starting Docker containers..."
             docker-compose up -d --build
-
-            log "Verifying containers..."
-            docker ps
-
-            log "Deployment completed successfully!"
