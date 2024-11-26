@@ -26,7 +26,7 @@ jobs:
 
       - name: Add SSL Certificates via Secrets
         env:
-          DB_SSH_KEY: ${{ secrets.DB_SSH_KEY }}
+          DB_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
           DB_EC2_USER: ${{ secrets.DB_EC2_USER }}
           DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}
           MONGO_TLS_CA: ${{ secrets.MONGO_TLS_CA }}
