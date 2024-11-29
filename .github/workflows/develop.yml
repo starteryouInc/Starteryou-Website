@@ -1,4 +1,5 @@
 name: Deploy to AWS EC2
+
 on:
   push:
     branches:
@@ -10,6 +11,26 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Verify SSH Tunnel
+        env:
+          DB_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
+          DB_EC2_USER: ${{ secrets.DB_EC2_USER }}
+          DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}
+        run: |
+          # Ensure the .ssh directory exists
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          # Add EC2 host to known hosts to avoid host verification failure
+          ssh-keyscan -H $DB_EC2_HOST >> ~/.ssh/known_hosts
+
+          # Save the private key for SSH
+          echo "$DB_SSH_KEY" > ~/.ssh/db_key.pem
+          chmod 600 ~/.ssh/db_key.pem
+
+          # Verify the SSH tunnel
+          ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "echo 'SSH Tunnel Verified!'"
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -23,30 +44,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Download SSL Certificates from Database Server
-        env:
-          DB_EC2_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
-          DB_EC2_USER: ${{ secrets.DB_EC2_USER }}
-          DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}
-        run: |
-          # Prepare SSH
-          mkdir -p ~/.ssh
-          echo "$DB_EC2_SSH_KEY" > ~/.ssh/db_server_key
-          chmod 600 ~/.ssh/db_server_key
-          ssh-keyscan -H $DB_EC2_HOST >> ~/.ssh/known_hosts
-
-          # Create local directory for SSL certificates
-          mkdir -p ./keys/mongodb-ssl
-
-          # Archive and Download SSL Certificates
-          ssh -i ~/.ssh/db_server_key $DB_EC2_USER@$DB_EC2_HOST "sudo tar -czf /tmp/mongodb-ssl.tar.gz -C /etc/ssl mongodb"
-          scp -i ~/.ssh/db_server_key $DB_EC2_USER@$DB_EC2_HOST:/tmp/mongodb-ssl.tar.gz ./keys/mongodb-ssl/
-          tar -xzf ./keys/mongodb-ssl/mongodb-ssl.tar.gz -C ./keys/mongodb-ssl/
-
-          # Verify SSL Files
-          echo "Listing SSL certificates:"
-          ls -l ./keys/mongodb-ssl/mongodb/
-
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7
         env:
@@ -54,7 +51,7 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          key: ${{ secrets.DB_EC2_SSH_KEY }}
           script: |
             #!/bin/bash
             set -e
@@ -83,11 +80,6 @@ jobs:
               git reset --hard origin/develop
             fi
 
-            log "Copying SSL certificates..."
-            mkdir -p "$REPO_DIR/keys/mongodb-ssl"
-            cp -r ./keys/mongodb-ssl/* "$REPO_DIR/keys/mongodb-ssl/"
-            chmod 644 "$REPO_DIR/keys/mongodb-ssl/"*
-
             log "Creating .env file..."
             rm -f "$ENV_FILE"
             touch "$ENV_FILE"
@@ -97,13 +89,13 @@ jobs:
             NODE_ENV=production
             MONGO_USER=${{ secrets.MONGO_USER }}
             MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
-            MONGO_HOST=${{ secrets.MONGO_HOST }}
-            MONGO_PORT=${{ secrets.MONGO_PORT }}
+            MONGO_HOST=localhost # Access via SSH tunnel
+            MONGO_PORT=27017
             MONGO_DB=${{ secrets.MONGO_DB }}
             MONGO_AUTH_SOURCE=${{ secrets.MONGO_AUTH_SOURCE }}
-            MONGO_TLS=${{ secrets.MONGO_TLS }}
-            MONGO_TLS_CA=${{ secrets.MONGO_TLS_CA }}
-            MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}
+            MONGO_TLS=true
+            MONGO_TLS_CA=/etc/ssl/mongodb/ca.crt
+            MONGO_TLS_CERT=/etc/ssl/mongodb/server.pem
             MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}
             EOF
 
