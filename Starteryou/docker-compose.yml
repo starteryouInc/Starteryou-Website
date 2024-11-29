@@ -6,66 +6,31 @@ services:
       dockerfile: Dockerfile
     container_name: starteryou-backend
     restart: unless-stopped
-    
-    # Multiple environment loading methods
     env_file:
       - .env
-    
     environment:
-      # Core environment configuration
-      - NODE_ENV=production
-      - PORT=3000
-      
-      # Frontend-related URLs
-      - FRONTEND_URL=http://54.196.202.145:8080
-      - VITE_BACKEND_URL=http://54.196.202.145:3000
-      
-      # MongoDB Configuration with fallback to .env
-      - MONGO_USER=${MONGO_USER:-${MONGO_USER}}
-      - MONGO_PASSWORD=${MONGO_PASSWORD:-${MONGO_PASSWORD}}
-      - MONGO_HOST=${MONGO_HOST:-${MONGO_HOST}}
-      - MONGO_PORT=${MONGO_PORT:-${MONGO_PORT}}
-      - MONGO_DB=${MONGO_DB:-${MONGO_DB}}
-      - MONGO_AUTH_SOURCE=${MONGO_AUTH_SOURCE:-${MONGO_AUTH_SOURCE}}
-      - MONGO_TLS=${MONGO_TLS:-${MONGO_TLS}}
-      - MONGO_TLS_CA=${MONGO_TLS_CA:-${MONGO_TLS_CA}}
-      - MONGO_TLS_CERT=${MONGO_TLS_CERT:-${MONGO_TLS_CERT}}
-      - MONGO_APP_NAME= ${MONGO_APP_NAME:-${MONGO_APP_NAME}}
-
-    
-    # Enhanced volume mappings
+      NODE_ENV: production
+      PORT: 3000
+      FRONTEND_URL: ${FRONTEND_URL}
+      VITE_BACKEND_URL: ${VITE_BACKEND_URL}
+      MONGO_USER: ${MONGO_USER}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_HOST: localhost # Access via SSH tunnel
+      MONGO_PORT: 27017
+      MONGO_DB: ${MONGO_DB}
+      MONGO_AUTH_SOURCE: ${MONGO_AUTH_SOURCE}
+      MONGO_TLS: true
+      MONGO_TLS_CA: /etc/ssl/mongodb/ca.crt
+      MONGO_TLS_CERT: /etc/ssl/mongodb/server.pem
+      MONGO_APP_NAME: ${MONGO_APP_NAME}
     volumes:
-      # Bind mount the entire backend directory
       - ./backend:/usr/src/app
-      
-      # Mount SSL keys and certificates
-      - ./keys:/usr/src/app/keys
-      
-      # Persistent node_modules
-      - /usr/src/app/node_modules
-      
-      # Explicitly mount .env file
-      - ./.env:/usr/src/app/.env
-      
-      # Mount SSL certificates
-      - ./keys/mongodb-ssl:/etc/ssl/mongodb:ro  # Changed this line
-      
-      # Uploads volume
-      - ./backend/uploads:/usr/src/app/uploads
-    
     ports:
       - "3000:3000"
-    
     networks:
       - starteryou-network
-    
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    
     depends_on:
       - tunnel
-    
-    # Optional healthcheck
     healthcheck:
       test: ["CMD", "wget", "--spider", "http://localhost:3000/health"]
       interval: 30s
@@ -80,14 +45,14 @@ services:
       sh -c "apk add --no-cache openssh &&
              chmod 600 /keys/myKey.pem &&
              mkdir -p ~/.ssh &&
-             ssh-keyscan 52.207.194.195 >> ~/.ssh/known_hosts &&
-             ssh -N -L 27017:localhost:27017 ec2-user@52.207.194.195 -i /keys/myKey.pem"
+             ssh-keyscan ${DB_EC2_HOST} >> ~/.ssh/known_hosts &&
+             ssh -N -L 27017:localhost:27017 -L /etc/ssl/mongodb:/etc/ssl/mongodb:ro \
+             ${DB_EC2_USER}@${DB_EC2_HOST} -i /keys/myKey.pem"
     restart: always
     networks:
       - starteryou-network
     volumes:
-      - ./keys:/keys
-      - ./keys/mongodb-ssl:/etc/ssl/mongodb:ro  # Changed this line
+      - ./keys:/keys:ro # Read-only mount for private SSH keys
 
   frontend:
     build:
@@ -98,7 +63,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - BACKEND_URL=http://54.196.202.145:3000
+      BACKEND_URL: ${BACKEND_URL}
     depends_on:
       - backend
     networks:
