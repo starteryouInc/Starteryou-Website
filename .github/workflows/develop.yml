@@ -8,71 +8,86 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      # Step 1: Checkout the Code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Configure AWS Credentials for Dev Server
-      - name: Configure AWS credentials for Dev Server
-        uses: aws-actions/configure-aws-credentials@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # Step 3: Debug AWS Credentials on Dev Server
-      - name: Debug AWS credentials
+      - name: Set up environment variables
         run: |
-          echo "Testing AWS credentials on dev server..."
-          echo "AWS Region: ${{ secrets.AWS_REGION }}"
-          aws sts get-caller-identity --region ${{ secrets.AWS_REGION }}
-
-      # Step 4: Verify SSH Tunnel to DB Server
-      - name: Verify SSH Tunnel to DB Server
+          echo "MONGO_USER=${{ secrets.MONGO_USER }}" >> $GITHUB_ENV
+          echo "MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}" >> $GITHUB_ENV
+          echo "MONGO_HOST=${{ secrets.MONGO_HOST }}" >> $GITHUB_ENV
+          echo "MONGO_PORT=${{ secrets.MONGO_PORT }}" >> $GITHUB_ENV
+          echo "MONGO_DB=${{ secrets.MONGO_DB }}" >> $GITHUB_ENV
+          echo "MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}" >> $GITHUB_ENV
+          echo "MONGO_TLS_CA=${{ secrets.MONGO_TLS_CA }}" >> $GITHUB_ENV
+      - name: Fetch SSL certificates from DB server
+        env:
+          DB_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}    # Private key for DB server
+          DB_EC2_USER: ${{ secrets.DB_EC2_USER }}      # User for DB server
+          DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}      # IP/Hostname for DB server
+      - name: Add SSL Certificates via Secrets
         run: |
-          echo "Setting up SSH tunnel to DB server..."
+          # Ensure the .ssh directory exists
           mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          ssh-keyscan -H "$${{ secrets.DB_EC2_HOST }}" >> ~/.ssh/known_hosts
-          echo "$${{ secrets.DB_EC2_SSH_KEY }}" > ~/.ssh/db_key.pem
-          chmod 600 ~/.ssh/db_key.pem
-          ssh -i ~/.ssh/db_key.pem $${{ secrets.DB_EC2_USER }}@$${{ secrets.DB_EC2_HOST }} "echo 'DB Server SSH Verified!'"
-
-      # Step 5: Deploy Application to Dev Server
-      - name: Deploy Application to Dev Server
-        uses: appleboy/ssh-action@v0.1.7
+          # Add DB server to known hosts to avoid host verification failure
+          ssh-keyscan -H $DB_EC2_HOST >> ~/.ssh/known_hosts
+          # Create the folder for storing SSL certificates
+          mkdir -p ./mongodb-certs
+          # Create a temporary file for the SSH private key and set its permissions
+          echo "$DB_SSH_KEY" > ~/db_key.pem
+          chmod 600 ~/db_key.pem
+          # Temporarily change permissions on the DB server to allow access to the files
+          echo "Changing permissions on DB server for certificate files..."
+          ssh -i ~/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo chmod 644 /etc/ssl/mongodb/ca.crt /etc/ssl/mongodb/server.pem"
+          # Fetch the SSL certificates from the DB server
+          echo "Copying SSL certificates..."
+          scp -i ~/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/ca.crt ./mongodb-certs/
+          scp -i ~/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/server.pem ./mongodb-certs/
+          # Revert the permissions on the DB server after copying the certificates
+          echo "Reverting permissions on DB server..."
+          ssh -i ~/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo chmod 600 /etc/ssl/mongodb/server.pem /etc/ssl/mongodb/ca.crt"
+          echo "${{ secrets.MONGO_TLS_CA }}" > ./mongodb-certs/ca.crt
+          echo "${{ secrets.MONGO_TLS_CERT }}" > ./mongodb-certs/server.pem
+        shell: bash
+          # Clean up SSH key
+          rm -f ~/db_key.pem
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v0.1.7  # Use a stable version of the ssh-action
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            #!/bin/bash
             set -e
-            echo "Starting deployment on dev server..."
-
-            # Ensure Git is installed
-            if ! command -v git &> /dev/null; then
-              sudo yum update -y || sudo apt-get update -y
-              sudo yum install -y git || sudo apt-get install -y git
-            fi
-
-            # Clone or update repository
-            PROJECT_ROOT="/home/ec2-user/Starteryou-Website"
-            REPO_DIR="${PROJECT_ROOT}/Starteryou"
-            if [ ! -d "$REPO_DIR" ]; then
-              mkdir -p "$PROJECT_ROOT"
-              cd "$PROJECT_ROOT"
-              git clone https://github.com/***Inc/Starteryou-Website.git -b develop Starteryou
+            # Navigate to project directory or clone if it doesn't exist
+            if [ ! -d "/home/ec2-user/Starteryou-Website/Starteryou" ]; then
+              mkdir -p /home/ec2-user/Starteryou-Website
+              cd /home/ec2-user/Starteryou-Website
+              git clone https://github.com/starteryouInc/Starteryou-Website.git -b develop Starteryou
             else
-              cd "$REPO_DIR"
-              git fetch origin develop
-              git reset --hard origin/develop
+              cd /home/ec2-user/Starteryou-Website/Starteryou
+              # Pull changes from develop branch, handling any divergences
+              git pull origin develop --ff-only || git pull origin develop --rebase
             fi
-
-            # Restart Docker and deploy containers
+          
+            # Ensure Docker is runnings
             sudo systemctl start docker || sudo systemctl restart docker
+            # Ensure Docker is running
+            sudo systemctl restart docker
+            # Clean up old containers and rebuild
             docker-compose down --volumes --remove-orphans
-            docker-compose up -d --build
-
-            echo "Deployment on dev server completed successfully!"
+            docker system prune -af --volumes
