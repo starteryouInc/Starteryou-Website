@@ -13,8 +13,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Verify SSH Tunnel
-      - name: Verify SSH Tunnel
+      # Step 2: Ensure SSH Tunnel for Database is Set Up
+      - name: Verify SSH Tunnel to Database
         env:
           DB_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
           DB_EC2_USER: ${{ secrets.DB_EC2_USER }}
@@ -24,33 +24,25 @@ jobs:
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
 
-          # Add EC2 host to known hosts to avoid host verification failure
+          # Add the database server to known hosts
           ssh-keyscan -H $DB_EC2_HOST >> ~/.ssh/known_hosts
 
           # Save the private key for SSH
           echo "$DB_SSH_KEY" > ~/.ssh/db_key.pem
           chmod 600 ~/.ssh/db_key.pem
 
-          # Verify the SSH tunnel
-          ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "echo 'SSH Tunnel Verified!'"
+          # Verify the SSH tunnel to the database server
+          ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "echo 'Database Server SSH Verified!'"
 
-      # Step 3: Configure AWS Credentials (if needed for other tasks)
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      # Step 4: Deploy Application to EC2
-      - name: Deploy to EC2
+      # Step 3: Deploy Application to EC2
+      - name: Deploy Application to EC2
         uses: appleboy/ssh-action@v0.1.7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          host: ${{ secrets.DB_EC2_HOST }}
-          username: ${{ secrets.DB_EC2_USER }}
-          key: ${{ secrets.DB_EC2_SSH_KEY }}
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             #!/bin/bash
             set -e
@@ -59,6 +51,13 @@ jobs:
             log() {
               echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"
             }
+
+            # Ensure Git is installed
+            log "Ensuring Git is installed..."
+            if ! command -v git &> /dev/null; then
+              sudo yum update -y || sudo apt-get update -y
+              sudo yum install -y git || sudo apt-get install -y git
+            fi
 
             # Set project and repository directories
             PROJECT_ROOT="/home/ec2-user/Starteryou-Website"
