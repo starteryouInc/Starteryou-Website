@@ -13,95 +13,65 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Configure AWS Credentials
-      - name: Configure AWS credentials
+      # Step 2: Configure AWS Credentials for Dev Server
+      - name: Configure AWS credentials for Dev Server
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: $${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: $${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      # Step 3: Verify SSH Tunnel to Database
-      - name: Verify SSH Tunnel to Database
+      # Step 3: Debug AWS Credentials on Dev Server
+      - name: Debug AWS credentials
         run: |
-          # Ensure the .ssh directory exists
+          echo "Testing AWS credentials on dev server..."
+          aws sts get-caller-identity --region ${{ secrets.AWS_REGION }}
+
+      # Step 4: Verify SSH Tunnel to DB Server
+      - name: Verify SSH Tunnel to DB Server
+        run: |
+          echo "Setting up SSH tunnel to DB server..."
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-
-          # Add the database server to known hosts
           ssh-keyscan -H "${{ secrets.DB_EC2_HOST }}" >> ~/.ssh/known_hosts
-
-          # Save the private key for SSH
           echo "${{ secrets.DB_EC2_SSH_KEY }}" > ~/.ssh/db_key.pem
           chmod 600 ~/.ssh/db_key.pem
+          ssh -i ~/.ssh/db_key.pem ${{ secrets.DB_EC2_USER }}@${{ secrets.DB_EC2_HOST }} "echo 'DB Server SSH Verified!'"
 
-          # Verify the SSH tunnel to the database server
-          ssh -i ~/.ssh/db_key.pem ${{ secrets.DB_EC2_USER }}@${{ secrets.DB_EC2_HOST }} "echo 'Database Server SSH Verified!'"
-
-      # Step 4: Deploy Application to EC2
-      - name: Deploy Application to EC2
+      # Step 5: Deploy Application to Dev Server
+      - name: Deploy Application to Dev Server
         uses: appleboy/ssh-action@v0.1.7
         with:
-          host: $${{ secrets.EC2_HOST }}
-          username: $${{ secrets.EC2_USER }}
-          key: $${{ secrets.EC2_SSH_KEY }}
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             #!/bin/bash
             set -e
+            echo "Starting deployment on dev server..."
 
-            # Define the log function
-            log() {
-              echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"
-            }
-
-            log "Exporting environment variables for deployment..."
-            DB_SSH_KEY="$${{ secrets.DB_SSH_KEY }}"
-            DB_EC2_HOST="$${{ secrets.DB_EC2_HOST }}"
-            DB_EC2_USER="$${{ secrets.DB_EC2_USER }}"
-            NODE_ENV=production
-            MONGO_USER="$${{ secrets.MONGO_USER }}"
-            MONGO_PASSWORD="$${{ secrets.MONGO_PASSWORD }}"
-            MONGO_HOST=localhost
-            MONGO_PORT=27017
-            MONGO_DB="$${{ secrets.MONGO_DB }}"
-            MONGO_AUTH_SOURCE="$${{ secrets.MONGO_AUTH_SOURCE }}"
-            MONGO_TLS=true
-            MONGO_TLS_CA=/etc/ssl/mongodb/ca.crt
-            MONGO_TLS_CERT=/etc/ssl/mongodb/server.pem
-            MONGO_APP_NAME="$${{ secrets.MONGO_APP_NAME }}"
-            export DB_SSH_KEY DB_EC2_HOST DB_EC2_USER NODE_ENV MONGO_USER MONGO_PASSWORD MONGO_HOST MONGO_PORT MONGO_DB MONGO_AUTH_SOURCE MONGO_TLS MONGO_TLS_CA MONGO_TLS_CERT MONGO_APP_NAME
-
-            log "Ensuring Git is installed..."
+            # Ensure Git is installed
             if ! command -v git &> /dev/null; then
               sudo yum update -y || sudo apt-get update -y
               sudo yum install -y git || sudo apt-get install -y git
             fi
 
-            # Set project and repository directories
+            # Clone or update repository
             PROJECT_ROOT="/home/ec2-user/Starteryou-Website"
             REPO_DIR="${PROJECT_ROOT}/Starteryou"
-
-            # Navigate to project directory or clone if it doesn't exist
             if [ ! -d "$REPO_DIR" ]; then
-              log "Cloning repository..."
               mkdir -p "$PROJECT_ROOT"
               cd "$PROJECT_ROOT"
               git clone https://github.com/***Inc/Starteryou-Website.git -b develop Starteryou
             else
-              log "Pulling latest changes..."
               cd "$REPO_DIR"
               git fetch origin develop
               git reset --hard origin/develop
             fi
 
-            log "Restarting Docker..."
+            # Restart Docker and deploy containers
             sudo systemctl start docker || sudo systemctl restart docker
-
-            log "Cleaning up old Docker resources..."
             docker-compose down --volumes --remove-orphans
-            docker system prune -af --volumes
-
-            log "Building and starting Docker containers..."
             docker-compose up -d --build
 
-            log "Deployment completed successfully!"
+            echo "Deployment on dev server completed successfully!"
