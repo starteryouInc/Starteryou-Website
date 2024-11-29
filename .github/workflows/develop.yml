@@ -1,6 +1,5 @@
 name: Deploy to AWS EC2
 
-
 on:
   push:
     branches:
@@ -9,11 +8,12 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
+      # Step 1: Checkout the Code
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Step 2: Verify SSH Tunnel
       - name: Verify SSH Tunnel
         env:
           DB_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
@@ -34,11 +34,7 @@ jobs:
           # Verify the SSH tunnel
           ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "echo 'SSH Tunnel Verified!'"
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-
+      # Step 3: Configure AWS Credentials (if needed for other tasks)
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -46,19 +42,35 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      # Step 4: Deploy Application to EC2
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@v0.1.7  # Use a stable version of the ssh-action
+        uses: appleboy/ssh-action@v0.1.7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
+          host: ${{ secrets.DB_EC2_HOST }}
+          username: ${{ secrets.DB_EC2_USER }}
           key: ${{ secrets.DB_EC2_SSH_KEY }}
           script: |
+            #!/bin/bash
             set -e
+
+            # Define the log function
+            log() {
+              echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"
+            }
+
+            # Set project and repository directories
+            PROJECT_ROOT="/home/ec2-user/Starteryou-Website"
+            REPO_DIR="${PROJECT_ROOT}/Starteryou"
+            ENV_FILE="${REPO_DIR}/.env"
+
             # Navigate to project directory or clone if it doesn't exist
-            if [ ! -d "/home/ec2-user/Starteryou-Website/Starteryou" ]; then
-              mkdir -p /home/ec2-user/Starteryou-Website
-              cd /home/ec2-user/Starteryou-Website
-              git clone https://github.com/starteryouInc/Starteryou-Website.git -b develop Starteryou
+            if [ ! -d "$REPO_DIR" ]; then
+              log "Cloning repository..."
+              mkdir -p "$PROJECT_ROOT"
+              cd "$PROJECT_ROOT"
+              git clone https://github.com/***Inc/Starteryou-Website.git -b develop Starteryou
             else
               log "Pulling latest changes..."
               cd "$REPO_DIR"
@@ -66,6 +78,7 @@ jobs:
               git reset --hard origin/develop
             fi
 
+            # Create the .env file
             log "Creating .env file..."
             rm -f "$ENV_FILE"
             touch "$ENV_FILE"
@@ -85,10 +98,16 @@ jobs:
             MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}
             EOF
 
+            # Restart Docker and clean up old resources
             log "Restarting Docker..."
             sudo systemctl start docker || sudo systemctl restart docker
 
             log "Cleaning up old Docker resources..."
             docker-compose down --volumes --remove-orphans
             docker system prune -af --volumes
+
+            # Build and start containers
+            log "Building and starting Docker containers..."
             docker-compose up -d --build
+
+            log "Deployment completed successfully!"
