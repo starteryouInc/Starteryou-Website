@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigation } from "../../../context/NavigationContext";
 import FileUpload from "../../Common/FileUpload";
-
+import { API_CONFIG } from "@config/api";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
 
@@ -21,9 +21,12 @@ const UnlockPotential = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/text", {
-          params: { page, component: "UnlockPotential" },
-        });
+        const response = await axios.get(
+          `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+          {
+            params: { page, component: "UnlockPotential" },
+          }
+        );
 
         if (response.data) {
           setTitle(response.data.content || title);
@@ -54,7 +57,7 @@ const UnlockPotential = () => {
         ? paragraph
         : [paragraph.trim()];
 
-      await axios.put("http://localhost:3000/api/text", {
+      await axios.put(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`, {
         page,
         component: "UnlockPotential",
         content: title.trim(),

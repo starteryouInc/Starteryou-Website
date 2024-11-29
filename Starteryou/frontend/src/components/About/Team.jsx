@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { FiEdit2 } from "react-icons/fi";
 import { useNavigation } from "../../context/NavigationContext";
+import { API_CONFIG } from "@config/api";
 
 /**
  * The Team component displays a list of team members, their positions, names, and about text.
@@ -78,9 +79,12 @@ const Team = () => {
           }
 
           try {
-            const response = await axios.get("http://localhost:3000/api/text", {
-              params: { page, component: member.position },
-            });
+            const response = await axios.get(
+              `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+              {
+                params: { page, component: member.position },
+              }
+            );
 
             if (response.data && response.data.component) {
               return {
@@ -130,7 +134,10 @@ const Team = () => {
       };
 
       // Sends a PUT request to save the edited data.
-      await axios.put(`http://localhost:3000/api/text`, payload);
+      await axios.put(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+        payload
+      );
 
       const updatedMembers = [...teamMembers];
       updatedMembers[index] = member; // Update the specific member in the state.

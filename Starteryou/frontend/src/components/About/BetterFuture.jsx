@@ -7,6 +7,7 @@ import {
   faPencilAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
+import { API_CONFIG } from "@config/api";
 
 /**
  * `BetterFuture` Component
@@ -48,9 +49,12 @@ const BetterFuture = () => {
   useEffect(() => {
     const fetchTextContent = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/text", {
-          params: { page, component: "BetterFuture" }, // Identifies the component in the backend
-        });
+        const response = await axios.get(
+          `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+          {
+            params: { page, component: "BetterFuture" }, // Identifies the component in the backend
+          }
+        );
 
         // Update content and paragraphs with fetched data
         const { content, paragraphs } = response.data;
@@ -89,7 +93,7 @@ const BetterFuture = () => {
    */
   const saveContent = async () => {
     try {
-      await axios.put("http://localhost:3000/api/text", {
+      await axios.put(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`, {
         page: "AboutPage",
         component: "BetterFuture",
         content: content.trim(), // Trim whitespace from content

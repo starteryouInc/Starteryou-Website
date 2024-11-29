@@ -3,7 +3,7 @@ import axios from "axios"; // Ensure axios is imported
 import { FaPencilAlt } from "react-icons/fa"; // Ensure icon is imported
 import { useNavigation } from "../../../context/NavigationContext";
 import FileUpload from "../../Common/FileUpload";
-
+import { API_CONFIG } from "@config/api";
 const HeroJobPortal = () => {
   const [preview, setPreview] = useState(null);
   const { isAdmin } = useNavigation();
@@ -20,9 +20,12 @@ const HeroJobPortal = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/text", {
-          params: { page, component: "HeroJobBefore" },
-        });
+        const response = await axios.get(
+          `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+          {
+            params: { page, component: "HeroJobBefore" },
+          }
+        );
 
         if (response.data) {
           setTitle(
@@ -62,7 +65,7 @@ const HeroJobPortal = () => {
         ? paragraph
         : [paragraph.trim()];
 
-      await axios.put("http://localhost:3000/api/text", {
+      await axios.put(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`, {
         page: "JobBeforeSignup",
         component: "HeroJobBefore",
         content: title.trim(),

@@ -11,6 +11,7 @@ import axios from "axios"; // Library for making HTTP requests
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; // Icon component from FontAwesome
 import { faPencilAlt, faSave } from "@fortawesome/free-solid-svg-icons"; // Specific icons for edit and save functionality
 import { useNavigation } from "../../context/NavigationContext"; // Custom context for managing navigation and admin state
+import { API_CONFIG } from "@config/api";
 
 /**
  * TechTeam component for displaying tech team information.
@@ -59,9 +60,12 @@ const TechTeam = () => {
   useEffect(() => {
     const fetchTextContent = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/text", {
-          params: { page, component: "TechTeam" }, // Specify the component name for fetching content
-        });
+        const response = await axios.get(
+          `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+          {
+            params: { page, component: "TechTeam" }, // Specify the component name for fetching content
+          }
+        );
         const { content, paragraphs } = response.data;
 
         // Set fetched content and paragraphs, fallback to placeholders if data is missing
@@ -81,7 +85,7 @@ const TechTeam = () => {
    */
   const saveContent = async () => {
     try {
-      await axios.put("http://localhost:3000/api/text", {
+      await axios.put(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`, {
         page: "HomePage",
 
         component: "TechTeam", // Specify the component name for saving content

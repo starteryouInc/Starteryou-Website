@@ -10,6 +10,7 @@ import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
+import { API_CONFIG } from "@config/api";
 
 /**
  * OurVision Component
@@ -47,9 +48,12 @@ const OurVision = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/text", {
-          params: { page, component: "OurVision" },
-        });
+        const response = await axios.get(
+          `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+          {
+            params: { page, component: "OurVision" },
+          }
+        );
 
         if (response.data) {
           setTitle(response.data.content || "Our Vision");
@@ -105,7 +109,7 @@ const OurVision = () => {
         ? paragraph
         : [paragraph.trim()];
 
-      await axios.put("http://localhost:3000/api/text", {
+      await axios.put(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`, {
         page: "AboutPage",
         component: "OurVision",
         content: title.trim(),
