@@ -13,12 +13,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Ensure SSH Tunnel for Database is Set Up
+      # Step 2: Verify SSH Tunnel to Database
       - name: Verify SSH Tunnel to Database
-        env:
-          DB_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
-          DB_EC2_USER: ${{ secrets.DB_EC2_USER }}
-          DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}
         run: |
           # Ensure the .ssh directory exists
           mkdir -p ~/.ssh
@@ -28,17 +24,18 @@ jobs:
           ssh-keyscan -H $DB_EC2_HOST >> ~/.ssh/known_hosts
 
           # Save the private key for SSH
-          echo "$DB_SSH_KEY" > ~/.ssh/db_key.pem
+          echo "${{ secrets.DB_EC2_SSH_KEY }}" > ~/.ssh/db_key.pem
           chmod 600 ~/.ssh/db_key.pem
 
           # Verify the SSH tunnel to the database server
-          ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "echo 'Database Server SSH Verified!'"
+          ssh -i ~/.ssh/db_key.pem ${{ secrets.DB_EC2_USER }}@${{ secrets.DB_EC2_HOST }} "echo 'Database Server SSH Verified!'"
+
+        env:
+          DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}
 
       # Step 3: Deploy Application to EC2
       - name: Deploy Application to EC2
         uses: appleboy/ssh-action@v0.1.7
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
