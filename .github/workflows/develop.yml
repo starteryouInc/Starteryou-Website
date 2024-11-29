@@ -25,7 +25,8 @@ jobs:
       - name: Debug AWS credentials
         run: |
           echo "Testing AWS credentials on dev server..."
-          aws sts get-caller-identity --region $${{ secrets.AWS_REGION }}
+          echo "AWS Region: ${{ secrets.AWS_REGION }}"
+          aws sts get-caller-identity --region ${{ secrets.AWS_REGION }}
 
       # Step 4: Verify SSH Tunnel to DB Server
       - name: Verify SSH Tunnel to DB Server
