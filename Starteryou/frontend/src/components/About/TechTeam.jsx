@@ -44,7 +44,7 @@ const TechTeam = () => {
    * @type {[boolean, function]}
    */
   const [isEditing, setIsEditing] = useState(false);
-
+  const page = "HomePage"; // Specify the page name for the current component.
   /**
    * Retrieve admin status from navigation context.
    * @type {object}
@@ -60,15 +60,15 @@ const TechTeam = () => {
     const fetchTextContent = async () => {
       try {
         const response = await axios.get("http://localhost:3000/api/text", {
-          params: { component: "TechTeam" }, // Specify the component name for fetching content
+          params: { page, component: "TechTeam" }, // Specify the component name for fetching content
         });
         const { content, paragraphs } = response.data;
 
         // Set fetched content and paragraphs, fallback to placeholders if data is missing
         setContent(content || "Our Tech Team");
         setParagraphs(paragraphs || []);
-      } catch (error) {
-        console.error("Error fetching text content:", error); // Log errors to the console
+      } catch {
+        console.error("Error fetching text content"); // Log errors to the console
       }
     };
 
@@ -82,6 +82,8 @@ const TechTeam = () => {
   const saveContent = async () => {
     try {
       await axios.put("http://localhost:3000/api/text", {
+        page: "HomePage",
+
         component: "TechTeam", // Specify the component name for saving content
         content: content.trim(), // Trim whitespace from the title
         paragraphs: paragraphs.map((para) => para.trim()), // Trim whitespace for each paragraph
@@ -89,8 +91,8 @@ const TechTeam = () => {
 
       // Exit editing mode after successful save
       setIsEditing(false);
-    } catch (error) {
-      console.error("Error saving content:", error); // Log errors to the console
+    } catch {
+      console.error("Error saving content"); // Log errors to the console
     }
   };
 

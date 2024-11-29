@@ -62,7 +62,7 @@ const Team = () => {
   const [teamMembers, setTeamMembers] = useState(initialData); // Holds team member data.
   const [editingIndex, setEditingIndex] = useState(null); // Tracks which team member is being edited.
   const [editingData, setEditingData] = useState(null); // Temporary state for edited data.
-
+  const page = "AboutPage"; // Specify the page name for the current component.
   /**
    * Fetches team member data from the backend and updates the state.
    * @async
@@ -79,7 +79,7 @@ const Team = () => {
 
           try {
             const response = await axios.get("http://localhost:3000/api/text", {
-              params: { component: member.position },
+              params: { page, component: member.position },
             });
 
             if (response.data && response.data.component) {
@@ -98,8 +98,8 @@ const Team = () => {
               );
               return member;
             }
-          } catch (error) {
-            console.error(`Error fetching data for ${member.position}:`, error);
+          } catch {
+            console.error(`Error fetching data for ${member.position}:`);
             return member; // Return initial data if fetching fails.
           }
         });
@@ -123,6 +123,7 @@ const Team = () => {
     try {
       const member = editingData; // The member currently being edited.
       const payload = {
+        page: "AboutPage",
         component: member.position,
         content: member.name,
         paragraphs: [member.about],
@@ -136,8 +137,8 @@ const Team = () => {
       setTeamMembers(updatedMembers);
 
       setEditingIndex(null); // Reset the editing index after save.
-    } catch (error) {
-      console.error("Error saving updated data:", error);
+    } catch {
+      console.error("Error saving updated data");
     }
   };
 

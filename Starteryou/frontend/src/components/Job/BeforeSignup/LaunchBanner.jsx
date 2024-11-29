@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { useNavigation } from "../../context/NavigationContext";
-import FileUpload from "../Common/FileUpload";
-
+import { useNavigation } from "../../../context/NavigationContext";
+import FileUpload from "../../Common/FileUpload";
 
 const LaunchBanner = () => {
   const [preview, setPreview] = useState(null);

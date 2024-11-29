@@ -40,7 +40,7 @@ const BetterFuture = () => {
 
   // Check if the user is an admin
   const { isAdmin } = useNavigation();
-
+  const page = "AboutPage"; // Specify the page name for the current component.
   /**
    * Fetches the text content from the backend API.
    * Updates the heading and paragraph states with the fetched data.
@@ -49,15 +49,15 @@ const BetterFuture = () => {
     const fetchTextContent = async () => {
       try {
         const response = await axios.get("http://localhost:3000/api/text", {
-          params: { component: "BetterFuture" }, // Identifies the component in the backend
+          params: { page, component: "BetterFuture" }, // Identifies the component in the backend
         });
 
         // Update content and paragraphs with fetched data
         const { content, paragraphs } = response.data;
         setContent(content || "Build Better Future");
         setParagraphs(paragraphs || []);
-      } catch (error) {
-        console.error("Error fetching text content:", error);
+      } catch {
+        console.error("Error fetching text content");
       }
     };
 
@@ -90,13 +90,14 @@ const BetterFuture = () => {
   const saveContent = async () => {
     try {
       await axios.put("http://localhost:3000/api/text", {
+        page: "AboutPage",
         component: "BetterFuture",
         content: content.trim(), // Trim whitespace from content
         paragraphs: paragraphs.map((para) => para.trim()), // Trim each paragraph
       });
       setIsEditing(false); // Exit editing mode on success
-    } catch (error) {
-      console.error("Error saving content:", error);
+    } catch {
+      console.error("Error saving content");
     }
   };
 

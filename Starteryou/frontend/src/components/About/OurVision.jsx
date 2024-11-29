@@ -33,14 +33,14 @@ const OurVision = () => {
    */
   const [title, setTitle] = useState("OUR VISION");
   const [paragraph, setParagraph] = useState(
-    "Starteryou envisions a world where every student has access to diverse job opportunities..."
+    "Starteryou envisions a world where every student has access to diverse job opportunities, gaining essential work experience and building a foundation for their future careers. We aspire to be the go-to Student Employment Hub, continually innovating and expanding our offerings to enhance the job-seeking journey for both students and employers."
   );
   const [preview, setPreview] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const { isAdmin } = useNavigation();
   const [error, setError] = useState("");
-
+  const page = "AboutPage"; // Specify the page name for the current component.
   /**
    * Fetches initial data for the "Our Vision" section from the API on component mount.
    */
@@ -48,7 +48,7 @@ const OurVision = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get("http://localhost:3000/api/text", {
-          params: { component: "OurVision" },
+          params: { page, component: "OurVision" },
         });
 
         if (response.data) {
@@ -59,8 +59,8 @@ const OurVision = () => {
               : "Your description paragraph here."
           );
         }
-      } catch (error) {
-        console.error("Error fetching data:", error);
+      } catch {
+        console.error("Error fetching data");
         setError("Error fetching vision content. Please try again later.");
       }
     };
@@ -106,6 +106,7 @@ const OurVision = () => {
         : [paragraph.trim()];
 
       await axios.put("http://localhost:3000/api/text", {
+        page: "AboutPage",
         component: "OurVision",
         content: title.trim(),
         paragraphs: normalizedParagraphs,
@@ -113,8 +114,8 @@ const OurVision = () => {
 
       setError("");
       setIsEditing(false);
-    } catch (error) {
-      console.error("Error saving content:", error.response || error.message);
+    } catch {
+      console.error("Error saving content");
       setError("Error saving content. Please try again later.");
     }
   };
@@ -180,7 +181,6 @@ const OurVision = () => {
           {isAdmin && <FileUpload handleFileChange={handleFileChange} />}
         </div>
       </div>
-      {error && <p className="text-red-500 text-center mt-4">{error}</p>}
     </div>
   );
 };
