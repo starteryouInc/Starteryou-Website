@@ -6,9 +6,10 @@ import LatestInsight from "../components/JobPortal/LatestInsight";
 import LaunchBanner from "../components/JobPortal/LaunchBanner";
 import PathStart from "../components/JobPortal/PathStart";
 import UnlockPotential from "../components/JobPortal/UnlockPotential";
-
+import InProgressPage from "./InProgressPage";
 export default function JobPortalPage() {
-  return (
+  const deployReady = true;
+  return deployReady ? (
     <div>
       <HeroJobPortal />
       <JobListing />
@@ -18,5 +19,7 @@ export default function JobPortalPage() {
       <LaunchBanner />
       <LatestInsight />
     </div>
+  ) : (
+    <InProgressPage />
   );
 }
