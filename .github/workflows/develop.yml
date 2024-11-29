@@ -21,7 +21,7 @@ jobs:
           chmod 700 ~/.ssh
 
           # Add the database server to known hosts
-          ssh-keyscan -H $DB_EC2_HOST >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ secrets.DB_EC2_HOST }}" >> ~/.ssh/known_hosts
 
           # Save the private key for SSH
           echo "${{ secrets.DB_EC2_SSH_KEY }}" > ~/.ssh/db_key.pem
@@ -29,9 +29,6 @@ jobs:
 
           # Verify the SSH tunnel to the database server
           ssh -i ~/.ssh/db_key.pem ${{ secrets.DB_EC2_USER }}@${{ secrets.DB_EC2_HOST }} "echo 'Database Server SSH Verified!'"
-
-        env:
-          DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}
 
       # Step 3: Deploy Application to EC2
       - name: Deploy Application to EC2
