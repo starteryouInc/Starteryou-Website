@@ -25,7 +25,7 @@ jobs:
       - name: Debug AWS credentials
         run: |
           echo "Testing AWS credentials on dev server..."
-          aws sts get-caller-identity --region ${{ secrets.AWS_REGION }}
+          aws sts get-caller-identity --region $${{ secrets.AWS_REGION }}
 
       # Step 4: Verify SSH Tunnel to DB Server
       - name: Verify SSH Tunnel to DB Server
@@ -33,10 +33,10 @@ jobs:
           echo "Setting up SSH tunnel to DB server..."
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          ssh-keyscan -H "${{ secrets.DB_EC2_HOST }}" >> ~/.ssh/known_hosts
-          echo "${{ secrets.DB_EC2_SSH_KEY }}" > ~/.ssh/db_key.pem
+          ssh-keyscan -H "$${{ secrets.DB_EC2_HOST }}" >> ~/.ssh/known_hosts
+          echo "$${{ secrets.DB_EC2_SSH_KEY }}" > ~/.ssh/db_key.pem
           chmod 600 ~/.ssh/db_key.pem
-          ssh -i ~/.ssh/db_key.pem ${{ secrets.DB_EC2_USER }}@${{ secrets.DB_EC2_HOST }} "echo 'DB Server SSH Verified!'"
+          ssh -i ~/.ssh/db_key.pem $${{ secrets.DB_EC2_USER }}@$${{ secrets.DB_EC2_HOST }} "echo 'DB Server SSH Verified!'"
 
       # Step 5: Deploy Application to Dev Server
       - name: Deploy Application to Dev Server
