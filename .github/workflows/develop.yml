@@ -16,10 +16,6 @@ jobs:
 
       # Step 2: Set Up SSH Tunnel
       - name: Set up SSH Tunnel
-        env:
-          DB_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
-          DB_EC2_USER: ${{ secrets.DB_EC2_USER }}
-          DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}
         run: |
           echo "Setting up SSH tunnel..."
           # Ensure the .ssh directory exists
@@ -27,22 +23,18 @@ jobs:
           chmod 700 ~/.ssh
 
           # Add the database server to known hosts
-          ssh-keyscan -H $DB_EC2_HOST >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ secrets.DB_EC2_HOST }}" >> ~/.ssh/known_hosts
 
           # Save the private key for SSH
-          echo "$DB_SSH_KEY" > ~/.ssh/db_key.pem
+          echo "${{ secrets.DB_EC2_SSH_KEY }}" > ~/.ssh/db_key.pem
           chmod 600 ~/.ssh/db_key.pem
 
           # Start SSH tunnel in the background
-          ssh -N -L 27017:localhost:27017 $DB_EC2_USER@$DB_EC2_HOST -i ~/.ssh/db_key.pem &
+          ssh -N -L 27017:localhost:27017 ${{ secrets.DB_EC2_USER }}@${{ secrets.DB_EC2_HOST }} -i ~/.ssh/db_key.pem &
           echo "SSH tunnel started."
 
       # Step 3: Verify SSH Tunnel
       - name: Verify SSH Tunnel
-        env:
-          DB_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
-          DB_EC2_USER: ${{ secrets.DB_EC2_USER }}
-          DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}
         run: |
           echo "Verifying SSH tunnel..."
           if nc -z localhost 27017; then
@@ -63,8 +55,6 @@ jobs:
       # Step 5: Deploy to EC2
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
