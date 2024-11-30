@@ -38,3 +38,29 @@ Welcome to the Starteryou Website repository! This project is the official platf
    ```bash
    git clone https://github.com/starteryouInc/Starteryou-Website.git
    cd Starteryou-Website
+
+## 📁 Project Structure
+Starteryou-Website/
+├── backend/                  # Backend service
+│   ├── Dockerfile            # Backend Dockerfile
+│   ├── package.json          # Backend dependencies
+│   ├── server.js             # Main server file
+│   ├── routes/               # API route definitions
+│   │   └── jobs.js           # Job-related APIs
+│   ├── models/               # Database models
+│   │   └── Job.js            # Job schema definition
+│   ├── config/               # Configuration files (e.g., database connection)
+│   └── uploads/              # Directory for file uploads
+├── frontend/                 # Frontend service
+│   ├── Dockerfile            # Frontend Dockerfile
+│   ├── package.json          # Frontend dependencies
+│   ├── public/               # Static assets
+│   │   └── index.html        # Main HTML template
+│   ├── src/                  # React source code
+│   │   ├── components/       # React components
+│   │   ├── pages/            # React pages (e.g., Home, Jobs)
+│   │   ├── App.jsx           # Main React app
+│   │   └── index.js          # React entry point
+├── docker-compose.yml        # Docker Compose configuration
+├── .env                      # Environment variables
+└── README.md                 # Project documentation
