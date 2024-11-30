@@ -14,47 +14,42 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set Up SSH Tunnel
-      - name: Set up SSH Tunnel
-        env:
-          DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}
-          DB_EC2_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
-          DB_EC2_USER: ${{ secrets.DB_EC2_USER }}
+      # Step 2: Configure Environment Secrets
+      - name: Export secrets to environment
         run: |
-          echo "Setting up SSH tunnel..."
-          # Ensure the .ssh directory exists
+          echo "DB_EC2_HOST=${{ secrets.DB_EC2_HOST }}" >> $GITHUB_ENV
+          echo "DB_EC2_USER=${{ secrets.DB_EC2_USER }}" >> $GITHUB_ENV
+          echo "DB_EC2_SSH_KEY=${{ secrets.DB_EC2_SSH_KEY }}" >> $GITHUB_ENV
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
+          echo "MONGO_USER=${{ secrets.MONGO_USER }}" >> $GITHUB_ENV
+          echo "MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}" >> $GITHUB_ENV
+          echo "MONGO_DB=${{ secrets.MONGO_DB }}" >> $GITHUB_ENV
+          echo "MONGO_AUTH_SOURCE=${{ secrets.MONGO_AUTH_SOURCE }}" >> $GITHUB_ENV
+          echo "MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}" >> $GITHUB_ENV
+
+      # Step 3: Set Up SSH Tunnel
+      - name: Set up SSH Tunnel
+        run: |
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
 
-          # Add the database server to known hosts
-          ssh-keyscan -H "$DB_EC2_HOST" >> ~/.ssh/known_hosts
-
-          # Save the private key for SSH
-          echo "$DB_EC2_SSH_KEY" > ~/.ssh/db_key.pem
+          echo "${DB_EC2_SSH_KEY}" > ~/.ssh/db_key.pem
           chmod 600 ~/.ssh/db_key.pem
 
-          # Start SSH tunnel in the background
-          ssh -N -L 27017:localhost:27017 $DB_EC2_USER@$DB_EC2_HOST -i ~/.ssh/db_key.pem &
-          echo "SSH tunnel started."
+          ssh-keyscan -H "${DB_EC2_HOST}" >> ~/.ssh/known_hosts
+          ssh -N -L 27017:localhost:27017 ${DB_EC2_USER}@${DB_EC2_HOST} -i ~/.ssh/db_key.pem &
 
-      # Step 3: Verify SSH Tunnel
+      # Step 4: Verify SSH Tunnel
       - name: Verify SSH Tunnel
         run: |
-          echo "Verifying SSH tunnel..."
           if nc -z localhost 27017; then
             echo "SSH Tunnel Verified!"
           else
             echo "Failed to verify SSH Tunnel."
             exit 1
           fi
-
-      # Step 4: Configure AWS Credentials
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
 
       # Step 5: Deploy to EC2
       - name: Deploy to EC2
@@ -68,65 +63,30 @@ jobs:
             set -e
             set -o pipefail
 
-            export MONGO_USER="${{ secrets.MONGO_USER }}"
-            export MONGO_PASSWORD="${{ secrets.MONGO_PASSWORD }}"
-            export MONGO_DB="${{ secrets.MONGO_DB }}"
-            export MONGO_AUTH_SOURCE="${{ secrets.MONGO_AUTH_SOURCE }}"
-            export MONGO_APP_NAME="${{ secrets.MONGO_APP_NAME }}"
-
-            log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"; }
-            handle_error() { log "Error occurred on line $1"; exit 1; }
-            trap 'handle_error $LINENO' ERR
-
             PROJECT_ROOT="/home/ec2-user/Starteryou-Website"
             REPO_DIR="${PROJECT_ROOT}/Starteryou"
             ENV_FILE="${REPO_DIR}/.env"
 
-            log "Ensuring project root exists..."
             mkdir -p "$PROJECT_ROOT"
             cd "$PROJECT_ROOT"
 
-            log "Managing repository..."
             if [ ! -d "$REPO_DIR" ]; then
-              log "Cloning repository..."
               git clone https://github.com/starteryouInc/Starteryou-Website.git -b develop Starteryou
             else
-              log "Pulling latest changes..."
               cd "$REPO_DIR"
               git fetch origin develop
               git reset --hard origin/develop
             fi
 
-            log "Creating .env file..."
-            rm -f "$ENV_FILE"
-            touch "$ENV_FILE"
-            chmod 600 "$ENV_FILE"
+            echo "NODE_ENV=production" > "$ENV_FILE"
+            echo "MONGO_USER=${MONGO_USER}" >> "$ENV_FILE"
+            echo "MONGO_PASSWORD=${MONGO_PASSWORD}" >> "$ENV_FILE"
+            echo "MONGO_HOST=localhost" >> "$ENV_FILE"
+            echo "MONGO_PORT=27017" >> "$ENV_FILE"
+            echo "MONGO_DB=${MONGO_DB}" >> "$ENV_FILE"
+            echo "MONGO_AUTH_SOURCE=${MONGO_AUTH_SOURCE}" >> "$ENV_FILE"
+            echo "MONGO_APP_NAME=${MONGO_APP_NAME}" >> "$ENV_FILE"
 
-            cat > "$ENV_FILE" << 'EOF'
-            NODE_ENV=production
-            MONGO_USER=${MONGO_USER}
-            MONGO_PASSWORD=${MONGO_PASSWORD}
-            MONGO_HOST=localhost # Access via SSH tunnel
-            MONGO_PORT=27017
-            MONGO_DB=${MONGO_DB}
-            MONGO_AUTH_SOURCE=${MONGO_AUTH_SOURCE}
-            MONGO_TLS=true
-            MONGO_TLS_CA=/etc/ssl/mongodb/ca.crt
-            MONGO_TLS_CERT=/etc/ssl/mongodb/server.pem
-            MONGO_APP_NAME=${MONGO_APP_NAME}
-            EOF
-
-            log "Restarting Docker..."
-            sudo systemctl start docker || sudo systemctl restart docker
-
-            log "Cleaning up old Docker resources..."
+            sudo systemctl restart docker
             docker-compose down --volumes --remove-orphans
-            docker system prune -af --volumes
-
-            log "Building and starting Docker containers..."
             docker-compose up -d --build
-
-            log "Verifying containers..."
-            docker ps
-
-            log "Deployment completed successfully!"
