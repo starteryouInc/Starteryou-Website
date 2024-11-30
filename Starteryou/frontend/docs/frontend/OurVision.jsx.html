@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: OurVision.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: OurVision.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file OurVision.jsx
+ * @description This component represents the "Our Vision" section, displaying a title, a description paragraph, and an image.
+ * It includes admin functionalities for editing content and uploading an image.
+ * @module OurVision
+ */
+
+import { useState, useEffect } from "react";
+import { useNavigation } from "../../context/NavigationContext";
+import FileUpload from "../Common/FileUpload";
+import axios from "axios";
+import { FaPencilAlt } from "react-icons/fa";
+
+/**
+ * OurVision Component
+ *
+ * Displays a section with a title, paragraph, and an image.
+ * Allows admin users to edit the content and upload images.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered OurVision component.
+ */
+const OurVision = () => {
+  /**
+   * State variables for managing the content, preview, and editing mode.
+   * @type {string} title - The title of the section.
+   * @type {string} paragraph - The description content of the section.
+   * @type {string|null} preview - The image preview URL.
+   * @type {File|null} imageFile - The uploaded image file.
+   * @type {boolean} isEditing - Whether the admin is in editing mode.
+   * @type {boolean} isAdmin - Whether the user is an admin.
+   * @type {string} error - Error message to display.
+   */
+  const [title, setTitle] = useState("OUR VISION");
+  const [paragraph, setParagraph] = useState(
+    "Starteryou envisions a world where every student has access to diverse job opportunities..."
+  );
+  const [preview, setPreview] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const { isAdmin } = useNavigation();
+  const [error, setError] = useState("");
+
+  /**
+   * Fetches initial data for the "Our Vision" section from the API on component mount.
+   */
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/text", {
+          params: { component: "OurVision" },
+        });
+
+        if (response.data) {
+          setTitle(response.data.content || "Our Vision");
+          setParagraph(
+            Array.isArray(response.data.paragraphs)
+              ? response.data.paragraphs.join("\n")
+              : "Your description paragraph here."
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError("Error fetching vision content. Please try again later.");
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  /**
+   * Handles file input changes and sets the preview for the uploaded image.
+   * @param {Event} e - The change event from the file input.
+   */
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setPreview(URL.createObjectURL(file));
+    setImageFile(file);
+  };
+
+  /**
+   * Toggles editing mode for admin users.
+   */
+  const handleEdit = () => isAdmin &amp;&amp; setIsEditing(true);
+
+  /**
+   * Updates the title state when the input value changes.
+   * @param {Event} e - The change event from the input field.
+   */
+  const handleChangeTitle = (e) => setTitle(e.target.value);
+
+  /**
+   * Updates the paragraph state when the textarea value changes.
+   * @param {Event} e - The change event from the textarea field.
+   */
+  const handleChangeParagraph = (e) => setParagraph(e.target.value);
+
+  /**
+   * Saves the updated content to the server.
+   * Normalizes the paragraph content into an array format.
+   */
+  const saveContent = async () => {
+    try {
+      const normalizedParagraphs = Array.isArray(paragraph)
+        ? paragraph
+        : [paragraph.trim()];
+
+      await axios.put("http://localhost:3000/api/text", {
+        component: "OurVision",
+        content: title.trim(),
+        paragraphs: normalizedParagraphs,
+      });
+
+      setError("");
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error saving content:", error.response || error.message);
+      setError("Error saving content. Please try again later.");
+    }
+  };
+
+  return (
+    &lt;div className="max-w-[1300px] mx-auto container px-4 py-10">
+      &lt;div className="flex flex-col md:flex-row md:space-x-4">
+        {/* Text Box Section */}
+        &lt;div className="bg-white p-2 md:p-6 mb-4 md:mb-0 flex-1 flex flex-col justify-center md:order-2">
+          {isEditing ? (
+            &lt;div>
+              &lt;input
+                type="text"
+                value={title}
+                onChange={handleChangeTitle}
+                className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-[#1F2329] border border-gray-300 p-2 rounded w-full"
+              />
+              &lt;textarea
+                value={paragraph}
+                onChange={handleChangeParagraph}
+                className="text-[#1F2329] text-base border border-gray-300 p-2 rounded w-full"
+                rows={6}
+              />
+              &lt;button
+                onClick={saveContent}
+                className="mt-4 bg-green-600 text-white py-2 px-4 rounded"
+              >
+                Save
+              &lt;/button>
+            &lt;/div>
+          ) : (
+            &lt;div>
+              &lt;h2 className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-[#1F2329]">
+                {title}
+              &lt;/h2>
+              &lt;p className="text-[#1F2329] text-base">{paragraph}&lt;/p>
+              {isAdmin &amp;&amp; (
+                &lt;FaPencilAlt
+                  onClick={handleEdit}
+                  style={{ cursor: "pointer", marginTop: "1rem" }}
+                  className="text-gray-500 "
+                />
+              )}
+            &lt;/div>
+          )}
+        &lt;/div>
+
+        {/* Image Box Section */}
+        &lt;div className="relative flex-1 items-center justify-center rounded-lg mb-4 md:mb-0 h-[200px] min-h-[200px] md:h-[300px] md:min-h-[400px]">
+          {preview ? (
+            &lt;img
+              src={preview}
+              alt="Preview"
+              className="relative h-[200px] min-h-[200px] md:h-[300px] md:min-h-[400px]"
+            />
+          ) : (
+            &lt;img
+              src="/AboutPage/vision.svg"
+              alt="vision"
+              className="relative h-[200px] min-h-[200px] md:h-[300px] md:min-h-[400px]"
+            />
+          )}
+          {isAdmin &amp;&amp; &lt;FileUpload handleFileChange={handleFileChange} />}
+        &lt;/div>
+      &lt;/div>
+      {error &amp;&amp; &lt;p className="text-red-500 text-center mt-4">{error}&lt;/p>}
+    &lt;/div>
+  );
+};
+
+export default OurVision;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-BetterFuture.html">BetterFuture</a></li><li><a href="module-OurVision.html">OurVision</a></li></ul><h3>Global</h3><ul><li><a href="global.html#HeroAbout">HeroAbout</a></li><li><a href="global.html#OurMission">OurMission</a></li><li><a href="global.html#Team">Team</a></li><li><a href="global.html#TechTeam">TechTeam</a></li><li><a href="global.html#saveContent">saveContent</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri Nov 22 2024 11:43:58 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
