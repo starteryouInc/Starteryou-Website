@@ -72,11 +72,6 @@ jobs:
               echo "Docker Swarm already active."
             fi
 
-            echo "Recreating Docker secrets..."
-            docker secret rm mongo_tls_ca mongo_tls_cert || true
-            docker secret create mongo_tls_ca /etc/ssl/mongodb/ca.crt
-            docker secret create mongo_tls_cert /etc/ssl/mongodb/server.pem
-
             PROJECT_ROOT="/home/ec2-user/Starteryou-Website"
             REPO_DIR="${PROJECT_ROOT}/Starteryou"
             ENV_FILE="${REPO_DIR}/.env"
