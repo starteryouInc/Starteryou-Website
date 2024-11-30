@@ -34,3 +34,51 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+
+  sshtunnel:
+      image: alpine:latest
+      container_name: sshtunnel
+      entrypoint: >
+        sh -c "
+        apk add --no-cache openssh &&
+        ssh-keyscan -H $DB_EC2_HOST >> /etc/ssh/ssh_known_hosts &&
+        ssh -N -L 27017:localhost:27017 $DB_EC2_USER@$DB_EC2_HOST -i /root/db_key.pem
+        "
+      environment:
+        DB_EC2_HOST: ${DB_EC2_HOST:-default-db-host}
+        DB_EC2_USER: ${DB_EC2_USER:-default-db-user}
+      volumes:
+        - ./db_key.pem:/root/db_key.pem:ro
+      restart: on-failure
+      healthcheck:
+        test: ["CMD", "pgrep", "ssh"]
+        interval: 10s
+        timeout: 5s
+        retries: 3
+      networks:
+        - backend-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: starteryou-frontend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      BACKEND_URL: http://54.196.202.145:3000
+    depends_on:
+      - backend
+    networks:
+      - backend-network
+
+networks:
+  backend-network:
+    driver: overlay
+
+secrets:
+  mongo_tls_ca:
+    external: true
+  mongo_tls_cert:
+    external: true
