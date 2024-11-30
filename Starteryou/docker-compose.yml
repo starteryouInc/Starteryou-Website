@@ -26,8 +26,7 @@ services:
     networks:
       - backend-network
     depends_on:
-      sshtunnel:
-        condition: service_healthy
+      - sshtunnel
     healthcheck:
       test: ["CMD", "wget", "--spider", "http://localhost:3000/health"]
       interval: 30s
