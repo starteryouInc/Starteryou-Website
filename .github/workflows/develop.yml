@@ -8,35 +8,51 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
+      # Step 1: Checkout Code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Verify SSH Tunnel
+      # Step 2: Set Up SSH Tunnel
+      - name: Set up SSH Tunnel
         env:
-          DB_SSH_KEY: $${{ secrets.DB_EC2_SSH_KEY }}
-          DB_EC2_USER: $${{ secrets.DB_EC2_USER }}
-          DB_EC2_HOST: $${{ secrets.DB_EC2_HOST }}
+          DB_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
+          DB_EC2_USER: ${{ secrets.DB_EC2_USER }}
+          DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}
         run: |
+          echo "Setting up SSH tunnel..."
           # Ensure the .ssh directory exists
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
 
-          # Add EC2 host to known hosts to avoid host verification failure
+          # Add the database server to known hosts
           ssh-keyscan -H $DB_EC2_HOST >> ~/.ssh/known_hosts
 
           # Save the private key for SSH
           echo "$DB_SSH_KEY" > ~/.ssh/db_key.pem
           chmod 600 ~/.ssh/db_key.pem
 
-          # Verify the SSH tunnel
-          ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "echo 'SSH Tunnel Verified!'"
+          # Start SSH tunnel in the background
+          ssh -N -L 27017:localhost:27017 $DB_EC2_USER@$DB_EC2_HOST -i ~/.ssh/db_key.pem &
+          echo "SSH tunnel started."
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
+      # Step 3: Verify SSH Tunnel
+      - name: Verify SSH Tunnel
+        env:
+          DB_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
+          DB_EC2_USER: ${{ secrets.DB_EC2_USER }}
+          DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}
+        run: |
+          echo "Verifying SSH tunnel..."
+          if nc -z localhost 27017; then
+            echo "SSH Tunnel Verified!"
+          else
+            echo "Failed to verify SSH Tunnel."
+            exit 1
+          fi
 
+      # Step 4: Configure AWS Credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -44,6 +60,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      # Step 5: Deploy to EC2
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7
         env:
@@ -51,7 +68,7 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.DB_EC2_SSH_KEY }}
+          key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             #!/bin/bash
             set -e
@@ -87,16 +104,16 @@ jobs:
 
             cat > "$ENV_FILE" << EOF
             NODE_ENV=production
-            MONGO_USER=$${{ secrets.MONGO_USER }}
-            MONGO_PASSWORD=$${{ secrets.MONGO_PASSWORD }}
+            MONGO_USER=${{ secrets.MONGO_USER }}
+            MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
             MONGO_HOST=localhost # Access via SSH tunnel
             MONGO_PORT=27017
-            MONGO_DB=$${{ secrets.MONGO_DB }}
-            MONGO_AUTH_SOURCE=$${{ secrets.MONGO_AUTH_SOURCE }}
+            MONGO_DB=${{ secrets.MONGO_DB }}
+            MONGO_AUTH_SOURCE=${{ secrets.MONGO_AUTH_SOURCE }}
             MONGO_TLS=true
             MONGO_TLS_CA=/etc/ssl/mongodb/ca.crt
             MONGO_TLS_CERT=/etc/ssl/mongodb/server.pem
-            MONGO_APP_NAME=$${{ secrets.MONGO_APP_NAME }}
+            MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}
             EOF
 
             log "Restarting Docker..."
