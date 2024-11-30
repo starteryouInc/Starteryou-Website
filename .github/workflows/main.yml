@@ -64,14 +64,6 @@ jobs:
             sudo mv /tmp/server.pem /etc/ssl/mongodb/server.pem
             sudo chmod 600 /etc/ssl/mongodb/*
 
-            # Initialize Docker Swarm if not already active
-            if ! docker info --format '{{.Swarm.LocalNodeState}}' | grep -q "active"; then
-              echo "Initializing Docker Swarm..."
-              docker swarm init
-            else
-              echo "Docker Swarm already active."
-            fi
-
             PROJECT_ROOT="/home/ec2-user/Starteryou-Website"
             REPO_DIR="${PROJECT_ROOT}/Starteryou"
             ENV_FILE="${REPO_DIR}/.env"
