@@ -80,11 +80,11 @@ jobs:
             cd "$PROJECT_ROOT"
 
             if [ ! -d "$REPO_DIR" ]; then
-              git clone https://github.com/starteryouInc/Starteryou-Website.git -b develop Starteryou
+              git clone https://github.com/starteryouInc/Starteryou-Website.git -b main Starteryou
             else
               cd "$REPO_DIR"
-              git fetch origin develop
-              git reset --hard origin/develop
+              git fetch origin main
+              git reset --hard origin/main
             fi
 
             echo "Generating .env file..."
