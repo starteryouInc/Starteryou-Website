@@ -12,7 +12,7 @@ services:
       PORT: 3000
       FRONTEND_URL: http://54.196.202.145:8080
       VITE_BACKEND_URL: http://54.196.202.145:3000
-      MONGO_TLS: "true"
+      MONGO_TLS: true
       MONGO_TLS_CA: /run/secrets/mongo_tls_ca
       MONGO_TLS_CERT: /run/secrets/mongo_tls_cert
     secrets:
