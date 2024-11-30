@@ -108,7 +108,14 @@ jobs:
             MONGO_TLS_CA=/etc/ssl/mongodb/ca.crt
             MONGO_TLS_CERT=/etc/ssl/mongodb/server.pem
             MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}
+            DB_EC2_HOST=${{ secrets.DB_EC2_HOST }}
+            DB_EC2_USER=${{ secrets.DB_EC2_USER }}
             EOF
+            
+            # Source the .env file to make variables available to the session
+            set -a
+            source "$ENV_FILE"
+            set +a
 
             chmod 600 "$ENV_FILE"
 
