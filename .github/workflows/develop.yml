@@ -28,21 +28,17 @@ jobs:
           echo "MONGO_AUTH_SOURCE=${{ secrets.MONGO_AUTH_SOURCE }}" >> $GITHUB_ENV
           echo "MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}" >> $GITHUB_ENV
 
-      # Step 3: Decode SSH Key
-      - name: Decode SSH Key
+      # Step 3: Write SSH Key
+      - name: Write SSH Key
         run: |
           mkdir -p ~/.ssh                   # Ensure the .ssh directory exists
           chmod 700 ~/.ssh                  # Set proper permissions for the directory
-          echo "${{ secrets.DB_EC2_SSH_KEY }}" | base64 --decode > ~/.ssh/db_key.pem
+          echo "${{ secrets.DB_EC2_SSH_KEY }}" > ~/.ssh/db_key.pem
           chmod 600 ~/.ssh/db_key.pem       # Set proper permissions for the private key
-
 
       # Step 4: Set Up SSH Tunnel
       - name: Set up SSH Tunnel
         run: |
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-
           ssh-keyscan -H "${DB_EC2_HOST}" >> ~/.ssh/known_hosts
           ssh -N -L 27017:localhost:27017 ${DB_EC2_USER}@${DB_EC2_HOST} -i ~/.ssh/db_key.pem &
 
