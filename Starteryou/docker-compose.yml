@@ -1,115 +1,105 @@
-name: Deploy to AWS EC2
+version: "3.8"
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: starteryou-backend
+    restart: unless-stopped
+    
+    # Multiple environment loading methods
+    env_file:
+      - .env
+    
+    environment:
+      # Core environment configuration
+      - NODE_ENV=production
+      - PORT=3000
+      
+      # Frontend-related URLs
+      - FRONTEND_URL=http://54.196.202.145:8080
+      - VITE_BACKEND_URL=http://54.196.202.145:3000
+      
+      # MongoDB Configuration with fallback to .env
+      - MONGO_USER=${MONGO_USER:-${MONGO_USER}}
+      - MONGO_PASSWORD=${MONGO_PASSWORD:-${MONGO_PASSWORD}}
+      - MONGO_HOST=${MONGO_HOST:-${MONGO_HOST}}
+      - MONGO_PORT=${MONGO_PORT:-${MONGO_PORT}}
+      - MONGO_DB=${MONGO_DB:-${MONGO_DB}}
+      - MONGO_TLS_CERT=${MONGO_TLS_CERT:-${MONGO_TLS_CERT}}
+      - MONGO_TLS_CA=${MONGO_TLS_CA:-${MONGO_TLS_CA}}
+    
+    # Enhanced volume mappings
+    volumes:
+      # Bind mount the entire backend directory
+      - ./backend:/usr/src/app
+      
+      # Mount SSL keys and certificates
+      - ./keys:/usr/src/app/keys
+      
+      # Persistent node_modules
+      - /usr/src/app/node_modules
+      
+      # Explicitly mount .env file
+      - ./.env:/usr/src/app/.env
+      
+      # Mount SSL certificates
+      - /etc/ssl/mongodb:/etc/ssl/mongodb:ro
+      
+      # Uploads volume
+      - ./backend/uploads:/usr/src/app/uploads
+    
+    ports:
+      - "3000:3000"
+    
+    networks:
+      - starteryou-network
+    
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    
+    depends_on:
+      - sshtunnel
+    
+    # Optional healthcheck
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-on:
-  push:
-    branches:
-      - develop
+  sshtunnel:
+      image: alpine:latest
+      container_name: sshtunnel
+      entrypoint: >
+        sh -c "
+        apk add --no-cache openssh &&
+        ssh-keyscan -H ${DB_EC2_HOST} >> /etc/ssh/ssh_known_hosts &&
+        ssh -N -L 27017:localhost:27017 ${DB_EC2_USER}@${DB_EC2_HOST} -i /root/db_key.pem
+        "
+      environment:
+        DB_EC2_HOST: ${DB_EC2_HOST}
+        DB_EC2_USER: ${DB_EC2_USER}
+      volumes:
+        - ./db_key.pem:/root/db_key.pem:ro
+      restart: always
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: starteryou-frontend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - BACKEND_URL=http://54.196.202.145:3000
+    depends_on:
+      - backend
+    networks:
+      - starteryou-network
 
-      - name: Verify SSH Tunnel
-        env:
-          DB_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
-          DB_EC2_USER: ${{ secrets.DB_EC2_USER }}
-          DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}
-        run: |
-          # Ensure the .ssh directory exists
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-
-          # Add EC2 host to known hosts to avoid host verification failure
-          ssh-keyscan -H $DB_EC2_HOST >> ~/.ssh/known_hosts
-
-          # Save the private key for SSH
-          echo "$DB_SSH_KEY" > ~/.ssh/db_key.pem
-          chmod 600 ~/.ssh/db_key.pem
-
-          # Verify the SSH tunnel
-          ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "echo 'SSH Tunnel Verified!'"
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v0.1.7
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.DB_EC2_SSH_KEY }}
-          script: |
-            #!/bin/bash
-            set -e
-            set -o pipefail
-
-            log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"; }
-            handle_error() { log "Error occurred on line $1"; exit 1; }
-            trap 'handle_error $LINENO' ERR
-
-            PROJECT_ROOT="/home/ec2-user/Starteryou-Website"
-            REPO_DIR="${PROJECT_ROOT}/Starteryou"
-            ENV_FILE="${REPO_DIR}/.env"
-
-            log "Ensuring project root exists..."
-            mkdir -p "$PROJECT_ROOT"
-            cd "$PROJECT_ROOT"
-
-            log "Managing repository..."
-            if [ ! -d "$REPO_DIR" ]; then
-              log "Cloning repository..."
-              git clone https://github.com/starteryouInc/Starteryou-Website.git -b develop Starteryou
-            else
-              log "Pulling latest changes..."
-              cd "$REPO_DIR"
-              git fetch origin develop
-              git reset --hard origin/develop
-            fi
-
-            log "Creating .env file..."
-            rm -f "$ENV_FILE"
-            touch "$ENV_FILE"
-            chmod 600 "$ENV_FILE"
-
-            cat > "$ENV_FILE" << EOF
-              NODE_ENV=production
-              MONGO_USER=$${{ secrets.MONGO_USER }}
-              MONGO_PASSWORD=$${{ secrets.MONGO_PASSWORD }}
-              MONGO_HOST=localhost # Access via SSH tunnel
-              MONGO_PORT=27017
-              MONGO_DB=$${{ secrets.MONGO_DB }}
-              MONGO_AUTH_SOURCE=$${{ secrets.MONGO_AUTH_SOURCE }}
-              MONGO_TLS=true
-              MONGO_TLS_CA=/etc/ssl/mongodb/ca.crt
-              MONGO_TLS_CERT=/etc/ssl/mongodb/server.pem
-              MONGO_APP_NAME=$${{ secrets.MONGO_APP_NAME }}
-              EOF
-
-            log "Restarting Docker..."
-            sudo systemctl start docker || sudo systemctl restart docker
-
-            log "Cleaning up old Docker resources..."
-            docker-compose down --volumes --remove-orphans
-            docker system prune -af --volumes
-
-            log "Building and starting Docker containers..."
-            docker-compose up -d --build
-
-            log "Verifying containers..."
-            docker ps
-
-            log "Deployment completed successfully!"
+networks:
+  starteryou-network:
+    driver: bridge
