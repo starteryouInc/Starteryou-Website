@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       # Step 1: Checkout Code
       - name: Checkout code
@@ -20,20 +21,16 @@ jobs:
           DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}
           DB_EC2_USER: ${{ secrets.DB_EC2_USER }}
         run: |
-          # Create SSH directory and set permissions
+          set -e
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-
-          # Add Dev Server to known hosts
           ssh-keyscan -H $DB_EC2_HOST >> ~/.ssh/known_hosts
+          echo "$DB_EC2_SSH_KEY" > ~/.ssh/db_key.pem
+          chmod 600 ~/.ssh/db_key.pem
 
-          # Save the private SSH key
-          echo "$DB_EC2_SSH_KEY" > ~/.ssh/dev_key.pem
-          chmod 600 ~/.ssh/dev_key.pem
-
-          # Fetch certificates from Dev Server
-          scp -i ~/.ssh/dev_key.pem $DB_EC2_USER@$DB_EC2_HOST:/path/to/ca.crt ./ca.crt
-          scp -i ~/.ssh/dev_key.pem $DB_EC2_USER@$DB_EC2_HOST:/path/to/server.pem ./server.pem
+          echo "Fetching certificates from DB server..."
+          scp -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/ca.crt ./ca.crt
+          scp -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/server.pem ./server.pem
 
       # Step 3: Transfer Certificates to Target EC2 Server
       - name: Transfer Certificates to Target EC2
@@ -42,18 +39,14 @@ jobs:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ${{ secrets.EC2_USER }}
         run: |
-          # Create SSH directory and set permissions
+          set -e
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-
-          # Add EC2 Host to known hosts
           ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
-
-          # Save the private SSH key
           echo "$EC2_SSH_KEY" > ~/.ssh/ec2_key.pem
           chmod 600 ~/.ssh/ec2_key.pem
 
-          # Transfer certificates to EC2 server
+          echo "Transferring certificates to EC2 server..."
           scp -i ~/.ssh/ec2_key.pem ./ca.crt $EC2_USER@$EC2_HOST:/tmp/ca.crt
           scp -i ~/.ssh/ec2_key.pem ./server.pem $EC2_USER@$EC2_HOST:/tmp/server.pem
 
@@ -63,28 +56,35 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          key: ${{ secrets.DB_EC2_SSH_KEY }}
           script: |
-            # Set up project directory
+            set -e
+            sudo mkdir -p /etc/ssl/mongodb
+            sudo mv /tmp/ca.crt /etc/ssl/mongodb/ca.crt
+            sudo mv /tmp/server.pem /etc/ssl/mongodb/server.pem
+            sudo chmod 600 /etc/ssl/mongodb/*
+
+            echo "Recreating Docker secrets..."
+            docker secret rm mongo_tls_ca mongo_tls_cert || true
+            docker secret create mongo_tls_ca /etc/ssl/mongodb/ca.crt
+            docker secret create mongo_tls_cert /etc/ssl/mongodb/server.pem
+
             PROJECT_ROOT="/home/ec2-user/Starteryou-Website"
             REPO_DIR="${PROJECT_ROOT}/Starteryou"
             ENV_FILE="${REPO_DIR}/.env"
 
-            echo "Ensuring project root exists..."
             mkdir -p "$PROJECT_ROOT"
             cd "$PROJECT_ROOT"
 
-            echo "Cloning repository if it doesn't exist..."
             if [ ! -d "$REPO_DIR" ]; then
               git clone https://github.com/starteryouInc/Starteryou-Website.git -b develop Starteryou
             else
-              echo "Pulling latest changes..."
               cd "$REPO_DIR"
               git fetch origin develop
               git reset --hard origin/develop
             fi
 
-            echo "Generating .env file dynamically..."
+            echo "Generating .env file..."
             cat > "$ENV_FILE" << EOF
             NODE_ENV=production
             PORT=3000
@@ -92,19 +92,18 @@ jobs:
             VITE_BACKEND_URL=http://54.196.202.145:3000
             MONGO_USER=${{ secrets.MONGO_USER }}
             MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
-            MONGO_HOST=${{ secrets.DB_EC2_HOST }}
-            MONGO_PORT=${{ secrets.MONGO_PORT }}
+            MONGO_HOST=localhost
+            MONGO_PORT=27017
             MONGO_DB=${{ secrets.MONGO_DB }}
             MONGO_AUTH_SOURCE=${{ secrets.MONGO_AUTH_SOURCE }}
-            MONGO_TLS=${{ secrets.MONGO_TLS }}
-            MONGO_TLS_CA=${{ secrets.MONGO_TLS_CA }}
-            MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}
+            MONGO_TLS=true
+            MONGO_TLS_CA=/etc/ssl/mongodb/ca.crt
+            MONGO_TLS_CERT=/etc/ssl/mongodb/server.pem
             MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}
             EOF
 
-            echo "Setting appropriate permissions for .env..."
             chmod 600 "$ENV_FILE"
 
-            echo "Restarting Docker services..."
+            echo "Deploying Docker services..."
             docker-compose down --volumes --remove-orphans
-            docker-compose up -d --build
+            docker-compose up --build -d

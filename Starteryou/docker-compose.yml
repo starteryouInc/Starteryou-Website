@@ -15,14 +15,11 @@ services:
       FRONTEND_URL: http://54.196.202.145:8080
       VITE_BACKEND_URL: http://54.196.202.145:3000
       MONGO_TLS: true
-      MONGO_TLS_CA: /run/secrets/mongo_tls_ca
-      MONGO_TLS_CERT: /run/secrets/mongo_tls_cert
     secrets:
       - mongo_tls_ca
       - mongo_tls_cert
     volumes:
       - ./backend:/usr/src/app
-      - ./keys:/usr/src/app/keys
       - ./backend/uploads:/usr/src/app/uploads
     ports:
       - "3000:3000"
@@ -36,7 +33,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 30s
 
   sshtunnel:
     image: alpine:latest
@@ -52,12 +49,12 @@ services:
       DB_EC2_USER: ${DB_EC2_USER}
     volumes:
       - ./db_key.pem:/root/db_key.pem:ro
-    restart: always
+    restart: on-failure
     healthcheck:
       test: ["CMD", "pgrep", "ssh"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 3
     networks:
       - backend-network
 
@@ -70,7 +67,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - BACKEND_URL=http://54.196.202.145:3000
+      BACKEND_URL: http://54.196.202.145:3000
     depends_on:
       - backend
     networks:
