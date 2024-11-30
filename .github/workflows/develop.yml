@@ -1,4 +1,4 @@
-name: Deploy to AWS EC2
+name: Deploy to AWS EC2s
 
 on:
   push:
@@ -111,7 +111,7 @@ jobs:
             DB_EC2_HOST=${{ secrets.DB_EC2_HOST }}
             DB_EC2_USER=${{ secrets.DB_EC2_USER }}
             EOF
-            
+
             # Source the .env file to make variables available to the session
             set -a
             source "$ENV_FILE"
