@@ -64,30 +64,60 @@ jobs:
             set -e
             set -o pipefail
 
+            log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"; }
+            handle_error() { log "Error occurred on line $1"; exit 1; }
+            trap 'handle_error $LINENO' ERR
+
             PROJECT_ROOT="/home/ec2-user/Starteryou-Website"
             REPO_DIR="${PROJECT_ROOT}/Starteryou"
             ENV_FILE="${REPO_DIR}/.env"
 
+            log "Ensuring project root exists..."
             mkdir -p "$PROJECT_ROOT"
             cd "$PROJECT_ROOT"
 
+            log "Managing repository..."
             if [ ! -d "$REPO_DIR" ]; then
+              log "Cloning repository..."
               git clone https://github.com/starteryouInc/Starteryou-Website.git -b develop Starteryou
             else
+              log "Pulling latest changes..."
               cd "$REPO_DIR"
               git fetch origin develop
               git reset --hard origin/develop
             fi
 
-            echo "NODE_ENV=production" > "$ENV_FILE"
-            echo "MONGO_USER=${MONGO_USER}" >> "$ENV_FILE"
-            echo "MONGO_PASSWORD=${MONGO_PASSWORD}" >> "$ENV_FILE"
-            echo "MONGO_HOST=localhost" >> "$ENV_FILE"
-            echo "MONGO_PORT=27017" >> "$ENV_FILE"
-            echo "MONGO_DB=${MONGO_DB}" >> "$ENV_FILE"
-            echo "MONGO_AUTH_SOURCE=${MONGO_AUTH_SOURCE}" >> "$ENV_FILE"
-            echo "MONGO_APP_NAME=${MONGO_APP_NAME}" >> "$ENV_FILE"
+            log "Creating .env file..."
+            rm -f "$ENV_FILE"
+            touch "$ENV_FILE"
+            chmod 600 "$ENV_FILE"
 
-            sudo systemctl restart docker
+            cat > "$ENV_FILE" << EOF
+            NODE_ENV=production
+            MONGO_USER=${{ secrets.MONGO_USER }}
+            MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
+            MONGO_HOST=localhost # Access via SSH tunnel
+            MONGO_PORT=27017
+            MONGO_DB=${{ secrets.MONGO_DB }}
+            MONGO_AUTH_SOURCE=${{ secrets.MONGO_AUTH_SOURCE }}
+            MONGO_TLS=true
+            MONGO_TLS_CA=/etc/ssl/mongodb/ca.crt
+            MONGO_TLS_CERT=/etc/ssl/mongodb/server.pem
+            MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}
+            EOF
+
+            log "Restarting Docker..."
+            sudo systemctl start docker || sudo systemctl restart docker
+
+            log "Cleaning up old Docker resources..."
             docker-compose down --volumes --remove-orphans
+            docker system prune -af --volumes
+
+            log "Building and starting Docker containers..."
             docker-compose up -d --build
+
+            log "Verifying containers..."
+            docker ps
+
+            log "Deployment completed successfully!"
+
