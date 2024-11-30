@@ -47,9 +47,8 @@ jobs:
           chmod 600 ~/.ssh/ec2_key.pem
 
           echo "Transferring certificates to EC2 server..."
-          ssh -i ~/.ssh/ec2_key.pem $EC2_USER@$EC2_HOST "sudo mkdir -p /etc/letsencrypt/live/starteryou.com"
-          scp -i ~/.ssh/ec2_key.pem ./ca.crt $EC2_USER@$EC2_HOST:/etc/letsencrypt/live/starteryou.com/fullchain.pem
-          scp -i ~/.ssh/ec2_key.pem ./server.pem $EC2_USER@$EC2_HOST:/etc/letsencrypt/live/starteryou.com/privkey.pem
+          scp -i ~/.ssh/ec2_key.pem ./ca.crt $EC2_USER@$EC2_HOST:/tmp/ca.crt
+          scp -i ~/.ssh/ec2_key.pem ./server.pem $EC2_USER@$EC2_HOST:/tmp/server.pem
 
 
       # Step 4: Deploy Application on Target EC2 Server
