@@ -31,8 +31,11 @@ jobs:
       # Step 3: Decode SSH Key
       - name: Decode SSH Key
         run: |
-          echo "${{ secrets.DB_EC2_SSH_KEY_B64 }}" | base64 --decode > ~/.ssh/db_key.pem
-          chmod 600 ~/.ssh/db_key.pem
+          mkdir -p ~/.ssh                   # Ensure the .ssh directory exists
+          chmod 700 ~/.ssh                  # Set proper permissions for the directory
+          echo "${{ secrets.DB_EC2_SSH_KEY }}" | base64 --decode > ~/.ssh/db_key.pem
+          chmod 600 ~/.ssh/db_key.pem       # Set proper permissions for the private key
+
 
       # Step 4: Set Up SSH Tunnel
       - name: Set up SSH Tunnel
