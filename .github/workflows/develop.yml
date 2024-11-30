@@ -32,7 +32,6 @@ jobs:
           ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo cat /etc/ssl/mongodb/ca.crt" > ./ca.crt
           ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo cat /etc/ssl/mongodb/server.pem" > ./server.pem
 
-
       # Step 3: Transfer Certificates to Target EC2 Server
       - name: Transfer Certificates to Target EC2
         env:
@@ -64,6 +63,14 @@ jobs:
             sudo mv /tmp/ca.crt /etc/ssl/mongodb/ca.crt
             sudo mv /tmp/server.pem /etc/ssl/mongodb/server.pem
             sudo chmod 600 /etc/ssl/mongodb/*
+
+            # Initialize Docker Swarm if not already active
+            if ! docker info --format '{{.Swarm.LocalNodeState}}' | grep -q "active"; then
+              echo "Initializing Docker Swarm..."
+              docker swarm init
+            else
+              echo "Docker Swarm already active."
+            fi
 
             echo "Recreating Docker secrets..."
             docker secret rm mongo_tls_ca mongo_tls_cert || true
