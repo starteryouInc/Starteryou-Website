@@ -29,8 +29,9 @@ jobs:
           chmod 600 ~/.ssh/db_key.pem
 
           echo "Fetching certificates from DB server..."
-          scp -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/ca.crt ./ca.crt
-          scp -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/server.pem ./server.pem
+          ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo cat /etc/ssl/mongodb/ca.crt" > ./ca.crt
+          ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo cat /etc/ssl/mongodb/server.pem" > ./server.pem
+
 
       # Step 3: Transfer Certificates to Target EC2 Server
       - name: Transfer Certificates to Target EC2
