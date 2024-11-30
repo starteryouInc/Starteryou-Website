@@ -1,4 +1,27 @@
+version: "3.8"
+
 services:
+  cert-fetcher:
+    image: alpine:latest
+    container_name: cert-fetcher
+    entrypoint: >
+      sh -c "
+      apk add --no-cache openssh &&
+      mkdir -p /certificates &&
+      ssh-keyscan -H $DB_EC2_HOST >> /etc/ssh/ssh_known_hosts &&
+      scp -i /root/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/ca.crt /certificates/ca.crt &&
+      scp -i /root/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/server.pem /certificates/server.pem &&
+      sleep infinity
+      "
+    environment:
+      DB_EC2_HOST: ${DB_EC2_HOST:-default-db-host}
+      DB_EC2_USER: ${DB_EC2_USER:-default-db-user}
+    volumes:
+      - cert-vol:/certificates
+      - ./db_key.pem:/root/db_key.pem:ro
+    networks:
+      - backend-network
+
   backend:
     build:
       context: ./backend
@@ -13,12 +36,10 @@ services:
       FRONTEND_URL: http://54.196.202.145:8080
       VITE_BACKEND_URL: http://54.196.202.145:3000
       MONGO_TLS: "true"
-      MONGO_TLS_CA: /run/secrets/mongo_tls_ca
-      MONGO_TLS_CERT: /run/secrets/mongo_tls_cert
-    secrets:
-      - mongo_tls_ca
-      - mongo_tls_cert
+      MONGO_TLS_CA: /certificates/ca.crt
+      MONGO_TLS_CERT: /certificates/server.pem
     volumes:
+      - cert-vol:/certificates:ro
       - ./backend:/usr/src/app
       - ./backend/uploads:/usr/src/app/uploads
     ports:
@@ -26,36 +47,13 @@ services:
     networks:
       - backend-network
     depends_on:
-      - sshtunnel
+      - cert-fetcher
     healthcheck:
       test: ["CMD", "wget", "--spider", "http://localhost:3000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
-
-  sshtunnel:
-      image: alpine:latest
-      container_name: sshtunnel
-      entrypoint: >
-        sh -c "
-        apk add --no-cache openssh &&
-        ssh-keyscan -H $DB_EC2_HOST >> /etc/ssh/ssh_known_hosts &&
-        ssh -N -L 27017:localhost:27017 $DB_EC2_USER@$DB_EC2_HOST -i /root/db_key.pem
-        "
-      environment:
-        DB_EC2_HOST: ${DB_EC2_HOST:-default-db-host}
-        DB_EC2_USER: ${DB_EC2_USER:-default-db-user}
-      volumes:
-        - ./db_key.pem:/root/db_key.pem:ro
-      restart: on-failure
-      healthcheck:
-        test: ["CMD", "pgrep", "ssh"]
-        interval: 10s
-        timeout: 5s
-        retries: 3
-      networks:
-        - backend-network
 
   frontend:
     build:
@@ -74,10 +72,7 @@ services:
 
 networks:
   backend-network:
-    driver: overlay
+    driver: bridge
 
-secrets:
-  mongo_tls_ca:
-    external: true
-  mongo_tls_cert:
-    external: true
+volumes:
+  cert-vol:
