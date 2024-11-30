@@ -1,79 +1,40 @@
-# RevampUI
+# Starteryou Website
 
-RevampUI is a modern user interface design system built with React and Vite, structured inside the `StarterYou` folder. This repository contains a collection of reusable, responsive, and visually appealing components that can be integrated into any web project. It provides an optimized and scalable UI foundation to streamline the development process and ensure a great user experience.
+[![Deploy to AWS EC2s](https://github.com/starteryouInc/Starteryou-Website/actions/workflows/develop.yml/badge.svg?branch=develop)](https://github.com/starteryouInc/Starteryou-Website/actions/workflows/develop.yml)
 
-## 🔗 Live Demo
+Welcome to the Starteryou Website repository! This project is the official platform for StarterYou Inc., aimed at connecting high school and college students with part-time job opportunities, internships, and more. The platform is scalable, responsive, and built to serve the needs of students and employers alike.
 
-Check out the live version of the project here: [StarterYou Live](https://starteryou.netlify.app/)
+## 🚀 Features
 
-**URL for Dev Server:** http://54.196.202.145:8080/
+- Job Listings: Explore part-time job opportunities such as cashiers, store vendors, and more.
+- CRUD Functionality: All data, including job listings, applications, and user profiles, is dynamically loaded and managed through APIs.
+- Scalable Architecture: Powered by container-based infrastructure for automatic scaling.
+- Responsive Design: Built using React Bootstrap for a seamless user experience across devices.
+- Secure Hosting: Hosted on AWS with MongoDB as the database backend and HTTPS enabled via SSL.
+- Student-Centric Services:
+  - Ridesharing for students.
+  - Volunteer opportunities.
+  - School pages with details about events, clubs, and mentors.
 
+## 🛠️ Tech Stack
 
-## 📂 Project Structure
+- Frontend: React with Vite for fast development.
+- Backend: Node.js and Express.js.
+- Database: MongoDB.
+- Hosting: AWS (EC2, Docker).
+- CI/CD: GitHub Actions for streamlined deployment.
+- Containerization: Docker for isolated environments and scalability.
 
-The code for the entire project is located inside the `StarterYou` folder. This folder contains all the components, styles, and assets needed for the project.
-
-
-```plaintext
-RevampUI/
-│
-├── StarterYou/
-│   ├── public/
-│   ├── src/
-│   │   ├── assets/
-│   │   ├── components/
-|   |   ├── pages/
-│   │   ├── App.jsx
-│   │   ├── main.jsx
-│   │   └── index.css
-│   ├── index.html
-│   └── package.json
-```
-
-## 🚀 Getting Started
-
-To get a local copy of this project up and running, follow these simple steps.
+## 🔧 Setup Instructions
 
 ### Prerequisites
+- Node.js >= 16.x
+- Docker >= 20.x
+- MongoDB
+- AWS CLI (optional for deployment)
 
-Make sure you have the following installed:
-
-- **Node.js** (v14 or higher)
-- **npm** or **yarn**
-- **Vite** (comes with the project)
-
-### Installation
-
-1. Clone the repo:
-
+### Development Environment
+1. Clone the repository:
    ```bash
-   git clone https://github.com/connectleadme/RevampUI.git
-   ```
-
-2. Navigate to the StarterYou directory:
-
-   ```bash
-   cd RevampUI/StarterYou
-   ```
-
-3. Install the dependencies:
-    ```bash
-    npm install
-    ```
-    Or if you prefer using `yarn`:
-    ```bash
-    yarn install
-    ```
-
-4. Start the development server:
-    ```bash
-    npm run dev
-    ```
-    Or with `yarn`:
-    ```bash
-    yarn dev
-    ```
-    
-5. Open [http://localhost:3000](http://localhost:3000) to view the project in your browser.
-
----
+   git clone https://github.com/starteryouInc/Starteryou-Website.git
+   cd Starteryou-Website
