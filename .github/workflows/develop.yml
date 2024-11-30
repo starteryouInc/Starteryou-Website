@@ -23,105 +23,80 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+            # Step 6: Deploy to EC2
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          key: ${{ secrets.DB_EC2_SSH_KEY }}
           script: |
             #!/bin/bash
             set -e
             set -o pipefail
 
-            # Logging function
-            log() {
-              echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"
-            }
-
-            # Error handling function
-            handle_error() {
-              log "Error occurred on line $1"
-              exit 1
-            }
+            log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"; }
+            handle_error() { log "Error occurred on line $1"; exit 1; }
             trap 'handle_error $LINENO' ERR
 
-            # Project configuration
             PROJECT_ROOT="/home/ec2-user/Starteryou-Website"
             REPO_DIR="${PROJECT_ROOT}/Starteryou"
             ENV_FILE="${REPO_DIR}/.env"
 
-            # Ensure project root exists
-            log "Ensuring project root directory exists..."
+            log "Ensuring project root exists..."
             mkdir -p "$PROJECT_ROOT"
             cd "$PROJECT_ROOT"
 
-            # Repository management
             log "Managing repository..."
             if [ ! -d "$REPO_DIR" ]; then
-              log "Repository not found. Cloning..."
+              log "Cloning repository..."
               git clone https://github.com/starteryouInc/Starteryou-Website.git -b develop Starteryou
             else
-              log "Repository found. Updating..."
+              log "Pulling latest changes..."
               cd "$REPO_DIR"
               git fetch origin develop
               git reset --hard origin/develop
             fi
 
-            # Verify repository
-            log "Verifying repository contents..."
-            cd "$REPO_DIR"
-            pwd
-            ls -la
-
-            # Create .env file securely
             log "Creating .env file..."
             rm -f "$ENV_FILE"
             touch "$ENV_FILE"
             chmod 600 "$ENV_FILE"
 
-            # Write environment variables
-            log "Writing environment variables..."
             cat > "$ENV_FILE" << EOF
-            # Application Environment
-            NODE_ENV=production
+# Application Environment
+NODE_ENV=production
 
-            # MongoDB Configuration
-            MONGO_USER=${{ secrets.MONGO_USER }}
-            MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
-            MONGO_HOST=${{ secrets.MONGO_HOST }}
-            MONGO_PORT=${{ secrets.MONGO_PORT }}
-            MONGO_DB=${{ secrets.MONGO_DB }}
-            MONGO_TLS_CA=${{ secrets.MONGO_TLS_CA }}
-            MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}
+# MongoDB Configuration
+MONGO_USER=${MONGO_USER}
+MONGO_PASSWORD=${MONGO_PASSWORD}
+MONGO_HOST=localhost
+MONGO_PORT=27017
+MONGO_DB=${MONGO_DB}
+MONGO_AUTH_SOURCE=${MONGO_AUTH_SOURCE}
+MONGO_APP_NAME=${MONGO_APP_NAME}
 
-            # Additional Environment Variables can be added here
-            # EXAMPLE_VAR=example_value
-            EOF
+# Additional Environment Variables can be added here
+# EXAMPLE_VAR=example_value
+EOF
 
-            # Verify .env file
-            log "Verifying .env file..."
-            ls -l "$ENV_FILE"
-            echo "Environment file contents (without sensitive data):"
-            grep -v -E "MONGO_PASSWORD|MONGO_TLS_CA|MONGO_TLS_CERT" "$ENV_FILE"
-
-            # Ensure Docker is running
             log "Ensuring Docker is running..."
             sudo systemctl start docker || sudo systemctl restart docker
 
-            # Clean up old containers and resources
             log "Cleaning up old Docker resources..."
             docker-compose down --volumes --remove-orphans
             docker system prune -af --volumes
 
-            # Rebuild and start application
-            log "Rebuilding and starting application..."
+            log "Building and starting Docker containers..."
             docker-compose up -d --build
 
-            # Verify containers
-            log "Verifying running containers..."
+            log "Verifying containers..."
             docker ps
 
             log "Deployment completed successfully!"
+        env:
+          MONGO_USER: ${{ secrets.MONGO_USER }}
+          MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
+          MONGO_DB: ${{ secrets.MONGO_DB }}
+          MONGO_AUTH_SOURCE: ${{ secrets.MONGO_AUTH_SOURCE }}
+          MONGO_APP_NAME: ${{ secrets.MONGO_APP_NAME }}
