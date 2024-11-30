@@ -71,13 +71,11 @@ services:
     depends_on:
       - backend
     networks:
-      - backend-network  # Use shared network for communication with backend
+      - backend-network
 
 networks:
   backend-network:
-    driver: overlay  # Updated to support Docker Swarm
-  frontend-network:
-    driver: overlay  # Updated to support Docker Swarm
+    driver: overlay
 
 secrets:
   mongo_tls_ca:
