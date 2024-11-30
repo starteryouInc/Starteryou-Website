@@ -9,69 +9,102 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout the Code
+      # Step 1: Checkout Code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Configure AWS Credentials for Dev Server
-      - name: Configure AWS credentials for Dev Server
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      # Step 3: Debug AWS Credentials on Dev Server
-      - name: Debug AWS credentials
+      # Step 2: Fetch Certificates from DB Server
+      - name: Fetch Certificates from DB Server
+        env:
+          DB_EC2_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
+          DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}
+          DB_EC2_USER: ${{ secrets.DB_EC2_USER }}
         run: |
-          echo "Testing AWS credentials on dev server..."
-          aws sts get-caller-identity --region ${{ secrets.AWS_REGION }}
-
-      # Step 4: Verify SSH Tunnel to DB Server
-      - name: Verify SSH Tunnel to DB Server
-        run: |
-          echo "Setting up SSH tunnel to DB server..."
+          # Create SSH directory and set permissions
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          ssh-keyscan -H "${{ secrets.DB_EC2_HOST }}" >> ~/.ssh/known_hosts
-          echo "${{ secrets.DB_EC2_SSH_KEY }}" > ~/.ssh/db_key.pem
-          chmod 600 ~/.ssh/db_key.pem
-          ssh -i ~/.ssh/db_key.pem ${{ secrets.DB_EC2_USER }}@${{ secrets.DB_EC2_HOST }} "echo 'DB Server SSH Verified!'"
 
-      # Step 5: Deploy Application to Dev Server
-      - name: Deploy Application to Dev Server
+          # Add Dev Server to known hosts
+          ssh-keyscan -H $DB_EC2_HOST >> ~/.ssh/known_hosts
+
+          # Save the private SSH key
+          echo "$DB_EC2_SSH_KEY" > ~/.ssh/dev_key.pem
+          chmod 600 ~/.ssh/dev_key.pem
+
+          # Fetch certificates from Dev Server
+          scp -i ~/.ssh/dev_key.pem $DB_EC2_USER@$DB_EC2_HOST:/path/to/ca.crt ./ca.crt
+          scp -i ~/.ssh/dev_key.pem $DB_EC2_USER@$DB_EC2_HOST:/path/to/server.pem ./server.pem
+
+      # Step 3: Transfer Certificates to Target EC2 Server
+      - name: Transfer Certificates to Target EC2
+        env:
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+        run: |
+          # Create SSH directory and set permissions
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          # Add EC2 Host to known hosts
+          ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+
+          # Save the private SSH key
+          echo "$EC2_SSH_KEY" > ~/.ssh/ec2_key.pem
+          chmod 600 ~/.ssh/ec2_key.pem
+
+          # Transfer certificates to EC2 server
+          scp -i ~/.ssh/ec2_key.pem ./ca.crt $EC2_USER@$EC2_HOST:/tmp/ca.crt
+          scp -i ~/.ssh/ec2_key.pem ./server.pem $EC2_USER@$EC2_HOST:/tmp/server.pem
+
+      # Step 4: Deploy Application on Target EC2 Server
+      - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            #!/bin/bash
-            set -e
-            echo "Starting deployment on dev server..."
-
-            # Ensure Git is installed
-            if ! command -v git &> /dev/null; then
-              sudo yum update -y || sudo apt-get update -y
-              sudo yum install -y git || sudo apt-get install -y git
-            fi
-
-            # Clone or update repository
+            # Set up project directory
             PROJECT_ROOT="/home/ec2-user/Starteryou-Website"
             REPO_DIR="${PROJECT_ROOT}/Starteryou"
+            ENV_FILE="${REPO_DIR}/.env"
+
+            echo "Ensuring project root exists..."
+            mkdir -p "$PROJECT_ROOT"
+            cd "$PROJECT_ROOT"
+
+            echo "Cloning repository if it doesn't exist..."
             if [ ! -d "$REPO_DIR" ]; then
-              mkdir -p "$PROJECT_ROOT"
-              cd "$PROJECT_ROOT"
-              git clone https://github.com/***Inc/Starteryou-Website.git -b develop Starteryou
+              git clone https://github.com/starteryouInc/Starteryou-Website.git -b develop Starteryou
             else
+              echo "Pulling latest changes..."
               cd "$REPO_DIR"
               git fetch origin develop
               git reset --hard origin/develop
             fi
 
-            # Restart Docker and deploy containers
-            sudo systemctl start docker || sudo systemctl restart docker
+            echo "Generating .env file dynamically..."
+            cat > "$ENV_FILE" << EOF
+            NODE_ENV=production
+            PORT=3000
+            FRONTEND_URL=http://54.196.202.145:8080
+            VITE_BACKEND_URL=http://54.196.202.145:3000
+            MONGO_USER=${{ secrets.MONGO_USER }}
+            MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
+            MONGO_HOST=${{ secrets.DB_EC2_HOST }}
+            MONGO_PORT=${{ secrets.MONGO_PORT }}
+            MONGO_DB=${{ secrets.MONGO_DB }}
+            MONGO_AUTH_SOURCE=${{ secrets.MONGO_AUTH_SOURCE }}
+            MONGO_TLS=${{ secrets.MONGO_TLS }}
+            MONGO_TLS_CA=${{ secrets.MONGO_TLS_CA }}
+            MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}
+            MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}
+            EOF
+
+            echo "Setting appropriate permissions for .env..."
+            chmod 600 "$ENV_FILE"
+
+            echo "Restarting Docker services..."
             docker-compose down --volumes --remove-orphans
             docker-compose up -d --build
-
-            echo "Deployment on dev server completed successfully!"
