@@ -45,11 +45,7 @@ jobs:
           ssh -i ~/.ssh/ec2_key.pem $EC2_USER@$EC2_HOST "sudo mkdir -p /etc/ssl/mongodb"
           scp -i ~/.ssh/ec2_key.pem ./ca.crt $EC2_USER@$EC2_HOST:/etc/ssl/mongodb/ca.crt
           scp -i ~/.ssh/ec2_key.pem ./server.pem $EC2_USER@$EC2_HOST:/etc/ssl/mongodb/server.pem
-
-          ssh -i ~/.ssh/ec2_key.pem $EC2_USER@$EC2_HOST "sudo mkdir -p /etc/letsencrypt/live/starteryou.com"
-          scp -i ~/.ssh/ec2_key.pem /etc/letsencrypt/live/starteryou.com/fullchain.pem $EC2_USER@$EC2_HOST:/etc/letsencrypt/live/starteryou.com/fullchain.pem
-          scp -i ~/.ssh/ec2_key.pem /etc/letsencrypt/live/starteryou.com/privkey.pem $EC2_USER@$EC2_HOST:/etc/letsencrypt/live/starteryou.com/privkey.pem
-
+          
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7
         with:
