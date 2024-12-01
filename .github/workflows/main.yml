@@ -10,11 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout Code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Fetch Certificates from DB Server
       - name: Fetch Certificates from DB Server
         env:
           DB_EC2_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
@@ -28,11 +26,9 @@ jobs:
           echo "$DB_EC2_SSH_KEY" > ~/.ssh/db_key.pem
           chmod 600 ~/.ssh/db_key.pem
 
-          echo "Fetching certificates from DB server..."
           ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo cat /etc/ssl/mongodb/ca.crt" > ./ca.crt
           ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo cat /etc/ssl/mongodb/server.pem" > ./server.pem
 
-      # Step 3: Transfer Certificates to Target EC2 Server
       - name: Transfer Certificates to Target EC2
         env:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
@@ -46,11 +42,14 @@ jobs:
           echo "$EC2_SSH_KEY" > ~/.ssh/ec2_key.pem
           chmod 600 ~/.ssh/ec2_key.pem
 
-          echo "Transferring certificates to EC2 server..."
-          scp -i ~/.ssh/ec2_key.pem ./ca.crt $EC2_USER@$EC2_HOST:/tmp/ca.crt
-          scp -i ~/.ssh/ec2_key.pem ./server.pem $EC2_USER@$EC2_HOST:/tmp/server.pem
+          ssh -i ~/.ssh/ec2_key.pem $EC2_USER@$EC2_HOST "sudo mkdir -p /etc/ssl/mongodb"
+          scp -i ~/.ssh/ec2_key.pem ./ca.crt $EC2_USER@$EC2_HOST:/etc/ssl/mongodb/ca.crt
+          scp -i ~/.ssh/ec2_key.pem ./server.pem $EC2_USER@$EC2_HOST:/etc/ssl/mongodb/server.pem
 
-      # Step 4: Deploy Application on Target EC2 Server
+          ssh -i ~/.ssh/ec2_key.pem $EC2_USER@$EC2_HOST "sudo mkdir -p /etc/letsencrypt/live/starteryou.com"
+          scp -i ~/.ssh/ec2_key.pem ./fullchain.pem $EC2_USER@$EC2_HOST:/etc/letsencrypt/live/starteryou.com/fullchain.pem
+          scp -i ~/.ssh/ec2_key.pem ./privkey.pem $EC2_USER@$EC2_HOST:/etc/letsencrypt/live/starteryou.com/privkey.pem
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7
         with:
@@ -83,8 +82,8 @@ jobs:
             cat > "$ENV_FILE" << EOF
             NODE_ENV=production
             PORT=3000
-            FRONTEND_URL=http://44.206.147.137:8080
-            VITE_BACKEND_URL=http://44.206.147.137:3000
+            FRONTEND_URL=https://starteryou.com
+            VITE_BACKEND_URL=https://starteryou.com
             MONGO_USER=${{ secrets.MONGO_USER }}
             MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
             MONGO_HOST=localhost
@@ -95,17 +94,28 @@ jobs:
             MONGO_TLS_CA=/etc/ssl/mongodb/ca.crt
             MONGO_TLS_CERT=/etc/ssl/mongodb/server.pem
             MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}
-            DB_EC2_HOST=${{ secrets.DB_EC2_HOST }}
-            DB_EC2_USER=${{ secrets.DB_EC2_USER }}
             EOF
 
-            # Source the .env file to make variables available to the session
             set -a
             source "$ENV_FILE"
             set +a
 
             chmod 600 "$ENV_FILE"
 
-            echo "Deploying Docker services..."
             docker-compose down --volumes --remove-orphans
             docker-compose up --build -d
+
+      - name: Reload NGINX
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.PROD_EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo nginx -t
+            sudo systemctl reload nginx
+
+      - name: Validate Services Health
+        run: |
+          curl -f https://starteryou.com/health || (echo "Frontend health check failed" && exit 1)
+          curl -f https://starteryou.com/api/health || (echo "Backend health check failed" && exit 1)
