@@ -101,7 +101,7 @@ services:
       timeout: 10s
       retries: 3
     volumes:
-      - /etc/letsencrypt/live/starteryou.com:/etc/letsencrypt/live/starteryou.com:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     networks:
       - frontend-network
 
