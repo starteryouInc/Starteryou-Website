@@ -13,32 +13,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Stop NGINX Temporarily
+      - name: Stop NGINX and Free Ports
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.PROD_EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "Stopping NGINX to free port 443..."
+            echo "Stopping NGINX and freeing ports..."
             sudo systemctl stop nginx || echo "NGINX is not running or already stopped."
-      - name: Free Ports 80 and 443
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.PROD_EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
             for PORT in 80 443; do
               echo "Checking for process using port $PORT..."
               PID=$(sudo lsof -t -i:$PORT)
               if [ -n "$PID" ]; then
                 echo "Port $PORT is in use by process $PID. Killing it..."
-                sudo kill -9 $PID || echo "Failed to kill process $PID. Please check permissions."
+                sudo kill -9 $PID || echo "Failed to kill process $PID."
               else
                 echo "Port $PORT is free."
               fi
             done
+
       - name: Fetch Certificates from DB Server
         env:
           DB_EC2_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
@@ -53,6 +47,7 @@ jobs:
           chmod 600 ~/.ssh/db_key.pem
           ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo cat /etc/ssl/mongodb/ca.crt" > ./ca.crt
           ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo cat /etc/ssl/mongodb/server.pem" > ./server.pem
+
       - name: Transfer Certificates to Target EC2
         env:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
@@ -68,6 +63,7 @@ jobs:
           echo "Transferring certificates to EC2 server..."
           scp -i ~/.ssh/ec2_key.pem ./ca.crt $EC2_USER@$EC2_HOST:/tmp/ca.crt
           scp -i ~/.ssh/ec2_key.pem ./server.pem $EC2_USER@$EC2_HOST:/tmp/server.pem
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7
         with:
@@ -115,7 +111,8 @@ jobs:
             chmod 600 "$ENV_FILE"
             docker-compose down --volumes --remove-orphans
             docker-compose up --build -d
-      - name: Start NGINX After Deployment
+
+      - name: Restart NGINX After Deployment
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.PROD_EC2_HOST }}
@@ -124,7 +121,8 @@ jobs:
           script: |
             echo "Restarting NGINX..."
             sudo nginx -t
-            sudo systemctl start nginx
+            sudo systemctl restart nginx
+
       - name: Validate Services Health
         run: |
           curl -f https://starteryou.com/health || (echo "Frontend health check failed" && exit 1)
