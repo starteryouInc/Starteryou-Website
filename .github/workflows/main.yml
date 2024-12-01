@@ -23,7 +23,7 @@ jobs:
             echo "Stopping NGINX and freeing ports..."
             sudo systemctl stop nginx || echo "NGINX is not running or already stopped."
             for PORT in 80 443; do
-              echo "Checking for process using port $PORT..."
+              echo "Checking for processes using port $PORT..."
               PID=$(sudo lsof -t -i:$PORT)
               if [ -n "$PID" ]; then
                 echo "Port $PORT is in use by process $PID. Killing it..."
@@ -119,9 +119,21 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            echo "Stopping NGINX gracefully..."
+            sudo systemctl stop nginx || echo "NGINX is not running."
             echo "Restarting NGINX..."
             sudo nginx -t
-            sudo systemctl restart nginx
+            if sudo systemctl restart nginx; then
+              echo "NGINX restarted successfully."
+            else
+              echo "NGINX failed to restart. Collecting logs..."
+              sudo journalctl -xeu nginx.service
+              sudo systemctl status nginx
+              echo "Checking ports in use..."
+              sudo lsof -i:80
+              sudo lsof -i:443
+              exit 1
+            fi
 
       - name: Validate Services Health
         run: |
