@@ -13,24 +13,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Stop and Remove Conflicting Containers
+      - name: Stop and Remove All Containers
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.PROD_EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "Stopping and removing containers using ports 80 or 443..."
-            for PORT in 80 443; do
-              CONTAINER_ID=$(docker ps --filter "publish=$PORT" -q)
-              if [ -n "$CONTAINER_ID" ]; then
-                echo "Stopping container $CONTAINER_ID using port $PORT..."
-                docker stop $CONTAINER_ID || echo "Failed to stop container $CONTAINER_ID."
-                docker rm $CONTAINER_ID || echo "Failed to remove container $CONTAINER_ID."
-              else
-                echo "No containers found using port $PORT."
-              fi
-            done
+            echo "Stopping and removing all containers..."
+            docker ps -aq | xargs -r docker stop || echo "No running containers to stop."
+            docker ps -aq | xargs -r docker rm || echo "No containers to remove."
 
       - name: Free Ports 80 and 443
         uses: appleboy/ssh-action@v0.1.7
