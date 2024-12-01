@@ -13,22 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Free Ports 80 and 443
-      - name: Free Ports 80 and 443
-        run: |
-          for PORT in 80 443; do
-            echo "Checking for process using port $PORT..."
-            PID=$(sudo lsof -t -i:$PORT)
-            if [ -n "$PID" ]; then
-              echo "Port $PORT is in use by process $PID. Killing it..."
-              sudo kill -9 $PID || echo "Failed to kill process $PID. Please check permissions."
-            else
-              echo "Port $PORT is free."
-            fi
-          done
-        shell: bash
-
-
       - name: Fetch Certificates from DB Server
         env:
           DB_EC2_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
