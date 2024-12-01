@@ -12,19 +12,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
-      - name: Free Ports 80 and 443
-        run: |
-          echo "Checking for processes using ports 80 and 443..."
-          sudo lsof -i:80 || echo "Port 80 is not in use."
-          sudo lsof -i:443 || echo "Port 443 is not in use."
-      
-          # Kill processes using ports
-          sudo kill -9 $(sudo lsof -t -i:80) || echo "No process was using port 80."
-          sudo kill -9 $(sudo lsof -t -i:443) || echo "No process was using port 443."
-      
-          echo "Ports 80 and 443 are now free."
-      
 
       - name: Fetch Certificates from DB Server
         env:
