@@ -23,7 +23,7 @@ import EducationPage from "./pages/EducationPage";
 import Navbar from "./components/Common/Navbar";
 import Footer from "./components/Common/Footer";
 import Signup from "./components/Auth/Signup";
-import InProgressPage from "./pages/InProgressPage";
+import InProgressPage from "./components/Common/InProgressPage";
 
 const Layout = () => {
   const location = useLocation();

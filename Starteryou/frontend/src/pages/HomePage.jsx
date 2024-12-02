@@ -11,7 +11,7 @@ import Contact from "../components/Landing/Contact";
 import Hero from "../components/Landing/Hero";
 import Pricing from "../components/Landing/Pricing";
 import UpcomingFeatures from "../components/Landing/UpcomingFeatures";
-import InProgressPage from "./InProgressPage";
+import InProgressPage from "../components/Common/InProgressPage";
 export default function HomePage() {
   const deployReady = false;
   return deployReady ? (
