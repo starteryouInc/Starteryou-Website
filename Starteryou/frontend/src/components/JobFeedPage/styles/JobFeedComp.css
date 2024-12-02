@@ -1,0 +1,45 @@
+/* Filter Buttons Componenet Styling */
+.filter-buttons-container {
+  width: 130px;
+  height: 36px;
+  border: 2px solid #bcbcbc;
+  border-radius: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  color: #bcbcbc;
+  cursor: pointer;
+}
+.buttons-title {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 16px;
+}
+.filter-buttons-container:hover {
+  border-color: #8d00ff;
+  background-color: #f2e8f9;
+  color: #8d00ff;
+}
+
+/* Job Card Component Styling */
+.card-container {
+  padding: 18px;
+  border: 1px solid #8d00ff;
+  border-radius: 5px;
+}
+
+.job-details li {
+  display: flex;
+}
+
+/* Job Detailed Card Component Styling */
+.card-detailed-container {
+  padding: 18px;
+  border-radius: 5px;
+}
+@media (width >= 768px) {
+  .card-detailed-container {
+    border: 1px solid #8d00ff;
+  }
+}
