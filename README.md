@@ -40,3 +40,31 @@ Welcome to the Starteryou Website repository! This project is the official platf
    ```bash
    git clone https://github.com/starteryouInc/Starteryou-Website.git
    cd Starteryou-Website
+### Project Structure
+Here is the project structure tree for the "StarterYou Website":
+
+```
+Starteryou-Website
+├── Frontend
+│   ├── src
+│   │   ├── components
+│   │   ├── styles
+│   │   ├── assets
+│   │   └── utils
+│   ├── vite.config.js
+│   └── package.json
+├── Backend
+│   ├── server
+│   │   ├── routes
+│   │   ├── models
+│   │   ├── controllers
+│   │   └── middlewares
+│   ├── config.js
+│   ├── app.js
+│   └── package.json
+├── Database
+│   └── MongoDB
+└── CI/CD
+    ├── Dockerfile
+    └── .github/workflows
+```
