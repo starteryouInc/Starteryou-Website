@@ -21,26 +21,6 @@ services:
       retries: 3
     restart: always
 
-  cert-fetcher:
-    image: alpine:latest
-    container_name: cert-fetcher
-    entrypoint: >
-      sh -c "
-      apk add --no-cache openssh &&
-      mkdir -p /certificates &&
-      ssh-keyscan -H $DB_EC2_HOST >> /etc/ssh/ssh_known_hosts &&
-      scp -i /root/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/ca.crt /certificates/ca.crt &&
-      scp -i /root/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/server.pem /certificates/server.pem &&
-      sleep infinity"
-    environment:
-      DB_EC2_HOST: ${DB_EC2_HOST:-default-db-host}
-      DB_EC2_USER: ${DB_EC2_USER:-default-db-user}
-    volumes:
-      - cert-vol:/certificates
-      - ./db_key.pem:/root/db_key.pem:ro
-    networks:
-      - backend-network
-
   backend:
     build:
       context: ./backend
@@ -57,10 +37,9 @@ services:
       MONGO_TLS: "true"
       MONGO_HOST: localhost
       MONGO_PORT: 27017
-      MONGO_TLS_CA: /certificates/ca.crt
-      MONGO_TLS_CERT: /certificates/server.pem
+      MONGO_TLS_CA: /etc/ssl/mongodb/ca.crt
+      MONGO_TLS_CERT: /etc/ssl/mongodb/server.pem
     volumes:
-      - cert-vol:/certificates:ro
       - ./backend:/usr/src/app
       - ./backend/uploads:/usr/src/app/uploads
     ports:
@@ -69,7 +48,6 @@ services:
       - backend-network
     depends_on:
       - sshtunnel
-      - cert-fetcher
     healthcheck:
       test: ["CMD", "wget", "--spider", "http://localhost:3000/health"]
       interval: 30s
@@ -95,6 +73,3 @@ services:
 networks:
   backend-network:
     driver: bridge
-
-volumes:
-  cert-vol:
