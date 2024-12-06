@@ -27,10 +27,14 @@ services:
     entrypoint: >
       sh -c "
       apk add --no-cache openssh &&
-      mkdir -p /certificates &&
+      chmod 600 /root/db_key.pem &&
+      echo 'Added SSH key' &&
       ssh-keyscan -H $DB_EC2_HOST >> /etc/ssh/ssh_known_hosts &&
+      echo 'Added host key' &&
       scp -i /root/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/ca.crt /certificates/ca.crt &&
+      echo 'Fetched ca.crt' &&
       scp -i /root/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/server.pem /certificates/server.pem &&
+      echo 'Fetched server.pem' &&
       sleep infinity"
     environment:
       DB_EC2_HOST: ${DB_EC2_HOST:-default-db-host}
