@@ -30,12 +30,9 @@ services:
       apk add --no-cache openssh &&
       mkdir -p /certificates &&
       ssh-keyscan -H $DB_EC2_HOST >> /etc/ssh/ssh_known_hosts &&
-      while true; do
-        scp -i /root/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/ca.crt /certificates/ca.crt &&
-        scp -i /root/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/server.pem /certificates/server.pem &&
-        echo 'Certificates fetched at $(date)';
-        sleep 86400;
-      done"
+      scp -i /root/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/ca.crt /certificates/ca.crt &&
+      scp -i /root/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/server.pem /certificates/server.pem &&
+      sleep infinity"
     environment:
       DB_EC2_HOST: ${DB_EC2_HOST:-default-db-host}
       DB_EC2_USER: ${DB_EC2_USER:-default-db-user}
