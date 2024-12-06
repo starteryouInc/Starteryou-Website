@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
 import { API_CONFIG } from "@config/api";
-import { toast } from "react-toastify";
 
 const icons = [
   {
@@ -51,7 +50,7 @@ const BestBuddy = () => {
       const response = await fetch(
         `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`
       );
-      
+
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -80,10 +79,13 @@ const BestBuddy = () => {
     formData.append("title", title); // Include the title for the update
 
     try {
-      const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`, {
-        method: "PUT",
-        body: formData,
-      });
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`,
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -115,6 +117,7 @@ const BestBuddy = () => {
 
       {/* Display the uploaded file */}
       <div className="relative flex justify-center mt-2">
+        {/* Display the uploaded file */}
         {uploadedFile ? (
           <img
             src={uploadedFile}
@@ -128,25 +131,13 @@ const BestBuddy = () => {
             className="w-[900px] h-[300px] md:h-[450px]"
           />
         )}
-      </div>
 
-      {/* Upload and Update Buttons */}
-      <div className="flex justify-center mt-4">
-        <FileUpload handleFileChange={handleFileChange} />
+        {/* Upload Icon at the Top-Right Corner */}
         {isAdmin && (
-          <div className="ml-4">
-            <input
-              type="file"
-              onChange={handleFileChange}
-              className="hidden"
-              id="updateFileInput"
+          <div className="relative ">
+            <FileUpload
+              handleFileChange={(e) => handleFileChange(e, titles[1])}
             />
-            <label
-              htmlFor="updateFileInput"
-              className="cursor-pointer bg-blue-500 text-white py-2 px-4 rounded"
-            >
-              Update Image
-            </label>
           </div>
         )}
       </div>
