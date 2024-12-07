@@ -22,8 +22,8 @@ import EducationPage from "./pages/EducationPage";
 import Navbar from "./components/Common/Navbar";
 import Footer from "./components/Common/Footer";
 import Signup from "./components/Auth/Signup";
-import JobPageBefore from "./pages/JobPageBefore";
-import JobPageAfter from "./pages/JobPageAfter";
+import JobPageBefore from "./pages/JobPageBefore"; // Ensure this file exists in the "pages" directory.
+import JobPageAfter from "./pages/JobPageAfter"; // Ensure this file exists in the "pages" directory.
 
 const Layout = () => {
   const location = useLocation();
@@ -45,6 +45,7 @@ const Layout = () => {
         <Route path="/education" element={<EducationPage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/job2" element={<JobPageAfter />} />
+
         {/* Admin Protected Routes */}
         <Route
           path="/admin"
@@ -64,7 +65,7 @@ const Layout = () => {
         />
         <Route
           path="/admin/job2"
-          element={<AdminProtectedRoute element={<JobPageBefore />} />}
+          element={<AdminProtectedRoute element={<JobPageAfter />} />}
         />
       </Routes>
       {location.pathname !== "/login" && <Footer />}

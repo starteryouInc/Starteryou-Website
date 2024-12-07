@@ -59,6 +59,18 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
+//docs
+// Serve frontend docs
+app.use('/docs/frontend', express.static(path.join(__dirname, 'frontend/docs')));
+
+// Serve backend docs
+app.use('/docs/backend', express.static(path.join(__dirname, 'backend/docs')));
+
+// Optional: Serve a combined docs route
+app.use('/docs', (req, res) => {
+    res.redirect('/docs/frontend/index.html'); // Redirect to frontend docs by default
+});
+
 // API Request Logger Middleware
 const requestLogger = (req, res, next) => {
   const timestamp = new Date().toISOString();
