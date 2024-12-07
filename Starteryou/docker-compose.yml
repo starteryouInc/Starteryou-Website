@@ -5,7 +5,6 @@ services:
     entrypoint: >
       sh -c "
       apk add --no-cache openssh &&
-      chmod 600 /root/db_key.pem &&
       ssh-keyscan -H $DB_EC2_HOST >> /etc/ssh/ssh_known_hosts &&
       ssh -N -L 27017:localhost:27017 $DB_EC2_USER@$DB_EC2_HOST -i /root/db_key.pem"
     environment:
@@ -28,7 +27,7 @@ services:
     entrypoint: >
       sh -c "
       apk add --no-cache openssh &&
-      chmod 600 /root/db_key.pem &&
+      mkdir -p /certificates &&
       ssh-keyscan -H $DB_EC2_HOST >> /etc/ssh/ssh_known_hosts &&
       scp -i /root/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/ca.crt /certificates/ca.crt &&
       scp -i /root/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/server.pem /certificates/server.pem &&
