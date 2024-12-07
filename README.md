@@ -6,6 +6,10 @@
 
 Welcome to the Starteryou Website repository! This project is the official platform for StarterYou Inc., aimed at connecting high school and college students with part-time job opportunities, internships, and more. The platform is scalable, responsive, and built to serve the needs of students and employers alike.
 
+## 🌐 Links
+- **Development Environment:** [http://dev.starteryou.com:8080/](http://dev.starteryou.com:8080/)
+- **Production Environment:** [https://starteryou.com/](https://starteryou.com/)
+
 ## 🚀 Features
 
 - Job Listings: Explore part-time job opportunities such as cashiers, store vendors, and more.
@@ -40,6 +44,9 @@ Welcome to the Starteryou Website repository! This project is the official platf
    ```bash
    git clone https://github.com/starteryouInc/Starteryou-Website.git
    cd Starteryou-Website
+   ```
+
+---
 ### Project Structure
 Here is the project structure tree for the "StarterYou Website":
 
