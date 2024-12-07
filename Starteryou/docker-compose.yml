@@ -50,7 +50,6 @@ services:
       - backend-network
     depends_on:
       - sshtunnel
-      - cert-fetcher
     healthcheck:
       test: ["CMD", "wget", "--spider", "http://localhost:3000/health"]
       interval: 30s
