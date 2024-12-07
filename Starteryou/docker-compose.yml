@@ -6,7 +6,7 @@ services:
       sh -c "
       apk add --no-cache openssh &&
       ssh-keyscan -H ${DB_EC2_HOST} >> /etc/ssh/ssh_known_hosts &&
-      ssh -N -L 27017:localhost:27017 ${DB_EC2_USER}@${DB_EC2_HOST} -i /root/db_key.pem
+      ssh -o ExitOnForwardFailure=yes -N -L 27017:localhost:27017 ${DB_EC2_USER}@${DB_EC2_HOST} -i /root/db_key.pem
       "
     environment:
       DB_EC2_HOST: ${DB_EC2_HOST}
@@ -43,7 +43,8 @@ services:
     networks:
       - backend-network
     depends_on:
-      - sshtunnel
+      sshtunnel:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--spider", "http://localhost:3000/health"]
       interval: 30s
@@ -69,6 +70,3 @@ services:
 networks:
   backend-network:
     driver: bridge
-
-volumes:
-  cert-vol:
