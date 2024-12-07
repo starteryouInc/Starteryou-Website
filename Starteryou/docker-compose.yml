@@ -30,8 +30,8 @@ services:
       apk add --no-cache openssh &&
       mkdir -p /certificates &&
       ssh-keyscan -H $DB_EC2_HOST >> /etc/ssh/ssh_known_hosts &&
-      scp -i /root/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/ca.crt /certificates/ca.crt &&
-      scp -i /root/db_key.pem $DB_EC2_USER@$DB_EC2_HOST:/etc/ssl/mongodb/server.pem /certificates/server.pem &&
+      ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST \"sudo cat /etc/ssl/mongodb/ca.crt\" > /certificates/ca.crt &&
+      ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST \"sudo cat /etc/ssl/mongodb/server.pem\" > /certificates/server.pem &&
       sleep infinity"
     environment:
       DB_EC2_HOST: ${DB_EC2_HOST:-default-db-host}
