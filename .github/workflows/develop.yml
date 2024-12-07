@@ -96,8 +96,8 @@ jobs:
             cat > "$ENV_FILE" << EOF
             NODE_ENV=production
             PORT=3000
-            FRONTEND_URL=http://54.196.202.145:8080
-            VITE_BACKEND_URL=http://54.196.202.145:3000
+            FRONTEND_URL=http://dev.starteryou.com:8080
+            VITE_BACKEND_URL=http://dev.starteryou.com:3000
             MONGO_USER=${{ secrets.MONGO_USER }}
             MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
             MONGO_HOST=localhost
