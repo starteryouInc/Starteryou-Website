@@ -11,6 +11,7 @@ import axios from "axios"; // Library for making HTTP requests
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; // Icon component from FontAwesome
 import { faPencilAlt, faSave } from "@fortawesome/free-solid-svg-icons"; // Specific icons for edit and save functionality
 import { useNavigation } from "../../context/NavigationContext"; // Custom context for managing navigation and admin state
+import { API_CONFIG } from "@config/api";
 
 /**
  * TechTeam component for displaying tech team information.
@@ -44,7 +45,7 @@ const TechTeam = () => {
    * @type {[boolean, function]}
    */
   const [isEditing, setIsEditing] = useState(false);
-
+  const page = "HomePage"; // Specify the page name for the current component.
   /**
    * Retrieve admin status from navigation context.
    * @type {object}
@@ -59,16 +60,19 @@ const TechTeam = () => {
   useEffect(() => {
     const fetchTextContent = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/text", {
-          params: { component: "TechTeam" }, // Specify the component name for fetching content
-        });
+        const response = await axios.get(
+          `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+          {
+            params: { page, component: "TechTeam" }, // Specify the component name for fetching content
+          }
+        );
         const { content, paragraphs } = response.data;
 
         // Set fetched content and paragraphs, fallback to placeholders if data is missing
         setContent(content || "Our Tech Team");
         setParagraphs(paragraphs || []);
-      } catch (error) {
-        console.error("Error fetching text content:", error); // Log errors to the console
+      } catch {
+        console.error("Error fetching text content"); // Log errors to the console
       }
     };
 
@@ -81,7 +85,9 @@ const TechTeam = () => {
    */
   const saveContent = async () => {
     try {
-      await axios.put("http://localhost:3000/api/text", {
+      await axios.put(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`, {
+        page: "HomePage",
+
         component: "TechTeam", // Specify the component name for saving content
         content: content.trim(), // Trim whitespace from the title
         paragraphs: paragraphs.map((para) => para.trim()), // Trim whitespace for each paragraph
@@ -89,8 +95,8 @@ const TechTeam = () => {
 
       // Exit editing mode after successful save
       setIsEditing(false);
-    } catch (error) {
-      console.error("Error saving content:", error); // Log errors to the console
+    } catch {
+      console.error("Error saving content"); // Log errors to the console
     }
   };
 

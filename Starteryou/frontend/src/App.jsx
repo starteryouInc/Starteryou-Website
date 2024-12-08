@@ -8,7 +8,7 @@ import { useEffect } from "react";
 
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
-import JobPortalPage from "./pages/JobPortalPage";
+
 import {
   NavigationProvider,
   NavigationHandler,
@@ -18,12 +18,13 @@ import { UserProvider } from "./context/UserContext";
 import LoginPage from "./components/Auth/LoginPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import JobPage from "./pages/JobPage";
 import EducationPage from "./pages/EducationPage";
 import Navbar from "./components/Common/Navbar";
 import Footer from "./components/Common/Footer";
 import Signup from "./components/Auth/Signup";
 import InProgressPage from "./components/Common/InProgressPage";
+import JobPageBefore from "./pages/JobPageBefore"; // Ensure this file exists in the "pages" directory.
+import JobPageAfter from "./pages/JobPageAfter"; // Ensure this file exists in the "pages" directory.
 
 const Layout = () => {
   const location = useLocation();
@@ -40,12 +41,13 @@ const Layout = () => {
         {/* Default Routes for everyone */}
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
-        <Route path="/jobs" element={<JobPortalPage />} />
+        <Route path="/jobs" element={<JobPageBefore />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/education" element={<EducationPage />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/job2" element={<JobPage />} />
         <Route path="/InProgressPage" element={<InProgressPage />} />
+        <Route path="/job2" element={<JobPageAfter />} />
+
         {/* Admin Protected Routes */}
         <Route
           path="/admin"
@@ -57,7 +59,7 @@ const Layout = () => {
         />
         <Route
           path="/admin/jobs"
-          element={<AdminProtectedRoute element={<JobPortalPage />} />}
+          element={<AdminProtectedRoute element={<JobPageBefore />} />}
         />
         <Route
           path="/admin/education"
@@ -65,7 +67,7 @@ const Layout = () => {
         />
         <Route
           path="/admin/job2"
-          element={<AdminProtectedRoute element={<JobPage />} />}
+          element={<AdminProtectedRoute element={<JobPageAfter />} />}
         />
       </Routes>
       {location.pathname !== "/login" && <Footer />}

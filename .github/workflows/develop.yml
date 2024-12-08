@@ -1,4 +1,4 @@
-name: Deploy to AWS EC2s
+name: Deploy to AWS EC2-DEV-SERVER
 
 on:
   push:
@@ -20,17 +20,29 @@ jobs:
           DB_EC2_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
           DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}
           DB_EC2_USER: ${{ secrets.DB_EC2_USER }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
         run: |
           set -e
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          ssh-keyscan -H $DB_EC2_HOST >> ~/.ssh/known_hosts
+
+          # Create db_key.pem for accessing DB server
           echo "$DB_EC2_SSH_KEY" > ~/.ssh/db_key.pem
           chmod 600 ~/.ssh/db_key.pem
+          ssh-keyscan -H $DB_EC2_HOST >> ~/.ssh/known_hosts
 
           echo "Fetching certificates from DB server..."
           ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo cat /etc/ssl/mongodb/ca.crt" > ./ca.crt
           ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo cat /etc/ssl/mongodb/server.pem" > ./server.pem
+
+          # Transfer db_key.pem to the target EC2 server
+          echo "Transferring db_key.pem to EC2 server..."
+          echo "$EC2_SSH_KEY" > ~/.ssh/ec2_key.pem
+          chmod 600 ~/.ssh/ec2_key.pem
+          ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+          scp -i ~/.ssh/ec2_key.pem ~/.ssh/db_key.pem $EC2_USER@$EC2_HOST:/tmp/db_key.pem
 
       # Step 3: Transfer Certificates to Target EC2 Server
       - name: Transfer Certificates to Target EC2
@@ -56,12 +68,13 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.DB_EC2_SSH_KEY }}
+          key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
             sudo mkdir -p /etc/ssl/mongodb
             sudo mv /tmp/ca.crt /etc/ssl/mongodb/ca.crt
             sudo mv /tmp/server.pem /etc/ssl/mongodb/server.pem
+            sudo mv /tmp/db_key.pem /etc/ssl/mongodb/db_key.pem
             sudo chmod 600 /etc/ssl/mongodb/*
 
             PROJECT_ROOT="/home/ec2-user/Starteryou-Website"
@@ -83,8 +96,8 @@ jobs:
             cat > "$ENV_FILE" << EOF
             NODE_ENV=production
             PORT=3000
-            FRONTEND_URL=http://54.196.202.145:8080
-            VITE_BACKEND_URL=http://54.196.202.145:3000
+            FRONTEND_URL=http://dev.starteryou.com:8080
+            VITE_BACKEND_URL=http://dev.starteryou.com:3000
             MONGO_USER=${{ secrets.MONGO_USER }}
             MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
             MONGO_HOST=localhost

@@ -28,8 +28,8 @@ console.log("Loaded Environment Variables:", {
   mongoHost: process.env.MONGO_HOST,
   mongoPort: process.env.MONGO_PORT,
   mongoDb: process.env.MONGO_DB,
-  mongoAuthSource: process.env.MONGO_AUTH_SOURCE
-});  // Debugging line to ensure the environment variables are loaded
+  mongoAuthSource: process.env.MONGO_AUTH_SOURCE,
+}); // Debugging line to ensure the environment variables are loaded
 
 // Check for missing required environment variables
 if (!mongoUser || !mongoPassword || !mongoHost || !mongoDb) {
@@ -41,12 +41,14 @@ if (!mongoUser || !mongoPassword || !mongoHost || !mongoDb) {
 let mongoUri = `mongodb://${mongoUser}:${mongoPassword}@${mongoHost}:${mongoPort}/${mongoDb}?authSource=${mongoAuthSource}&directConnection=true&serverSelectionTimeoutMS=2000`;
 
 if (mongoTls) {
-  mongoUri += `&tls=true&tlsCertificateKeyFile=${encodeURIComponent(mongoTlsCert)}&tlsCAFile=${encodeURIComponent(mongoTlsCa)}`;
+  mongoUri += `&tls=true&tlsCertificateKeyFile=${encodeURIComponent(
+    mongoTlsCert
+  )}&tlsCAFile=${encodeURIComponent(mongoTlsCa)}`;
 }
 
 mongoUri += `&appName=${mongoAppName}`;
 
-console.log('------------------------>'+mongoUri);
+console.log("------------------------>" + mongoUri);
 
 // Initialize express app
 const app = express();
@@ -56,6 +58,18 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
+
+//docs
+// Serve frontend docs
+app.use('/docs/frontend', express.static(path.join(__dirname, 'frontend/docs')));
+
+// Serve backend docs
+app.use('/docs/backend', express.static(path.join(__dirname, 'backend/docs')));
+
+// Optional: Serve a combined docs route
+app.use('/docs', (req, res) => {
+    res.redirect('/docs/frontend/index.html'); // Redirect to frontend docs by default
+});
 
 // API Request Logger Middleware
 const requestLogger = (req, res, next) => {
