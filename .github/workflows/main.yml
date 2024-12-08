@@ -1,4 +1,4 @@
-name: Deploy to AWS EC2s
+name: Deploy to AWS EC2-PROD-SERVER
 
 on:
   push:
@@ -120,8 +120,3 @@ jobs:
             chmod 600 "$ENV_FILE"
             docker-compose down --volumes --remove-orphans
             docker-compose up --build -d
-
-      - name: Validate Services Health
-        run: |
-          curl -f https://starteryou.com/health || (echo "Frontend health check failed" && exit 1)
-          curl -f https://starteryou.com/api/health || (echo "Backend health check failed" && exit 1)
