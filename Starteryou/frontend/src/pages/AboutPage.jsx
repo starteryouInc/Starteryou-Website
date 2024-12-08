@@ -7,7 +7,7 @@ import TechTeam from "../components/About/TechTeam";
 import Contact from "../components/Landing/Contact";
 import InProgressPage from "../components/Common/InProgressPage";
 export default function AboutPage() {
-  const deployReady = false;
+  const deployReady = true;
   return deployReady ? (
     <div>
       <HeroAbout />

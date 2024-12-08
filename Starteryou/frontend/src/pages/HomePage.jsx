@@ -13,7 +13,7 @@ import Pricing from "../components/Landing/Pricing";
 import UpcomingFeatures from "../components/Landing/UpcomingFeatures";
 import InProgressPage from "../components/Common/InProgressPage";
 export default function HomePage() {
-  const deployReady = false;
+  const deployReady = true;
   return deployReady ? (
     <div>
       <Hero />
