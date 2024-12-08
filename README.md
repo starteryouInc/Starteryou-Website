@@ -2,7 +2,7 @@
 
 [![Deploy to AWS EC2s](https://github.com/starteryouInc/Starteryou-Website/actions/workflows/develop.yml/badge.svg?branch=develop)](https://github.com/starteryouInc/Starteryou-Website/actions/workflows/develop.yml)
 
-[![Deploy to AWS EC2-PROD-SERVER](https://github.com/starteryouInc/Starteryou-Website/actions/workflows/main.yml/badge.svg)](https://github.com/starteryouInc/Starteryou-Website/actions/workflows/main.yml)
+[![Deploy to AWS EC2-PROD-SERVER](https://github.com/starteryouInc/Starteryou-Website/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/starteryouInc/Starteryou-Website/actions/workflows/main.yml)
 
 Welcome to the Starteryou Website repository! This project is the official platform for StarterYou Inc., aimed at connecting high school and college students with part-time job opportunities, internships, and more. The platform is scalable, responsive, and built to serve the needs of students and employers alike.
 
