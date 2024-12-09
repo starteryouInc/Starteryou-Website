@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { FiEdit2 } from "react-icons/fi";
 import { useNavigation } from "../../context/NavigationContext";
+import { API_CONFIG } from "@config/api";
 
 /**
  * The Team component displays a list of team members, their positions, names, and about text.
@@ -62,7 +63,7 @@ const Team = () => {
   const [teamMembers, setTeamMembers] = useState(initialData); // Holds team member data.
   const [editingIndex, setEditingIndex] = useState(null); // Tracks which team member is being edited.
   const [editingData, setEditingData] = useState(null); // Temporary state for edited data.
-
+  const page = "AboutPage"; // Specify the page name for the current component.
   /**
    * Fetches team member data from the backend and updates the state.
    * @async
@@ -78,9 +79,12 @@ const Team = () => {
           }
 
           try {
-            const response = await axios.get("http://localhost:3000/api/text", {
-              params: { component: member.position },
-            });
+            const response = await axios.get(
+              `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+              {
+                params: { page, component: member.position },
+              }
+            );
 
             if (response.data && response.data.component) {
               return {
@@ -98,8 +102,8 @@ const Team = () => {
               );
               return member;
             }
-          } catch (error) {
-            console.error(`Error fetching data for ${member.position}:`, error);
+          } catch {
+            console.error(`Error fetching data for ${member.position}:`);
             return member; // Return initial data if fetching fails.
           }
         });
@@ -123,21 +127,25 @@ const Team = () => {
     try {
       const member = editingData; // The member currently being edited.
       const payload = {
+        page: "AboutPage",
         component: member.position,
         content: member.name,
         paragraphs: [member.about],
       };
 
       // Sends a PUT request to save the edited data.
-      await axios.put(`http://localhost:3000/api/text`, payload);
+      await axios.put(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+        payload
+      );
 
       const updatedMembers = [...teamMembers];
       updatedMembers[index] = member; // Update the specific member in the state.
       setTeamMembers(updatedMembers);
 
       setEditingIndex(null); // Reset the editing index after save.
-    } catch (error) {
-      console.error("Error saving updated data:", error);
+    } catch {
+      console.error("Error saving updated data");
     }
   };
 

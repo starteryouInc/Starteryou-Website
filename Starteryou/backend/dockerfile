@@ -1,50 +1,39 @@
-# backend/Dockerfile
+# Use Node.js base image
 FROM node:18-alpine
 
-# Install necessary build tools and copy tools
+# Install necessary tools
 RUN apk add --no-cache python3 make g++ openssh-client
 
-# Create app directory
+# Set working directory
 WORKDIR /usr/src/app
 
-# Copy package files first for better caching
+# Copy package files and install dependencies
 COPY package*.json ./
 
-# Install all dependencies
-RUN npm install --only=production
+# Install all dependencies (including devDependencies)
+RUN npm install
 
-# Create directories for SSL certificates and ensure proper permissions
-RUN mkdir -p /etc/ssl/mongodb /usr/src/app/uploads \
-    && chmod 755 /etc/ssl/mongodb \
-    && chmod 755 /usr/src/app/uploads
+# Install nodemon globally for development
+RUN npm install -g nodemon
 
-# Copy .env file explicitly
-COPY .env* ./
+# Create uploads directory
+RUN mkdir -p /usr/src/app/uploads && chmod 755 /usr/src/app/uploads
 
-# Copy application source
+# Copy application source code
 COPY . .
 
-# Expose port
+# Expose the application port
 EXPOSE 3000
 
-# Set default environment variables
+# Set environment variables for TLS paths
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV MONGO_TLS_CA=C:/Users/niksh/OneDrive/Desktop/keys/server.pem
+ENV MONGO_TLS_CERT=C:/Users/niksh/OneDrive/Desktop/keys/server.pem
 
-# Explicitly set TLS paths
-ENV MONGO_TLS_CERT=/etc/ssl/mongodb/server.pem
-ENV MONGO_TLS_CA=/etc/ssl/mongodb/ca.crt
-
-# Volume for uploads
-VOLUME ["/usr/src/app/uploads"]
-
-# Health check
+# Healthcheck
 HEALTHCHECK --interval=30s --timeout=3s \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/status || exit 1
 
-# Debug step to verify environment
-RUN echo "Listing .env file:" && ls -l .env* || true
-RUN echo "Showing non-sensitive .env contents:" && cat .env | grep -v -E "PASSWORD|SECRET|TOKEN" || true
-
-# Start command with potential environment debugging
-CMD ["sh", "-c", "echo 'Environment Variables:' && env | sort && node server.js"]
+# Start the application
+CMD ["nodemon", "server.js"]

@@ -1,89 +1,62 @@
-version: "3.8"
 services:
+  sshtunnel:
+    image: alpine:latest
+    container_name: sshtunnel
+    entrypoint: >
+      sh -c "
+      apk add --no-cache openssh &&
+      ssh-keyscan -H ${DB_EC2_HOST} >> /etc/ssh/ssh_known_hosts &&
+      ssh -o ExitOnForwardFailure=yes -N -L 27017:localhost:27017 ${DB_EC2_USER}@${DB_EC2_HOST} -i /root/db_key.pem
+      "
+    environment:
+      DB_EC2_HOST: ${DB_EC2_HOST}
+      DB_EC2_USER: ${DB_EC2_USER}
+    volumes:
+      - ./db_key.pem:/root/db_key.pem:ro
+    restart: always
+    healthcheck:
+      test: ["CMD", "pgrep", "ssh"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: starteryou-backend
     restart: unless-stopped
-    
-    # Multiple environment loading methods
     env_file:
       - .env
-    
     environment:
-      # Core environment configuration
-      - NODE_ENV=production
-      - PORT=3000
-      
-      # Frontend-related URLs
-      - FRONTEND_URL=http://54.196.202.145:8080
-      - VITE_BACKEND_URL=http://54.196.202.145:3000
-      
-      # MongoDB Configuration with fallback to .env
-      - MONGO_USER=${MONGO_USER:-${MONGO_USER}}
-      - MONGO_PASSWORD=${MONGO_PASSWORD:-${MONGO_PASSWORD}}
-      - MONGO_HOST=${MONGO_HOST:-${MONGO_HOST}}
-      - MONGO_PORT=${MONGO_PORT:-${MONGO_PORT}}
-      - MONGO_DB=${MONGO_DB:-${MONGO_DB}}
-      - MONGO_TLS_CERT=${MONGO_TLS_CERT:-${MONGO_TLS_CERT}}
-      - MONGO_TLS_CA=${MONGO_TLS_CA:-${MONGO_TLS_CA}}
-    
-    # Enhanced volume mappings
+      NODE_ENV: production
+      PORT: 3000
+      FRONTEND_URL: http://dev.starteryou.com:8080
+      VITE_BACKEND_URL: http://dev.starteryou.com:3000
+      MONGO_TLS: "true"
+      MONGO_HOST: localhost
+      MONGO_PORT: 27017
+      MONGO_TLS_CA: /certificates/ca.crt
+      MONGO_TLS_CERT: /certificates/server.pem
     volumes:
-      # Bind mount the entire backend directory
+      - /etc/ssl/mongodb/ca.crt:/certificates/ca.crt:ro
+      - /etc/ssl/mongodb/server.pem:/certificates/server.pem:ro
       - ./backend:/usr/src/app
-      
-      # Mount SSL keys and certificates
-      - ./keys:/usr/src/app/keys
-      
-      # Persistent node_modules
-      - /usr/src/app/node_modules
-      
-      # Explicitly mount .env file
-      - ./.env:/usr/src/app/.env
-      
-      # Mount SSL certificates
-      - /etc/ssl/mongodb:/etc/ssl/mongodb:ro
-      
-      # Uploads volume
       - ./backend/uploads:/usr/src/app/uploads
-    
     ports:
       - "3000:3000"
-    
     networks:
-      - starteryou-network
-    
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    
+      - backend-network
     depends_on:
-      - tunnel
-    
-    # Optional healthcheck
+      sshtunnel:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--spider", "http://localhost:3000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
-
-  tunnel:
-    image: alpine:latest
-    container_name: ssh-tunnel
-    command: >
-      sh -c "apk add --no-cache openssh &&
-             chmod 600 /keys/myKey.pem &&
-             mkdir -p ~/.ssh &&
-             ssh-keyscan 52.207.194.195 >> ~/.ssh/known_hosts &&
-             ssh -N -L 27017:localhost:27017 ec2-user@52.207.194.195 -i /keys/myKey.pem"
-    restart: always
-    networks:
-      - starteryou-network
-    volumes:
-      - ./keys:/keys
-      - /etc/ssl/mongodb:/etc/ssl/mongodb:ro,z
+      start_period: 30s
 
   frontend:
     build:
@@ -94,12 +67,12 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - BACKEND_URL=http://54.196.202.145:3000
+      BACKEND_URL: http://dev.starteryou.com:3000
     depends_on:
       - backend
     networks:
-      - starteryou-network
+      - backend-network
 
 networks:
-  starteryou-network:
+  backend-network:
     driver: bridge

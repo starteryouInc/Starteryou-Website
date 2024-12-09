@@ -17,22 +17,34 @@ const TextContent = require("../models/TextContent"); // Adjust path as needed
  * @throws {500} If a server error occurs during retrieval.
  */
 router.get("/text", async (req, res) => {
-  const { component } = req.query;
+  const { page, component } = req.query;
 
-  if (!component) {
-    return res
-      .status(400)
-      .json({ message: "Component name is required in the query parameters." });
+  if (!page) {
+    return res.status(400).json({
+      message: "'page' is required in query parameters.",
+    });
   }
 
   try {
-    const content = await TextContent.findOne({ component });
-    if (!content) {
-      return res
-        .status(404)
-        .json({ message: "Content not found for the specified component." });
+    // If a component is provided, fetch specific content for the given page and component
+    if (component) {
+      const content = await TextContent.findOne({ page, component });
+      if (!content) {
+        return res.status(404).json({
+          message: "Content not found for the specified page and component.",
+        });
+      }
+      return res.json(content);
     }
-    res.json(content);
+
+    // If no component is provided, fetch all content for the given page
+    const content = await TextContent.find({ page });
+    if (!content || content.length === 0) {
+      return res.status(404).json({
+        message: `No content found for the specified page: ${page}`,
+      });
+    }
+    return res.json(content);
   } catch (error) {
     console.error("Error retrieving content:", error);
     res.status(500).json({
@@ -53,12 +65,12 @@ router.get("/text", async (req, res) => {
  * @throws {500} If a server error occurs during the update process.
  */
 router.put("/text", async (req, res) => {
-  const { component, content, paragraphs } = req.body;
+  const { page, component, content, paragraphs } = req.body;
 
-  if (!component) {
-    return res
-      .status(400)
-      .json({ message: "Component name is required in the request body." });
+  if (!page || !component) {
+    return res.status(400).json({
+      message: "Both 'page' and 'component' are required in the request body.",
+    });
   }
   if (content === undefined && !Array.isArray(paragraphs)) {
     return res.status(400).json({
@@ -68,9 +80,9 @@ router.put("/text", async (req, res) => {
   }
 
   try {
-    let textContent = await TextContent.findOne({ component });
+    let textContent = await TextContent.findOne({ page, component });
     if (!textContent) {
-      textContent = new TextContent({ component });
+      textContent = new TextContent({ page, component });
     }
 
     if (content !== undefined) {
@@ -78,11 +90,7 @@ router.put("/text", async (req, res) => {
     }
 
     if (Array.isArray(paragraphs)) {
-      if (paragraphs.length > 0) {
-        textContent.paragraphs = paragraphs;
-      } else {
-        console.warn("Empty paragraphs array provided.");
-      }
+      textContent.paragraphs = paragraphs;
     }
 
     await textContent.save();
@@ -106,20 +114,23 @@ router.put("/text", async (req, res) => {
  * @throws {500} If a server error occurs during deletion.
  */
 router.delete("/text", async (req, res) => {
-  const { component } = req.query;
+  const { page, component } = req.query;
 
-  if (!component) {
-    return res
-      .status(400)
-      .json({ message: "Component name is required in query parameters." });
+  if (!page || !component) {
+    return res.status(400).json({
+      message: "Both 'page' and 'component' are required in query parameters.",
+    });
   }
 
   try {
-    const deletedContent = await TextContent.findOneAndDelete({ component });
+    const deletedContent = await TextContent.findOneAndDelete({
+      page,
+      component,
+    });
     if (!deletedContent) {
-      return res
-        .status(404)
-        .json({ message: "No content found for the specified component." });
+      return res.status(404).json({
+        message: "No content found for the specified page and component.",
+      });
     }
     res.json({ message: "Content deleted successfully." });
   } catch (error) {

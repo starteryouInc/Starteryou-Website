@@ -5,9 +5,10 @@ import OurVision from "../components/About/OurVision";
 import Team from "../components/About/Team";
 import TechTeam from "../components/About/TechTeam";
 import Contact from "../components/Landing/Contact";
-
+import InProgressPage from "../components/Common/InProgressPage";
 export default function AboutPage() {
-  return (
+  const deployReady = true;
+  return deployReady ? (
     <div>
       <HeroAbout />
       <BetterFuture />
@@ -17,5 +18,7 @@ export default function AboutPage() {
       <TechTeam />
       <Contact />
     </div>
+  ) : (
+    <InProgressPage />
   );
 }

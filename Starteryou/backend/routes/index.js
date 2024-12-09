@@ -231,8 +231,14 @@ const apiEndpoints = [
       {
         method: "GET",
         path: "/api/text",
-        description: "Retrieve text content for a specific component",
+        description: "Retrieve text content for a specific page and component",
         parameters: {
+          page: {
+            in: "query",
+            required: true,
+            type: "string",
+            description: "Name of the page to retrieve content for",
+          },
           component: {
             in: "query",
             required: true,
@@ -244,6 +250,7 @@ const apiEndpoints = [
           200: {
             description: "Content retrieved successfully",
             content: {
+              page: "string",
               component: "string",
               content: "string",
               paragraphs: ["string"],
@@ -252,26 +259,33 @@ const apiEndpoints = [
             },
           },
           400: {
-            description: "Missing component parameter",
+            description: "Missing page or component parameter",
           },
           404: {
-            description: "Content not found for the specified component",
+            description:
+              "Content not found for the specified page and component",
           },
           500: {
             description: "Server error during retrieval",
           },
         },
         example: {
-          curl: 'curl "http://localhost:5000/api/text?component=OurMission"',
+          curl: 'curl "http://localhost:5000/api/text?page=AboutPage&component=HeroAbout"',
         },
       },
       {
         method: "PUT",
         path: "/api/text",
-        description: "Update or create text content for a specific component",
+        description:
+          "Update or create text content for a specific page and component",
         requestBody: {
           type: "application/json",
           fields: {
+            page: {
+              type: "string",
+              required: true,
+              description: "Name of the page to update",
+            },
             component: {
               type: "string",
               required: true,
@@ -293,6 +307,7 @@ const apiEndpoints = [
           200: {
             description: "Content updated successfully",
             content: {
+              page: "string",
               component: "string",
               content: "string",
               paragraphs: ["string"],
@@ -308,16 +323,23 @@ const apiEndpoints = [
           },
         },
         example: {
-          curl: `curl -X PUT http://localhost:5000/api/text \
-          -H "Content-Type: application/json" \
-          -d '{"component": "OurMission", "content": "New content here", "paragraphs": ["Updated paragraph 1", "Updated paragraph 2"]}'`,
+          curl:
+            "curl -X PUT http://localhost:5000/api/text \\\n" +
+            '-H "Content-Type: application/json" \\\n' +
+            '-d \'{"page": "AboutPage", "component": "HeroAbout", "content": "New content here", "paragraphs": ["Updated paragraph 1", "Updated paragraph 2"]}\'',
         },
       },
       {
         method: "DELETE",
         path: "/api/text",
-        description: "Delete text content for a specific component",
+        description: "Delete text content for a specific page and component",
         parameters: {
+          page: {
+            in: "query",
+            required: true,
+            type: "string",
+            description: "Name of the page to delete content from",
+          },
           component: {
             in: "query",
             required: true,
@@ -330,17 +352,18 @@ const apiEndpoints = [
             description: "Content deleted successfully",
           },
           400: {
-            description: "Missing component parameter",
+            description: "Missing page or component parameter",
           },
           404: {
-            description: "Content not found for the specified component",
+            description:
+              "Content not found for the specified page and component",
           },
           500: {
             description: "Server error during deletion",
           },
         },
         example: {
-          curl: 'curl -X DELETE "http://localhost:5000/api/text?component=OurMission"',
+          curl: 'curl -X DELETE "http://localhost:5000/api/text?page=AboutPage&component=HeroAbout"',
         },
       },
     ],

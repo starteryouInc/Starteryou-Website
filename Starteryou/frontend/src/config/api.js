@@ -8,6 +8,7 @@ export const API_CONFIG = {
     fileUpdate: (title) => `/api/files/update/${title}`,
     fileDelete: (title) => `/api/files/delete/${title}`,
     fileList: "/api/files/list",
-    fileCleanup: "/api/files/cleanup"
-  }
+    fileCleanup: "/api/files/cleanup",
+    textApi: "/api/text",
+  },
 };

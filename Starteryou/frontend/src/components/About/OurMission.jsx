@@ -17,7 +17,7 @@ import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
-
+import { API_CONFIG } from "@config/api";
 /**
  * OurMission component to manage and display the mission statement.
  *
@@ -38,6 +38,7 @@ const OurMission = () => {
   const [isEditing, setIsEditing] = useState(false); // Edit mode state
   const { isAdmin } = useNavigation(); // Check if the user is an admin
   const [error, setError] = useState(""); // Error state for API actions
+  const page = "AboutPage"; // Specify the page name for the current component.
 
   /**
    * Fetches mission content from the server.
@@ -47,9 +48,12 @@ const OurMission = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/text", {
-          params: { component: "OurMission" },
-        });
+        const response = await axios.get(
+          `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+          {
+            params: { page, component: "OurMission" },
+          }
+        );
 
         if (response.data) {
           setTitle(response.data.content || "Our Mission");
@@ -59,9 +63,9 @@ const OurMission = () => {
               : "Your description paragraph here."
           );
         }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setError("Error fetching mission content. Please try again later.");
+      } catch {
+        console.error("Error fetching data");
+        setError("Error fetching content. Please try again later.");
       }
     };
 
@@ -112,7 +116,8 @@ const OurMission = () => {
         ? paragraph
         : [paragraph.trim()]; // Ensure paragraphs are stored as an array
 
-      await axios.put("http://localhost:3000/api/text", {
+      await axios.put(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`, {
+        page: "AboutPage",
         component: "OurMission",
         content: title.trim(),
         paragraphs: normalizedParagraphs,
@@ -193,8 +198,6 @@ const OurMission = () => {
           {isAdmin && <FileUpload handleFileChange={handleFileChange} />}
         </div>
       </div>
-      {/* Error message */}
-      {error && <p className="text-red-500 text-center mt-4">{error}</p>}
     </div>
   );
 };

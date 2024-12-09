@@ -1,6 +1,6 @@
 import { useState } from "react";
-import FileUpload from "../Common/FileUpload";
-import { useNavigation } from "../../context/NavigationContext";
+import FileUpload from "../../Common/FileUpload";
+import { useNavigation } from "../../../context/NavigationContext";
 
 const LatestInsight = () => {
   const { isAdmin } = useNavigation();

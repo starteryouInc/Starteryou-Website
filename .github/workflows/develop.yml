@@ -1,4 +1,5 @@
-name: Deploy to AWS EC2
+name: Deploy to AWS EC2-DEV-SERVER
+
 on:
   push:
     branches:
@@ -7,121 +8,117 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
+      # Step 1: Checkout Code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
+      # Step 2: Fetch Certificates from DB Server
+      - name: Fetch Certificates from DB Server
+        env:
+          DB_EC2_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
+          DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}
+          DB_EC2_USER: ${{ secrets.DB_EC2_USER }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+        run: |
+          set -e
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          # Create db_key.pem for accessing DB server
+          echo "$DB_EC2_SSH_KEY" > ~/.ssh/db_key.pem
+          chmod 600 ~/.ssh/db_key.pem
+          ssh-keyscan -H $DB_EC2_HOST >> ~/.ssh/known_hosts
 
+          echo "Fetching certificates from DB server..."
+          ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo cat /etc/ssl/mongodb/ca.crt" > ./ca.crt
+          ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo cat /etc/ssl/mongodb/server.pem" > ./server.pem
+
+          # Transfer db_key.pem to the target EC2 server
+          echo "Transferring db_key.pem to EC2 server..."
+          echo "$EC2_SSH_KEY" > ~/.ssh/ec2_key.pem
+          chmod 600 ~/.ssh/ec2_key.pem
+          ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+          scp -i ~/.ssh/ec2_key.pem ~/.ssh/db_key.pem $EC2_USER@$EC2_HOST:/tmp/db_key.pem
+
+      # Step 3: Transfer Certificates to Target EC2 Server
+      - name: Transfer Certificates to Target EC2
+        env:
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+        run: |
+          set -e
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+          echo "$EC2_SSH_KEY" > ~/.ssh/ec2_key.pem
+          chmod 600 ~/.ssh/ec2_key.pem
+
+          echo "Transferring certificates to EC2 server..."
+          scp -i ~/.ssh/ec2_key.pem ./ca.crt $EC2_USER@$EC2_HOST:/tmp/ca.crt
+          scp -i ~/.ssh/ec2_key.pem ./server.pem $EC2_USER@$EC2_HOST:/tmp/server.pem
+
+      # Step 4: Deploy Application on Target EC2 Server
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            #!/bin/bash
             set -e
-            set -o pipefail
+            sudo mkdir -p /etc/ssl/mongodb
+            sudo mv /tmp/ca.crt /etc/ssl/mongodb/ca.crt
+            sudo mv /tmp/server.pem /etc/ssl/mongodb/server.pem
+            sudo mv /tmp/db_key.pem /etc/ssl/mongodb/db_key.pem
+            sudo chmod 600 /etc/ssl/mongodb/*
 
-            # Logging function
-            log() {
-              echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"
-            }
-
-            # Error handling function
-            handle_error() {
-              log "Error occurred on line $1"
-              exit 1
-            }
-            trap 'handle_error $LINENO' ERR
-
-            # Project configuration
             PROJECT_ROOT="/home/ec2-user/Starteryou-Website"
             REPO_DIR="${PROJECT_ROOT}/Starteryou"
             ENV_FILE="${REPO_DIR}/.env"
 
-            # Ensure project root exists
-            log "Ensuring project root directory exists..."
             mkdir -p "$PROJECT_ROOT"
             cd "$PROJECT_ROOT"
 
-            # Repository management
-            log "Managing repository..."
             if [ ! -d "$REPO_DIR" ]; then
-              log "Repository not found. Cloning..."
               git clone https://github.com/starteryouInc/Starteryou-Website.git -b develop Starteryou
             else
-              log "Repository found. Updating..."
               cd "$REPO_DIR"
               git fetch origin develop
               git reset --hard origin/develop
             fi
 
-            # Verify repository
-            log "Verifying repository contents..."
-            cd "$REPO_DIR"
-            pwd
-            ls -la
-
-            # Create .env file securely
-            log "Creating .env file..."
-            rm -f "$ENV_FILE"
-            touch "$ENV_FILE"
-            chmod 600 "$ENV_FILE"
-
-            # Write environment variables
-            log "Writing environment variables..."
+            echo "Generating .env file..."
             cat > "$ENV_FILE" << EOF
-            # Application Environment
             NODE_ENV=production
-
-            # MongoDB Configuration
+            PORT=3000
+            FRONTEND_URL=http://dev.starteryou.com:8080
+            VITE_BACKEND_URL=http://dev.starteryou.com:3000
             MONGO_USER=${{ secrets.MONGO_USER }}
             MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
-            MONGO_HOST=${{ secrets.MONGO_HOST }}
-            MONGO_PORT=${{ secrets.MONGO_PORT }}
+            MONGO_HOST=localhost
+            MONGO_PORT=27017
             MONGO_DB=${{ secrets.MONGO_DB }}
-            MONGO_TLS_CA=${{ secrets.MONGO_TLS_CA }}
-            MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}
-
-            # Additional Environment Variables can be added here
-            # EXAMPLE_VAR=example_value
+            MONGO_AUTH_SOURCE=${{ secrets.MONGO_AUTH_SOURCE }}
+            MONGO_TLS=true
+            MONGO_TLS_CA=/etc/ssl/mongodb/ca.crt
+            MONGO_TLS_CERT=/etc/ssl/mongodb/server.pem
+            MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}
+            DB_EC2_HOST=${{ secrets.DB_EC2_HOST }}
+            DB_EC2_USER=${{ secrets.DB_EC2_USER }}
             EOF
 
-            # Verify .env file
-            log "Verifying .env file..."
-            ls -l "$ENV_FILE"
-            echo "Environment file contents (without sensitive data):"
-            grep -v -E "MONGO_PASSWORD|MONGO_TLS_CA|MONGO_TLS_CERT" "$ENV_FILE"
+            # Source the .env file to make variables available to the session
+            set -a
+            source "$ENV_FILE"
+            set +a
 
-            # Ensure Docker is running
-            log "Ensuring Docker is running..."
-            sudo systemctl start docker || sudo systemctl restart docker
+            chmod 600 "$ENV_FILE"
 
-            # Clean up old containers and resources
-            log "Cleaning up old Docker resources..."
+            echo "Deploying Docker services..."
             docker-compose down --volumes --remove-orphans
-            docker system prune -af --volumes
-
-            # Rebuild and start application
-            log "Rebuilding and starting application..."
-            docker-compose up -d --build
-
-            # Verify containers
-            log "Verifying running containers..."
-            docker ps
-
-            log "Deployment completed successfully!"
+            docker-compose up --build -d
