@@ -1,6 +1,6 @@
 // config/api.js
 export const API_CONFIG = {
-  baseURL: "http://54.196.202.145:3000",
+  baseURL: "http://localhost:3000",
   endpoints: {
     fileByTitle: (title) => `/api/files/download/${title}`,
     fileUpload: "/api/files/upload",
