@@ -1,9 +1,9 @@
-name: Deploy to AWS EC2
+name: Deploy to AWS EC2-PROD-SERVER
 
 on:
   push:
     branches:
-      - develop
+      - main
 
 jobs:
   deploy:
@@ -11,32 +11,112 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - name: Stop and Remove All Containers
+        uses: appleboy/ssh-action@v0.1.7
         with:
-          node-version: "18"
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
+          host: ${{ secrets.PROD_EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/ec2-user/RevampUI/Starteryou
-            git pull origin main
-            docker-compose down
-            docker system prune -af
-            docker-compose up -d --build
-            docker ps
-            docker logs starteryou-backend
-            docker logs starteryou-frontend
+            echo "Stopping and removing all containers..."
+            docker ps -aq | xargs -r docker stop || echo "No running containers to stop."
+            docker ps -aq | xargs -r docker rm || echo "No containers to remove."
+
+      - name: Free Ports 80 and 443
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.PROD_EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "Freeing ports 80 and 443..."
+            for PORT in 80 443; do
+              PID=$(sudo lsof -t -i:$PORT)
+              if [ -n "$PID" ]; then
+                echo "Port $PORT is in use by process $PID. Killing it..."
+                sudo kill -9 $PID || echo "Failed to kill process $PID."
+              else
+                echo "Port $PORT is free."
+              fi
+            done
+
+      - name: Fetch Certificates from DB Server
+        env:
+          DB_EC2_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
+          DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}
+          DB_EC2_USER: ${{ secrets.DB_EC2_USER }}
+        run: |
+          set -e
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan -H $DB_EC2_HOST >> ~/.ssh/known_hosts
+          echo "$DB_EC2_SSH_KEY" > ~/.ssh/db_key.pem
+          chmod 600 ~/.ssh/db_key.pem
+          ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo cat /etc/ssl/mongodb/ca.crt" > ./ca.crt
+          ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo cat /etc/ssl/mongodb/server.pem" > ./server.pem
+
+      - name: Transfer Certificates to Target EC2
+        env:
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_HOST: ${{ secrets.PROD_EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+        run: |
+          set -e
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+          echo "$EC2_SSH_KEY" > ~/.ssh/ec2_key.pem
+          chmod 600 ~/.ssh/ec2_key.pem
+          echo "Transferring certificates to EC2 server..."
+          scp -i ~/.ssh/ec2_key.pem ./ca.crt $EC2_USER@$EC2_HOST:/tmp/ca.crt
+          scp -i ~/.ssh/ec2_key.pem ./server.pem $EC2_USER@$EC2_HOST:/tmp/server.pem
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.PROD_EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            sudo mkdir -p /etc/ssl/mongodb
+            sudo mv /tmp/ca.crt /etc/ssl/mongodb/ca.crt
+            sudo mv /tmp/server.pem /etc/ssl/mongodb/server.pem
+            sudo chmod 600 /etc/ssl/mongodb/*
+            PROJECT_ROOT="/home/ec2-user/Starteryou-Website"
+            REPO_DIR="${PROJECT_ROOT}/Starteryou"
+            ENV_FILE="${REPO_DIR}/.env"
+            mkdir -p "$PROJECT_ROOT"
+            cd "$PROJECT_ROOT"
+            if [ ! -d "$REPO_DIR" ]; then
+              git clone https://github.com/starteryouInc/Starteryou-Website.git -b main Starteryou
+            else
+              cd "$REPO_DIR"
+              git fetch origin main
+              git reset --hard origin/main
+            fi
+            echo "Generating .env file..."
+            cat > "$ENV_FILE" << EOF
+            NODE_ENV=production
+            PORT=3000
+            FRONTEND_URL=https://starteryou.com
+            VITE_BACKEND_URL=https://starteryou.com
+            MONGO_USER=${{ secrets.MONGO_USER }}
+            MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
+            MONGO_HOST=localhost
+            MONGO_PORT=27017
+            MONGO_DB=${{ secrets.MONGO_DB }}
+            MONGO_AUTH_SOURCE=${{ secrets.MONGO_AUTH_SOURCE }}
+            MONGO_TLS=true
+            MONGO_TLS_CA=/etc/ssl/mongodb/ca.crt
+            MONGO_TLS_CERT=/etc/ssl/mongodb/server.pem
+            MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}
+            EOF
+            set -a
+            source "$ENV_FILE"
+            set +a
+            chmod 600 "$ENV_FILE"
+            docker-compose down --volumes --remove-orphans
+            docker-compose up --build -d
