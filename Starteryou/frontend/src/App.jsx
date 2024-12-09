@@ -25,6 +25,8 @@ import Signup from "./components/Auth/Signup";
 import InProgressPage from "./components/Common/InProgressPage";
 import JobPageBefore from "./pages/JobPageBefore"; // Ensure this file exists in the "pages" directory.
 import JobPageAfter from "./pages/JobPageAfter"; // Ensure this file exists in the "pages" directory.
+import JobFeedPage from "./pages/JobFeedPage";
+import NewsLetter from "./components/Common/NewsLetter";
 
 const Layout = () => {
   const location = useLocation();
@@ -48,6 +50,9 @@ const Layout = () => {
         <Route path="/InProgressPage" element={<InProgressPage />} />
         <Route path="/job2" element={<JobPageAfter />} />
 
+        {/* New Job Feed Page ( IN PROGRESS )*/}
+        <Route path="/jobfeeds" element={<JobFeedPage />} />
+
         {/* Admin Protected Routes */}
         <Route
           path="/admin"
@@ -70,6 +75,11 @@ const Layout = () => {
           element={<AdminProtectedRoute element={<JobPageAfter />} />}
         />
       </Routes>
+
+      {/* New Letter has beeen installed in the website ( IN PROGRESS ) */}
+      <div className="flex justify-center items-center">
+        {location.pathname !== "/login" && <NewsLetter />}
+      </div>
       {location.pathname !== "/login" && <Footer />}
     </div>
   );
