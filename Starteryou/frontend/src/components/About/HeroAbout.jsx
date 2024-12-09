@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
 import { useNavigation } from "../../context/NavigationContext";
-// import { API_CONFIG } from "@config/api";
+import { API_CONFIG } from "@config/api";
 /**
  * HeroAbout component that displays and allows editing of a title and paragraph content.
  * The component is primarily for admins who can edit the content, while others can only view it.
@@ -19,9 +19,12 @@ const HeroAbout = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:3000", {
-          params: { page, component: "HeroAbout" },
-        });
+        const response = await axios.get(
+          `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+          {
+            params: { page, component: "HeroAbout" },
+          }
+        );
 
         if (response.data) {
           setTitle(response.data.content || "Your Hero Title Here");
@@ -49,7 +52,7 @@ const HeroAbout = () => {
         ? paragraph
         : [paragraph.trim()];
 
-      await axios.put("http://localhost:3000", {
+      await axios.put(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`, {
         page: "AboutPage",
         component: "HeroAbout",
         content: title.trim(),
