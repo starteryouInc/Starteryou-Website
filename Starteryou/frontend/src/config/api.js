@@ -9,5 +9,6 @@ export const API_CONFIG = {
     fileDelete: (title) => `/api/files/delete/${title}`,
     fileList: "/api/files/list",
     fileCleanup: "/api/files/cleanup",
+    textApi: "/api/text",
   },
 };

@@ -19,7 +19,7 @@ const HeroAbout = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://dev.starteryou.com:3000", {
+        const response = await axios.get("http://localhost:3000", {
           params: { page, component: "HeroAbout" },
         });
 
@@ -49,7 +49,7 @@ const HeroAbout = () => {
         ? paragraph
         : [paragraph.trim()];
 
-      await axios.put("http://dev.starteryou.com:3000", {
+      await axios.put("http://localhost:3000", {
         page: "AboutPage",
         component: "HeroAbout",
         content: title.trim(),
