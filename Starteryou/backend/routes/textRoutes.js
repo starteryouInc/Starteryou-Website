@@ -2,11 +2,21 @@
  * @fileoverview API routes for managing text content associated with specific components.
  * Contains endpoints for retrieving, updating, and deleting text content stored in the database.
  */
-
+const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
 const TextContent = require("../models/TextContent"); // Adjust path as needed
+const mongoUser = encodeURIComponent(process.env.MONGO_USER);
+const mongoPassword = encodeURIComponent(process.env.MONGO_PASSWORD);
+const mongoHost = process.env.MONGO_HOST;
+const mongoPort = process.env.MONGO_PORT;
+const mongoDb = process.env.MONGO_DB;
+const mongoAuthSource = process.env.MONGO_AUTH_SOURCE;
+const mongoTls = process.env.MONGO_TLS === "true";
+const mongoTlsCert = process.env.MONGO_TLS_CERT;
+const mongoTlsCa = process.env.MONGO_TLS_CA;
 
+const mongoUri = `mongodb://${mongoUser}:${mongoPassword}@${mongoHost}:${mongoPort}/${mongoDb}?authSource=${mongoAuthSource}&tls=${mongoTls}&tlsCertificateKeyFile=${mongoTlsCert}&tlsCAFile=${mongoTlsCa}`;
 /**
  * @route GET /api/text
  * @description Retrieves text content for a specific component.
