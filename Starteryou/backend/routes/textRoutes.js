@@ -28,40 +28,22 @@ router.get("/text", async (req, res) => {
   console.log("Fetching content for:", { page, component }); // Logging for debugging
 
   try {
-    // Check MongoDB connection
-    if (!mongoose.connection.readyState) {
-      return res.status(500).json({
-        message: "MongoDB connection lost or not ready.",
-      });
-    }
-
-    // If a component is provided, fetch specific content for the given page and component
-    if (component) {
-      const content = await TextContent.findOne({ page, component }).maxTimeMS(
-        10000
-      ); // Set max query time to 10 seconds
-      if (!content) {
-        return res.status(404).json({
-          message: "Content not found for the specified page and component.",
-        });
-      }
-      return res.json(content);
-    }
-
-    // If no component is provided, fetch all content for the given page
-    const content = await TextContent.find({ page }).maxTimeMS(10000); // Set max query time for all queries
-    if (!content || content.length === 0) {
+    const content = await TextContent.findOne({ page, component }).maxTimeMS(
+      10000
+    );
+    console.log("Content fetched:", content);
+    if (!content) {
       return res.status(404).json({
-        message: `No content found for the specified page: ${page}`,
+        message: "Content not found for the specified page and component.",
       });
     }
     return res.json(content);
   } catch (error) {
-    console.error("Error retrieving content:", error);
+    console.error("Error during query:", error);
     res.status(500).json({
       message: "An error occurred while retrieving content.",
       error: error.message,
-      stack: process.env.NODE_ENV === "development" ? error.stack : undefined, // Include stack trace in development
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
     });
   }
 });
