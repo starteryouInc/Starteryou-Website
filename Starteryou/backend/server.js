@@ -61,14 +61,17 @@ app.use(express.static(path.join(__dirname, "public")));
 
 //docs
 // Serve frontend docs
-app.use('/docs/frontend', express.static(path.join(__dirname, 'frontend/docs')));
+app.use(
+  "/docs/frontend",
+  express.static(path.join(__dirname, "frontend/docs"))
+);
 
 // Serve backend docs
-app.use('/docs/backend', express.static(path.join(__dirname, 'backend/docs')));
+app.use("/docs/backend", express.static(path.join(__dirname, "backend/docs")));
 
 // Optional: Serve a combined docs route
-app.use('/docs', (req, res) => {
-    res.redirect('/docs/frontend/index.html'); // Redirect to frontend docs by default
+app.use("/docs", (req, res) => {
+  res.redirect("/docs/frontend/index.html"); // Redirect to frontend docs by default
 });
 
 // API Request Logger Middleware
@@ -115,7 +118,7 @@ const connectWithRetry = () => {
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
       family: 4,
-      connectTimeoutMS: 10000,
+      connectTimeoutMS: 30000,
     })
     .then(() => {
       console.log("✅ MongoDB Connected Successfully!");
