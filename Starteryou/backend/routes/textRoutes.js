@@ -92,7 +92,10 @@ router.put("/text", async (req, res) => {
   }
 
   try {
-    let textContent = await TextContent.findOne({ page, component });
+    let textContent = await TextContent.findOne({ page, component }).maxTimeMS(
+      10000
+    ); // Set max query time to 10 seconds
+
     if (!textContent) {
       textContent = new TextContent({ page, component });
     }
