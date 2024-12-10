@@ -2,7 +2,7 @@
  * @fileoverview API routes for managing text content associated with specific components.
  * Contains endpoints for retrieving, updating, and deleting text content stored in the database.
  */
-
+const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
 const TextContent = require("../models/TextContent"); // Adjust path as needed
