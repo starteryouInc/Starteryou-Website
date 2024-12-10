@@ -118,7 +118,7 @@ const connectWithRetry = () => {
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
       family: 4,
-      connectTimeoutMS: 10000,
+      connectTimeoutMS: 30000,
     })
     .then(() => {
       console.log("✅ MongoDB Connected Successfully!");
