@@ -10,5 +10,6 @@ export const API_CONFIG = {
     fileList: "/api/files/list",
     fileCleanup: "/api/files/cleanup",
     textApi: "/api/text",
+    testApi: "/api",
   },
 };

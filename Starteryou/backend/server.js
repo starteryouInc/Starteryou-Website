@@ -5,6 +5,7 @@ const path = require("path");
 const { mountRoutes } = require("./routes"); // Main routes including API docs
 const fileRoutes = require("./routes/fileRoutes"); // File handling routes
 const textRoutes = require("./routes/textRoutes");
+const testRoutes = require("./routes/testRoutes");
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 require("dotenv").config(); // Load environment variables
 
@@ -91,6 +92,7 @@ app.use("/api/files", fileRoutes);
 app.use("/api/system", verificationRoutes);
 mountRoutes(app); // This mounts the main routes including API docs
 app.use("/api", textRoutes); // Add the prefix here
+app.use("/api", testRoutes); // Add the prefix here
 
 // MongoDB Connection Configuration
 mongoose.set("strictQuery", false);
