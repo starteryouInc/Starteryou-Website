@@ -37,8 +37,15 @@ jobs:
           ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo cat /etc/ssl/mongodb/ca.crt" > ./ca.crt
           ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo cat /etc/ssl/mongodb/server.pem" > ./server.pem
 
+          # Ensure db_key.pem exists before transferring
+          if [ -f ~/.ssh/db_key.pem ]; then
+            echo "db_key.pem exists. Transferring db_key.pem to EC2 server..."
+          else
+            echo "Error: db_key.pem does not exist!"
+            exit 1
+          fi
+
           # Transfer db_key.pem to the target EC2 server
-          echo "Transferring db_key.pem to EC2 server..."
           echo "$EC2_SSH_KEY" > ~/.ssh/ec2_key.pem
           chmod 600 ~/.ssh/ec2_key.pem
           ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
