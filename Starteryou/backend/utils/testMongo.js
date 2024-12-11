@@ -8,8 +8,8 @@ console.log("Loaded Environment Variables:", {
   mongoHost: process.env.MONGO_HOST,
   mongoPort: process.env.MONGO_PORT,
   mongoDb: process.env.MONGO_DB,
-  mongoAuthSource: process.env.MONGO_AUTH_SOURCE
-});  // Debugging line to ensure the environment variables are loaded
+  mongoAuthSource: process.env.MONGO_AUTH_SOURCE,
+}); // Debugging line to ensure the environment variables are loaded
 // Get the environment variables
 const mongoUser = encodeURIComponent(process.env.MONGO_USER);
 const mongoPassword = encodeURIComponent(process.env.MONGO_PASSWORD);
@@ -29,7 +29,7 @@ if (!mongoUser || !mongoPassword || !mongoHost || !mongoDb) {
 
 async function runTest() {
   // Build the MongoDB URI conditionally based on whether TLS is enabled
-  let mongoUri = `mongodb://${mongoUser}:${mongoPassword}@${mongoHost}:${mongoPort}/${mongoDb}?authSource=${mongoAuthSource}`;
+  let mongoUri = `mongodb://${mongoUser}:${mongoPassword}@${mongoHost}:${mongoPort}/${mongoDb}?authSource=${mongoAuthSource}&directConnection=true&serverSelectionTimeoutMS=2000`;
 
   if (mongoTls) {
     if (!mongoTlsCert || !mongoTlsCa) {
