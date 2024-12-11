@@ -29,6 +29,7 @@ if (!mongoUser || !mongoPassword || !mongoHost || !mongoDb) {
 
 async function runTest() {
   // Build the MongoDB URI conditionally based on whether TLS is enabled
+
   let mongoUri = `mongodb://${mongoUser}:${mongoPassword}@${mongoHost}:${mongoPort}/${mongoDb}?authSource=${mongoAuthSource}&directConnection=true&serverSelectionTimeoutMS=2000`;
 
   if (mongoTls) {
