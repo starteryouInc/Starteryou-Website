@@ -25,5 +25,5 @@ dist-ssr
 *.env
 
 # Docker files
-**/Dockerfile
-*.docker-compose.yml
+**/dockerfile
+**/.docker-compose.yml
