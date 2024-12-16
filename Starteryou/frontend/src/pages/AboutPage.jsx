@@ -6,7 +6,6 @@ import Team from "../components/About/Team";
 import TechTeam from "../components/About/TechTeam";
 import Contact from "../components/Landing/Contact";
 import InProgressPage from "../components/Common/InProgressPage";
-import TestComponent from "../components/About/TestComponent";
 export default function AboutPage() {
   const deployReady = true;
   return deployReady ? (
@@ -18,7 +17,6 @@ export default function AboutPage() {
       <Team />
       <TechTeam />
       <Contact />
-      <TestComponent />
     </div>
   ) : (
     <InProgressPage />
