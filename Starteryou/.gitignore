@@ -25,6 +25,6 @@ dist-ssr
 *.env
 
 # Docker files
-Frontend/dockerfile
-Backend/dockerfile
+frontend/dockerfile
+backend/dockerfile
 docker-compose.yml
