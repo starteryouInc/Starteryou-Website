@@ -9,12 +9,7 @@ WORKDIR /usr/src/app
 
 # Copy package files and install dependencies
 COPY package*.json ./
-
-# Install all dependencies (including devDependencies)
-RUN npm install
-
-# Install nodemon globally for development
-RUN npm install -g nodemon
+RUN npm install --only=production
 
 # Create uploads directory
 RUN mkdir -p /usr/src/app/uploads && chmod 755 /usr/src/app/uploads
@@ -28,8 +23,8 @@ EXPOSE 3000
 # Set environment variables for TLS paths
 ENV NODE_ENV=production
 ENV PORT=3000
-ENV MONGO_TLS_CA="C:/Users/MD ASIF SIDDIQUI/Desktop/Asif/ca.crt"
-ENV MONGO_TLS_CERT="C:/Users/MD ASIF SIDDIQUI/Desktop/Asif/server.pem"
+ENV MONGO_TLS_CA=/etc/ssl/mongodb/ca.crt
+ENV MONGO_TLS_CERT=/etc/ssl/mongodb/server.pem
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=3s \
