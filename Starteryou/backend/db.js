@@ -7,7 +7,7 @@ const maxRetries = 5;
 
 // Hardcoded MongoDB URI
 const mongoUri =
-  "mongodb://starteryouadmin:4mXq!9%40lPZ7gT8$h@52.207.194.195:27017/?authSource=admin&tls=true&tlsCertificateKeyFile=/certificates/server.pem&tlsCAFile=/certificates/ca.crt";
+  "this should be changed";
 
 mongoose.set("strictQuery", false);
 mongoose.set("debug", true);
