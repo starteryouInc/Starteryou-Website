@@ -27,6 +27,7 @@ import JobPageBefore from "./pages/JobPageBefore"; // Ensure this file exists in
 import JobPageAfter from "./pages/JobPageAfter"; // Ensure this file exists in the "pages" directory.
 import JobFeedPage from "./pages/JobFeedPage";
 import NewsLetter from "./components/Common/NewsLetter";
+import UserProfile from "./pages/UserProfile";
 
 const Layout = () => {
   const location = useLocation();
@@ -52,6 +53,9 @@ const Layout = () => {
 
         {/* New Job Feed Page ( IN PROGRESS )*/}
         <Route path="/jobfeeds" element={<JobFeedPage />} />
+        
+        {/* New User Profile Page ( IN PROGRESS ) */}
+        <Route path="/userprofile" element={<UserProfile/>}></Route>
 
         {/* Admin Protected Routes */}
         <Route

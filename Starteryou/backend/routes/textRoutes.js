@@ -16,56 +16,84 @@ const TextContent = require("../models/TextContent"); // Adjust path as needed
  * @throws {404} If no content is found for the specified component.
  * @throws {500} If a server error occurs during retrieval.
  */
-router.get("/text", async (req, res) => {
+// router.get("/text", async (req, res) => {
+//   const { page, component } = req.query;
+
+//   if (!page) {
+//     return res.status(400).json({
+//       message: "'page' is required in query parameters.",
+//     });
+//   }
+
+//   console.log("Fetching content for:", { page, component }); // Logging for debugging
+//   try {
+//     // Check MongoDB connection
+//     if (!mongoose.connection.readyState) {
+//       return res.status(500).json({
+//         message: "MongoDB connection lost or not ready.",
+//       });
+//     }
+
+//     // If a component is provided, fetch specific content for the given page and component
+//     if (component) {
+//       const content = await TextContent.findOne({ page, component }).maxTimeMS(
+//         10000
+//       );
+//       console.log("Found content:", content); // Log the content
+//       // Set max query time to 10 seconds
+//       if (!content) {
+//         return res.status(404).json({
+//           message: "Content not found for the specified page and component.",
+//         });
+//       }
+//       return res.json(content);
+//     }
+
+//     // If no component is provided, fetch all content for the given page
+//     const content = await TextContent.find({ page }).maxTimeMS(10000); // Set max query time for all queries
+//     if (!content || content.length === 0) {
+//       return res.status(404).json({
+//         message: `No content found for the specified page: ${page}`,
+//       });
+//     }
+//     return res.json(content);
+//   } catch (error) {
+//     console.error("Error retrieving content:", error);
+//     res.status(500).json({
+//       message: "An error occurred while retrieving content.",
+//       error: error.message,
+//       stack: process.env.NODE_ENV === "development" ? error.stack : undefined, // Include stack trace in development
+//     });
+//   }
+// });
+
+router.get('/text', async (req, res) => {
   const { page, component } = req.query;
 
-  if (!page) {
-    return res.status(400).json({
-      message: "'page' is required in query parameters.",
-    });
-  }
+  if(!page){ return res.status(400).json({ msg: "'page: ' parameter is required to fetch the content." }) };
 
-  console.log("Fetching content for:", { page, component }); // Logging for debugging
   try {
-    // Check MongoDB connection
-    if (!mongoose.connection.readyState) {
-      return res.status(500).json({
-        message: "MongoDB connection lost or not ready.",
-      });
+    if(mongoose.connection.readyState !== 1){
+      return res.status(500).json({ msg: "MongoDB connection is lost, trying to reconnect pls wait a while!" });
     }
 
-    // If a component is provided, fetch specific content for the given page and component
-    if (component) {
-      const content = await TextContent.findOne({ page, component }).maxTimeMS(
-        10000
-      );
-      console.log("Found content:", content); // Log the content
-      // Set max query time to 10 seconds
-      if (!content) {
+    if(component){
+      const content = await TextContent.find({page: page, component: component});
+      if(!content){ return res.status(404).json({msg: "Content not found for the specified page and component."}) }
+      return res.json({success: true, msg: "Found content with component", Data: content});
+    } else{
+      const content = await TextContent.find({page: page});
+      if (!content || content.length === 0) {
         return res.status(404).json({
-          message: "Content not found for the specified page and component.",
+          message: `No content found for the specified page: ${page}`,
         });
       }
-      return res.json(content);
+      return res.json({success: true, msg: "Found content with out component", Data: content});
     }
-
-    // If no component is provided, fetch all content for the given page
-    const content = await TextContent.find({ page }).maxTimeMS(10000); // Set max query time for all queries
-    if (!content || content.length === 0) {
-      return res.status(404).json({
-        message: `No content found for the specified page: ${page}`,
-      });
-    }
-    return res.json(content);
   } catch (error) {
-    console.error("Error retrieving content:", error);
-    res.status(500).json({
-      message: "An error occurred while retrieving content.",
-      error: error.message,
-      stack: process.env.NODE_ENV === "development" ? error.stack : undefined, // Include stack trace in development
-    });
+    res.status(500).json({msg: 'Not able to fetched the data!'})
   }
-});
+})
 
 /**
  * @route PUT /api/text

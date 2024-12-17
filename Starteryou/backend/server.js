@@ -6,10 +6,12 @@ const { mountRoutes } = require("./routes"); // Main routes including API docs
 const fileRoutes = require("./routes/fileRoutes"); // File handling routes
 const textRoutes = require("./routes/textRoutes");
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
+const logger = require("./utils/logger");
 require("dotenv").config(); // Load environment variables
 
 const router = express.Router();
 
+mongoose.set('debug', true);
 // Load MongoDB configuration from environment variables
 const mongoUser = encodeURIComponent(process.env.MONGO_USER);
 const mongoPassword = encodeURIComponent(process.env.MONGO_PASSWORD);
@@ -162,7 +164,8 @@ mongoose.connection.on("error", (err) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error("Error:", err.stack);
+  // console.error("Error:", err.stack);
+  logger.error(`Error: ${err.stack}`)
   res.status(500).json({
     success: false,
     message: err.message || "Internal Server Error",
@@ -171,6 +174,7 @@ app.use((err, req, res, next) => {
 
 // Handle 404 routes - This should be the last middleware
 app.use((req, res) => {
+  logger.warn(`404 - Route not found: ${req.originalUrl} - Method: ${req.method}`);
   res.status(404).json({
     success: false,
     message: "Route not found",
@@ -186,7 +190,15 @@ app.use((req, res) => {
 // Start the Express server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`
+  //   console.log(`
+  // 🚀 Server is running on port ${PORT}
+  // 📚 API Documentation: http://localhost:${PORT}/api/docs
+  // 📋 Postman Collection: http://localhost:${PORT}/api/docs/postman
+  // 💻 Health Check: http://localhost:${PORT}/health
+  // ⚙ File Verification: http://localhost:${PORT}/api/system/verify-all
+  // 🔧 Environment: ${process.env.NODE_ENV || "development"}
+  //   `);
+  logger.info(`
 🚀 Server is running on port ${PORT}
 📚 API Documentation: http://localhost:${PORT}/api/docs
 📋 Postman Collection: http://localhost:${PORT}/api/docs/postman
