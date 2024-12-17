@@ -27,4 +27,3 @@ dist-ssr
 # Docker files
 frontend/dockerfile
 backend/dockerfile
-docker-compose.yml
