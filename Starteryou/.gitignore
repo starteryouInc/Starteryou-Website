@@ -24,6 +24,3 @@ dist-ssr
 *.sw?
 *.env
 
-# Docker files
-frontend/dockerfile
-backend/dockerfile
