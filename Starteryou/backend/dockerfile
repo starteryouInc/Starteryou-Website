@@ -28,12 +28,12 @@ EXPOSE 3000
 # Set environment variables for TLS paths
 ENV NODE_ENV=production
 ENV PORT=3000
-ENV MONGO_TLS_CA=C:/Users/niksh/OneDrive/Desktop/keys/server.pem
-ENV MONGO_TLS_CERT=C:/Users/niksh/OneDrive/Desktop/keys/server.pem
+ENV MONGO_TLS_CA="C:/Users/MD ASIF SIDDIQUI/Desktop/Asif/ca.crt"
+ENV MONGO_TLS_CERT="C:/Users/MD ASIF SIDDIQUI/Desktop/Asif/server.pem"
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=3s \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/status || exit 1
 
 # Start the application
-CMD ["nodemon", "server.js"]
+CMD ["node", "server.js"]
