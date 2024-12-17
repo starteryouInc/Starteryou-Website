@@ -22,6 +22,7 @@ services:
       - /etc/ssl/mongodb/server.pem:/certificates/server.pem:ro
       - ./backend:/usr/src/app
       - ./backend/uploads:/usr/src/app/uploads
+      - /usr/src/app/node_modules  # Prevent overwriting node_modules
     ports:
       - "3000:3000"
     networks:
