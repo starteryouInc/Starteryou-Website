@@ -9,7 +9,7 @@ WORKDIR /usr/src/app
 
 # Copy package files and install dependencies
 COPY package*.json ./
-RUN npm install --only=production
+RUN npm install #--only=production -- comment it when needs packages installed
 
 # Create uploads directory
 RUN mkdir -p /usr/src/app/uploads && chmod 755 /usr/src/app/uploads
