@@ -9,12 +9,7 @@ WORKDIR /usr/src/app
 
 # Copy package files and install dependencies
 COPY package*.json ./
-
-# Install all dependencies (including devDependencies)
-RUN npm install
-
-# Install nodemon globally for development
-RUN npm install -g nodemon
+RUN npm install #--only=production -- comment it when needs packages installed
 
 # Create uploads directory
 RUN mkdir -p /usr/src/app/uploads && chmod 755 /usr/src/app/uploads
@@ -28,50 +23,12 @@ EXPOSE 3000
 # Set environment variables for TLS paths
 ENV NODE_ENV=production
 ENV PORT=3000
-ENV MONGO_TLS_CA="C:/Users/MD ASIF SIDDIQUI/Desktop/Asif/ca.crt"
-ENV MONGO_TLS_CERT=# Use Node.js base image
-FROM node:18-alpine
-
-# Install necessary tools
-RUN apk add --no-cache python3 make g++ openssh-client
-
-# Set working directory
-WORKDIR /usr/src/app
-
-# Copy package files and install dependencies
-COPY package*.json ./
-
-# Install all dependencies (including devDependencies)
-RUN npm install
-
-# Install nodemon globally for development
-RUN npm install -g nodemon
-
-# Create uploads directory
-RUN mkdir -p /usr/src/app/uploads && chmod 755 /usr/src/app/uploads
-
-# Copy application source code
-COPY . .
-
-# Expose the application port
-EXPOSE 3000
-
-# Set environment variables for TLS paths
-ENV NODE_ENV=production
-ENV PORT=3000
-ENV MONGO_TLS_CA="C:/Users/atif/Desktop/myKey/ca.crt"
-ENV MONGO_TLS_CERT="C:/Users/atif/Desktop/myKey/server.pem"
+ENV MONGO_TLS_CA=/etc/ssl/mongodb/ca.crt
+ENV MONGO_TLS_CERT=/etc/ssl/mongodb/server.pem
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=3s \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/status || exit 1
-
-# Start the application
-CMD ["node", "server.js"]
-
-# Healthcheck
-HEALTHCHECK --interval=30s --timeout=3s \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/status || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://dev.starteryou.com:3000/api/status || exit 1
 
 # Start the application
 CMD ["node", "server.js"]

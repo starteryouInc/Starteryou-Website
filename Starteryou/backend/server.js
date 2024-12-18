@@ -38,7 +38,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: `http://localhost:${process.env.PORT || 3000}/api`,
+        url: `http://dev.starteryou.com:${process.env.PORT || 3000}/api`,
       },
     ],
   },
@@ -96,6 +96,6 @@ app.use((err, req, res, next) => {
 // Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
-  console.log(`📖 Swagger Docs available at http://localhost:${PORT}/api-docs`);
+  console.log(`🚀 Server running at http://dev.starteryou.com:${PORT}`);
+  console.log(`📖 Swagger Docs available at http://dev.starteryou.com:${PORT}/api-docs`);
 });

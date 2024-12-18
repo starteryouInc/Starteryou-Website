@@ -50,11 +50,9 @@ const Layout = () => {
         <Route path="/signup" element={<Signup />} />
         <Route path="/InProgressPage" element={<InProgressPage />} />
         <Route path="/job2" element={<JobPageAfter />} />
-
-        {/* New Job Feed Page ( IN PROGRESS )*/}
         <Route path="/jobfeeds" element={<JobFeedPage />} />
         
-        {/* New User Profile Page ( IN PROGRESS ) */}
+        {/* New User Profile Page ( COMPLETED ) */}
         <Route path="/userprofile" element={<UserProfile/>}></Route>
 
         {/* Admin Protected Routes */}
