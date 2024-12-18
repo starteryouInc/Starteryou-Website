@@ -3,7 +3,7 @@ import "../styles/RightSide.css";
 import EditPen from "/UserProfile/EditPen.svg";
 import { IoLanguageSharp } from "react-icons/io5";
 
-const LanguagesCard = () => {
+const LanguagesCard = ({ openLanguageForm }) => {
     const ProjectList = [
         {
           langID: 1,
@@ -24,7 +24,7 @@ const LanguagesCard = () => {
   >
     <div className="flex justify-between items-center">
       <h2 className="text-2xl">Languages</h2>
-      <h4 className="text-[#6a54df] font-semibold">+ Add</h4>
+      <button onClick={openLanguageForm} className="text-[#6a54df] font-semibold">+ Add</button>
     </div>
     <section className="flex flex-col items-start justify-between space-y-4">
       {ProjectList.length !== 0

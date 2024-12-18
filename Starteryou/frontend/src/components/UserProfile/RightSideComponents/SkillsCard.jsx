@@ -5,7 +5,7 @@ import "../styles/RightSide.css";
 
 const skills = ["JAVA", "CSS", "JAVASCRIPT", "UX DESIGN", "UI DESIGN"];
 
-const SkillsCard = () => {
+const SkillsCard = ({ openSkillForm }) => {
   return (
     <div className="skills-card relative">
       {/* Header */}
@@ -16,7 +16,7 @@ const SkillsCard = () => {
         </div>
 
         {/* Edit Button */}
-        <button>
+        <button onClick={openSkillForm}>
           <img src={EditPen} alt="Edit Skills" />
         </button>
       </div>

@@ -57,7 +57,7 @@ const EducationalDetailsForm = ({ openEducationForm }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-3xl mx-4 bg-white p-8 border rounded-[18px] space-y-4 md:w-[560px]"
+      className="max-w-3xl mx-4 bg-white p-8 border rounded-lg space-y-4 md:w-[560px]"
     >
       <h2 className="text-2xl font-semibold mb-4">Educational Details</h2>
 
@@ -188,7 +188,7 @@ const EducationalDetailsForm = ({ openEducationForm }) => {
         <button
           type="button"
           onClick={handleCancel}
-          className="text-purple-600 hover:underline"
+          className="text-purple-600"
         >
           Cancel
         </button>

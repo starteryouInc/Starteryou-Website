@@ -3,7 +3,7 @@ import "../styles/RightSide.css";
 import EditPen from "/UserProfile/EditPen.svg";
 import ProjectIcon from "/UserProfile/ProjectIcon.svg";
 
-const ProjectCard = () => {
+const ProjectCard = ({ openProjectForm }) => {
   const ProjectList = [
     {
       projectID: 1,
@@ -28,7 +28,7 @@ const ProjectCard = () => {
     >
       <div className="flex justify-between items-center">
         <h2 className="text-2xl">Projects</h2>
-        <h4 className="text-[#6a54df] font-semibold">+ Add</h4>
+        <button onClick={openProjectForm} className="text-[#6a54df] font-semibold">+ Add</button>
       </div>
       <section className="flex flex-col items-start justify-between space-y-4">
         {ProjectList.length !== 0

@@ -270,7 +270,7 @@ const apiEndpoints = [
           },
         },
         example: {
-          curl: 'curl "http://localhost:5000/api/text?page=AboutPage&component=HeroAbout"',
+          curl: 'curl "http://localhost:3000/api/text?page=AboutPage&component=HeroAbout"',
         },
       },
       {
@@ -324,7 +324,7 @@ const apiEndpoints = [
         },
         example: {
           curl:
-            "curl -X PUT http://localhost:5000/api/text \\\n" +
+            "curl -X PUT http://localhost:3000/api/text \\\n" +
             '-H "Content-Type: application/json" \\\n' +
             '-d \'{"page": "AboutPage", "component": "HeroAbout", "content": "New content here", "paragraphs": ["Updated paragraph 1", "Updated paragraph 2"]}\'',
         },
@@ -363,7 +363,7 @@ const apiEndpoints = [
           },
         },
         example: {
-          curl: 'curl -X DELETE "http://localhost:5000/api/text?page=AboutPage&component=HeroAbout"',
+          curl: 'curl -X DELETE "http://localhost:3000/api/text?page=AboutPage&component=HeroAbout"',
         },
       },
     ],

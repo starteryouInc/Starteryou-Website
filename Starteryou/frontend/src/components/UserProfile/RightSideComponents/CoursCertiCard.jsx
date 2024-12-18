@@ -3,7 +3,7 @@ import "../styles/RightSide.css";
 import EditPen from "/UserProfile/EditPen.svg";
 import { GrCertificate } from "react-icons/gr";
 
-const CoursCertiCard = () => {
+const CoursCertiCard = ({ openCertificationForm }) => {
   const CourAndCertiList = [
     {
         ID: 1,
@@ -27,7 +27,7 @@ const CoursCertiCard = () => {
     >
       <div className="flex justify-between items-center">
         <h2 className="text-2xl">Courses and Certification</h2>
-        <h4 className="text-[#6a54df] font-semibold">+ Add</h4>
+        <button onClick={openCertificationForm} className="text-[#6a54df] font-semibold">+ Add</button>
       </div>
       <section className="flex flex-col items-start justify-between space-y-4">
         {CourAndCertiList.length !== 0

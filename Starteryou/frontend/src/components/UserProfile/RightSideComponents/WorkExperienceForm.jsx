@@ -51,7 +51,7 @@ const WorkExperienceForm = ({ openWorkForm }) => {
 
   return (
     <form
-      className="p-8 mx-4 bg-white border rounded-[18px] max-w-3xl md:w-[560px] xl:w-[760px]"
+      className="p-8 mx-4 bg-white border rounded-lg max-w-3xl md:w-[560px] xl:w-[760px]"
       onSubmit={handleSubmit}
     >
       <h1 className="text-2xl font-semibold mb-6">Work Experience</h1>

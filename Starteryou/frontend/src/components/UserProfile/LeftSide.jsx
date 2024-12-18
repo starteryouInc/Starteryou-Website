@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./styles/LeftSide.css";
 import Flag from "/UserProfile/Flag.svg";
 import EditPen from "/UserProfile/EditPen.svg";
@@ -18,8 +18,10 @@ import {
   IoLogoTwitter,
   IoMailOutline,
 } from "react-icons/io5";
+import SocialPresenceForm from "./LeftSideComponent/SocialPresenceForm";
 
 const LeftSide = () => {
+  const [openSocialForm, setOpenSocialForm] = useState(false);
   return (
     <>
       <section className="left md:w-[560px] lg:w-[660px] xl:w-[460px]">
@@ -112,7 +114,12 @@ const LeftSide = () => {
         <div className="social-media-links-section space-y-4">
           <div className="social-media-title">
             <h2>Social Presence</h2>
-            <h4 className="text-[#6a54df] font-semibold">+ Add</h4>
+            <button
+              onClick={() => setOpenSocialForm(true)}
+              className="text-[#6a54df] font-semibold"
+            >
+              + Add
+            </button>
           </div>
           <ul className="space-y-4 secondary-text-color">
             <li className="social-media-list">
@@ -130,6 +137,15 @@ const LeftSide = () => {
           </ul>
         </div>
       </section>
+
+      {openSocialForm && (
+        <div
+          className="pop-up py-3 fixed inset-0 bg-black bg-opacity-50 flex items-center
+         justify-center z-50 overflow-y-scroll"
+        >
+          <SocialPresenceForm openSocialForm={() => setOpenSocialForm(false)} />
+        </div>
+      )}
     </>
   );
 };
