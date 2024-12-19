@@ -43,9 +43,9 @@ async function runTest() {
   const tester = new MongoTester(mongoUri);
   try {
     await tester.testConnection();
-    console.log("MongoDB connection test successful!");
+    console.log("✅ MongoDB connection test successful!");
   } catch (error) {
-    console.error("MongoDB connection test failed:", error);
+    console.error("❌ MongoDB connection test failed:", error);
   }
 }
 
@@ -68,11 +68,24 @@ const connectToMongoDB = async () => {
       // Wait for the connection to be fully ready
       await mongoose.connection.asPromise();
 
+      console.log("✅ MongoDB connection established!");
+
       // Monitor connection events only after a successful connection
       monitorConnectionEvents();
 
+      // Validate the connection before running operations
+      const isConnected = mongoose.connection.readyState === 1;
+      if (isConnected) {
+        console.log("🔍 Connection state validated: Ready for operations.");
+      } else {
+        console.warn("⚠️ Connection state not ready. Retrying...");
+        throw new Error("Connection state not ready");
+      }
+
       // Seed the database after successful connection
+      console.log("🌱 Seeding database...");
       await seedDatabase();
+      console.log("✅ Database seeded successfully!");
 
       return; // Exit loop on success
     } catch (error) {
