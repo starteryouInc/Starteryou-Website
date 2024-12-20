@@ -34,8 +34,9 @@ const connectToMongoDB = async () => {
       );
 
       await mongoose.connect(mongoUri, {
-        connectTimeoutMS: 60000,
-        socketTimeoutMS: 60000,
+        connectTimeoutMS: 120000, // 2 minutes
+        socketTimeoutMS: 120000, // 2 minutes
+        serverSelectionTimeoutMS: 120000, // 2 minutes
         family: 4, // IPv4
       });
 
@@ -84,7 +85,13 @@ const monitorConnectionEvents = () => {
   });
 
   mongoose.connection.on("disconnected", () => {
-    console.log("❌ MongoDB Disconnected.");
+    console.error("❌ MongoDB connection lost. Retrying...");
+  });
+
+  process.on("SIGINT", async () => {
+    console.log("🔌 Shutting down gracefully...");
+    await mongoose.disconnect();
+    process.exit(0);
   });
 
   mongoose.connection.on("error", (err) => {
