@@ -1,16 +1,42 @@
 const MongoTester = require("./utils/mongoTester");
-const seedDatabase = require("./seedDatabase");
+const seedDatabase = require("./seedDatabase"); // Import seeding logic
+
 const mongoose = require("mongoose");
+require("dotenv").config(); // Load environment variables
 
 let retryCount = 0;
 const maxRetries = 5;
 
-// Hardcoded MongoDB URI
-const mongoUri =
-  "mongodb://starteryouadmin:4mXq!9%40lPZ7gT8$h@52.207.194.195:27017/?authSource=admin&tls=true&tlsCertificateKeyFile=/certificates/server.pem&tlsCAFile=/certificates/ca.crt";
+// Load environment variables
+const {
+  MONGO_USER,
+  MONGO_PASSWORD,
+  MONGO_HOST,
+  MONGO_PORT,
+  MONGO_AUTH_SOURCE,
+  MONGO_TLS,
+  MONGO_TLS_CERT,
+  MONGO_TLS_CA,
+  MONGO_APP_NAME,
+} = process.env;
+
+// Construct the MongoDB URI dynamically
+let mongoUri = `mongodb://${encodeURIComponent(
+  MONGO_USER
+)}:${encodeURIComponent(
+  MONGO_PASSWORD
+)}@${MONGO_HOST}:${MONGO_PORT}/?authSource=${MONGO_AUTH_SOURCE}`;
+if (MONGO_TLS === "true") {
+  mongoUri += `&tls=true&tlsCertificateKeyFile=${MONGO_TLS_CERT}&tlsCAFile=${MONGO_TLS_CA}`;
+}
+mongoUri += `&appName=${MONGO_APP_NAME || "ExpressApp"}`;
+
+// Enable mongoose debugging conditionally (e.g., for development)
+if (process.env.NODE_ENV === "development") {
+  mongoose.set("debug", true);
+}
 
 mongoose.set("strictQuery", false);
-mongoose.set("debug", true);
 
 // Test MongoDB connection
 async function runTest() {
@@ -34,9 +60,8 @@ const connectToMongoDB = async () => {
       );
 
       await mongoose.connect(mongoUri, {
-        connectTimeoutMS: 120000, // 2 minutes
-        socketTimeoutMS: 120000, // 2 minutes
-        serverSelectionTimeoutMS: 120000, // 2 minutes
+        connectTimeoutMS: 60000,
+        socketTimeoutMS: 60000,
         family: 4, // IPv4
       });
 
@@ -85,13 +110,7 @@ const monitorConnectionEvents = () => {
   });
 
   mongoose.connection.on("disconnected", () => {
-    console.error("❌ MongoDB connection lost. Retrying...");
-  });
-
-  process.on("SIGINT", async () => {
-    console.log("🔌 Shutting down gracefully...");
-    await mongoose.disconnect();
-    process.exit(0);
+    console.log("❌ MongoDB Disconnected.");
   });
 
   mongoose.connection.on("error", (err) => {
