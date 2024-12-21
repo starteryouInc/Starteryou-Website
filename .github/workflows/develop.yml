@@ -105,19 +105,22 @@ jobs:
             PORT=3000
             FRONTEND_URL=http://dev.starteryou.com:8080
             VITE_BACKEND_URL=http://dev.starteryou.com:3000
-            MONGO_USER=${{ secrets.MONGO_USER }}
-            MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
-            MONGO_HOST=${{ secrets.MONGO_HOST }}
-            MONGO_PORT=${{ secrets.MONGO_PORT }}
-            MONGO_DB=${{ secrets.MONGO_DB }}
-            MONGO_AUTH_SOURCE=${{ secrets.MONGO_AUTH_SOURCE }}
-            MONGO_TLS=${{ secrets.MONGO_TLS }}
-            MONGO_TLS_CA=${{ secrets.MONGO_TLS_CA }}
-            MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}
-            MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}
-            DB_EC2_HOST=${{ secrets.DB_EC2_HOST }}
-            DB_EC2_USER=${{ secrets.DB_EC2_USER }}
+            MONGO_USER=$(echo "${{ secrets.MONGO_USER }}" | tr -d '\n')
+            MONGO_PASSWORD=$(echo "${{ secrets.MONGO_PASSWORD }}" | tr -d '\n')
+            MONGO_HOST=$(echo "${{ secrets.MONGO_HOST }}" | tr -d '\n')
+            MONGO_PORT=$(echo "${{ secrets.MONGO_PORT }}" | tr -d '\n')
+            MONGO_DB=$(echo "${{ secrets.MONGO_DB }}" | tr -d '\n')
+            MONGO_AUTH_SOURCE=$(echo "${{ secrets.MONGO_AUTH_SOURCE }}" | tr -d '\n')
+            MONGO_TLS=$(echo "${{ secrets.MONGO_TLS }}" | tr -d '\n')
+            MONGO_TLS_CA=$(echo "${{ secrets.MONGO_TLS_CA }}" | tr -d '\n')
+            MONGO_TLS_CERT=$(echo "${{ secrets.MONGO_TLS_CERT }}" | tr -d '\n')
+            MONGO_APP_NAME=$(echo "${{ secrets.MONGO_APP_NAME }}" | tr -d '\n')
+            DB_EC2_HOST=$(echo "${{ secrets.DB_EC2_HOST }}" | tr -d '\n')
+            DB_EC2_USER=$(echo "${{ secrets.DB_EC2_USER }}" | tr -d '\n')
             EOF
+            
+            echo ".env file generated successfully."
+
 
             # Source the .env file to make variables available to the session
             set -a
