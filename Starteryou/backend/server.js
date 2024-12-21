@@ -75,15 +75,18 @@ app.get("/health", (req, res) => {
  *       200:
  *         description: MongoDB connection status
  */
+// MongoDB Connection Status Route
 app.get("/db-status", (req, res) => {
-  const states = mongoose.STATES; // Dynamic state mapping from Mongoose
+  const states = mongoose.STATES;
   const connectionState = mongoose.connection.readyState;
   res.json({
     state: connectionState,
     message: states[connectionState] || "Unknown state",
+    host: mongoose.connection.host,
+    dbName: mongoose.connection.name,
+    uptime: process.uptime(),
   });
 });
-
 // Error-handling Middleware
 app.use((err, req, res, next) => {
   console.error("🚨 Error:", err.message);
@@ -97,5 +100,7 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://dev.starteryou.com:${PORT}`);
-  console.log(`📖 Swagger Docs available at http://dev.starteryou.com:${PORT}/api-docs`);
+  console.log(
+    `📖 Swagger Docs available at http://dev.starteryou.com:${PORT}/api-docs`
+  );
 });
