@@ -100,7 +100,7 @@ const connectToMongoDB = async () => {
       await seedDatabase();
       console.log("✅ Database seeded successfully!");
 
-      return; // Exit loop on success
+      return; // Exit loop on success.
     } catch (error) {
       retryCount++;
       console.error("❌ MongoDB Connection Error:", error.message);
