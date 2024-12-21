@@ -7,29 +7,42 @@ require("dotenv").config(); // Load environment variables
 let retryCount = 0;
 const maxRetries = 5;
 
-// Load environment variables
-const {
-  MONGO_USER,
-  MONGO_PASSWORD,
-  MONGO_HOST,
-  MONGO_PORT,
-  MONGO_AUTH_SOURCE,
-  MONGO_TLS,
-  MONGO_TLS_CERT,
-  MONGO_TLS_CA,
-  MONGO_APP_NAME,
-} = process.env;
+// Load MongoDB configuration from environment variables
+const mongoUser = encodeURIComponent(process.env.MONGO_USER);
+const mongoPassword = encodeURIComponent(process.env.MONGO_PASSWORD);
+const mongoHost = process.env.MONGO_HOST;
+const mongoPort = process.env.MONGO_PORT;
+const mongoDb = process.env.MONGO_DB;
+const mongoAuthSource = process.env.MONGO_AUTH_SOURCE;
+const mongoTls = process.env.MONGO_TLS === "true";
+const mongoTlsCert = process.env.MONGO_TLS_CERT;
+const mongoTlsCa = process.env.MONGO_TLS_CA;
+const mongoAppName = process.env.MONGO_APP_NAME;
 
-// Construct the MongoDB URI dynamically
-let mongoUri = `mongodb://${encodeURIComponent(
-  MONGO_USER
-)}:${encodeURIComponent(
-  MONGO_PASSWORD
-)}@${MONGO_HOST}:${MONGO_PORT}/?authSource=${MONGO_AUTH_SOURCE}`;
-if (MONGO_TLS === "true") {
-  mongoUri += `&tls=true&tlsCertificateKeyFile=${MONGO_TLS_CERT}&tlsCAFile=${MONGO_TLS_CA}`;
+console.log("Loaded Environment Variables:", {
+  mongoUser: process.env.MONGO_USER,
+  mongoPassword: process.env.MONGO_PASSWORD,
+  mongoHost: process.env.MONGO_HOST,
+  mongoPort: process.env.MONGO_PORT,
+  mongoDb: process.env.MONGO_DB,
+  mongoAuthSource: process.env.MONGO_AUTH_SOURCE,
+}); // Debugging line to ensure the environment variables are loaded
+
+// Check for missing required environment variables
+if (!mongoUser || !mongoPassword || !mongoHost || !mongoDb) {
+  console.error("❌ Missing required MongoDB environment variables");
+  process.exit(1);
 }
-mongoUri += `&appName=${MONGO_APP_NAME || "ExpressApp"}`;
+
+// Build MongoDB URI dynamically based on environment variables
+let mongoUri = `mongodb://${mongoUser}:${mongoPassword}@${mongoHost}:${mongoPort}/${mongoDb}?authSource=${mongoAuthSource}&directConnection=true&serverSelectionTimeoutMS=2000`;
+if (mongoTls) {
+  mongoUri += `&tls=true&tlsCertificateKeyFile=${encodeURIComponent(
+    mongoTlsCert
+  )}&tlsCAFile=${encodeURIComponent(mongoTlsCa)}`;
+}
+
+mongoUri += `&appName=${mongoAppName}`;
 
 // Enable mongoose debugging conditionally (e.g., for development)
 if (process.env.NODE_ENV === "development") {
