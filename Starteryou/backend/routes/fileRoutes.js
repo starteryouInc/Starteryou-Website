@@ -7,7 +7,7 @@ require("dotenv").config();
 
 const router = express.Router();
 
-// Initialize GridFSBucket
+// Initialize GridFSBucket.
 let bucket;
 mongoose.connection.once("open", () => {
   bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
