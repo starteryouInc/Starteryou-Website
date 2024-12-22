@@ -7,7 +7,8 @@ const { connectToMongoDB } = require("./db");
 const textRoutes = require("./routes/textRoutes");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-
+const authRoutes = require("./routes/authRoutes");
+const profileRoutes = require("./routes/profileRoutes");
 // Initialize Express app
 const app = express();
 
@@ -42,7 +43,7 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ["./routes/*.js"], // Path to your API route files
+  apis: ["./routes/authRoutes.js"], // Path to your API route files
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
@@ -50,7 +51,8 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Routes
 app.use("/api", textRoutes);
-
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/profile", profileRoutes);
 // Health Check Route
 /**
  * @swagger
