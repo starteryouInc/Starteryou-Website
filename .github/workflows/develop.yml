@@ -114,9 +114,9 @@ jobs:
             MONGO_TLS=$(echo "${{ secrets.MONGO_TLS }}" | tr -d '\n')
             MONGO_TLS_CA=$(echo "${{ secrets.MONGO_TLS_CA }}" | tr -d '\n')
             MONGO_TLS_CERT=$(echo "${{ secrets.MONGO_TLS_CERT }}" | tr -d '\n')
+            MONGO_APP_NAME=$(echo "${{ secrets.MONGO_APP_NAME }}" | tr -d '\n')
             MONGO_TLS_CA_PATH=$(echo "${{ secrets.MONGO_TLS_CA_PATH }}" | tr -d '\n')
             MONGO_TLS_CERT_PATH=$(echo "${{ secrets.MONGO_TLS_CERT_PATH }}" | tr -d '\n')
-            MONGO_APP_NAME=$(echo "${{ secrets.MONGO_APP_NAME }}" | tr -d '\n')
             EOF
             
             echo ".env.server file generated successfully."
