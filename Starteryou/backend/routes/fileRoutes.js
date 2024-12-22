@@ -7,7 +7,20 @@ require("dotenv").config();
 
 const router = express.Router();
 
-// Initialize GridFSBucket.
+// MongoDB connection
+// const mongoUri =
+//   "mongodb://starteryouadmin:4mXq!9%40lPZ7gT8$h@52.207.194.195:27017/?authSource=admin&tls=true&tlsCertificateKeyFile=/certificates/server.pem&tlsCAFile=/certificates/ca.crt";
+
+// // Connect to MongoDB
+// mongoose
+//   .connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
+//   .then(() => console.log("✅ MongoDB connected successfully for File"))
+//   .catch((error) => {
+//     console.error("❌ MongoDB connection error for file:", error);
+//     process.exit(1);
+//   });
+
+// Initialize GridFSBucket
 let bucket;
 mongoose.connection.once("open", () => {
   bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
