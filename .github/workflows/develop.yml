@@ -104,8 +104,6 @@ jobs:
             MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}
             DB_EC2_HOST=${{ secrets.DB_EC2_HOST }}
             DB_EC2_USER=${{ secrets.DB_EC2_USER }}
-            HEALTHCHECK_URL=http://dev.starteryou.com:3000/health
-            BACKEND_URL=http://dev.starteryou.com:3000
             EOF
 
 
