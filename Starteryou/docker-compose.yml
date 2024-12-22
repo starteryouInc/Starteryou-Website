@@ -18,7 +18,7 @@ services:
     networks:
       - backend-network
     healthcheck:
-      test: ["CMD", "wget", "--spider", "${HEALTHCHECK_URL:-http://localhost:3000/health}"]
+      test: ["CMD", "wget", "--spider", "${HEALTHCHECK_URL:-http://dev.starteryou.com:3000/health}"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -36,7 +36,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      BACKEND_URL: ${BACKEND_URL:-http://localhost:3000}
+      BACKEND_URL: ${BACKEND_URL:-http://dev.starteryou.com:3000}
     depends_on:
       - backend
     networks:
