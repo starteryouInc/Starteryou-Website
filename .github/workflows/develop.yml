@@ -77,12 +77,12 @@ jobs:
             mkdir -p "$PROJECT_ROOT"
             cd "$PROJECT_ROOT"
 
-            # Clone or update the repository
+            # Fresh clone if repo doesn't exist
             if [ ! -d "$REPO_DIR" ]; then
-              echo "Cloning repository..."
+              echo "Cloning repository from develop branch..."
               git clone https://github.com/starteryouInc/Starteryou-Website.git -b develop Starteryou
             else
-              echo "Repository exists. Fetching updates..."
+              echo "Repository exists. Resetting to the develop branch..."
               cd "$REPO_DIR"
               git fetch origin develop
               git reset --hard origin/develop
