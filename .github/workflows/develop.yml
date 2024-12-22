@@ -92,8 +92,8 @@ jobs:
             cat > "$ENV_FILE" << EOF
             NODE_ENV=production
             PORT=3000
-            FRONTEND_URL=http://dev.starteryou.com:8080
-            VITE_BACKEND_URL=http://dev.starteryou.com:3000
+            FRONTEND_URL=http://dev.***.com:8080
+            VITE_BACKEND_URL=http://dev.***.com:3000
             MONGO_USER=$(echo "${{ secrets.MONGO_USER }}" | tr -d '\n')
             MONGO_PASSWORD=$(echo "${{ secrets.MONGO_PASSWORD }}" | tr -d '\n')
             MONGO_HOST=$(echo "${{ secrets.MONGO_HOST }}" | tr -d '\n')
@@ -101,14 +101,22 @@ jobs:
             MONGO_DB=$(echo "${{ secrets.MONGO_DB }}" | tr -d '\n')
             MONGO_AUTH_SOURCE=$(echo "${{ secrets.MONGO_AUTH_SOURCE }}" | tr -d '\n')
             MONGO_TLS=$(echo "${{ secrets.MONGO_TLS }}" | tr -d '\n')
-            MONGO_TLS_CA=$(echo "${{ secrets.MONGO_TLS_CA }}" | tr -d '\n')
-            MONGO_TLS_CERT=$(echo "${{ secrets.MONGO_TLS_CERT }}" | tr -d '\n')
+            MONGO_TLS_CA=/certificates/ca.crt
+            MONGO_TLS_CERT=/certificates/server.pem
             MONGO_TLS_CA_PATH=$(echo "${{ secrets.MONGO_TLS_CA_PATH }}" | tr -d '\n')
             MONGO_TLS_CERT_PATH=$(echo "${{ secrets.MONGO_TLS_CERT_PATH }}" | tr -d '\n')
             MONGO_APP_NAME=$(echo "${{ secrets.MONGO_APP_NAME }}" | tr -d '\n')
             EOF
-            
             echo ".env.server file generated successfully."
+            
+            # Debugging to verify the file exists
+            echo "ENV_FILE path: $ENV_FILE"
+            ls -l "$ENV_FILE"
+            
+            # Create a symbolic link for .env as a fallback
+            ln -sf "$ENV_FILE" /home/***/Starteryou-Website/Starteryou/.env
+            
+            # Deploy Docker services
             echo "Deploying Docker services..."
             docker-compose --profile server --env-file "$ENV_FILE" down --volumes --remove-orphans
             docker-compose --profile server --env-file "$ENV_FILE" up --build -d
