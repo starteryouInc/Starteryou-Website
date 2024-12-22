@@ -50,11 +50,6 @@ class MongoTester {
         success: false,
         error: error.message,
       };
-    } finally {
-      if (this.isConnected) {
-        await mongoose.connection.close();
-        console.log("\nConnection closed");
-      }
     }
   }
 

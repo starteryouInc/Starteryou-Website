@@ -5,10 +5,11 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const { connectToMongoDB } = require("./db");
 const textRoutes = require("./routes/textRoutes");
+// const fileRoutes = require("./routes/fileRoutes");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-const authRoutes = require("./routes/authRoutes");
-const profileRoutes = require("./routes/profileRoutes");
+//const authRoutes = require("./routes/authRoutes");
+//const profileRoutes = require("./routes/profileRoutes");
 // Initialize Express app
 const app = express();
 
@@ -51,8 +52,8 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Routes
 app.use("/api", textRoutes);
-app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/profile", profileRoutes);
+// app.use("/api/files", fileRoutes);app.use("/api/v1/auth", authRoutes);
+//app.use("/api/v1/profile", profileRoutes);
 // Health Check Route
 /**
  * @swagger
@@ -77,7 +78,6 @@ app.get("/health", (req, res) => {
  *       200:
  *         description: MongoDB connection status
  */
-// MongoDB Connection Status Route
 app.get("/db-status", (req, res) => {
   const states = mongoose.STATES;
   const connectionState = mongoose.connection.readyState;
@@ -89,6 +89,7 @@ app.get("/db-status", (req, res) => {
     uptime: process.uptime(),
   });
 });
+
 // Error-handling Middleware
 app.use((err, req, res, next) => {
   console.error("🚨 Error:", err.message);

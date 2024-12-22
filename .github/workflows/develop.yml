@@ -83,7 +83,7 @@ jobs:
               git fetch origin develop
               git reset --hard origin/develop
             fi
-
+  
             echo "Generating .env.server file..."
             cat > "$ENV_FILE" << EOF
             NODE_ENV=production
@@ -105,6 +105,7 @@ jobs:
             DB_EC2_HOST=${{ secrets.DB_EC2_HOST }}
             DB_EC2_USER=${{ secrets.DB_EC2_USER }}
             EOF
+
 
             # Source the .env.server file to make variables available to the session
             set -a
