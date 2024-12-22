@@ -100,6 +100,17 @@ jobs:
             fi
 
             echo "Generating .env.server file..."
+
+            MONGO_TLS_CA_PATH=$(echo "${{ secrets.MONGO_TLS_CA_PATH }}" | tr -d '\n')
+            if [ -z "$MONGO_TLS_CA_PATH" ]; then
+              MONGO_TLS_CA_PATH="/etc/ssl/mongodb/ca.crt"
+            fi
+            
+            MONGO_TLS_CERT_PATH=$(echo "${{ secrets.MONGO_TLS_CERT_PATH }}" | tr -d '\n')
+            if [ -z "$MONGO_TLS_CERT_PATH" ]; then
+              MONGO_TLS_CERT_PATH="/etc/ssl/mongodb/server.pem"
+            fi
+            
             cat > "$ENV_FILE" << EOF
             NODE_ENV=production
             PORT=3000
@@ -112,12 +123,13 @@ jobs:
             MONGO_DB=$(echo "${{ secrets.MONGO_DB }}" | tr -d '\n')
             MONGO_AUTH_SOURCE=$(echo "${{ secrets.MONGO_AUTH_SOURCE }}" | tr -d '\n')
             MONGO_TLS=$(echo "${{ secrets.MONGO_TLS }}" | tr -d '\n')
-            MONGO_TLS_CA_PATH=$(echo "${{ secrets.MONGO_TLS_CA_PATH:-/etc/ssl/mongodb/ca.crt} }" | tr -d '\n')
-            MONGO_TLS_CERT_PATH=$(echo "${{ secrets.MONGO_TLS_CERT_PATH:-/etc/ssl/mongodb/server.pem} }" | tr -d '\n')
             MONGO_TLS_CA=$(echo "${{ secrets.MONGO_TLS_CA }}" | tr -d '\n')
             MONGO_TLS_CERT=$(echo "${{ secrets.MONGO_TLS_CERT }}" | tr -d '\n')
+            MONGO_TLS_CA_PATH=$MONGO_TLS_CA_PATH
+            MONGO_TLS_CERT_PATH=$MONGO_TLS_CERT_PATH
             MONGO_APP_NAME=$(echo "${{ secrets.MONGO_APP_NAME }}" | tr -d '\n')
             EOF
+
             
             echo ".env.server file generated successfully."
 
