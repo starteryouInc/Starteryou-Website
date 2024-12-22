@@ -17,7 +17,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: "http://localhost:3000/api/text", // Replace with your base URL
+        url: "http://dev.starteryou.com:3000/api/text", // Replace with your base URL
       },
     ],
   },

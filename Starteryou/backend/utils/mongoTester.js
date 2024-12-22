@@ -70,11 +70,14 @@ class MongoTester {
       );
 
       // Test write
-      await TestModel.create({test: "connection_test", timestamp: new Date()});
+      await TestModel.create({
+        test: "connection_test",
+        timestamp: new Date(),
+      });
       console.log("✅ Write operation successful");
 
       // Test read
-      await TestModel.findOne({test: "connection_test"});
+      await TestModel.findOne({ test: "connection_test" });
       console.log("✅ Read operation successful");
 
       // Cleanup

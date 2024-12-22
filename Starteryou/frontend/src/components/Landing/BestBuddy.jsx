@@ -39,7 +39,7 @@ const icons = [
 const BestBuddy = () => {
   const { isAdmin } = useNavigation();
   const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images
-  const title = "starteryou-v2"; // Set the title for fetching and uploading
+  const title = "bestbuddy"; // Set the title for fetching and uploading
   const [error, setError] = useState(null); // Error state for handling errors
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false); // State to track fetch attempt
 
@@ -136,7 +136,7 @@ const BestBuddy = () => {
         {isAdmin && (
           <div className="relative ">
             <FileUpload
-              handleFileChange={(e) => handleFileChange(e, titles[1])}
+              handleFileChange={(e) => handleFileChange(e, title[1])}
             />
           </div>
         )}
