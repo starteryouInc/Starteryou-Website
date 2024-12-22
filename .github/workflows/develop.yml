@@ -45,31 +45,16 @@ jobs:
             exit 1
           fi
 
-          # Transfer db_key.pem to the target EC2 server
+          # Transfer certificates to target EC2 server
           echo "$EC2_SSH_KEY" > ~/.ssh/ec2_key.pem
           chmod 600 ~/.ssh/ec2_key.pem
           ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
-          scp -i ~/.ssh/ec2_key.pem ~/.ssh/db_key.pem $EC2_USER@$EC2_HOST:/tmp/db_key.pem
 
-      # Step 3: Transfer Certificates to Target EC2 Server
-      - name: Transfer Certificates to Target EC2
-        env:
-          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-          EC2_USER: ${{ secrets.EC2_USER }}
-        run: |
-          set -e
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
-          echo "$EC2_SSH_KEY" > ~/.ssh/ec2_key.pem
-          chmod 600 ~/.ssh/ec2_key.pem
-
-          echo "Transferring certificates to EC2 server..."
           scp -i ~/.ssh/ec2_key.pem ./ca.crt $EC2_USER@$EC2_HOST:/tmp/ca.crt
           scp -i ~/.ssh/ec2_key.pem ./server.pem $EC2_USER@$EC2_HOST:/tmp/server.pem
+          scp -i ~/.ssh/ec2_key.pem ~/.ssh/db_key.pem $EC2_USER@$EC2_HOST:/tmp/db_key.pem
 
-      # Step 4: Deploy Application on Target EC2 Server
+      # Step 3: Deploy Application on Target EC2 Server
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7
         with:
@@ -98,28 +83,35 @@ jobs:
               git fetch origin develop
               git reset --hard origin/develop
             fi
-
+  
             echo "Generating .env.server file..."
             cat > "$ENV_FILE" << EOF
             NODE_ENV=production
             PORT=3000
             FRONTEND_URL=http://dev.starteryou.com:8080
             VITE_BACKEND_URL=http://dev.starteryou.com:3000
-            MONGO_USER=$(echo "${{ secrets.MONGO_USER }}" | tr -d '\n')
-            MONGO_PASSWORD=$(echo "${{ secrets.MONGO_PASSWORD }}" | tr -d '\n')
-            MONGO_HOST=$(echo "${{ secrets.MONGO_HOST }}" | tr -d '\n')
-            MONGO_PORT=$(echo "${{ secrets.MONGO_PORT }}" | tr -d '\n')
-            MONGO_DB=$(echo "${{ secrets.MONGO_DB }}" | tr -d '\n')
-            MONGO_AUTH_SOURCE=$(echo "${{ secrets.MONGO_AUTH_SOURCE }}" | tr -d '\n')
-            MONGO_TLS=$(echo "${{ secrets.MONGO_TLS }}" | tr -d '\n')
-            MONGO_TLS_CA=$(echo "${{ secrets.MONGO_TLS_CA }}" | tr -d '\n')
-            MONGO_TLS_CERT=$(echo "${{ secrets.MONGO_TLS_CERT }}" | tr -d '\n')
-            MONGO_APP_NAME=$(echo "${{ secrets.MONGO_APP_NAME }}" | tr -d '\n')
-            MONGO_TLS_CA_PATH=$(echo "${{ secrets.MONGO_TLS_CA_PATH }}" | tr -d '\n')
-            MONGO_TLS_CERT_PATH=$(echo "${{ secrets.MONGO_TLS_CERT_PATH }}" | tr -d '\n')
+            MONGO_USER=${{ secrets.MONGO_USER }}
+            MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
+            MONGO_HOST=${{ secrets.MONGO_HOST }}
+            MONGO_PORT=${{ secrets.MONGO_PORT }}
+            MONGO_DB=${{ secrets.MONGO_DB }}
+            MONGO_AUTH_SOURCE=${{ secrets.MONGO_AUTH_SOURCE }}
+            MONGO_TLS=${{ secrets.MONGO_TLS }}
+            MONGO_TLS_CA=${{ secrets.MONGO_TLS_CA }}
+            MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}
+            MONGO_TLS_CA_PATH=${{ secrets.MONGO_TLS_CA_PATH }}
+            MONGO_TLS_CERT_PATH=${{ secrets.MONGO_TLS_CERT_PATH }}
+            MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}
+            DB_EC2_HOST=${{ secrets.DB_EC2_HOST }}
+            DB_EC2_USER=${{ secrets.DB_EC2_USER }}
             EOF
-            
-            echo ".env.server file generated successfully."
+
+
+            # Source the .env.server file to make variables available to the session
+            set -a
+            source "$ENV_FILE"
+            set +a
+            chmod 600 "$ENV_FILE"
 
             echo "Deploying Docker services..."
             docker-compose --profile server --env-file "$ENV_FILE" down --volumes --remove-orphans
