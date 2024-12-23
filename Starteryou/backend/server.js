@@ -5,10 +5,11 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const { connectToMongoDB } = require("./db");
 const textRoutes = require("./routes/textRoutes");
-// const fileRoutes = require("./routes/fileRoutes");
+const fileRoutes = require("./routes/fileRoutes");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-
+const { mountRoutes } = require("./routes"); // Main routes including API docs
+const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 // Initialize Express app
 const app = express();
 
@@ -42,16 +43,35 @@ const swaggerOptions = {
         url: `http://dev.starteryou.com:${process.env.PORT || 3000}/api`,
       },
     ],
+    tags: [
+      { name: "TextRoutes", description: "Routes for text operations" },
+      { name: "FileRoutes", description: "Routes for file operations" },
+    ],
   },
   apis: ["./routes/*.js"], // Path to your API route files
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-
+app.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+app.use("/api/system", verificationRoutes);
+mountRoutes(app); // This mounts the main routes including API docs
 // Routes
+/**
+ * @swagger
+ * tags:
+ *   - name: TextRoutes
+ *     description: Routes for text operations
+ */
 app.use("/api", textRoutes);
-// app.use("/api/files", fileRoutes);
+
+/**
+ * @swagger
+ * tags:
+ *   - name: FileRoutes
+ *     description: Routes for file operations
+ */
+app.use("/api/files", fileRoutes);
+
 // Health Check Route
 /**
  * @swagger
@@ -102,6 +122,19 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://dev.starteryou.com:${PORT}`);
   console.log(
-    `📖 Swagger Docs available at http://dev.starteryou.com:${PORT}/api-docs`
+    `📖 Swagger Docs available at http://dev.starteryou.com:${PORT}/api-test`
+  );
+  console.log(`💻 Health Check: http://dev.starteryou.com:${PORT}/health`);
+  console.log(
+    `🗄️ Database Status: http://dev.starteryou.com:${PORT}/db-status`
+  );
+  console.log(
+    `📚 API Documentation: http://dev.starteryou.com:${PORT}/api/docs`
+  );
+  console.log(
+    `📋 Postman Collection: http://dev.starteryou.com:${PORT}/api/docs/postman`
+  );
+  console.log(
+    `⚙️ File Verification: http://dev.starteryou.com:${PORT}/api/system/verify-all`
   );
 });

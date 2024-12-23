@@ -5,20 +5,10 @@ const { ObjectId } = require("mongodb");
 const FileMetadata = require("../models/FileMetadata");
 require("dotenv").config();
 
+const swaggerJsDoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
+
 const router = express.Router();
-
-// MongoDB connection
-// const mongoUri =
-//   "mongodb://starteryouadmin:4mXq!9%40lPZ7gT8$h@52.207.194.195:27017/?authSource=admin&tls=true&tlsCertificateKeyFile=/certificates/server.pem&tlsCAFile=/certificates/ca.crt";
-
-// // Connect to MongoDB
-// mongoose
-//   .connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
-//   .then(() => console.log("✅ MongoDB connected successfully for File"))
-//   .catch((error) => {
-//     console.error("❌ MongoDB connection error for file:", error);
-//     process.exit(1);
-//   });
 
 // Initialize GridFSBucket
 let bucket;
@@ -44,7 +34,60 @@ const ensureBucket = () => {
   return bucket;
 };
 
-// POST: Upload a file
+// Swagger configuration
+const swaggerOptions = {
+  swaggerDefinition: {
+    openapi: "3.0.0",
+    info: {
+      title: "File Upload API",
+      version: "1.0.0",
+      description:
+        "API for file upload, download, update, and delete operations using GridFS",
+    },
+    servers: [
+      {
+        url: "http://dev.starteryou.com:3000/api/",
+        description: "Dev Server",
+      },
+    ],
+  },
+  apis: ["./routes/fileRoutes.js"], // Path to this file
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+
+// Swagger UI setup
+router.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+/**
+ * @swagger
+ * /upload:
+ *   post:
+ *     tags:
+ *       - FileRoutes
+ *     summary: Upload a file
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *               title:
+ *                 type: string
+ *               uploadedBy:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: File uploaded successfully
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
 router.post("/upload", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) {
@@ -60,7 +103,6 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 
     const gridFsBucket = ensureBucket();
 
-    // Check for duplicate title
     const existingFile = await FileMetadata.findOne({ title: req.body.title });
     if (existingFile) {
       return res
@@ -68,7 +110,6 @@ router.post("/upload", upload.single("file"), async (req, res) => {
         .json({ success: false, message: "File title already exists" });
     }
 
-    // Upload to GridFS
     const uploadStream = gridFsBucket.openUploadStream(req.file.originalname, {
       contentType: req.file.mimetype,
       metadata: {
@@ -106,7 +147,40 @@ router.post("/upload", upload.single("file"), async (req, res) => {
   }
 });
 
-// PUT: Update a file
+/**
+ * @swagger
+ * /update/{title}:
+ *   put:
+ *     tags:
+ *       - FileRoutes
+ *     summary: Update a file
+ *     parameters:
+ *       - in: path
+ *         name: title
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The title of the file to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: File updated successfully
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: File not found
+ *       500:
+ *         description: Internal server error
+ */
 router.put("/update/:title", upload.single("file"), async (req, res) => {
   try {
     const gridFsBucket = ensureBucket();
@@ -162,7 +236,28 @@ router.put("/update/:title", upload.single("file"), async (req, res) => {
   }
 });
 
-// GET: Download a file
+/**
+ * @swagger
+ * /download/{title}:
+ *   get:
+ *     tags:
+ *       - FileRoutes
+ *     summary: Download a file
+ *     parameters:
+ *       - in: path
+ *         name: title
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The title of the file to download
+ *     responses:
+ *       200:
+ *         description: File downloaded successfully
+ *       404:
+ *         description: File not found
+ *       500:
+ *         description: Internal server error
+ */
 router.get("/download/:title", async (req, res) => {
   try {
     const gridFsBucket = ensureBucket();
@@ -200,7 +295,29 @@ router.get("/download/:title", async (req, res) => {
   }
 });
 
-// DELETE: Remove a file
+/**
+ * @swagger
+ * /delete/{title}:
+ *   delete:
+ *     tags:
+ *       - FileRoutes
+ *     summary: Delete a file
+ *     parameters:
+ *       - in: path
+ *         name: title
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The title of the file to delete
+ *     responses:
+ *       200:
+ *         description: File deleted successfully
+ *       404:
+ *         description: File not found
+ *       500:
+ *         description: Internal server error
+ */
+
 router.delete("/delete/:title", async (req, res) => {
   try {
     const gridFsBucket = ensureBucket();

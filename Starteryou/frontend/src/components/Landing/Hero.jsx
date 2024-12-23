@@ -166,9 +166,7 @@ const Hero = () => {
           {isAdmin && (
             <div className="hidden md:block absolute top-20 left-20">
               <FileUpload
-                handleFileChange={(e) =>
-                  handleImageUpload(e, setImage1, titles[0])
-                }
+                handleFileChange={(e) => handleImageUpload(e, titles[0])}
               />
             </div>
           )}
@@ -184,9 +182,7 @@ const Hero = () => {
           {isAdmin && (
             <div>
               <FileUpload
-                handleFileChange={(e) =>
-                  handleImageUpload(e, setImage2, titles[1])
-                }
+                handleFileChange={(e) => handleImageUpload(e, titles[1])}
               />
             </div>
           )}
@@ -202,9 +198,7 @@ const Hero = () => {
           {isAdmin && (
             <div className="hidden md:block absolute top-20 right-2">
               <FileUpload
-                handleFileChange={(e) =>
-                  handleImageUpload(e, setImage3, titles[2])
-                }
+                handleFileChange={(e) => handleImageUpload(e, titles[2])}
               />
             </div>
           )}
