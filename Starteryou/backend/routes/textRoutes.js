@@ -33,6 +33,8 @@ router.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  * @swagger
  * /text:
  *   get:
+ *     tags:
+ *       - TextRoutes
  *     summary: Retrieves text content for a specific component.
  *     description: Retrieve content stored in the database for a given page and component.
  *     parameters:
@@ -105,6 +107,8 @@ router.get("/text", async (req, res) => {
  * @swagger
  * /text:
  *   put:
+ *     tags:
+ *       - TextRoutes
  *     summary: Updates or creates text content for a specific component.
  *     description: Update or create content in the database for a given page and component.
  *     requestBody:
@@ -178,6 +182,8 @@ router.put("/text", async (req, res) => {
  * @swagger
  * /text:
  *   delete:
+ *     tags:
+ *       - TextRoutes
  *     summary: Deletes text content for a specific component.
  *     description: Delete content from the database for a given page and component.
  *     parameters:
