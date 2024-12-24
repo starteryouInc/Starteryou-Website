@@ -1,12 +1,12 @@
-import {useState, useEffect} from "react"; // Added useEffect import
-import {useNavigation} from "../../context/NavigationContext";
+import { useState, useEffect } from "react"; // Added useEffect import
+import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
-import {API_CONFIG} from "@config/api";
+import { API_CONFIG } from "@config/api";
 
 const BestJob3 = () => {
   const { isAdmin } = useNavigation();
   const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images
-  const title = "starteryou-v2"; // Set the title for fetching and uploading
+  const title = "bestjob3"; // Set the title for fetching and uploading
   const [error, setError] = useState(null); // Error state for handling errors
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false); // State to track fetch attempt
 
@@ -17,7 +17,7 @@ const BestJob3 = () => {
       const response = await fetch(
         `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`
       );
-      
+
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -46,10 +46,13 @@ const BestJob3 = () => {
     formData.append("title", title); // Include the title for the update
 
     try {
-      const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`, {
-        method: "PUT",
-        body: formData,
-      });
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`,
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -78,7 +81,7 @@ const BestJob3 = () => {
         {/* Left Section */}
         <div className="md:w-full lg:w-1/2 w-full md:text-center lg:text-left mb-8 lg:mb-0">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-1 leading-tight">
-            Rohit ipsum dolor sit amet consectetur adipiscing.
+            Lorem ipsum dolor sit amet consectetur adipiscing.
           </h2>
           <p className="text-gray-600 mb-2 md:text-lg font-light">
             Let us handle the grunt work so you can do the fun stuff.
@@ -106,14 +109,14 @@ const BestJob3 = () => {
               src={uploadedFile}
               alt="Preview"
               className="relative w-[340px] h-[190px] top-[66px] left-[-48px] md:w-[480px] md:h-[200px] md:top-[71px] md:left-[-20px] lg:top-[78px] lg:left-[-70px] lg:w-[680px] lg:h-[400px] rounded-xl"
-              style={{transform: "rotate(-10.22deg)"}}
+              style={{ transform: "rotate(-10.22deg)" }}
             />
           ) : (
             <img
               src="/LandingPage/Rectangle.png"
               alt="Job Opportunities"
               className="relative w-[340px] h-[190px] top-[66px] left-[-48px] md:w-[480px] md:h-[200px] md:top-[71px] md:left-[-20px] lg:top-[78px] lg:left-[-70px] lg:w-[680px] lg:h-[400px] rounded-xl"
-              style={{transform: "rotate(-10.22deg)"}}
+              style={{ transform: "rotate(-10.22deg)" }}
             />
           )}
           {/* Admin file upload section */}

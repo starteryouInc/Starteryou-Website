@@ -159,7 +159,7 @@ const Team = () => {
         {teamMembers.map((member, index) => (
           <div
             key={index}
-            className="flex flex-col items-center bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] p-6 shadow-md h-[350px] rounded-md relative"
+            className="flex flex-col items-center bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] p-6 shadow-md min-h-[350px] rounded-md relative"
           >
             <img
               src={member.imgSrc}

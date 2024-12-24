@@ -6,14 +6,14 @@ import { toast } from "react-toastify";
 
 const Hero = () => {
   const { isAdmin } = useNavigation();
-
+  const [error, setError] = useState(null); // Error state for handling errors
   // State variables for each image
   const [image1, setImage1] = useState("/LandingPage/Heroimg3.png");
   const [image2, setImage2] = useState("/LandingPage/Heroimg2.jpg");
   const [image3, setImage3] = useState("/LandingPage/Heroimg3.png");
 
   // Titles to identify each image in the backend
-  const titles = ["starteryou-v2", "starteryou-v2", "starteryou-v2"]; // Different titles for each image
+  const titles = ["hero1", "hero2", "hero3"]; // Different titles for each image
 
   // Fetch images by title on component mount
   useEffect(() => {
@@ -41,28 +41,39 @@ const Hero = () => {
   }, []);
 
   // Handle image update by title
-  const handleImageUpload = async (e, setImage, title) => {
-    const file = e.target.files[0];
+  const handleImageUpload = async (event, imageType) => {
+    const file = event.target.files[0];
     const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", title);
+    formData.append("file", file); // Append the file to the FormData
+    formData.append("title", imageType); // Include the title for the update
 
     try {
       const response = await fetch(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate}`,
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(imageType)}`,
         {
           method: "PUT",
           body: formData,
         }
       );
-      if (!response.ok) throw new Error("Network response was not ok");
+      if (!response.ok) {
+        throw new Error(`Error updating image for ${imageType}`);
+      }
 
-      const newImageUrl = URL.createObjectURL(file); // Show new image preview
-      setImage(newImageUrl);
-      toast.success(`Image updated successfully for ${title}`); // Success toast
+      const data = await response.json();
+      console.log(`Image updated successfully for ${imageType}:`, data);
+      // Update the specific image URL in the state
+      if (imageType === "image1") {
+        setImage1(URL.createObjectURL(file));
+      } else if (imageType === "image2") {
+        setImage2(URL.createObjectURL(file));
+      } else if (imageType === "image3") {
+        setImage3(URL.createObjectURL(file));
+      }
+
+      setError(null); // Reset error state on successful upload
     } catch (error) {
-      console.error("Error updating image:", error);
-      toast.error(`Error updating image for ${title}`); // Error toast
+      console.error(`Error updating image for ${imageType}:`, error);
+      setError(`Error updating image for ${imageType}`); // Set error message
     }
   };
 
@@ -155,9 +166,7 @@ const Hero = () => {
           {isAdmin && (
             <div className="hidden md:block absolute top-20 left-20">
               <FileUpload
-                handleFileChange={(e) =>
-                  handleImageUpload(e, setImage1, titles[0])
-                }
+                handleFileChange={(e) => handleImageUpload(e, titles[0])}
               />
             </div>
           )}
@@ -173,9 +182,7 @@ const Hero = () => {
           {isAdmin && (
             <div>
               <FileUpload
-                handleFileChange={(e) =>
-                  handleImageUpload(e, setImage2, titles[1])
-                }
+                handleFileChange={(e) => handleImageUpload(e, titles[1])}
               />
             </div>
           )}
@@ -191,9 +198,7 @@ const Hero = () => {
           {isAdmin && (
             <div className="hidden md:block absolute top-20 right-2">
               <FileUpload
-                handleFileChange={(e) =>
-                  handleImageUpload(e, setImage3, titles[2])
-                }
+                handleFileChange={(e) => handleImageUpload(e, titles[2])}
               />
             </div>
           )}

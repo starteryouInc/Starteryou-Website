@@ -45,31 +45,16 @@ jobs:
             exit 1
           fi
 
-          # Transfer db_key.pem to the target EC2 server
+          # Transfer certificates to target EC2 server
           echo "$EC2_SSH_KEY" > ~/.ssh/ec2_key.pem
           chmod 600 ~/.ssh/ec2_key.pem
           ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
-          scp -i ~/.ssh/ec2_key.pem ~/.ssh/db_key.pem $EC2_USER@$EC2_HOST:/tmp/db_key.pem
 
-      # Step 3: Transfer Certificates to Target EC2 Server
-      - name: Transfer Certificates to Target EC2
-        env:
-          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-          EC2_USER: ${{ secrets.EC2_USER }}
-        run: |
-          set -e
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
-          echo "$EC2_SSH_KEY" > ~/.ssh/ec2_key.pem
-          chmod 600 ~/.ssh/ec2_key.pem
-
-          echo "Transferring certificates to EC2 server..."
           scp -i ~/.ssh/ec2_key.pem ./ca.crt $EC2_USER@$EC2_HOST:/tmp/ca.crt
           scp -i ~/.ssh/ec2_key.pem ./server.pem $EC2_USER@$EC2_HOST:/tmp/server.pem
+          scp -i ~/.ssh/ec2_key.pem ~/.ssh/db_key.pem $EC2_USER@$EC2_HOST:/tmp/db_key.pem
 
-      # Step 4: Deploy Application on Target EC2 Server
+      # Step 3: Deploy Application on Target EC2 Server
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7
         with:
@@ -86,7 +71,7 @@ jobs:
 
             PROJECT_ROOT="/home/ec2-user/Starteryou-Website"
             REPO_DIR="${PROJECT_ROOT}/Starteryou"
-            ENV_FILE="${REPO_DIR}/.env"
+            ENV_FILE="${REPO_DIR}/.env.server"
 
             mkdir -p "$PROJECT_ROOT"
             cd "$PROJECT_ROOT"
@@ -98,8 +83,8 @@ jobs:
               git fetch origin develop
               git reset --hard origin/develop
             fi
-
-            echo "Generating .env file..."
+  
+            echo "Generating .env.server file..."
             cat > "$ENV_FILE" << EOF
             NODE_ENV=production
             PORT=3000
@@ -114,18 +99,20 @@ jobs:
             MONGO_TLS=${{ secrets.MONGO_TLS }}
             MONGO_TLS_CA=${{ secrets.MONGO_TLS_CA }}
             MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}
+            MONGO_TLS_CA_PATH=${{ secrets.MONGO_TLS_CA_PATH }}
+            MONGO_TLS_CERT_PATH=${{ secrets.MONGO_TLS_CERT_PATH }}
             MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}
             DB_EC2_HOST=${{ secrets.DB_EC2_HOST }}
             DB_EC2_USER=${{ secrets.DB_EC2_USER }}
             EOF
 
-            # Source the .env file to make variables available to the session
+
+            # Source the .env.server file to make variables available to the session
             set -a
             source "$ENV_FILE"
             set +a
-
             chmod 600 "$ENV_FILE"
 
             echo "Deploying Docker services..."
-            docker-compose down --volumes --remove-orphans
-            docker-compose up --build -d
+            docker-compose --profile server --env-file "$ENV_FILE" down --volumes --remove-orphans
+            docker-compose --profile server --env-file "$ENV_FILE" up --build -d

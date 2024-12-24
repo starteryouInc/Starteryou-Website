@@ -32,7 +32,7 @@ const seedDatabase = async () => {
     await TextContent.insertMany(seedData);
     console.log("✅ Database seeded successfully!");
   } catch (error) {
-    console.error("❌ Error seeding database:", error.message, error.stack);
+    console.error("❌ Error seeding database:", error);
   }
 };
 

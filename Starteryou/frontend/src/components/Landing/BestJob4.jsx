@@ -1,7 +1,7 @@
-import {useState, useEffect} from "react";
-import {useNavigation} from "../../context/NavigationContext";
+import { useState, useEffect } from "react";
+import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
-import {API_CONFIG} from "@config/api";
+import { API_CONFIG } from "@config/api";
 
 const icons = [
   {
@@ -33,7 +33,7 @@ const icons = [
 const BestJob4 = () => {
   const { isAdmin } = useNavigation();
   const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images
-  const title = "starteryou-v2"; // Set the title for fetching and uploading
+  const title = "bestjob4"; // Set the title for fetching and uploading
   const [error, setError] = useState(null); // Error state for handling errors
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false); // State to track fetch attempt
 
@@ -44,7 +44,7 @@ const BestJob4 = () => {
       const response = await fetch(
         `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`
       );
-      
+
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -73,10 +73,13 @@ const BestJob4 = () => {
     formData.append("title", title); // Include the title for the update
 
     try {
-      const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`, {
-        method: "PUT",
-        body: formData,
-      });
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`,
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -97,13 +100,13 @@ const BestJob4 = () => {
     <div className="flex items-center justify-center py-16 lg:mt-20 px-4 lg:px-0">
       <div className="max-w-[1200px] h-auto w-full text-center">
         <p className="text-3xl sm:text-4xl md:text-5xl font-bold lg:font-extrabold text-[#1F2329] mb-6">
-          idly samber masala vada
+          Lorem ipsum dolor sit amet
         </p>
         <div className="flex flex-col items-center mt-10">
           {/* Icons for small screens */}
           <div className="flex flex-col items-center space-y-4 sm:hidden">
             <div className="flex flex-wrap justify-center space-x-6">
-              {icons.map(({src, alt, text, link}, index) => (
+              {icons.map(({ src, alt, text, link }, index) => (
                 <a
                   href={link}
                   key={index}
@@ -120,7 +123,7 @@ const BestJob4 = () => {
 
           {/* Icons for medium and large screens */}
           <div className="hidden sm:flex flex-wrap justify-center space-x-6">
-            {icons.map(({src, alt, text}, index) => (
+            {icons.map(({ src, alt, text }, index) => (
               <div
                 key={index}
                 className="flex items-center mb-4 relative cursor-pointer text-[#1F2329]"
