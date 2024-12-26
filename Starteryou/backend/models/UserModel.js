@@ -27,11 +27,9 @@ const UserSchema = new Schema(
     profile: {
       firstName: {
         type: String,
-        default: "John",
       },
       lastName: {
         type: String,
-        default: "Doe",
       },
       avatar: {
         type: String,
@@ -41,12 +39,10 @@ const UserSchema = new Schema(
     roles: {
       type: [String],
       enum: ["user", "admin"],
-      default: ["user"],
     },
     permissions: {
       type: [String],
       enum: ["read:profile", "write:profile", "manage:users"],
-      default: ["read:profile"],
     },
     accountStatus: {
       active: {
@@ -68,7 +64,6 @@ const UserSchema = new Schema(
       },
       loginAttempts: {
         type: Number,
-        default: 0,
       },
       mfaEnabled: {
         type: Boolean,
@@ -93,19 +88,6 @@ const UserSchema = new Schema(
     timestamps: true,
   }
 );
-
-// Middleware for hashing passwords
-UserSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
-});
-
-// Method to compare passwords
-UserSchema.methods.matchPassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
-};
 
 // Method to handle login attempts
 UserSchema.methods.incrementLoginAttempts = async function () {

@@ -6,12 +6,32 @@ import { toast } from "react-toastify";
 
 const BestJob = () => {
   const { isAdmin } = useNavigation();
+  const [activeBox, setActiveBox] = useState(0);
   const [image1, setImage1] = useState("/LandingPage/Rectangle.png");
   const [image2, setImage2] = useState("/LandingPage/Heroimg2.jpg");
   const [error, setError] = useState(null); // Error state for handling errors
 
   const titles = ["job1", "job2"];
-
+  const boxes = [
+    {
+      id: 0,
+      iconSrc: "/LandingPage/Icons/page 1.svg",
+      title: "Lorem Ipsum",
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+    },
+    {
+      id: 1,
+      iconSrc: "/LandingPage/Icons/FindJob.svg",
+      title: "Find Jobs",
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+    },
+    {
+      id: 2,
+      iconSrc: "/LandingPage/Icons/addJob.svg",
+      title: "Add Jobs",
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+    },
+  ];
   // Fetch images by title on component mount
   useEffect(() => {
     const fetchImages = async () => {
@@ -86,6 +106,48 @@ const BestJob = () => {
           <a href="#" className="text-[#7950F2] hover:underline font-medium">
             See new openings &gt;
           </a>
+
+          {/* Boxes */}
+          <div className="mt-8 flex flex-col md:flex-row md:justify-between lg:flex-col md:space-x-2 space-y-4 md:space-y-0 md:px-6 lg:space-x-0 lg:px-0">
+            {boxes.map((box) => (
+              <div
+                key={box.id}
+                className={`p-4 rounded-xl cursor-pointer ${
+                  activeBox === box.id
+                    ? "shadow-[0px_10.19px_30.57px_10.19px_#1F23290A]"
+                    : "shadow-none"
+                } md:w-[300px] md:h-[200px] lg:h-auto lg:w-auto`}
+                onClick={() => setActiveBox(box.id)}
+              >
+                <div className="flex items-center space-x-4">
+                  <img
+                    src={box.iconSrc}
+                    alt={box.title}
+                    className="w-8 h-8"
+                    style={{
+                      filter:
+                        activeBox === box.id
+                          ? "invert(29%) sepia(65%) saturate(7461%) hue-rotate(248deg) brightness(88%) contrast(97%)"
+                          : "none",
+                    }}
+                  />
+                  <h3
+                    className={`text-xl font-bold ${
+                      activeBox === box.id ? "text-[#7950F2]" : "text-black"
+                    }`}
+                  >
+                    {box.title}
+                  </h3>
+                </div>
+
+                {activeBox === box.id && (
+                  <p className="mt-4 text-gray-600 text-lg font-thin text-left">
+                    {box.description}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Right Section */}

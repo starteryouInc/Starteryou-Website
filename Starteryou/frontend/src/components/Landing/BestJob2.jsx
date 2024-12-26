@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 const BestJob2 = () => {
   const { isAdmin } = useNavigation();
   const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images
-  const title = "starteryou-v2"; // Set the title for fetching and uploading
+  const title = "bestjob2"; // Set the title for fetching and uploading
   const [error, setError] = useState(null); // Error state for handling errors
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false); // State to track fetch attempt
 
@@ -18,7 +18,7 @@ const BestJob2 = () => {
       const response = await fetch(
         `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`
       );
-      
+
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -47,10 +47,13 @@ const BestJob2 = () => {
     formData.append("title", title); // Include the title for the update
 
     try {
-      const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`, {
-        method: "PUT",
-        body: formData,
-      });
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`,
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -94,10 +97,6 @@ const BestJob2 = () => {
               alt="Current Image"
               className="relative w-[340px] h-[180px] top-[35px] left-[30px] md:w-[550px] md:top-[28px] md:left-[50px] lg:top-[78px] lg:left-[70px] lg:w-[680px] lg:h-[400px] rounded-xl"
               style={{ transform: "rotate(-6.44deg)" }}
-              onError={() => {
-                setError("Failed to load image");
-                setUploadedFile(null);
-              }}
             />
           ) : (
             <img
@@ -109,15 +108,13 @@ const BestJob2 = () => {
           )}
 
           {/* Admin Update Control */}
-          {isAdmin && (
-            <FileUpload handleFileChange={handleFileChange} />
-          )}
+          {isAdmin && <FileUpload handleFileChange={handleFileChange} />}
 
           {/* Error Display */}
           {error && (
             <div className="absolute top-16 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-md shadow-md">
               <p>{error}</p>
-              <button 
+              <button
                 onClick={fetchUploadedFile}
                 className="text-[#6853E3] text-sm hover:underline mt-1"
               >
@@ -130,7 +127,7 @@ const BestJob2 = () => {
         {/* Content Section */}
         <div className="order-1 lg:order-2 md:w-full lg:w-1/3 w-full md:text-center lg:text-left mb-8 lg:mb-0">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-1 leading-tight">
-            Eww ipsum dolor sit amet.
+            Lorem ipsum dolor sit amet.
           </h2>
           <p className="text-gray-600 mb-2 md:text-lg">
             Lorem ipsum dolor sit amet, consectetur adipiscing.
