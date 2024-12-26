@@ -64,19 +64,13 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions);
 // Use Swagger UI
 router.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-/**
- * @swagger
- * tags:
- *   name: Auth
- *   description: Authentication endpoints
- */
 
 /**
  * @swagger
  * /v1/auth/register:
  *   post:
  *     summary: Register a new user
- *     tags: [Auth]
+ *     tags: [Authentication]
  *     requestBody:
  *       required: true
  *       content:
@@ -216,7 +210,7 @@ const register = async (req, res) => {
  * /v1/auth/login:
  *   post:
  *     summary: Login a user
- *     tags: [Auth]
+ *     tags: [Authentication]
  *     requestBody:
  *       required: true
  *       content:
@@ -307,7 +301,7 @@ const login = async (req, res) => {
  * /v1/auth/logout:
  *   get:
  *     summary: Logout a user
- *     tags: [Auth]
+ *     tags: [Authentication]
  *     responses:
  *       200:
  *         description: Logout successful
@@ -348,7 +342,7 @@ const logout = async (req, res) => {
  * /v1/auth/refreshToken:
  *   post:
  *     summary: Refresh access token
- *     tags: [Auth]
+ *     tags: [Authentication]
  */
 const refreshToken = async (req, res) => {
   const { refreshToken } = req.body;
