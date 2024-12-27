@@ -213,7 +213,7 @@ const register = async (req, res) => {
  * /v1/auth/login:
  *   post:
  *     summary: Login a user
- *     tags: [Auth]
+ *     tags: [Authentication]
  *     requestBody:
  *       required: true
  *       content:
