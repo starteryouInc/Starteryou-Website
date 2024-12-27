@@ -90,6 +90,9 @@ router.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *               password:
  *                 type: string
  *                 example: "password123"
+ *               role:
+ *                 type: string
+ *                 example: "user"  # Example: "admin" or "user"
  *     responses:
  *       201:
  *         description: User registered successfully
@@ -120,9 +123,9 @@ router.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  */
 const register = async (req, res) => {
   try {
-    const { username, email, phoneNumber, password } = req.body;
+    const { username, email, phoneNumber, password, role} = req.body;
 
-    if (!username || !email || !phoneNumber || !password) {
+    if (!username || !email || !phoneNumber || !password || !role) {
       return res
         .status(400)
         .json({ message: "All fields are required", success: false });
@@ -210,7 +213,7 @@ const register = async (req, res) => {
  * /v1/auth/login:
  *   post:
  *     summary: Login a user
- *     tags: [Authentication]
+ *     tags: [Auth]
  *     requestBody:
  *       required: true
  *       content:
@@ -256,10 +259,9 @@ const register = async (req, res) => {
  *       500:
  *         description: Internal Server Error
  */
-
 const login = async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) {
+  if (!email || !password ) {
     return res.status(400).json({
       message: "All fields are required",
       success: false,
@@ -296,6 +298,7 @@ const login = async (req, res) => {
     handleError(res, error);
   }
 };
+
 /**
  * @swagger
  * /v1/auth/logout:
@@ -337,12 +340,46 @@ const logout = async (req, res) => {
     handleError(res, error);
   }
 };
+
 /**
  * @swagger
  * /v1/auth/refreshToken:
  *   post:
  *     summary: Refresh access token
  *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 example: "your-refresh-token-here"
+ *     responses:
+ *       200:
+ *         description: Token refreshed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Token refreshed successfully
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 accessToken:
+ *                   type: string
+ *                   example: "new-access-token-here"
+ *       400:
+ *         description: Refresh token is required
+ *       403:
+ *         description: Invalid or expired refresh token
+ *       500:
+ *         description: Internal Server Error
  */
 const refreshToken = async (req, res) => {
   const { refreshToken } = req.body;

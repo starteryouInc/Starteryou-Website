@@ -36,14 +36,12 @@ const UserSchema = new Schema(
         default: "profile_image_url",
       },
     },
-    roles: {
+    role: {
       type: [String],
       enum: ["user", "admin"],
+      required:true
     },
-    permissions: {
-      type: [String],
-      enum: ["read:profile", "write:profile", "manage:users"],
-    },
+
     accountStatus: {
       active: {
         type: Boolean,
