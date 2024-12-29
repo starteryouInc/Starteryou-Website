@@ -51,27 +51,194 @@ Welcome to the Starteryou Website repository! This project is the official platf
 Here is the project structure tree for the "StarterYou Website":
 
 ```
-Starteryou-Website
-├── Frontend
-│   ├── src
-│   │   ├── components
-│   │   ├── styles
-│   │   ├── assets
-│   │   └── utils
-│   ├── vite.config.js
-│   └── package.json
-├── Backend
-│   ├── server
-│   │   ├── routes
-│   │   ├── models
-│   │   ├── controllers
-│   │   └── middlewares
-│   ├── config.js
-│   ├── app.js
-│   └── package.json
-├── Database
-│   └── MongoDB
-└── CI/CD
-    ├── Dockerfile
-    └── .github/workflows
+Directory structure:
+└── starteryouInc-Starteryou-Website.git/
+    ├── Starteryou/
+    │   ├── .gitignore
+    │   ├── backend/
+    │   │   ├── docs/
+    │   │   │   ├── global.html
+    │   │   │   ├── index.html
+    │   │   │   ├── scripts/
+    │   │   │   │   ├── linenumber.js
+    │   │   │   │   └── prettify/
+    │   │   │   │       ├── prettify.js
+    │   │   │   │       ├── Apache-License-2.0.txt
+    │   │   │   │       └── lang-css.js
+    │   │   │   ├── routes_textRoutes.js.html
+    │   │   │   ├── models_TextContent.js.html
+    │   │   │   ├── fonts/
+    │   │   │   │   ├── OpenSans-LightItalic-webfont.eot
+    │   │   │   │   ├── OpenSans-BoldItalic-webfont.eot
+    │   │   │   │   ├── OpenSans-Regular-webfont.woff
+    │   │   │   │   ├── OpenSans-Light-webfont.eot
+    │   │   │   │   ├── OpenSans-BoldItalic-webfont.woff
+    │   │   │   │   ├── OpenSans-LightItalic-webfont.woff
+    │   │   │   │   ├── OpenSans-Italic-webfont.woff
+    │   │   │   │   ├── OpenSans-Bold-webfont.eot
+    │   │   │   │   ├── OpenSans-Regular-webfont.eot
+    │   │   │   │   ├── OpenSans-Italic-webfont.eot
+    │   │   │   │   ├── OpenSans-Bold-webfont.woff
+    │   │   │   │   └── OpenSans-Light-webfont.woff
+    │   │   │   ├── styles/
+    │   │   │   │   ├── prettify-tomorrow.css
+    │   │   │   │   ├── jsdoc-default.css
+    │   │   │   │   └── prettify-jsdoc.css
+    │   │   │   ├── module-TextContent.html
+    │   │   │   └── textRoutes.js.html
+    │   │   ├── server.js
+    │   │   ├── package.json
+    │   │   ├── jsconfig.json
+    │   │   ├── models/
+    │   │   │   ├── TextContent.js
+    │   │   │   └── FileMetadata.js
+    │   │   ├── routes/
+    │   │   │   ├── fileRoutes.js
+    │   │   │   ├── verificationRoutes.js
+    │   │   │   ├── textRoutes.js
+    │   │   │   └── index.js
+    │   │   ├── jsdoc.config.json
+    │   │   ├── dockerfile
+    │   │   ├── package-lock.json
+    │   │   ├── middleware/
+    │   │   │   └── apiLogger.js
+    │   │   └── utils/
+    │   │       ├── testMongo.js
+    │   │       └── mongoTester.js
+    │   ├── frontend/
+    │   │   ├── docs/
+    │   │   │   └── frontend/
+    │   │   │       ├── global.html
+    │   │   │       ├── index.html
+    │   │   │       ├── scripts/
+    │   │   │       │   ├── linenumber.js
+    │   │   │       │   └── prettify/
+    │   │   │       │       ├── prettify.js
+    │   │   │       │       ├── Apache-License-2.0.txt
+    │   │   │       │       └── lang-css.js
+    │   │   │       ├── module-BetterFuture.html
+    │   │   │       ├── OurVision.jsx.html
+    │   │   │       ├── fonts/
+    │   │   │       │   ├── OpenSans-LightItalic-webfont.eot
+    │   │   │       │   ├── OpenSans-BoldItalic-webfont.eot
+    │   │   │       │   ├── OpenSans-Regular-webfont.woff
+    │   │   │       │   ├── OpenSans-Light-webfont.eot
+    │   │   │       │   ├── OpenSans-BoldItalic-webfont.woff
+    │   │   │       │   ├── OpenSans-LightItalic-webfont.woff
+    │   │   │       │   ├── OpenSans-Italic-webfont.woff
+    │   │   │       │   ├── OpenSans-Bold-webfont.eot
+    │   │   │       │   ├── OpenSans-Regular-webfont.eot
+    │   │   │       │   ├── OpenSans-Italic-webfont.eot
+    │   │   │       │   ├── OpenSans-Bold-webfont.woff
+    │   │   │       │   └── OpenSans-Light-webfont.woff
+    │   │   │       ├── OurMission.jsx.html
+    │   │   │       ├── HeroAbout.jsx.html
+    │   │   │       ├── styles/
+    │   │   │       │   ├── prettify-tomorrow.css
+    │   │   │       │   ├── jsdoc-default.css
+    │   │   │       │   └── prettify-jsdoc.css
+    │   │   │       ├── module-OurVision.html
+    │   │   │       ├── Team.jsx.html
+    │   │   │       ├── TechTeam.jsx.html
+    │   │   │       └── BetterFuture.jsx.html
+    │   │   ├── index.html
+    │   │   ├── eslint.config.js
+    │   │   ├── nginx.conf
+    │   │   ├── public/
+    │   │   │   ├── LandingPage/
+    │   │   │   │   └── Icons/
+    │   │   │   ├── JobPage/
+    │   │   │   ├── AboutPage/
+    │   │   │   │   ├── TechTeam/
+    │   │   │   │   └── Team/
+    │   │   │   └── JobPortalPage/
+    │   │   ├── postcss.config.js
+    │   │   ├── package.json
+    │   │   ├── vite.config.js
+    │   │   ├── jsdoc.config.json
+    │   │   ├── dockerfile
+    │   │   ├── package-lock.json
+    │   │   ├── tailwind.config.js
+    │   │   └── src/
+    │   │       ├── App.jsx
+    │   │       ├── index.css
+    │   │       ├── context/
+    │   │       │   ├── NavigationContext.jsx
+    │   │       │   ├── ProtectedRoute.jsx
+    │   │       │   └── UserContext.jsx
+    │   │       ├── assets/
+    │   │       ├── components/
+    │   │       │   ├── Education/
+    │   │       │   │   ├── EduHero.jsx
+    │   │       │   │   ├── UnlockPotential.jsx
+    │   │       │   │   ├── OurInsight.jsx
+    │   │       │   │   ├── StartJourney.jsx
+    │   │       │   │   ├── Testimonials.jsx
+    │   │       │   │   ├── ComprehensiveFeatures.jsx
+    │   │       │   │   └── YourJourney.jsx
+    │   │       │   ├── Auth/
+    │   │       │   │   ├── LoginPage.jsx
+    │   │       │   │   └── Signup.jsx
+    │   │       │   ├── Landing/
+    │   │       │   │   ├── Banner.jsx
+    │   │       │   │   ├── Contact.jsx
+    │   │       │   │   ├── Pricing.jsx
+    │   │       │   │   ├── BestJob4.jsx
+    │   │       │   │   ├── BestBuddy.jsx
+    │   │       │   │   ├── BestJob2.jsx
+    │   │       │   │   ├── Collab.jsx
+    │   │       │   │   ├── UpcomingFeatures.css
+    │   │       │   │   ├── Hero.jsx
+    │   │       │   │   ├── BestJob3.jsx
+    │   │       │   │   ├── Blog.jsx
+    │   │       │   │   ├── UpcomingFeatures.jsx
+    │   │       │   │   └── BestJob.jsx
+    │   │       │   ├── JobPage/
+    │   │       │   │   ├── AppSupport.jsx
+    │   │       │   │   ├── DiscoverFuture.jsx
+    │   │       │   │   ├── TailoredJob.jsx
+    │   │       │   │   ├── IdealJob.jsx
+    │   │       │   │   ├── Reviews.jsx
+    │   │       │   │   └── JobHero.jsx
+    │   │       │   ├── JobPortal/
+    │   │       │   │   ├── HeroJobPortal.jsx
+    │   │       │   │   ├── LatestInsight.jsx
+    │   │       │   │   ├── LaunchBanner.jsx
+    │   │       │   │   ├── UnlockPotential.jsx
+    │   │       │   │   ├── PathStart.jsx
+    │   │       │   │   ├── DiscoverPath.jsx
+    │   │       │   │   └── JobListing.jsx
+    │   │       │   ├── About/
+    │   │       │   │   ├── HeroAbout.jsx
+    │   │       │   │   ├── BetterFuture.jsx
+    │   │       │   │   ├── TechTeam.jsx
+    │   │       │   │   ├── OurVision.jsx
+    │   │       │   │   ├── OurMission.jsx
+    │   │       │   │   └── Team.jsx
+    │   │       │   └── Common/
+    │   │       │       ├── Footer.jsx
+    │   │       │       ├── AdminProtectedRoute.jsx
+    │   │       │       ├── FileUpload.jsx
+    │   │       │       └── Navbar.jsx
+    │   │       ├── hooks/
+    │   │       │   └── useFileOperations.js
+    │   │       ├── main.jsx
+    │   │       ├── config/
+    │   │       │   └── api.js
+    │   │       ├── pages/
+    │   │       │   ├── HomePage.jsx
+    │   │       │   ├── JobPortalPage.jsx
+    │   │       │   ├── EducationPage.jsx
+    │   │       │   ├── _app.js
+    │   │       │   ├── JobPage.jsx
+    │   │       │   └── AboutPage.jsx
+    │   │       ├── App.css
+    │   │       └── utils/
+    │   │           └── fileOperations.js
+    │   └── docker-compose.yml
+    ├── .github/
+    │   └── workflows/
+    │       ├── develop.yml
+    │       └── main.yml
+    └── README.md
 ```
