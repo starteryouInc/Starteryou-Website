@@ -261,7 +261,7 @@ const register = async (req, res) => {
  */
 const login = async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password ) {
+  if (!email || !password) {
     return res.status(400).json({
       message: "All fields are required",
       success: false,
@@ -270,21 +270,18 @@ const login = async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res
-        .status(400)
-        .json({ message: "User does not exist", success: false });
+      return res.status(400).json({ message: "User does not exist", success: false });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res
-        .status(401)
-        .json({ message: "Invalid credentials", success: false });
+      return res.status(401).json({ message: "Invalid credentials", success: false });
     }
+
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    // Save the refresh token in the database
+    // Store the refresh token in the database
     user.refreshToken = refreshToken;
     await user.save();
 
@@ -299,12 +296,23 @@ const login = async (req, res) => {
   }
 };
 
+
 /**
  * @swagger
  * /v1/auth/logout:
- *   get:
+ *   post:
  *     summary: Logout a user
  *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 example: "your-refresh-token-here"
  *     responses:
  *       200:
  *         description: Logout successful
@@ -319,27 +327,42 @@ const login = async (req, res) => {
  *                 success:
  *                   type: boolean
  *                   example: true
+ *       400:
+ *         description: Bad Request
  *       500:
  *         description: Internal Server Error
  */
 const logout = async (req, res) => {
-  try {
-    const { userId } = req.body;
-    const user = await User.findById(userId);
+  const { refreshToken } = req.body;
+  
+  if (!refreshToken) {
+    return res.status(400).json({ message: "Refresh token required", success: false });
+  }
 
-    if (user) {
-      user.refreshToken = null; // Invalidate the refresh token
-      await user.save();
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+
+    console.log('Provided Refresh Token:', refreshToken);  // Log provided token
+    console.log('Stored Refresh Token:', user.refreshToken);  // Log stored token
+
+    if (!user || user.refreshToken !== refreshToken) {
+      return res.status(403).json({ message: "Invalid refresh token", success: false });
     }
 
+    // Remove the refresh token from the database
+    user.refreshToken = null;
+    await user.save();
+
     return res.status(200).json({
-      message: "Logout successful",
+      message: "Logged out successfully",
       success: true,
     });
   } catch (error) {
     handleError(res, error);
   }
 };
+
 
 /**
  * @swagger
@@ -385,27 +408,30 @@ const refreshToken = async (req, res) => {
   const { refreshToken } = req.body;
 
   if (!refreshToken) {
-    return res
-      .status(400)
-      .json({ message: "Refresh token is required", success: false });
+    return res.status(400).json({ message: "Refresh token is required", success: false });
   }
 
   try {
     const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id);
 
+    console.log('Provided Refresh Token:', refreshToken);  // Log provided token
+    console.log('Stored Refresh Token:', user.refreshToken);  // Log stored token
+
     if (!user || user.refreshToken !== refreshToken) {
-      return res
-        .status(403)
-        .json({ message: "Invalid or expired refresh token", success: false });
+      return res.status(403).json({ message: "Invalid or expired refresh token", success: false });
     }
 
     const newAccessToken = generateAccessToken(user);
+    const newRefreshToken = generateRefreshToken(user);
+    user.refreshToken = newRefreshToken;
+    await user.save();
 
     return res.status(200).json({
-      message: "Token refreshed successfully",
+      message: "Tokens refreshed successfully",
       success: true,
       accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
     });
   } catch (error) {
     handleError(res, error);
@@ -415,7 +441,7 @@ const refreshToken = async (req, res) => {
 
 router.post("/register", register);
 router.post("/login", login);
-router.get("/logout", logout);
+router.post("/logout", logout);
 router.post("/refreshToken", refreshToken);
 
 module.exports = router;

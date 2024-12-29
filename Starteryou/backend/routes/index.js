@@ -445,7 +445,7 @@ const apiEndpoints = [
         },
       },
       {
-        method: "GET",
+        method: "POST",
         path: "/api/v1/auth/logout",
         description: "Logout the current user",
         responses: {
