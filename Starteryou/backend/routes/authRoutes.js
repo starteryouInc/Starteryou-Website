@@ -295,8 +295,7 @@ const login = async (req, res) => {
     handleError(res, error);
   }
 };
-
-
+ 
 /**
  * @swagger
  * /v1/auth/logout:
@@ -312,7 +311,7 @@ const login = async (req, res) => {
  *             properties:
  *               refreshToken:
  *                 type: string
- *                 example: "your-refresh-token-here"
+ *                 example: your_refresh_token_here
  *     responses:
  *       200:
  *         description: Logout successful
@@ -334,28 +333,31 @@ const login = async (req, res) => {
  */
 const logout = async (req, res) => {
   const { refreshToken } = req.body;
-  
+
   if (!refreshToken) {
-    return res.status(400).json({ message: "Refresh token required", success: false });
+    return res.status(400).json({
+      message: "Refresh token is required",
+      success: false,
+    });
   }
 
   try {
-    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
+    // Find the user associated with the refresh token
+    const user = await User.findOne({ refreshToken });
 
-    console.log('Provided Refresh Token:', refreshToken);  // Log provided token
-    console.log('Stored Refresh Token:', user.refreshToken);  // Log stored token
-
-    if (!user || user.refreshToken !== refreshToken) {
-      return res.status(403).json({ message: "Invalid refresh token", success: false });
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid refresh token",
+        success: false,
+      });
     }
 
-    // Remove the refresh token from the database
-    user.refreshToken = null;
+    // Invalidate the refresh token
+    user.refreshToken = null; // or use an empty string ""
     await user.save();
 
-    return res.status(200).json({
-      message: "Logged out successfully",
+    res.status(200).json({
+      message: "Logout successful",
       success: true,
     });
   } catch (error) {
@@ -364,84 +366,11 @@ const logout = async (req, res) => {
 };
 
 
-/**
- * @swagger
- * /v1/auth/refreshToken:
- *   post:
- *     summary: Refresh access token
- *     tags: [Authentication]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               refreshToken:
- *                 type: string
- *                 example: "your-refresh-token-here"
- *     responses:
- *       200:
- *         description: Token refreshed successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Token refreshed successfully
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 accessToken:
- *                   type: string
- *                   example: "new-access-token-here"
- *       400:
- *         description: Refresh token is required
- *       403:
- *         description: Invalid or expired refresh token
- *       500:
- *         description: Internal Server Error
- */
-const refreshToken = async (req, res) => {
-  const { refreshToken } = req.body;
-
-  if (!refreshToken) {
-    return res.status(400).json({ message: "Refresh token is required", success: false });
-  }
-
-  try {
-    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
-
-    console.log('Provided Refresh Token:', refreshToken);  // Log provided token
-    console.log('Stored Refresh Token:', user.refreshToken);  // Log stored token
-
-    if (!user || user.refreshToken !== refreshToken) {
-      return res.status(403).json({ message: "Invalid or expired refresh token", success: false });
-    }
-
-    const newAccessToken = generateAccessToken(user);
-    const newRefreshToken = generateRefreshToken(user);
-    user.refreshToken = newRefreshToken;
-    await user.save();
-
-    return res.status(200).json({
-      message: "Tokens refreshed successfully",
-      success: true,
-      accessToken: newAccessToken,
-      refreshToken: newRefreshToken,
-    });
-  } catch (error) {
-    handleError(res, error);
-  }
-};
 // Set up router
 
 router.post("/register", register);
 router.post("/login", login);
 router.post("/logout", logout);
-router.post("/refreshToken", refreshToken);
+
 
 module.exports = router;
