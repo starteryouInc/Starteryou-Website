@@ -130,6 +130,11 @@ const register = async (req, res) => {
         .status(400)
         .json({ message: "All fields are required", success: false });
     }
+
+    // Validate role (optional)
+  if (role !== "admin" && role !== "user") {
+    return res.status(400).json({ message: "Invalid role specified" });
+  }
     // email validation
     if (
       !validator.isEmail(email) ||
@@ -185,6 +190,7 @@ const register = async (req, res) => {
       email,
       phoneNumber,
       password: hashedPassword,
+      role
     });
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
@@ -201,6 +207,7 @@ const register = async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
+        role:user.role
       },
     });
   } catch (error) {
@@ -277,7 +284,7 @@ const login = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials", success: false });
     }
-
+    
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
@@ -289,7 +296,7 @@ const login = async (req, res) => {
       message: "Login successful",
       success: true,
       tokens: { accessToken, refreshToken },
-      user: { id: user._id, username: user.username, email: user.email },
+      user: { id: user._id, username: user.username, email: user.email ,role: user.role},
     });
   } catch (error) {
     handleError(res, error);

@@ -16,6 +16,7 @@ import {
 import AdminProtectedRoute from "./components/Common/AdminProtectedRoute";
 import { UserProvider } from "./context/UserContext";
 import LoginPage from "./components/Auth/LoginPage";
+import AdminSignupPage from "./components/Auth/AdminSignup";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import EducationPage from "./pages/EducationPage";
@@ -46,6 +47,7 @@ const Layout = () => {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/jobs" element={<JobPageBefore />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/adminsignup" element={<AdminSignupPage />} />
         <Route path="/education" element={<EducationPage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/InProgressPage" element={<InProgressPage />} />
