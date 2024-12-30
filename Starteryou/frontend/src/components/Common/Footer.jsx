@@ -14,15 +14,44 @@ const Footer = () => {
             nonummy nibh
           </p>
           <div className="flex space-x-4">
-            <div className="h-10 w-10 rounded-full bg-white border border-[#D4D4D8] flex items-center justify-center">
+            <a
+              href="https://www.facebook.com/people/Starter-You/pfbid0cKcKnJD21XgSFq7hohEhxuXbbeyZk1u8uvtktPesNbpdaXFKVuqXaKJwXekshggJl/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="h-10 w-10 rounded-full bg-white border border-[#D4D4D8] flex items-center justify-center"
+            >
               <img src="/fb.svg" alt="Facebook" className="h-4 w-4" />
-            </div>
-            <div className="h-10 w-10 rounded-full bg-white border border-[#D4D4D8] flex items-center justify-center">
+            </a>
+
+            <a
+              href="https://x.com/starter_you"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="h-10 w-10 rounded-full bg-white border border-[#D4D4D8] flex items-center justify-center"
+            >
               <img src="/Twitter.svg" alt="Twitter" className="h-4 w-5" />
-            </div>
-            <div className="h-10 w-10 rounded-full bg-white border border-[#D4D4D8] flex items-center justify-center">
+            </a>
+
+            <a
+              href="https://www.instagram.com/starteryou_official/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="h-10 w-10 rounded-full bg-white border border-[#D4D4D8] flex items-center justify-center"
+            >
               <img src="/Insta.svg" alt="Instagram" className="h-4 w-4" />
-            </div>
+            </a>
+            <a
+              href="https://www.linkedin.com/company/starteryou/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="h-10 w-10 rounded-full bg-white border border-[#D4D4D8] flex items-center justify-center"
+            >
+              <img
+                src="/devicon_linkedin.svg"
+                alt="Linkedin"
+                className="h-4 w-4"
+              />
+            </a>
           </div>
         </div>
 
