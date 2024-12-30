@@ -31,14 +31,14 @@ const Team = () => {
       position: "CEO",
       name: "Michael Berlingo",
       about: "Leading the company with a vision.",
-      linkedinUrl: "https://www.linkedin.com/in/mblingo/",
+      linkedinUrl: `https://www.linkedin.com/in/mblingo/`,
     },
     {
       imgSrc: "/AboutPage/Team/cso.jpg",
       position: "CSO",
       name: "Anthony Ivanov",
       about: "In charge of technology and innovation.",
-      linkedinUrl: "https://www.linkedin.com/in/anthony-ivanov/",
+      linkedinUrl: `https://www.linkedin.com/in/anthony-ivanov/`,
     },
     {
       imgSrc: "/AboutPage/Team/cto.jpg",
@@ -93,6 +93,7 @@ const Team = () => {
                     response.data.paragraphs[0] ||
                     "No additional information available.",
                   _id: response.data._id,
+                  linkedinUrl: member.linkedinUrl, // Preserve LinkedIn URL
                 };
               }
               return member; // Fallback to initial data if API call fails
@@ -300,14 +301,17 @@ const Team = () => {
                 </>
               )}
               {/* LinkedIn icon  */}
-              <a
-                href={member.linkedinUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#0077b5] hover:text-[#005582] mt-4"
-              >
-                <FaLinkedin size={24} />
-              </a>
+              {member.linkedinUrl && (
+                <a
+                  href={member.linkedinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#0077b5] hover:text-[#005582] mt-4 inline-block"
+                >
+                  <FaLinkedin size={24} />
+                </a>
+              )}
+
               {isAdmin && editingIndex !== index && (
                 <button
                   className="absolute top-3 right-3 text-[#D9502E] hover:text-[#252B42]"
