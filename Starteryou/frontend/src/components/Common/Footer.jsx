@@ -40,6 +40,18 @@ const Footer = () => {
             >
               <img src="/Insta.svg" alt="Instagram" className="h-4 w-4" />
             </a>
+            <a
+              href="https://www.linkedin.com/company/starteryou/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="h-10 w-10 rounded-full bg-white border border-[#D4D4D8] flex items-center justify-center"
+            >
+              <img
+                src="/devicon_linkedin.svg"
+                alt="Linkedin"
+                className="h-4 w-4"
+              />
+            </a>
           </div>
         </div>
 
