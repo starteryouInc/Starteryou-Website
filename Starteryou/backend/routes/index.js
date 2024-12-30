@@ -4,6 +4,7 @@ const router = express.Router();
 const fileRoutes = require("./fileRoutes");
 const textRoutes = require("./textRoutes.js");
 const authRoutes = require("./authRoutes");
+
 // Store all API endpoints and their descriptions
 const apiEndpoints = [
   // File Management APIs
@@ -442,19 +443,6 @@ const apiEndpoints = [
           curl: `curl -X POST http://localhost:3000/api/v1/auth/login \
           -H "Content-Type: application/json" \
           -d '{"email": "user1@example.com", "password": "password123"}'`,
-        },
-      },
-      {
-        method: "POST",
-        path: "/api/v1/auth/logout",
-        description: "Logout the current user",
-        responses: {
-          200: {
-            description: "Logout successful",
-          },
-        },
-        example: {
-          curl: "curl -X GET http://localhost:3000/api/v1/auth/logout",
         },
       },
     ],

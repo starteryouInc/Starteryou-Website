@@ -11,7 +11,6 @@ const swaggerUi = require("swagger-ui-express");
 const { mountRoutes } = require("./routes"); // Main routes including API docs
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 const authRoutes = require("./routes/authRoutes");
-const profileRoutes = require("./routes/profileRoutes");
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 // Initialize Express app
 const app = express();
@@ -87,8 +86,6 @@ app.use("/api/files", fileRoutes);
  *     description: Routes for Authentication endpoints
  */
 app.use("/api/v1/auth", authRoutes);
-
-//app.use("/api/v1/profile", profileRoutes);
 
 // Health Check Route
 /**

@@ -296,81 +296,9 @@ const login = async (req, res) => {
   }
 };
  
-/**
- * @swagger
- * /v1/auth/logout:
- *   post:
- *     summary: Logout a user
- *     tags: [Authentication]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               refreshToken:
- *                 type: string
- *                 example: your_refresh_token_here
- *     responses:
- *       200:
- *         description: Logout successful
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Logout successful
- *                 success:
- *                   type: boolean
- *                   example: true
- *       400:
- *         description: Bad Request
- *       500:
- *         description: Internal Server Error
- */
-const logout = async (req, res) => {
-  const { refreshToken } = req.body;
-
-  if (!refreshToken) {
-    return res.status(400).json({
-      message: "Refresh token is required",
-      success: false,
-    });
-  }
-
-  try {
-    // Find the user associated with the refresh token
-    const user = await User.findOne({ refreshToken });
-
-    if (!user) {
-      return res.status(400).json({
-        message: "Invalid refresh token",
-        success: false,
-      });
-    }
-
-    // Invalidate the refresh token
-    user.refreshToken = null; // or use an empty string ""
-    await user.save();
-
-    res.status(200).json({
-      message: "Logout successful",
-      success: true,
-    });
-  } catch (error) {
-    handleError(res, error);
-  }
-};
-
 
 // Set up router
 
 router.post("/register", register);
 router.post("/login", login);
-router.post("/logout", logout);
-
-
 module.exports = router;
