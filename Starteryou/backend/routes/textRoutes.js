@@ -4,7 +4,8 @@ const router = express.Router();
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const TextContent = require("../models/TextContent"); // Adjust path as needed
-
+require("dotenv").config();
+const backendUrl = process.env.BACKEND_URL || "http://localhost:3000";
 // Swagger setup
 const swaggerOptions = {
   swaggerDefinition: {
@@ -17,7 +18,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: "http://dev.starteryou.com:3000/api/text", // Replace with your base URL
+        url: `${backendUrl}/api/text`, // Replace with your base URL
       },
     ],
   },
@@ -27,7 +28,7 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
 // Use Swagger UI
-router.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+router.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 /**
  * @swagger

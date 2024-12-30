@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const { ObjectId } = require("mongodb");
 const FileMetadata = require("../models/FileMetadata");
 require("dotenv").config();
-
+const backendUrl = process.env.BACKEND_URL || "http://localhost:3000";
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 
@@ -46,8 +46,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: "http://dev.starteryou.com:3000/api/",
-        description: "Dev Server",
+        url: `${backendUrl}:3000/api/`,
       },
     ],
   },
@@ -57,7 +56,7 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
 // Swagger UI setup
-router.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+router.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 /**
  * @swagger

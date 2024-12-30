@@ -147,7 +147,7 @@ const BetterFuture = () => {
           rows={4}
         />
       ) : (
-        <p className="text-[#737373] mb-8 md:mb-14 max-w-[600px] mx-auto">
+        <p className="text-[#737373] mb-8 md:mb-14 max-w-[600px] mx-auto whitespace-pre-wrap">
           {paragraphs[0]}
         </p>
       )}
@@ -202,7 +202,7 @@ const BetterFuture = () => {
                 rows={3}
               />
             ) : (
-              paragraphs[1]
+              <span className="whitespace-pre-wrap">{paragraphs[1]}</span>
             )}
           </h2>
 
@@ -217,11 +217,11 @@ const BetterFuture = () => {
                     return updated;
                   })
                 }
-                className="text-[#737373] text-start max-w-[400px] text-base pb-6 border border-gray-300 p-2 rounded w-full"
+                className="text-[#737373] text-start max-w-[400px] text-base pb-6 border border-gray-300 p-2 rounded w-full whitespace-pre-wrap"
                 rows={3}
               />
             ) : (
-              paragraphs[2]
+              <span className="whitespace-pre-wrap">{paragraphs[2]}</span>
             )}
           </p>
 
@@ -245,7 +245,7 @@ const BetterFuture = () => {
                           updated[titleIndex] = e.target.value;
                           setParagraphs(updated);
                         }}
-                        className="text-xl text-left font-semibold text-[#252B42] border border-gray-300 p-2 rounded w-full"
+                        className="text-xl text-left font-semibold text-[#252B42] border border-gray-300 p-2 rounded w-full whitespace-pre-wrap "
                       />
                       <textarea
                         value={paragraphs[titleIndex + 1]} // Paragraph input
@@ -260,10 +260,10 @@ const BetterFuture = () => {
                     </>
                   ) : (
                     <>
-                      <h3 className="text-xl text-left font-semibold text-[#252B42]">
+                      <h3 className="text-xl text-left font-semibold text-[#252B42] whitespace-pre-wrap">
                         {paragraphs[titleIndex]}
                       </h3>
-                      <p className="text-[#737373] text-left text-sm">
+                      <p className="text-[#737373] text-left text-sm whitespace-pre-wrap">
                         {paragraphs[titleIndex + 1]}
                       </p>
                     </>
