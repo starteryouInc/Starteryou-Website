@@ -108,7 +108,7 @@ const Hero = () => {
 
       {/* Main Heading */}
       <h1 className="font-bold text-[40px] sm:text-[64px] leading-tight text-black uppercase z-10 pt-[190px]">
-        Collaborate Together
+        Collaborate Together2
       </h1>
 
       {/* doodle2 */}
