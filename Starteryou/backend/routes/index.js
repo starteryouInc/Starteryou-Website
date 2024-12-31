@@ -375,7 +375,6 @@ router.use("/api/files", fileRoutes);
 router.use("/api/text", textRoutes);
 
 // API documentation endpoint with enhanced information
-// API documentation endpoint with enhanced information
 router.get("/api/docs", (req, res) => {
   const baseUrl =
     process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
