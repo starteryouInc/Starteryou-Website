@@ -2,10 +2,10 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useUserContext } from "../../context/UserContext"; // Make sure the path is correct
+import { useUserContext } from "../../context/UserContext"; 
 
 const AdminSignup = () => {
-  const { setUser } = useUserContext(); // Destructure setUser from context
+  const { setUser } = useUserContext(); 
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
