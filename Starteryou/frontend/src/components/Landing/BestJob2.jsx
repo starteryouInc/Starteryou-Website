@@ -3,6 +3,8 @@ import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
 import { API_CONFIG } from "@config/api";
 import { toast } from "react-toastify";
+import { FaPencilAlt } from "react-icons/fa";
+import axios from "axios";
 
 const BestJob2 = () => {
   const { isAdmin } = useNavigation();
@@ -10,6 +12,13 @@ const BestJob2 = () => {
   const title = "bestjob2"; // Set the title for fetching and uploading
   const [error, setError] = useState(null); // Error state for handling errors
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false); // State to track fetch attempt
+  //States and Variables for TEXT EDITIN API
+  const [titleBJ2, setTitleBJ2] = useState("Best Job 2 Title");
+  const [paragraphBJ2, setParagraphBJ2] = useState(
+    "Lorem ipsum dolor sit amet, consectetur adipiscing."
+  );
+  const [isEditing, setIsEditing] = useState(false);
+  const page = "HomePage";
 
   const fetchUploadedFile = async () => {
     if (hasFetchedOnce) return; // Prevent fetching again if already attempted
@@ -34,10 +43,6 @@ const BestJob2 = () => {
       setHasFetchedOnce(true); // Mark as fetch attempt made
     }
   };
-
-  useEffect(() => {
-    fetchUploadedFile(); // Fetch the specific image on component mount
-  }, []);
 
   // Handle file upload
   const handleFileChange = async (event) => {
@@ -85,6 +90,55 @@ const BestJob2 = () => {
     },
   ];
 
+  const handleEdit = () => isAdmin && setIsEditing(true);
+
+  const fetchData = async () => {
+    try {
+      const { data } = await axios.get(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+        {
+          params: { page, component: "BestJob2" },
+        }
+      );
+
+      setTitleBJ2(data?.content || "");
+      setParagraphBJ2(
+        Array.isArray(data?.paragraphs) ? data.paragraphs.join("\n") : ""
+      );
+    } catch (error) {
+      console.error("Error fetching textData of BestJob2Comp:", error);
+    }
+  };
+
+  const saveContent = async () => {
+    try {
+      const noramlizedParagraphs = Array.isArray(paragraphBJ2)
+        ? paragraphBJ2
+        : [paragraphBJ2.trim()];
+      const response = await axios.put(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+        {
+          page: "HomePage",
+          component: "BestJob2",
+          content: titleBJ2.trim(),
+          paragraphs: noramlizedParagraphs,
+        }
+      );
+      setIsEditing(false);
+      console.log("BestJob2Comp Data is saved: ", response);
+    } catch (error) {
+      console.log(
+        "Error occured while saving the content(BestJob2Comp): ",
+        error
+      );
+    }
+  };
+
+  useEffect(() => {
+    fetchUploadedFile(); // Fetch the specific image on component mount
+    fetchData();
+  }, []);
+
   return (
     <div className="container mx-auto max-w-[1300px] px-4 py-12">
       <div className="flex flex-col lg:flex-row items-center justify-between lg:space-x-8">
@@ -126,12 +180,50 @@ const BestJob2 = () => {
 
         {/* Content Section */}
         <div className="order-1 lg:order-2 md:w-full lg:w-1/3 w-full md:text-center lg:text-left mb-8 lg:mb-0">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-1 leading-tight">
-            Lorem ipsum dolor sit amet.
-          </h2>
-          <p className="text-gray-600 mb-2 md:text-lg">
-            Lorem ipsum dolor sit amet, consectetur adipiscing.
-          </p>
+          {isEditing ? (
+            <div className="mt-10 flex flex-col space-y-4 z-50">
+              <textarea
+                value={titleBJ2}
+                onChange={(e) => setTitleBJ2(e.target.value)}
+                placeholder="Title here..."
+                className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
+              />
+              <textarea
+                value={paragraphBJ2}
+                onChange={(e) => setParagraphBJ2(e.target.value)}
+                placeholder="Paragraph here..."
+                className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
+              />
+              <div className="lg:w-[400px] flex items-center justify-between space-x-2 text-white">
+                <button
+                  onClick={saveContent}
+                  className="bg-green-600 py-2 px-4 rounded text-xl w-1/2"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="bg-red-600 py-2 px-4 rounded text-xl w-1/2"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="relative">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-1 leading-tight">
+                {titleBJ2}
+              </h2>
+              <p className="text-gray-600 mb-2 md:text-lg">{paragraphBJ2}</p>
+              {isAdmin && (
+                <FaPencilAlt
+                  onClick={handleEdit}
+                  className="cursor-pointer absolute top-0 -right-2 lg:-right-5"
+                />
+              )}
+            </div>
+          )}
+
           <a href="#" className="text-[#7950F2] hover:underline font-medium">
             Request for demo &gt;
           </a>
@@ -147,11 +239,34 @@ const BestJob2 = () => {
                   <img src={box.iconSrc} alt={box.title} className="w-8 h-8" />
                   <h3 className="text-xl font-bold text-black">{box.title}</h3>
                 </div>
-                <p className="mt-4 text-gray-600 text-lg font-thin text-left">
+                {/* <p className="mt-4 text-gray-600 text-lg font-thin text-left">
                   {box.description}
-                </p>
+                </p> */}
               </div>
             ))}
+            {/* <div className="p-4 rounded-xl cursor-pointer shadow-none md:w-[300px] md:h-[200px] lg:h-auto lg:w-auto">
+              <div className="flex items-center space-x-4">
+                <img
+                  src="/LandingPage/Icons/page 1.svg"
+                  alt="Lorem Ipsum"
+                  className="w-8 h-8"
+                />
+                <h3 className="text-xl font-bold text-black">Lorem Ipsum</h3>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-xl cursor-pointer shadow-none md:w-[300px] md:h-[200px] lg:h-auto lg:w-auto">
+              <div className="flex items-center space-x-4">
+                <img
+                  src="/LandingPage/Icons/userr.svg"
+                  alt="Learn from the best"
+                  className="w-8 h-8"
+                />
+                <h3 className="text-xl font-bold text-black">
+                  Learn from the best
+                </h3>
+              </div>
+            </div> */}
           </div>
         </div>
       </div>

@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
 import { API_CONFIG } from "@config/api";
+import { FaPencilAlt } from "react-icons/fa";
+import axios from "axios";
 
 const icons = [
   {
@@ -41,6 +43,11 @@ const BestBuddy = () => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const title = "bestbuddy";
   const [error, setError] = useState(null);
+  // States and Variables for TEXT EDITING API
+  const [titleBB, setTitleBB] = useState("The best buddy for your career");
+  const [paragraphBB, setParagraphBB] = useState("Perfectly working BestBuddy");
+  const [isEditing, setIsEditing] = useState(false);
+  const page = "HomePage";
 
   const fetchUploadedFile = async () => {
     try {
@@ -58,15 +65,6 @@ const BestBuddy = () => {
       setError("Failed to load image");
     }
   };
-
-  useEffect(() => {
-    fetchUploadedFile();
-    return () => {
-      if (uploadedFile) {
-        URL.revokeObjectURL(uploadedFile);
-      }
-    };
-  }, []);
 
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
@@ -93,20 +91,108 @@ const BestBuddy = () => {
     }
   };
 
+  const handleEdit = () => isAdmin && setIsEditing(true);
+
+  const fetchData = async () => {
+    try {
+      const { data } = await axios.get(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+        {
+          params: { page, component: "BestBuddy" },
+        }
+      );
+
+      setTitleBB(data?.content || "");
+      setParagraphBB(
+        Array.isArray(data?.paragraphs) ? data.paragraphs.join("\n") : ""
+      );
+    } catch (error) {
+      console.error("Error fetching textData of BestBuddyComp:", error);
+    }
+  };
+
+  const saveContent = async () => {
+    try {
+      const noramlizedParagraphs = Array.isArray(paragraphBB)
+        ? paragraphBB
+        : [paragraphBB.trim()];
+      const response = await axios.put(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+        {
+          page: "HomePage",
+          component: "BestBuddy",
+          content: titleBB.trim(),
+          paragraphs: noramlizedParagraphs,
+        }
+      );
+      setIsEditing(false);
+      console.log("BestBuddyComp Data is saved: ", response);
+    } catch (error) {
+      console.log(
+        "Error occured while saving the content(BestBuddyComp): ",
+        error
+      );
+    }
+  };
+
+  useEffect(() => {
+    fetchUploadedFile();
+    fetchData();
+    return () => {
+      if (uploadedFile) {
+        URL.revokeObjectURL(uploadedFile);
+      }
+    };
+  }, []);
+
   return (
     <div className="bg-white py-20 px-4 sm:py-24">
-      {/* Header Section */}
-      <div className="md:max-w-3xl lg:max-w-4xl mx-auto text-center">
-        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold lg:font-extrabold text-[#1F2329] mb-6">
-          The best buddy for your career
-        </h2>
-        <p className="text-[#1F2329] text-base font-light sm:text-lg md:text-xl leading-relaxed max-w-4xl mx-auto">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat.
-        </p>
-      </div>
+      {isEditing ? (
+        <div className="mt-10 flex flex-col items-center space-y-4 z-50">
+          <textarea
+            value={titleBB}
+            onChange={(e) => setTitleBB(e.target.value)}
+            placeholder="Title here..."
+            className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
+          />
+          <textarea
+            value={paragraphBB}
+            onChange={(e) => setParagraphBB(e.target.value)}
+            placeholder="Paragraph here..."
+            className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
+          />
+          <div className="lg:w-[400px] flex items-center justify-between space-x-2 text-white">
+            <button
+              onClick={saveContent}
+              className="bg-green-600 py-2 px-4 rounded text-xl w-1/2"
+            >
+              Save
+            </button>
+            <button
+              onClick={() => setIsEditing(false)}
+              className="bg-red-600 py-2 px-4 rounded text-xl w-1/2"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="relative md:max-w-3xl lg:max-w-4xl mx-auto text-center">
+          {/* Header Section */}
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold lg:font-extrabold text-[#1F2329] mb-6">
+            {titleBB}
+          </h2>
+          <p className="text-[#1F2329] text-base font-light sm:text-lg md:text-xl leading-relaxed max-w-4xl mx-auto">
+            {paragraphBB}
+          </p>
+          {isAdmin && (
+            <FaPencilAlt
+              onClick={handleEdit}
+              className="cursor-pointer absolute top-0 -right-2 lg:-right-5"
+            />
+          )}
+        </div>
+      )}
 
       {/* Icons and Uploaded Image */}
       <div className="flex flex-col items-center mt-10">
