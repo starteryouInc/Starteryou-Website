@@ -2,8 +2,10 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useUserContext } from "../../context/UserContext"; // Make sure the path is correct
 
-const AdminSignupPage = () => {
+const AdminSignup = () => {
+  const { setUser } = useUserContext(); // Destructure setUser from context
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -11,36 +13,49 @@ const AdminSignupPage = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [username, setUsername] = useState("");
 
+  const validateEmail = (email) => {
+    const regex = /^[a-zA-Z0-9._%+-]+@starteryou\.com$/i;
+    return regex.test(email);
+    };
+
   const handleAdminSignup = async (e) => {
     e.preventDefault();
 
-    try {
-      const response = await fetch("http://localhost:3000/api/v1/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-          phoneNumber,
-          username,
-          role: "admin",// Fixed role for admins
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success("Admin signup successful! You can now log in.");
-        navigate("/login");
-      } else {
-        toast.error(data.message || "Signup failed. Please try again.");
-      }
-    } catch (error) {
-      toast.error("An error occurred during signup.");
+    if (!validateEmail(email)) {
+      toast.error("Email must end with @starteryou.com and be in the correct format.");
+      return;
     }
-  };
+
+    try {
+    const response = await fetch("http://localhost:3000/api/v1/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        phoneNumber,
+        username,
+        role: "admin",
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      toast.success("Admin signup successful! You can now log in.");
+      setUser(data.user);
+      navigate("/login");
+    } else if (response.status === 409) {
+      toast.error(data.message || "A user with this email already exists. Please log in.");
+    } else {
+      toast.error(data.message || "Signup failed. Please try again.");
+    }
+  } catch (error) {
+    toast.error("An error occurred during signup.");
+  }
+};
 
   return (
     <div
@@ -113,9 +128,18 @@ const AdminSignupPage = () => {
             Sign Up
           </button>
         </form>
+
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-600">
+            Already have an account?{" "}
+            <a href="/login" className="text-blue-500 hover:underline">
+              Log in
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );
 };
 
-export default AdminSignupPage;
+export default AdminSignup;

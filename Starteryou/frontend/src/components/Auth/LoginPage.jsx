@@ -15,8 +15,18 @@ const LoginPage = () => {
   const [countdown, setCountdown] = useState(0);
   const lockoutDuration = 30;
 
+  const validateEmail = (email) => {
+    const regex = /^[a-zA-Z0-9._%+-]+@starteryou\.com$/i;
+    return regex.test(email);
+    };
+
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    if (!validateEmail(email)) {
+      toast.error("Email must end with @starteryou.com and be in the correct format.");
+      return;
+    }
 
     if (lockout) {
       toast.error("Too many failed attempts. Please wait and try again.");
@@ -133,6 +143,19 @@ const LoginPage = () => {
             Login
           </button>
         </form>
+
+        {/* Create account message */}
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-600">
+            Don't have an account?{" "}
+            <a
+              href="/adminsignup"
+              className="text-blue-500 hover:underline"
+            >
+              Create an account
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );

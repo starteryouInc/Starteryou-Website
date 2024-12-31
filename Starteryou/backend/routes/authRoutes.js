@@ -17,6 +17,8 @@ if (!process.env.JWT_SECRET) {
   process.exit(1); // Stop the app if JWT_SECRET is not defined
 }
 
+const validRoles = ["admin", "user"]; // Add more roles as needed
+
 // Helper functions to generate tokens
 const generateAccessToken = (user) => {
   return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
@@ -123,26 +125,15 @@ router.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  */
 const register = async (req, res) => {
   try {
-    const { username, email, phoneNumber, password, role} = req.body;
+    const { username, email, phoneNumber, password, role } = req.body;
 
     if (!username || !email || !phoneNumber || !password || !role) {
-      return res
-        .status(400)
-        .json({ message: "All fields are required", success: false });
+      return res.status(400).json({ message: "All fields are required", success: false });
     }
 
-    // Validate role (optional)
-  if (role !== "admin" && role !== "user") {
-    return res.status(400).json({ message: "Invalid role specified" });
-  }
-    // email validation
-    if (
-      !validator.isEmail(email) ||
-      !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)
-    ) {
-      return res
-        .status(400)
-        .json({ message: "Invalid email format", success: false });
+    // Validate role
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({ message: "Invalid role specified" });
     }
 
     // Validate password
@@ -150,8 +141,7 @@ const register = async (req, res) => {
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
-        message:
-          "Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, one number, and one special character",
+        message: "Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, one number, and one special character",
         success: false,
       });
     }
@@ -165,32 +155,35 @@ const register = async (req, res) => {
       });
     }
 
+    // Check if email or phone number already exists
     const existingUser = await User.findOne({
       $or: [{ email }, { phoneNumber }],
     });
 
     if (existingUser) {
       if (existingUser.email === email) {
-        return res.status(400).json({
+        return res.status(409).json({
           message: "Email already registered",
           success: false,
         });
       }
       if (existingUser.phoneNumber === phoneNumber) {
-        return res.status(400).json({
+        return res.status(409).json({
           message: "Phone number already registered",
           success: false,
         });
       }
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Hash the password before saving
+    const saltRounds = parseInt(process.env.SALT_ROUNDS) || 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
     const user = await User.create({
       username,
       email,
       phoneNumber,
       password: hashedPassword,
-      role
+      role,
     });
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
@@ -207,13 +200,23 @@ const register = async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        role:user.role
+        role: user.role,
       },
     });
   } catch (error) {
+    // Handle MongoDB duplicate key error (E11000)
+    if (error.code === 11000) {
+      return res.status(409).json({
+        message: "Duplicate entry. This email or phone number is already registered.",
+        success: false,
+      });
+    } 
+
+    // General error handler for other issues
     handleError(res, error);
   }
 };
+
 
 /**
  * @swagger
