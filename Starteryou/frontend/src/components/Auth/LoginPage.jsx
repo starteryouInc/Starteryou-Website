@@ -149,7 +149,7 @@ const LoginPage = () => {
           <p className="text-sm text-gray-600">
             Don't have an account?{" "}
             <a
-              href="/adminsignup"
+              href="/AdminSignup"
               className="text-blue-500 hover:underline"
             >
               Create an account

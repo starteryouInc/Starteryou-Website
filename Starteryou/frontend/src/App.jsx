@@ -40,14 +40,15 @@ const Layout = () => {
 
   return (
     <div className="font-montserrat scroll-smooth">
-      {location.pathname !== "/login" && <Navbar />}
+      {(location.pathname !== "/login" && location.pathname !== "/AdminSignup") && <Navbar />}
+
       <Routes>
         {/* Default Routes for everyone */}
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/jobs" element={<JobPageBefore />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/adminsignup" element={<AdminSignup />} />
+        <Route path="/AdminSignup" element={<AdminSignup />} />
         <Route path="/education" element={<EducationPage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/InProgressPage" element={<InProgressPage />} />
@@ -82,9 +83,9 @@ const Layout = () => {
 
       {/* New Letter has beeen installed in the website ( IN PROGRESS ) */}
       <div className="flex justify-center items-center">
-        {location.pathname !== "/login" && <NewsLetter />}
+        {(location.pathname !== "/login" && location.pathname !== "/AdminSignup") && <NewsLetter/>}
       </div>
-      {location.pathname !== "/login" && <Footer />}
+      {(location.pathname !== "/login" && location.pathname !== "/AdminSignup") && <Footer/>}
     </div>
   );
 };
