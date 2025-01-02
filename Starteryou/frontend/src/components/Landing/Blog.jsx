@@ -135,7 +135,7 @@ const Blog = () => {
               value={paragraph}
               onChange={(e) => setParagraph(e.target.value)}
               placeholder="Paragraph here..."
-              className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
+              className="lg:w-[700px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
             />
             <div className="lg:w-[400px] flex items-center justify-between space-x-2 text-white">
               <button
@@ -157,7 +157,7 @@ const Blog = () => {
             <h2 className="text-3xl font-bold md:text-4xl md:font-extrabold mb-4 text-left">
               {title}
             </h2>
-            <p className="text-[#121417] font-normal max-w-[600px] mt-2 italic text-left">
+            <p className="text-[#121417] font-normal max-w-[600px] mt-2 italic text-left whitespace-pre-wrap">
               {paragraph}
             </p>
             {isAdmin && (

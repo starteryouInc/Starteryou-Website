@@ -170,7 +170,7 @@ const BestJob4 = () => {
             </div>
           </div>
         ) : (
-          <p className="relative text-3xl sm:text-4xl md:text-5xl font-bold lg:font-extrabold text-[#1F2329] mb-6">
+          <p className="relative text-3xl sm:text-4xl md:text-5xl font-bold lg:font-extrabold text-[#1F2329] mb-6 whitespace-pre-wrap">
             {titleBJ4}
             {isAdmin && (
               <FaPencilAlt

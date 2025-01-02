@@ -214,7 +214,7 @@ const BestJob2 = () => {
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-1 leading-tight">
                 {titleBJ2}
               </h2>
-              <p className="text-gray-600 mb-2 md:text-lg">{paragraphBJ2}</p>
+              <p className="text-gray-600 mb-2 md:text-lg whitespace-pre-wrap">{paragraphBJ2}</p>
               {isAdmin && (
                 <FaPencilAlt
                   onClick={handleEdit}

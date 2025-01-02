@@ -164,7 +164,7 @@ const BestJob3 = () => {
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-1 leading-tight">
                 {titleBJ3}
               </h2>
-              <p className="text-gray-600 mb-2 md:text-lg font-light">
+              <p className="text-gray-600 mb-2 md:text-lg font-light whitespace-pre-wrap">
                 {paragraphBJ3[0]}
               </p>
               {isAdmin && (
@@ -225,11 +225,11 @@ const BestJob3 = () => {
                   alt=""
                   className="w-8 h-8"
                 />
-                <h3 className="text-xl font-bold text-[#7950F2]">
+                <h3 className="text-xl font-bold text-[#7950F2] whitespace-pre-wrap">
                   {paragraphBJ3[1]}
                 </h3>
               </div>
-              <p className="mt-4 text-[#646A73] text-base font-light text-left">
+              <p className="mt-4 text-[#646A73] text-base font-light text-left whitespace-pre-wrap">
                 {paragraphBJ3[2]}
               </p>
             </div>

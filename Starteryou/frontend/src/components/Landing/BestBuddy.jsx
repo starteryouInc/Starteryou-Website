@@ -159,7 +159,7 @@ const BestBuddy = () => {
             value={paragraphBB}
             onChange={(e) => setParagraphBB(e.target.value)}
             placeholder="Paragraph here..."
-            className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
+            className="lg:w-[700px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
           />
           <div className="lg:w-[400px] flex items-center justify-between space-x-2 text-white">
             <button
@@ -182,7 +182,7 @@ const BestBuddy = () => {
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold lg:font-extrabold text-[#1F2329] mb-6">
             {titleBB}
           </h2>
-          <p className="text-[#1F2329] text-base font-light sm:text-lg md:text-xl leading-relaxed max-w-4xl mx-auto">
+          <p className="text-[#1F2329] text-base font-light sm:text-lg md:text-xl leading-relaxed max-w-4xl mx-auto whitespace-pre-wrap">
             {paragraphBB}
           </p>
           {isAdmin && (

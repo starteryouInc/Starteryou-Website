@@ -76,7 +76,7 @@ const Banner = () => {
               value={paragraph}
               onChange={(e) => setParagraph(e.target.value)}
               placeholder="Paragraph here..."
-              className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
+              className="lg:w-[700px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
             />
             <div className="lg:w-[400px] flex items-center justify-between space-x-2 text-white">
               <button
@@ -98,7 +98,7 @@ const Banner = () => {
             <h1 className="text-3xl md:text-4xl font-extrabold mb-4">
               {title}
             </h1>
-            <p className="text-[#767676] mb-4 lg:max-w-[800px]">{paragraph}</p>
+            <p className="text-[#767676] mb-4 lg:max-w-[800px] whitespace-pre-wrap">{paragraph}</p>
             <button className="px-6 py-3 bg-[#D9502E] text-white rounded-md">
               Learn more
             </button>
