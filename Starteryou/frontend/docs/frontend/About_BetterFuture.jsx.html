@@ -1,4 +1,32 @@
-import { useState, useEffect, useRef } from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: About/BetterFuture.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: About/BetterFuture.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigation } from "../../context/NavigationContext";
 import {
@@ -107,35 +135,35 @@ const BetterFuture = () => {
   };
 
   return (
-    <div className="max-w-[1300px] mx-auto text-center p-6 pt-24 md:pb-12">
+    &lt;div className="max-w-[1300px] mx-auto text-center p-6 pt-24 md:pb-12">
       {/* Heading Section */}
-      <div className="relative">
+      &lt;div className="relative">
         {isEditing ? (
-          <input
+          &lt;input
             type="text"
             value={content} // Controlled input for editing heading
             onChange={(e) => setContent(e.target.value)}
             className="text-4xl font-bold md:font-extrabold mb-4 text-[#252B42] border border-gray-300 p-2 rounded w-full"
           />
         ) : (
-          <h1 className="text-4xl font-bold md:font-extrabold mb-4 text-[#252B42]">
+          &lt;h1 className="text-4xl font-bold md:font-extrabold mb-4 text-[#252B42]">
             {content}
-          </h1>
+          &lt;/h1>
         )}
 
         {/* Edit icon visible only for admins */}
-        {isAdmin && (
-          <FontAwesomeIcon
+        {isAdmin &amp;&amp; (
+          &lt;FontAwesomeIcon
             icon={faPencilAlt}
             onClick={handleEditToggle} // Toggle edit mode on click
             className="absolute top-0 right-0 text-gray-500 cursor-pointer"
           />
         )}
-      </div>
+      &lt;/div>
 
       {/* Description Section */}
       {isEditing ? (
-        <textarea
+        &lt;textarea
           value={paragraphs[0]} // Controlled textarea for first paragraph
           onChange={(e) =>
             setParagraphs((prev) => {
@@ -148,49 +176,49 @@ const BetterFuture = () => {
           rows={4}
         />
       ) : (
-        <p className="text-[#737373] mb-8 md:mb-14 max-w-[600px] mx-auto whitespace-pre-wrap">
+        &lt;p className="text-[#737373] mb-8 md:mb-14 max-w-[600px] mx-auto whitespace-pre-wrap">
           {paragraphs[0]}
-        </p>
+        &lt;/p>
       )}
 
       {/* Content Section with Video and Text */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-20 py-5 md:py-10">
+      &lt;div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-20 py-5 md:py-10">
         {/* Video Box */}
-        <div className="relative w-full h-auto">
-          <div className="relative overflow-hidden rounded-sm shadow-lg">
-            <video
+        &lt;div className="relative w-full h-auto">
+          &lt;div className="relative overflow-hidden rounded-sm shadow-lg">
+            &lt;video
               ref={videoRef} // Reference to control the video
               className="w-full h-[300px] md:h-[400px] object-cover"
               controls={false} // Disable default controls
             >
-              <source
+              &lt;source
                 src="/AboutPage/8471681-sd_640_338_25fps.mp4"
                 type="video/mp4"
               />
               Your browser does not support the video tag.
-            </video>
+            &lt;/video>
 
             {/* Play/Pause Button */}
-            <button
+            &lt;button
               onClick={handlePlayPause} // Trigger play/pause functionality
               className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-25 hover:bg-opacity-50 transition-all duration-300"
             >
-              <div className="bg-blue-500 w-16 h-16 rounded-full flex items-center justify-center">
-                <FontAwesomeIcon
+              &lt;div className="bg-blue-500 w-16 h-16 rounded-full flex items-center justify-center">
+                &lt;FontAwesomeIcon
                   icon={isPlaying ? faPause : faPlay} // Show play/pause icon
                   className="text-white text-2xl"
                 />
-              </div>
-            </button>
-          </div>
-        </div>
+              &lt;/div>
+            &lt;/button>
+          &lt;/div>
+        &lt;/div>
 
         {/* Text Box */}
-        <div className="flex flex-col bg-white p-2 md:p-6 justify-center">
+        &lt;div className="flex flex-col bg-white p-2 md:p-6 justify-center">
           {/* Display editable or static content */}
-          <h2 className="text-3xl font-semibold text-start text-[#252B42] pb-3">
+          &lt;h2 className="text-3xl font-semibold text-start text-[#252B42] pb-3">
             {isEditing ? (
-              <textarea
+              &lt;textarea
                 value={paragraphs[1]} // Editable second paragraph
                 onChange={(e) =>
                   setParagraphs((prev) => {
@@ -203,13 +231,13 @@ const BetterFuture = () => {
                 rows={3}
               />
             ) : (
-              <span className="whitespace-pre-wrap">{paragraphs[1]}</span>
+              &lt;span className="whitespace-pre-wrap">{paragraphs[1]}&lt;/span>
             )}
-          </h2>
+          &lt;/h2>
 
-          <p className="text-[#737373] text-start max-w-[454px] text-base pb-6">
+          &lt;p className="text-[#737373] text-start max-w-[454px] text-base pb-6">
             {isEditing ? (
-              <textarea
+              &lt;textarea
                 value={paragraphs[2]} // Editable third paragraph
                 onChange={(e) =>
                   setParagraphs((prev) => {
@@ -222,23 +250,23 @@ const BetterFuture = () => {
                 rows={3}
               />
             ) : (
-              <span className="whitespace-pre-wrap">{paragraphs[2]}</span>
+              &lt;span className="whitespace-pre-wrap">{paragraphs[2]}&lt;/span>
             )}
-          </p>
+          &lt;/p>
 
           {/* Editable small boxes */}
-          <div className="mt-6 space-y-4">
+          &lt;div className="mt-6 space-y-4">
             {[3, 5].map((titleIndex, idx) => (
-              <div key={titleIndex} className="flex items-center space-x-4">
-                <img
+              &lt;div key={titleIndex} className="flex items-center space-x-4">
+                &lt;img
                   src={`/AboutPage/better${idx + 1}.svg`}
                   alt={`Image ${idx + 1}`}
                   className="w-7 h-7 object-cover"
                 />
-                <div>
+                &lt;div>
                   {isEditing ? (
-                    <>
-                      <input
+                    &lt;>
+                      &lt;input
                         type="text"
                         value={paragraphs[titleIndex]} // Title input
                         onChange={(e) => {
@@ -248,7 +276,7 @@ const BetterFuture = () => {
                         }}
                         className="text-xl text-left font-semibold max-w-[400px] text-[#252B42] border border-gray-300 p-2 rounded w-full whitespace-pre-wrap "
                       />
-                      <textarea
+                      &lt;textarea
                         value={paragraphs[titleIndex + 1]} // Paragraph input
                         onChange={(e) => {
                           const updated = [...paragraphs];
@@ -261,35 +289,58 @@ const BetterFuture = () => {
                         className="text-[#737373] text-left max-w-[400px] text-sm border border-gray-300 p-2 rounded w-full"
                         rows={2}
                       />
-                    </>
+                    &lt;/>
                   ) : (
-                    <>
-                      <h3 className="text-xl text-left max-w-[400px] font-semibold text-[#252B42] whitespace-pre-wrap">
+                    &lt;>
+                      &lt;h3 className="text-xl text-left max-w-[400px] font-semibold text-[#252B42] whitespace-pre-wrap">
                         {paragraphs[titleIndex]}
-                      </h3>
-                      <p className="text-[#737373] text-left max-w-[400px] text-sm whitespace-pre-wrap">
+                      &lt;/h3>
+                      &lt;p className="text-[#737373] text-left max-w-[400px] text-sm whitespace-pre-wrap">
                         {paragraphs[titleIndex + 1]}
-                      </p>
-                    </>
+                      &lt;/p>
+                    &lt;/>
                   )}
-                </div>
-              </div>
+                &lt;/div>
+              &lt;/div>
             ))}
-          </div>
+          &lt;/div>
 
           {/* Save Button for admins */}
-          {isAdmin && isEditing && (
-            <button
+          {isAdmin &amp;&amp; isEditing &amp;&amp; (
+            &lt;button
               onClick={saveContent} // Save changes to API
               className="mt-6 px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-md"
             >
               Save
-            </button>
+            &lt;/button>
           )}
-        </div>
-      </div>
-    </div>
+        &lt;/div>
+      &lt;/div>
+    &lt;/div>
   );
 };
 
 export default BetterFuture;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-OurVision.html">OurVision</a></li></ul><h3>Global</h3><ul><li><a href="global.html#BetterFuture">BetterFuture</a></li><li><a href="global.html#HeroAbout">HeroAbout</a></li><li><a href="global.html#MaxWords">MaxWords</a></li><li><a href="global.html#Team">Team</a></li><li><a href="global.html#TechTeam">TechTeam</a></li><li><a href="global.html#saveContent">saveContent</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jan 01 2025 18:30:28 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
