@@ -104,6 +104,7 @@ jobs:
             MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}
             DB_EC2_HOST=${{ secrets.DB_EC2_HOST }}
             DB_EC2_USER=${{ secrets.DB_EC2_USER }}
+            DEV_JWT_SECRET=${{ secrets.DEV_JWT_SECRET }}
             EOF
 
 
