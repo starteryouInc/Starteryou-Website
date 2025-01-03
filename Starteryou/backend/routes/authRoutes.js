@@ -1,14 +1,13 @@
+require("dotenv").config(); 
 const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const dotenv = require("dotenv");
 const User = require("../models/UserModel");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const validator = require("validator");
 const router = express.Router();
 
-dotenv.config();
 
 //jwt secret key
 if (!process.env.DEV_JWT_SECRET) {
