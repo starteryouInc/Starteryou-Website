@@ -1,4 +1,4 @@
-require("dotenv").config(); 
+require('dotenv').config({ path: '.env.server' }); 
 const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -8,7 +8,7 @@ const swaggerUi = require("swagger-ui-express");
 const validator = require("validator");
 const router = express.Router();
 
-
+console.log("DEV_JWT_SECRET:", process.env.DEV_JWT_SECRET);
 //jwt secret key
 if (!process.env.DEV_JWT_SECRET) {
   console.error("Error: DEV_JWT_SECRET is missing in the environment variables.");
