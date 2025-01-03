@@ -90,6 +90,7 @@ jobs:
             PORT=3000
             FRONTEND_URL=http://dev.starteryou.com:8080
             VITE_BACKEND_URL=http://dev.starteryou.com:3000
+            DEV_JWT_SECRET=${{ secrets.DEV_JWT_SECRET }}
             MONGO_USER=${{ secrets.MONGO_USER }}
             MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
             MONGO_HOST=${{ secrets.MONGO_HOST }}
@@ -104,7 +105,6 @@ jobs:
             MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}
             DB_EC2_HOST=${{ secrets.DB_EC2_HOST }}
             DB_EC2_USER=${{ secrets.DB_EC2_USER }}
-            DEV_JWT_SECRET=${{ secrets.DEV_JWT_SECRET }}
             EOF
 
 
