@@ -10,24 +10,23 @@ const router = express.Router();
 
 dotenv.config();
 
-console.log("JWT_SECRET:", process.env.JWT_SECRET);
 
-if (!process.env.JWT_SECRET) {
-  console.error("Error: JWT_SECRET is missing in the environment variables.");
-  process.exit(1); // Stop the app if JWT_SECRET is not defined
+if (!process.env.DEV_JWT_SECRET) {
+  console.error("Error: DEV_JWT_SECRET is missing in the environment variables.");
+  process.exit(1); // Stop the app if DEV_JWT_SECRET is not defined
 }
 
 const validRoles = ["admin", "user"]; // Add more roles as needed
 
 // Helper functions to generate tokens
 const generateAccessToken = (user) => {
-  return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+  return jwt.sign({ id: user._id, role: user.role }, process.env.DEV_JWT_SECRET, {
     expiresIn: "15m",
   });
 };
 
 const generateRefreshToken = (user) => {
-  return jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+  return jwt.sign({ id: user._id }, process.env.DEV_JWT_SECRET, {
     expiresIn: "7d",
   });
 };
