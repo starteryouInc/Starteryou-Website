@@ -10,6 +10,7 @@ const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const { mountRoutes } = require("./routes"); // Main routes including API docs
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
+const cacheRoutes = require("./routes/cacheRoutes"); // Adjust the path as necessary
 // Initialize Express app
 const app = express();
 
@@ -54,6 +55,7 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use("/api/system", verificationRoutes);
+
 mountRoutes(app); // This mounts the main routes including API docs
 // Routes
 /**
@@ -82,9 +84,13 @@ app.use("/api/files", fileRoutes);
  *       200:
  *         description: Server is running
  */
+
 app.get("/health", (req, res) => {
   res.status(200).json({ message: "Server is running!" });
 });
+
+// Cache Routes
+app.use('/api', cacheRoutes);
 
 // MongoDB Connection Status Route
 /**

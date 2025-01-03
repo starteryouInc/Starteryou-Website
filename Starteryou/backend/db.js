@@ -147,4 +147,4 @@ module.exports = {
 };
 
 // Run the connection test on startup
-testConnection().catch(console.error);
+connectToMongoDB().catch(console.error);
