@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
 import { API_CONFIG } from "@config/api";
+import { FaPencilAlt } from "react-icons/fa";
+import axios from "axios";
 
 const icons = [
   {
@@ -36,6 +38,10 @@ const BestJob4 = () => {
   const title = "bestjob4"; // Set the title for fetching and uploading
   const [error, setError] = useState(null); // Error state for handling errors
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false); // State to track fetch attempt
+  // States and Variables for TEXT EDITING API
+  const [titleBJ4, setTitleBJ4] = useState("Best Job 4 Title");
+  const [isEditing, setIsEditing] = useState(false);
+  const page = "HomePage";
 
   const fetchUploadedFile = async () => {
     if (hasFetchedOnce) return; // Prevent fetching again if already attempted
@@ -96,12 +102,85 @@ const BestJob4 = () => {
     }
   };
 
+  const handleEdit = () => isAdmin && setIsEditing(true);
+
+  const fetchData = async () => {
+    try {
+      const { data } = await axios.get(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+        {
+          params: { page, component: "BestJob4" },
+        }
+      );
+
+      setTitleBJ4(data?.content || "");
+    } catch (error) {
+      console.error("Error fetching textData of BestJob4Comp:", error);
+    }
+  };
+
+  const saveContent = async () => {
+    try {
+      const response = await axios.put(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+        {
+          page: "HomePage",
+          component: "BestJob4",
+          content: titleBJ4.trim(),
+        }
+      );
+      setIsEditing(false);
+      console.log("BestJob4Comp Data is saved: ", response);
+    } catch (error) {
+      console.log(
+        "Error occured while saving the content(BestJob4Comp): ",
+        error
+      );
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   return (
     <div className="flex items-center justify-center py-16 lg:mt-20 px-4 lg:px-0">
       <div className="max-w-[1200px] h-auto w-full text-center">
-        <p className="text-3xl sm:text-4xl md:text-5xl font-bold lg:font-extrabold text-[#1F2329] mb-6">
-          Lorem ipsum dolor sit amet
-        </p>
+        {isEditing ? (
+          <div className="flex flex-col items-center space-y-4 z-50">
+            <textarea
+              value={titleBJ4}
+              onChange={(e) => setTitleBJ4(e.target.value)}
+              placeholder="Title here..."
+              className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
+            />
+            <div className="lg:w-[400px] flex items-center justify-between space-x-2 text-white">
+              <button
+                onClick={saveContent}
+                className="bg-green-600 py-2 px-4 rounded text-xl w-1/2"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => setIsEditing(false)}
+                className="bg-red-600 py-2 px-4 rounded text-xl w-1/2"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p className="relative text-3xl sm:text-4xl md:text-5xl font-bold lg:font-extrabold text-[#1F2329] mb-6 whitespace-pre-wrap">
+            {titleBJ4}
+            {isAdmin && (
+              <FaPencilAlt
+                onClick={handleEdit}
+                className="cursor-pointer absolute top-0 -right-2 lg:-right-5 text-base"
+              />
+            )}
+          </p>
+        )}
+
         <div className="flex flex-col items-center mt-10">
           {/* Icons for small screens */}
           <div className="flex flex-col items-center space-y-4 sm:hidden">

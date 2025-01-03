@@ -1,8 +1,63 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigation } from "../../context/NavigationContext";
+import { API_CONFIG } from "@config/api";
+import { FaPencilAlt } from "react-icons/fa";
+import axios from "axios";
 
 const Blog = () => {
+  const { isAdmin } = useNavigation();
+  const [title, setTitle] = useState("Our Blog");
+  const [paragraph, setParagraph] = useState("Perfectly working Blog");
+  const [isEditing, setIsEditing] = useState(false);
+  const page = "HomePage";
+
+  const handleEdit = () => isAdmin && setIsEditing(true);
+
   const [activeLink, setActiveLink] = useState("View All");
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  const fetchData = async () => {
+    try {
+      const { data } = await axios.get(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+        {
+          params: { page, component: "Blogs" },
+        }
+      );
+
+      setTitle(data?.content || "");
+      setParagraph(
+        Array.isArray(data?.paragraphs) ? data.paragraphs.join("\n") : ""
+      );
+    } catch (error) {
+      console.error("Error fetching textData of BlogsComp:", error);
+    }
+  };
+
+  const saveContent = async () => {
+    try {
+      const noramlizedParagraphs = Array.isArray(paragraph)
+        ? paragraph
+        : [paragraph.trim()];
+      const response = await axios.put(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+        {
+          page: "HomePage",
+          component: "Blogs",
+          content: title.trim(),
+          paragraphs: noramlizedParagraphs,
+        }
+      );
+      setIsEditing(false);
+      console.log("BlogsComp Data is saved: ", response);
+    } catch (error) {
+      console.log("Error occured while saving the content(BlogsComp): ", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const links = [
     "View All",
@@ -68,15 +123,51 @@ const Blog = () => {
   return (
     <div className="max-w-[1440px] mx-auto px-4 py-12 " id="blog">
       <div className="md:flex justify-between items-start">
-        <div className="md:w-2/3">
-          <h2 className="text-3xl font-bold md:text-4xl md:font-extrabold mb-4 text-left">
-            Our Blogs
-          </h2>
-          <p className="text-[#121417] font-normal max-w-[600px] mt-2 italic text-left">
-            Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam
-            nonummy nibh euismod tincidunt ut laoreet do.
-          </p>
-        </div>
+        {isEditing ? (
+          <div className="mt-10 flex flex-col space-y-4 z-50">
+            <textarea
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Title here..."
+              className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
+            />
+            <textarea
+              value={paragraph}
+              onChange={(e) => setParagraph(e.target.value)}
+              placeholder="Paragraph here..."
+              className="lg:w-[700px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
+            />
+            <div className="lg:w-[400px] flex items-center justify-between space-x-2 text-white">
+              <button
+                onClick={saveContent}
+                className="bg-green-600 py-2 px-4 rounded text-xl w-1/2"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => setIsEditing(false)}
+                className="bg-red-600 py-2 px-4 rounded text-xl w-1/2"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="relative md:w-2/3">
+            <h2 className="text-3xl font-bold md:text-4xl md:font-extrabold mb-4 text-left">
+              {title}
+            </h2>
+            <p className="text-[#121417] font-normal max-w-[600px] mt-2 italic text-left whitespace-pre-wrap">
+              {paragraph}
+            </p>
+            {isAdmin && (
+              <FaPencilAlt
+                onClick={handleEdit}
+                className="cursor-pointer absolute top-0 -right-2 lg:-right-5"
+              />
+            )}
+          </div>
+        )}
 
         <div className="mt-4 md:mt-0">
           <button className="bg-[#D9502E] text-white py-2 px-4 rounded-lg">
