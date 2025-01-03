@@ -10,7 +10,7 @@ const router = express.Router();
 
 dotenv.config();
 
-
+//jwt secret key
 if (!process.env.DEV_JWT_SECRET) {
   console.error("Error: DEV_JWT_SECRET is missing in the environment variables.");
   process.exit(1); // Stop the app if DEV_JWT_SECRET is not defined
