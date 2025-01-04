@@ -18,6 +18,7 @@ const mongoTls = process.env.MONGO_TLS === "true";
 const mongoTlsCert = process.env.MONGO_TLS_CERT;
 const mongoTlsCa = process.env.MONGO_TLS_CA;
 const mongoAppName = process.env.MONGO_APP_NAME;
+const jwtSecret = process.env.DEV_JWT_SECRET;
 
 console.log("Loaded Environment Variables:", {
   mongoUser: process.env.MONGO_USER,
@@ -26,7 +27,10 @@ console.log("Loaded Environment Variables:", {
   mongoPort: process.env.MONGO_PORT,
   mongoDb: process.env.MONGO_DB,
   mongoAuthSource: process.env.MONGO_AUTH_SOURCE,
-}); // Debugging line to ensure the environment variables are loaded
+  jwtSecret: process.env.DEV_JWT_SECRET,
+});
+console.log("DEV_JWT_SECRET:", jwtSecret);
+// Debugging line to ensure the environment variables are loaded
 
 // Check for missing required environment variables
 if (!mongoUser || !mongoPassword || !mongoHost || !mongoDb) {
