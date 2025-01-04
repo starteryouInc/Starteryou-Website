@@ -8,24 +8,34 @@ const swaggerUi = require("swagger-ui-express");
 const validator = require("validator");
 const router = express.Router();
 
-console.log("DEV_JWT_SECRET:", process.env.DEV_JWT_SECRET);
+console.log("Loaded Environment Variables:", {
+  mongoUser: process.env.MONGO_USER,
+  mongoPassword: process.env.MONGO_PASSWORD,
+  mongoHost: process.env.MONGO_HOST,
+  mongoPort: process.env.MONGO_PORT,
+  mongoDb: process.env.MONGO_DB,
+  mongoAuthSource: process.env.MONGO_AUTH_SOURCE,
+});
+
 //jwt secret key
-if (!process.env.DEV_JWT_SECRET) {
+const jwtSecret = process.env.DEV_JWT_SECRET;
+if (!jwtSecret) {
   console.error("Error: DEV_JWT_SECRET is missing in the environment variables.");
   process.exit(1); // Stop the app if DEV_JWT_SECRET is not defined
 }
+console.log("DEV_JWT_SECRET:", jwtSecret);
 
 const validRoles = ["admin", "user"]; // Add more roles as needed
 
 // Helper functions to generate tokens
 const generateAccessToken = (user) => {
-  return jwt.sign({ id: user._id, role: user.role }, process.env.DEV_JWT_SECRET, {
+  return jwt.sign({ id: user._id, role: user.role }, jwtSecret, {
     expiresIn: "15m",
   });
 };
 
 const generateRefreshToken = (user) => {
-  return jwt.sign({ id: user._id }, process.env.DEV_JWT_SECRET, {
+  return jwt.sign({ id: user._id }, jwtSecret, {
     expiresIn: "7d",
   });
 };
