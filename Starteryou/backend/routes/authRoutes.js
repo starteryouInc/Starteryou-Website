@@ -9,14 +9,12 @@ const validator = require("validator");
 const router = express.Router();
 const backendUrl = process.env.BACKEND_URL || "http://localhost:3000";
 
-
 //jwt secret key
 const jwtSecret = process.env.DEV_JWT_SECRET;
 if (!jwtSecret) {
   console.error("Error: DEV_JWT_SECRET is missing in the environment variables.");
   process.exit(1); // Stop the app if DEV_JWT_SECRET is not defined
 }
-
 
 const validRoles = ["admin", "user"]; // Add more roles as needed
 
@@ -65,7 +63,7 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
 // Use Swagger UI
-router.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+router.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 
 /**
