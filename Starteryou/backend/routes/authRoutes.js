@@ -7,6 +7,7 @@ const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const validator = require("validator");
 const router = express.Router();
+const backendUrl = process.env.BACKEND_URL || "http://localhost:3000";
 
 console.log("Loaded Environment Variables:", {
   mongoUser: process.env.MONGO_USER,
@@ -62,7 +63,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: "${BACKEND_URL}/api/v1/auth", // Replace with your base URL
+        url: `${backendUrl}/api/v1/auth`, // Replace with your base URL
       },
     ],
   },
