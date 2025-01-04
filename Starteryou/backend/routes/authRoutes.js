@@ -9,14 +9,6 @@ const validator = require("validator");
 const router = express.Router();
 const backendUrl = process.env.BACKEND_URL || "http://localhost:3000";
 
-console.log("Loaded Environment Variables:", {
-  mongoUser: process.env.MONGO_USER,
-  mongoPassword: process.env.MONGO_PASSWORD,
-  mongoHost: process.env.MONGO_HOST,
-  mongoPort: process.env.MONGO_PORT,
-  mongoDb: process.env.MONGO_DB,
-  mongoAuthSource: process.env.MONGO_AUTH_SOURCE,
-});
 
 //jwt secret key
 const jwtSecret = process.env.DEV_JWT_SECRET;
