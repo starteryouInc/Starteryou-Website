@@ -23,7 +23,7 @@ if (!jwtSecret) {
   console.error("Error: DEV_JWT_SECRET is missing in the environment variables.");
   process.exit(1); // Stop the app if DEV_JWT_SECRET is not defined
 }
-console.log("DEV_JWT_SECRET:", jwtSecret);
+
 
 const validRoles = ["admin", "user"]; // Add more roles as needed
 
