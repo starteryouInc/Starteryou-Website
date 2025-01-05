@@ -27,7 +27,7 @@ const AdminSignup = () => {
     }
 
     try {
-    const response = await fetch("${BACKEND_URL}/api/v1/auth/register", {
+    const response = await fetch("${backendUrl}/api/v1/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
