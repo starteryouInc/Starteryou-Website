@@ -7,7 +7,7 @@ const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const validator = require("validator");
 const router = express.Router();
-const backendUrl = process.env.BACKEND_URL || "http://localhost:3000";
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 
 //jwt secret key
 const jwtSecret = process.env.DEV_JWT_SECRET;
@@ -53,7 +53,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: `${backendUrl}/api/v1/auth`, // Replace with your base URL
+        url: `${BACKEND_URL}/api/v1/auth`, // Replace with your base URL
       },
     ],
   },
