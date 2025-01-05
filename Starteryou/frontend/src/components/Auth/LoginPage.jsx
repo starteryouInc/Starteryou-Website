@@ -35,7 +35,8 @@ const LoginPage = () => {
 
     try {
       // Sending the login request to the backend
-      const response = await fetch("${BACKEND_URL}/api/v1/auth/login", {
+      const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
+      const response = await fetch(`${BACKEND_URL}/api/v1/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
