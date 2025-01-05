@@ -3,7 +3,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useUserContext } from "../../context/UserContext"; 
-
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 const AdminSignup = () => {
   const { setUser } = useUserContext(); 
   const navigate = useNavigate();
@@ -27,7 +27,7 @@ const AdminSignup = () => {
     }
 
     try {
-    const response = await fetch("${BACKEND_URL}/api/v1/auth/register", {
+    const response = await fetch(`${BACKEND_URL}/api/v1/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
