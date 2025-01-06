@@ -25,7 +25,16 @@ console.log("Loaded Environment Variables:", {
   mongoPort: process.env.MONGO_PORT,
   mongoDb: process.env.MONGO_DB,
   mongoAuthSource: process.env.MONGO_AUTH_SOURCE,
-}); // Debugging line
+  
+});
+
+// Debugging line to ensure the environment variables are loaded
+
+// Check for missing required environment variables
+if (!mongoUser || !mongoPassword || !mongoHost || !mongoDb) {
+  console.error("❌ Missing required MongoDB environment variables");
+  process.exit(1);
+}
 
 // Build MongoDB URI dynamically based on environment variables
 let mongoUri = `mongodb://${mongoUser}:${mongoPassword}@${mongoHost}:${mongoPort}/${mongoDb}?authSource=${mongoAuthSource}&directConnection=true&serverSelectionTimeoutMS=2000`;

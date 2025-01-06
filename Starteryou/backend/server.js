@@ -10,6 +10,8 @@ const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const { mountRoutes } = require("./routes"); // Main routes including API docs
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
+const authRoutes = require("./routes/authRoutes");
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 const cacheRoutes = require("./routes/cacheRoutes"); // Adjust the path as necessary
 // Initialize Express app
 const app = express();
@@ -41,12 +43,16 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: `http://dev.starteryou.com:${process.env.PORT || 3000}/api`,
+        url: `${BACKEND_URL}/api`,
       },
     ],
     tags: [
       { name: "TextRoutes", description: "Routes for text operations" },
       { name: "FileRoutes", description: "Routes for file operations" },
+      {
+        name: "Authentication",
+        description: "Routes for Authentication endpoints",
+      },
     ],
   },
   apis: ["./routes/*.js"], // Path to your API route files
@@ -57,6 +63,7 @@ app.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use("/api/system", verificationRoutes);
 
 mountRoutes(app); // This mounts the main routes including API docs
+
 // Routes
 /**
  * @swagger
@@ -73,6 +80,14 @@ app.use("/api", textRoutes);
  *     description: Routes for file operations
  */
 app.use("/api/files", fileRoutes);
+
+/**
+ * @swagger
+ * tags:
+ *   - name: Authentication
+ *     description: Routes for Authentication endpoints
+ */
+app.use("/api/v1/auth", authRoutes);
 
 // Health Check Route
 /**
@@ -125,22 +140,13 @@ app.use((err, req, res, next) => {
 
 // Start Server
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://dev.starteryou.com:${PORT}`);
-  console.log(
-    `📖 Swagger Docs available at http://dev.starteryou.com:${PORT}/api-test`
-  );
-  console.log(`💻 Health Check: http://dev.starteryou.com:${PORT}/health`);
-  console.log(
-    `🗄️ Database Status: http://dev.starteryou.com:${PORT}/db-status`
-  );
-  console.log(
-    `📚 API Documentation: http://dev.starteryou.com:${PORT}/api/docs`
-  );
-  console.log(
-    `📋 Postman Collection: http://dev.starteryou.com:${PORT}/api/docs/postman`
-  );
-  console.log(
-    `⚙️ File Verification: http://dev.starteryou.com:${PORT}/api/system/verify-all`
-  );
+  console.log(`🚀 Server running at ${BACKEND_URL}`);
+  console.log(`📖 Swagger Docs available at ${BACKEND_URL}/api-test`);
+  console.log(`💻 Health Check: ${BACKEND_URL}/health`);
+  console.log(`🗄️ Database Status: ${BACKEND_URL}/db-status`);
+  console.log(`📚 API Documentation: ${BACKEND_URL}/api/docs`);
+  console.log(`📋 Postman Collection: ${BACKEND_URL}/api/docs/postman`);
+  console.log(`⚙️ File Verification: ${BACKEND_URL}/api/system/verify-all`);
 });
