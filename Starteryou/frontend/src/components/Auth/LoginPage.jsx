@@ -3,7 +3,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useUserContext } from "../../context/UserContext";
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:3000";
+import { API_CONFIG } from "@config/api";
 const LoginPage = () => {
   const { setUser } = useUserContext();
   const navigate = useNavigate();
@@ -35,7 +35,7 @@ const LoginPage = () => {
 
     try {
       // Sending the login request to the backend
-      const response = await fetch(`${BACKEND_URL}/api/v1/auth/login`, {
+      const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.authLogin}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
