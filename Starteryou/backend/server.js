@@ -8,6 +8,7 @@ const textRoutes = require("./routes/textRoutes");
 const fileRoutes = require("./routes/fileRoutes");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
+const teamRoutes = require("./routes/teamRoutes");
 const { mountRoutes } = require("./routes"); // Main routes including API docs
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 // Initialize Express app
@@ -54,6 +55,7 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use("/api/system", verificationRoutes);
+
 mountRoutes(app); // This mounts the main routes including API docs
 // Routes
 /**
@@ -71,7 +73,13 @@ app.use("/api", textRoutes);
  *     description: Routes for file operations
  */
 app.use("/api/files", fileRoutes);
-
+/**
+ * @swagger
+ * tags:
+ *   - name: FileRoutes
+ *     description: Routes for file operations
+ */
+app.use("/api", teamRoutes);
 // Health Check Route
 /**
  * @swagger

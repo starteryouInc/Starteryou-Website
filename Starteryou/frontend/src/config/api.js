@@ -1,6 +1,6 @@
 // config/api.js
 export const API_CONFIG = {
-  baseURL: "http://dev.starteryou.com:3000",
+  baseURL: "http://localhost:3000",
   endpoints: {
     fileByTitle: (title) => `/api/files/download/${title}`,
     fileUpload: "/api/files/upload",
@@ -10,5 +10,6 @@ export const API_CONFIG = {
     fileList: "/api/files/list",
     fileCleanup: "/api/files/cleanup",
     textApi: "/api/text",
+    teamApi: "/api/team",
   },
 };
