@@ -16,6 +16,7 @@ import {
 import AdminProtectedRoute from "./components/Common/AdminProtectedRoute";
 import { UserProvider } from "./context/UserContext";
 import LoginPage from "./components/Auth/LoginPage";
+import AdminSignup from "./components/Auth/AdminSignup";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import EducationPage from "./pages/EducationPage";
@@ -27,6 +28,7 @@ import JobPageBefore from "./pages/JobPageBefore"; // Ensure this file exists in
 import JobPageAfter from "./pages/JobPageAfter"; // Ensure this file exists in the "pages" directory.
 import JobFeedPage from "./pages/JobFeedPage";
 import NewsLetter from "./components/Common/NewsLetter";
+import UserProfile from "./pages/UserProfile";
 
 const Layout = () => {
   const location = useLocation();
@@ -38,20 +40,23 @@ const Layout = () => {
 
   return (
     <div className="font-montserrat scroll-smooth">
-      {location.pathname !== "/login" && <Navbar />}
+      {(location.pathname !== "/login" && location.pathname !== "/AdminSignup") && <Navbar />}
+
       <Routes>
         {/* Default Routes for everyone */}
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/jobs" element={<JobPageBefore />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/AdminSignup" element={<AdminSignup />} />
         <Route path="/education" element={<EducationPage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/InProgressPage" element={<InProgressPage />} />
         <Route path="/job2" element={<JobPageAfter />} />
-
-        {/* New Job Feed Page ( IN PROGRESS )*/}
         <Route path="/jobfeeds" element={<JobFeedPage />} />
+        
+        {/* New User Profile Page ( COMPLETED ) */}
+        <Route path="/userprofile" element={<UserProfile/>}></Route>
 
         {/* Admin Protected Routes */}
         <Route
@@ -78,9 +83,9 @@ const Layout = () => {
 
       {/* New Letter has beeen installed in the website ( IN PROGRESS ) */}
       <div className="flex justify-center items-center">
-        {location.pathname !== "/login" && <NewsLetter />}
+        {(location.pathname !== "/login" && location.pathname !== "/AdminSignup") && <NewsLetter/>}
       </div>
-      {location.pathname !== "/login" && <Footer />}
+      {(location.pathname !== "/login" && location.pathname !== "/AdminSignup") && <Footer/>}
     </div>
   );
 };

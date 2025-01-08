@@ -126,13 +126,13 @@ const UnlockPotential = () => {
             <img
               src={preview}
               alt="Preview"
-              className="relative w-[340px] h-[250px] md:w-[550px] md:h-[400px] lg:w-[680px] lg:h-[500px] rounded-xl transform rotate-[-6.44deg]"
+              className="relative w-[340px] h-[250px] md:w-[550px] md:h-[400px] lg:w-[680px] lg:h-[500px] rounded-xl left-[30px] top-[30px] md:left-[58px] md:top-[80px]"
             />
           ) : (
             <img
               src="/LandingPage/Rectangle.png"
               alt="Unlock Potential"
-              className="relative w-[340px] h-[250px] md:w-[550px] md:h-[400px] lg:w-[680px] lg:h-[500px] rounded-xl transform rotate-[-6.44deg]"
+              style={{ transform: "rotate(-6.44deg)" }}
             />
           )}
           {isAdmin && (

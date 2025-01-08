@@ -3,6 +3,8 @@ const express = require("express");
 const router = express.Router();
 const fileRoutes = require("./fileRoutes");
 const textRoutes = require("./textRoutes.js");
+const authRoutes = require("./authRoutes");
+
 // Store all API endpoints and their descriptions
 const apiEndpoints = [
   // File Management APIs
@@ -368,13 +370,90 @@ const apiEndpoints = [
       },
     ],
   },
+  // Authentication APIs
+  {
+    group: "Authentication",
+    endpoints: [
+      {
+        method: "POST",
+        path: "/api/v1/auth/register",
+        description: "Register a new user",
+        requestBody: {
+          type: "application/json",
+          fields: {
+            username: {
+              type: "string",
+              required: true,
+              description: "Username for the new user",
+            },
+            email: {
+              type: "string",
+              required: true,
+              description: "Email for the new user",
+            },
+            password: {
+              type: "string",
+              required: true,
+              description: "Password for the new user",
+            },
+          },
+        },
+        responses: {
+          201: {
+            description: "User successfully registered",
+          },
+          400: {
+            description: "Invalid input",
+          },
+        },
+        example: {
+          curl: `curl -X POST http://localhost:3000/api/v1/auth/register \
+          -H "Content-Type: application/json" \
+          -d '{"username": "user1", "email": "user1@example.com", "password": "password123"}'`,
+        },
+      },
+      {
+        method: "POST",
+        path: "/api/v1/auth/login",
+        description: "Login an existing user",
+        requestBody: {
+          type: "application/json",
+          fields: {
+            email: {
+              type: "string",
+              required: true,
+              description: "Email of the user",
+            },
+            password: {
+              type: "string",
+              required: true,
+              description: "Password of the user",
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: "Login successful",
+          },
+          401: {
+            description: "Invalid credentials",
+          },
+        },
+        example: {
+          curl: `curl -X POST http://localhost:3000/api/v1/auth/login \
+          -H "Content-Type: application/json" \
+          -d '{"email": "user1@example.com", "password": "password123"}'`,
+        },
+      },
+    ],
+  },
 ];
 
 // Mount routes
 router.use("/api/files", fileRoutes);
 router.use("/api/text", textRoutes);
+router.use("/api/v1/auth", authRoutes);
 
-// API documentation endpoint with enhanced information
 // API documentation endpoint with enhanced information
 router.get("/api/docs", (req, res) => {
   const baseUrl =
@@ -385,7 +464,7 @@ router.get("/api/docs", (req, res) => {
     version: "1.0.0",
     baseUrl,
     description:
-      "API for managing files and text content with metadata using GridFS",
+      "API for managing files, text content, and authentication functionalities.",
     totalEndpoints: apiEndpoints.reduce(
       (total, group) => total + group.endpoints.length,
       0
@@ -396,7 +475,7 @@ router.get("/api/docs", (req, res) => {
       "All file operations use titles as unique identifiers.",
       "Maximum file size: 10MB.",
       "Supported file types: All (e.g., PDFs, images, videos).",
-      "Authentication: Not implemented (add as needed).",
+      "Authentication: Implemented as of v1.",
       "Rate limiting: Not implemented (add as needed).",
       "Data persistence: Uses MongoDB with GridFS for file storage.",
     ],
@@ -415,8 +494,9 @@ router.get("/api/docs/postman", (req, res) => {
 
   const postmanCollection = {
     info: {
-      name: "File & Text Management API",
-      description: "API collection for managing files and text content.",
+      name: "File, Text & Auth Management API",
+      description:
+        "API collection for managing files, text content, and authentication.",
       schema:
         "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     },
