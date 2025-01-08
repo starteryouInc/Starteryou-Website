@@ -26,7 +26,6 @@ import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
 import { API_CONFIG } from "@config/api";
 import { MaxWords } from "../Common/wordValidation";
-
 const OurMission = () => {
   // State for title, paragraph, and image preview
   const [title, setTitle] = useState("OUR MISSION");
