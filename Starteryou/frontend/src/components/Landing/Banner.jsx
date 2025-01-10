@@ -52,6 +52,7 @@ const Banner = () => {
         "Error occured while saving the content(BannerComp): ",
         error
       );
+      // console.log("Bug fixing")
     }
   };
 
