@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: About/OurMission.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: About/OurMission.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * @file OurMission.jsx
  *
  * @description
@@ -7,7 +35,7 @@
  * @component
  *
  * @example
- * <OurMission />
+ * &lt;OurMission />
  *
  * @returns {JSX.Element} The rendered component displaying the mission statement, optional admin editing tools, and an image upload feature.
  *
@@ -26,6 +54,7 @@ import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
 import { API_CONFIG } from "@config/api";
 import { MaxWords } from "../Common/wordValidation";
+
 const OurMission = () => {
   // State for title, paragraph, and image preview
   const [title, setTitle] = useState("OUR MISSION");
@@ -142,7 +171,7 @@ const OurMission = () => {
   /**
    * Enables the edit mode for admin users.
    */
-  const handleEdit = () => isAdmin && setIsEditing(true);
+  const handleEdit = () => isAdmin &amp;&amp; setIsEditing(true);
 
   /**
    * Updates the title state based on the input value.
@@ -189,78 +218,101 @@ const OurMission = () => {
   };
 
   return (
-    <div className="max-w-[1300px] mx-auto container px-4 pt-4">
-      <div className="flex flex-col md:flex-row md:space-x-4 items-center">
+    &lt;div className="max-w-[1300px] mx-auto container px-4 pt-4">
+      &lt;div className="flex flex-col md:flex-row md:space-x-4 items-center">
         {/* Text Section */}
-        <div className="bg-white p-2 md:p-6 mb-4 md:mb-0 flex-1 flex flex-col justify-center">
+        &lt;div className="bg-white p-2 md:p-6 mb-4 md:mb-0 flex-1 flex flex-col justify-center">
           {isEditing ? (
-            <div>
+            &lt;div>
               {/* Input for title editing */}
-              <input
+              &lt;input
                 type="text"
                 value={title}
                 onChange={handleChangeTitle}
                 className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-[#1F2329] border border-gray-300 p-2 rounded w-full"
               />
               {/* Textarea for paragraph editing */}
-              <textarea
+              &lt;textarea
                 value={paragraph}
                 onChange={handleChangeParagraph}
                 className="text-[#1F2329] text-base border border-gray-300 p-2 rounded w-full"
                 rows={6}
               />
               {/* Save button */}
-              <button
+              &lt;button
                 onClick={saveContent}
                 className="mt-4 bg-green-600 text-white py-2 px-4 rounded"
               >
                 Save
-              </button>
-            </div>
+              &lt;/button>
+            &lt;/div>
           ) : (
-            <div>
+            &lt;div>
               {/* Display title and paragraph */}
-              <h2 className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-[#1F2329]">
+              &lt;h2 className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-[#1F2329]">
                 {title}
-              </h2>
-              <p className="text-[#1F2329] text-base">{paragraph}</p>
+              &lt;/h2>
+              &lt;p className="text-[#1F2329] text-base">{paragraph}&lt;/p>
               {/* Edit icon for admin users */}
-              {isAdmin && (
-                <FaPencilAlt
+              {isAdmin &amp;&amp; (
+                &lt;FaPencilAlt
                   onClick={handleEdit}
                   style={{ cursor: "pointer", marginTop: "1rem" }}
                   className="text-gray-500 "
                 />
               )}
-            </div>
+            &lt;/div>
           )}
-        </div>
+        &lt;/div>
 
         {/* Image Section */}
-        <div className="relative md:flex-1 w-full bg-cover bg-center rounded-lg mb-4 md:mb-0 h-[250px] min-h-[200px] md:h-[300px] md:min-h-[400px]">
+        &lt;div className="relative md:flex-1 w-full bg-cover bg-center rounded-lg mb-4 md:mb-0 h-[250px] min-h-[200px] md:h-[300px] md:min-h-[400px]">
           {uploadedFile ? (
-            <img
+            &lt;img
               src={uploadedFile}
               alt="Current Image"
               className="relative h-[250px] min-h-[200px] md:h-[300px] md:min-h-[400px] rounded-xl"
             />
           ) : (
-            <p className="text-sm text-center text-gray-500">
+            &lt;p className="text-sm text-center text-gray-500">
               Image preview will appear here...
-            </p>
+            &lt;/p>
           )}
 
-          {isAdmin && (
-            <FileUpload
+          {isAdmin &amp;&amp; (
+            &lt;FileUpload
               handleFileChange={handleFileChange}
               error={error}
               uploadedFile={uploadedFile}
             />
           )}
-        </div>
-      </div>
-    </div>
+        &lt;/div>
+      &lt;/div>
+    &lt;/div>
   );
 };
 
 export default OurMission;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-OurVision.html">OurVision</a></li></ul><h3>Global</h3><ul><li><a href="global.html#BetterFuture">BetterFuture</a></li><li><a href="global.html#HeroAbout">HeroAbout</a></li><li><a href="global.html#MaxWords">MaxWords</a></li><li><a href="global.html#Team">Team</a></li><li><a href="global.html#TechTeam">TechTeam</a></li><li><a href="global.html#saveContent">saveContent</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jan 01 2025 18:30:28 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
