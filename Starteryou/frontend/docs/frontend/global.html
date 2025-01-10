@@ -419,7 +419,10 @@ Admin users can edit team member details and upload new images.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Team.jsx.html">Team.jsx</a>, <a href="Team.jsx.html#line27">line 27</a>
+
         <a href="About_Team.jsx.html">About/Team.jsx</a>, <a href="About_Team.jsx.html#line26">line 26</a>
+
     </li></ul></dd>
     
 
@@ -565,6 +568,494 @@ Admin users can edit team member details and upload new images.</p>
     
 
     
+    <h4 class="name" id="fetchData"><span class="type-signature">(async) </span>fetchData<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Fetches team data from the API and updates the state.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Team.jsx.html">Team.jsx</a>, <a href="Team.jsx.html#line306">line 306</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        <p>If the API call fails, logs an error message to the console.</p>
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Resolves when the data is fetched and state is updated.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;void></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="handleDeleteUser"><span class="type-signature">(async) </span>handleDeleteUser<span class="signature">(index)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Deletes a team member by their index in the <code>teamMembers</code> array.</p>
+<p>This function sends a DELETE request to the server to remove a team member
+identified by their unique <code>_id</code>. If the deletion is successful, the
+team member is removed from the local <code>teamMembers</code> state. If an error
+occurs, it displays an appropriate alert message.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>index</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The index of the team member in the <code>teamMembers</code> array.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Team.jsx.html">Team.jsx</a>, <a href="Team.jsx.html#line87">line 87</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        <p>If an error occurs during the deletion process.</p>
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Resolves when the team member has been deleted and the state updated.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;void></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>handleDeleteUser(2)
+  .then(() => console.log("Deletion successful"))
+  .catch(err => console.error(err));</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="handleSaveNewUser"><span class="type-signature">(async) </span>handleSaveNewUser<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Saves a new team member to the server.</p>
+<p>This function validates the new member's details, sends them to the server
+via a POST request, and updates the <code>teamMembers</code> state with the newly added
+member if the operation is successful. If the validation fails or the server
+request encounters an error, an appropriate alert message is shown.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Team.jsx.html">Team.jsx</a>, <a href="Team.jsx.html#line340">line 340</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        <p>If the POST request fails, logs the error and shows an alert.</p>
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Resolves when the new member is successfully saved and the state is updated.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;void></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>handleSaveNewUser()
+  .then(() => console.log("New member saved"))
+  .catch((err) => console.error(err));</code></pre>
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="saveContent"><span class="type-signature">(async) </span>saveContent<span class="signature">()</span><span class="type-signature"></span></h4>
     
 
@@ -677,6 +1168,104 @@ Admin users can edit team member details and upload new images.</p>
 
 
         
+            
+
+    
+
+    
+    <h4 class="name" id="useEffect"><span class="type-signature">(async) </span>useEffect<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Fetches team data from the server when the component mounts.</p>
+<p>This effect runs once after the component is rendered. It makes an API
+call to fetch team data, updates the <code>teamMembers</code> state with the fetched
+data, and stops the loading spinner once the operation is complete.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Team.jsx.html">Team.jsx</a>, <a href="Team.jsx.html#line290">line 290</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>useEffect(() => {
+  // Code to fetch data from API and update state
+}, []);</code></pre>
+
+
+
+        
     
 
     
@@ -692,13 +1281,20 @@ Admin users can edit team member details and upload new images.</p>
 </div>
 
 <nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-OurVision.html">OurVision</a></li></ul><h3>Global</h3><ul><li><a href="global.html#BetterFuture">BetterFuture</a></li><li><a href="global.html#HeroAbout">HeroAbout</a></li><li><a href="global.html#Team">Team</a></li><li><a href="global.html#TechTeam">TechTeam</a></li><li><a href="global.html#fetchData">fetchData</a></li><li><a href="global.html#handleDeleteUser">handleDeleteUser</a></li><li><a href="global.html#handleSaveNewUser">handleSaveNewUser</a></li><li><a href="global.html#saveContent">saveContent</a></li><li><a href="global.html#useEffect">useEffect</a></li></ul>
+
     <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-OurVision.html">OurVision</a></li></ul><h3>Global</h3><ul><li><a href="global.html#BetterFuture">BetterFuture</a></li><li><a href="global.html#HeroAbout">HeroAbout</a></li><li><a href="global.html#MaxWords">MaxWords</a></li><li><a href="global.html#Team">Team</a></li><li><a href="global.html#TechTeam">TechTeam</a></li><li><a href="global.html#saveContent">saveContent</a></li></ul>
+
 </nav>
 
 <br class="clear">
 
 <footer>
+
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jan 08 2025 18:43:21 GMT+0530 (India Standard Time)
+
     Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jan 01 2025 18:30:28 GMT+0530 (India Standard Time)
+
 </footer>
 
 <script> prettyPrint(); </script>
