@@ -124,11 +124,21 @@ router.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *         description: Internal Server Error
  */
 const register = async (req, res) => {
-  console.log("Register request received:", req.body); // Log the request body for debugging
   try {
     const { username, email, phoneNumber, password, role } = req.body;
+    if (!username || !email || !phoneNumber || !password || !role) {
+      return res.status(400).json({ message: "All fields are required", success: false });
+    }
+    
+     // Validate email
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@starteryou\.com$/i;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({
+      message: "Email must be a valid starteryou.com email address",
+      success: false,
+    });
+  }
 
-    console.log("Email:", email); // Log the email for debugging
     const validEmployee = await Employee.findOne({ email });
     console.log("Valid Employee:", validEmployee); // Log the valid employee for debugging
     if (!validEmployee) {
@@ -289,6 +299,12 @@ const login = async (req, res) => {
       success: false,
     });
   }
+
+  const validEmployee = await Employee.findOne({ email });
+    console.log("Valid Employee:", validEmployee); // Log the valid employee for debugging
+    if (!validEmployee) {
+      return res.status(400).json({ message: "This email is not associated with a valid employee", success: false });
+    }
 
   try {
     const user = await User.findOne({ email });

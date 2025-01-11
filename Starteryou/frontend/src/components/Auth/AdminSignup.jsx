@@ -80,7 +80,7 @@ import { API_CONFIG } from "@config/api";
               onChange={(e) => setEmail(e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg"
               required
-              pattern="^[a-zA-Z0-9._%+-]+@starteryou\.com$"
+              pattern="/^[a-zA-Z0-9._%+-]+@starteryou\.com$/i"
               title="Please enter a valid email address ending with @starteryou.com"
             />
           </div>
