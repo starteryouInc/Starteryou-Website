@@ -6,6 +6,7 @@ const EmployeeSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    lowercase: true,
   },
   isActive: {
     type: Boolean,
