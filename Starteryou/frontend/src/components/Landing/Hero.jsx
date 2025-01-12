@@ -3,6 +3,8 @@ import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
 import { API_CONFIG } from "@config/api";
 import { toast } from "react-toastify";
+import { FaPencilAlt } from "react-icons/fa";
+import axios from "axios";
 
 const Hero = () => {
   const { isAdmin } = useNavigation();
@@ -11,6 +13,11 @@ const Hero = () => {
   const [image1, setImage1] = useState("/LandingPage/Heroimg3.png");
   const [image2, setImage2] = useState("/LandingPage/Heroimg2.jpg");
   const [image3, setImage3] = useState("/LandingPage/Heroimg3.png");
+  // States and Variables for TEXT EDITING API
+  const [title, setTitle] = useState("Collaborate Together");
+  const [paragraph, setParagraph] = useState("Perfectly working Hero");
+  const [isEditing, setIsEditing] = useState(false);
+  const page = "HomePage";
 
   // Titles to identify each image in the backend
   const titles = ["hero1", "hero2", "hero3"]; // Different titles for each image
@@ -77,6 +84,53 @@ const Hero = () => {
     }
   };
 
+  const handleEdit = () => isAdmin && setIsEditing(true);
+
+  const fetchData = async () => {
+    try {
+      const { data } = await axios.get(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+        {
+          params: { page, component: "Hero" },
+        }
+      );
+
+      setTitle(data?.content || "Your Hero Title Here");
+      setParagraph(
+        Array.isArray(data?.paragraphs)
+          ? data.paragraphs.join("\n")
+          : "Your description paragraph here."
+      );
+    } catch (error) {
+      console.error("Error fetching textData of HeroComp:", error);
+    }
+  };
+
+  const saveContent = async () => {
+    try {
+      const noramlizedParagraphs = Array.isArray(paragraph)
+        ? paragraph
+        : [paragraph.trim()];
+      const response = await axios.put(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+        {
+          page: "HomePage",
+          component: "Hero",
+          content: title.trim(),
+          paragraphs: noramlizedParagraphs,
+        }
+      );
+      setIsEditing(false);
+      console.log("HeroComp Data is saved: ", response);
+    } catch (error) {
+      console.log("Error occured while saving the content(HeroComp): ", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   return (
     <section className="relative w-full min-h-screen bg-[#2700D3] flex flex-col justify-center items-center text-center text-white px-4 overflow-hidden">
       {/* Background glow effect */}
@@ -97,34 +151,52 @@ const Hero = () => {
       {/* Main Background overlay */}
       <div className="absolute inset-0 top-0 w-full h-full bg-[radial-gradient(circle_farthest-side_at_50%_-150%,_rgba(229,241,255,1),_#2700D3),linear-gradient(to_bottom,_#2700D3,_rgba(229,241,255,1))] opacity-80 z-1"></div>
 
-      {/* doodle1 */}
-      <div className="absolute z-20 w-[80px] h-[80px] top-[140px] left-[0px] md:w-[212px] md:h-[157px] md:top-[150px] md:left-[8px] lg:left-[195px]">
-        <img
-          src="/LandingPage/4 1.png"
-          alt="Doodle 1"
-          className="w-full h-full object-cover rounded-2xl"
-        />
-      </div>
-
-      {/* Main Heading */}
-      <h1 className="font-bold text-[40px] sm:text-[64px] leading-tight text-black uppercase z-10 pt-[190px]">
-        Collaborate Together
-      </h1>
-
-      {/* doodle2 */}
-      <div className="absolute z-10 w-[100px] h-[100px] md:w-[150px] md:h-[150px] top-[236px] left-[280px] lg:w-[275px] lg:h-[242px] lg:top-[110px] md:top-[240px] md:left-[570px] lg:left-[1180px] opacity-90">
-        <img
-          src="/LandingPage/hat.png"
-          alt="Doodle 2"
-          className="w-full h-full object-cover rounded-2xl"
-        />
-      </div>
-
-      {/* Subheading */}
-      <p className="font-normal text-[16px] sm:text-[28px] mt-6 max-w-5xl z-10">
-        Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam
-        nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam.
-      </p>
+      {isEditing ? (
+        <div className="mt-10 lg:mt-40 flex flex-col items-center space-y-4 z-50">
+          <textarea
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Title here..."
+            className="lg:w-[400px] p-2 bg-transparent border border-white rounded outline-none resize-none text-2xl text-gray-200 scrollbar"
+          />
+          <textarea
+            value={paragraph}
+            onChange={(e) => setParagraph(e.target.value)}
+            placeholder="Paragraph here..."
+            className="lg:w-[700px] p-2 bg-transparent border border-white rounded outline-none resize-none text-xl text-gray-200 scrollbar"
+          />
+          <div className="lg:w-[400px] flex items-center justify-between space-x-2">
+            <button
+              onClick={saveContent}
+              className="bg-green-600 py-2 px-4 rounded text-xl w-1/2"
+            >
+              Save
+            </button>
+            <button
+              onClick={() => setIsEditing(false)}
+              className="bg-red-600 py-2 px-4 rounded text-xl w-1/2"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        // Main Heading and Subheading container:
+        <div className="relative mt-[120px] lg:mt-[190px] flex flex-col items-center z-50">
+          <h1 className="font-bold text-[40px] sm:text-[64px] leading-tight text-black uppercase">
+            {title}
+          </h1>
+          <p className="font-normal text-[16px] sm:text-[28px] mt-6 max-w-5xl whitespace-pre-wrap">
+            {paragraph}
+          </p>
+          {isAdmin && (
+            <FaPencilAlt
+              onClick={handleEdit}
+              className="cursor-pointer absolute top-0 -right-2 lg:-right-5"
+            />
+          )}
+        </div>
+      )}
 
       {/* Buttons */}
       <div className="mt-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-8 z-10">
@@ -134,6 +206,24 @@ const Hero = () => {
         <button className="bg-[#D9502E] text-white font-bold px-8 py-4 rounded-md text-lg">
           Get Demo
         </button>
+      </div>
+
+      {/* doodle1 */}
+      <div className="absolute z-20 w-[80px] h-[80px] top-[140px] left-[0px] md:w-[212px] md:h-[157px] md:top-[150px] md:left-[8px] lg:left-[195px]">
+        <img
+          src="/LandingPage/4 1.png"
+          alt="Doodle 1"
+          className="w-full h-full object-cover rounded-2xl"
+        />
+      </div>
+
+      {/* doodle2 */}
+      <div className="absolute z-10 w-[100px] h-[100px] md:w-[150px] md:h-[150px] top-[236px] left-[280px] lg:w-[275px] lg:h-[242px] lg:top-[110px] md:top-[240px] md:left-[570px] lg:left-[1180px] opacity-90">
+        <img
+          src="/LandingPage/hat.png"
+          alt="Doodle 2"
+          className="w-full h-full object-cover rounded-2xl"
+        />
       </div>
 
       {/* doodle3 */}

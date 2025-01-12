@@ -8,6 +8,7 @@ const textRoutes = require("./routes/textRoutes");
 const fileRoutes = require("./routes/fileRoutes");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
+const teamRoutes = require("./routes/teamRoutes");
 const { mountRoutes } = require("./routes"); // Main routes including API docs
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 const authRoutes = require("./routes/authRoutes");
@@ -84,6 +85,14 @@ app.use("/api/files", fileRoutes);
 /**
  * @swagger
  * tags:
+ *   - name: TeamRoutes
+ *     description: Routes for file operations
+ */
+app.use("/api", teamRoutes);
+
+/**
+ * @swagger
+ * tags:
  *   - name: Authentication
  *     description: Routes for Authentication endpoints
  */
@@ -142,11 +151,22 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at ${BACKEND_URL}`);
-  console.log(`📖 Swagger Docs available at ${BACKEND_URL}/api-test`);
-  console.log(`💻 Health Check: ${BACKEND_URL}/health`);
-  console.log(`🗄️ Database Status: ${BACKEND_URL}/db-status`);
-  console.log(`📚 API Documentation: ${BACKEND_URL}/api/docs`);
-  console.log(`📋 Postman Collection: ${BACKEND_URL}/api/docs/postman`);
-  console.log(`⚙️ File Verification: ${BACKEND_URL}/api/system/verify-all`);
-});
+
+  console.log(`🚀 Server running at http://dev.starteryou.com:${PORT}`);
+  console.log(
+    `📖 Swagger Docs available at http://dev.starteryou.com:${PORT}/api-test`
+  );
+  console.log(`💻 Health Check: http://dev.starteryou.com:${PORT}/health`);
+  console.log(
+    `🗄️ Database Status: http://dev.starteryou.com:${PORT}/db-status`
+  );
+  console.log(
+    `📚 API Documentation: http://dev.starteryou.com:${PORT}/api/docs`
+  );
+  console.log(
+    `📋 Postman Collection: http://dev.starteryou.com:${PORT}/api/docs/postman`
+  );
+  console.log(
+    `⚙️ File Verification: http://dev.starteryou.com:${PORT}/api/system/verify-all`
+  );
+  });
