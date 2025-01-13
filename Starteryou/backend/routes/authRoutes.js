@@ -10,7 +10,7 @@ const router = express.Router();
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 const Employee = require("../models/EmployeeModel");
 
-//jwt secret key
+//dev_jwt_secret key
 const jwtSecret = process.env.DEV_JWT_SECRET;
 if (!jwtSecret) {
   console.error("Error: DEV_JWT_SECRET is missing in the environment variables.");
