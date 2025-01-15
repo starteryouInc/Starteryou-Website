@@ -9,6 +9,8 @@ const validator = require("validator");
 const router = express.Router();
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 const Employee = require("../models/EmployeeModel");
+const cacheMiddleware = require("../cache/utils/cacheMiddleware");
+const invalidateCache = require("../cache/utils/invalidateCache");
 
 //jwt secret key
 const jwtSecret = process.env.DEV_JWT_SECRET;
@@ -229,6 +231,7 @@ const register = async (req, res) => {
     // General error handler for other issues
     handleError(res, error);
   }
+  await invalidateCache(req.originalUrl);
 };
 
 
@@ -333,11 +336,12 @@ const login = async (req, res) => {
   } catch (error) {
     handleError(res, error);
   }
+  await invalidateCache(req.originalUrl);
 };
  
 
 // Set up router
 
-router.post("/register", register);
-router.post("/login", login);
+router.post("/register",cacheMiddleware, register);
+router.post("/login",cacheMiddleware, login);
 module.exports = router;
