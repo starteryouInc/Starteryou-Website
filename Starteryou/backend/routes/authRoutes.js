@@ -12,7 +12,7 @@ const Employee = require("../models/EmployeeModel");
 const cacheMiddleware = require("../cache/utils/cacheMiddleware");
 const invalidateCache = require("../cache/utils/invalidateCache");
 
-//jwt secret key
+//dev_jwt_secret key
 const jwtSecret = process.env.DEV_JWT_SECRET;
 if (!jwtSecret) {
   console.error("Error: DEV_JWT_SECRET is missing in the environment variables.");
