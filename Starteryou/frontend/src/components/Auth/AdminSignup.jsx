@@ -12,7 +12,8 @@ const AdminSignup = () => {
   const [password, setPassword] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [username, setUsername] = useState("");
-
+  
+//validate email
   const validateEmail = (email) => {
     const regex = /^[a-zA-Z0-9._%+-]+@starteryou\.com$/i;
     return regex.test(email);
