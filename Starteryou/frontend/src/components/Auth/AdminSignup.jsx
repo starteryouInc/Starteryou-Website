@@ -4,8 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useUserContext } from "../../context/UserContext"; 
 import { API_CONFIG } from "@config/api";
-
-  const AdminSignup = () => {
+const AdminSignup = () => {
   const { setUser } = useUserContext(); 
   const navigate = useNavigate();
 
@@ -13,9 +12,20 @@ import { API_CONFIG } from "@config/api";
   const [password, setPassword] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [username, setUsername] = useState("");
+  
+//validate email
+  const validateEmail = (email) => {
+    const regex = /^[a-zA-Z0-9._%+-]+@starteryou\.com$/i;
+    return regex.test(email);
+    };
 
   const handleAdminSignup = async (e) => {
     e.preventDefault();
+
+    if (!validateEmail(email)) {
+      toast.error("Email must end with @starteryou.com and be in the correct format.");
+      return;
+    }
 
     try {
     const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.authRegister}`, {
@@ -69,6 +79,7 @@ import { API_CONFIG } from "@config/api";
               required
             />
           </div>
+
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email
@@ -80,11 +91,8 @@ import { API_CONFIG } from "@config/api";
               onChange={(e) => setEmail(e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg"
               required
-              pattern="/^[a-zA-Z0-9._%+-]+@starteryou\.com$/i"
-              title="Please enter a valid email address ending with @starteryou.com"
             />
           </div>
-
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
