@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
 const Schema = mongoose.Schema;
 
 const UserSchema = new Schema(
@@ -12,36 +11,16 @@ const UserSchema = new Schema(
       type: String,
       required: true,
       unique: true,
-      lowercase: true,
-    },
-    phoneNumber: {
-      required: true,
-      unique: true,
-      type: Number,
     },
     password: {
       type: String,
       required: true,
-      unique: true,
-    },
-    profile: {
-      firstName: {
-        type: String,
-      },
-      lastName: {
-        type: String,
-      },
-      avatar: {
-        type: String,
-        default: "profile_image_url",
-      },
     },
     role: {
-      type: [String],
-      enum: ["user", "admin"],
-      required:true
+      type: String,
+      enum: ["admin", "jobSeeker", "employer"],
+      required: true,
     },
-
     accountStatus: {
       active: {
         type: Boolean,
@@ -71,11 +50,6 @@ const UserSchema = new Schema(
         type: [String],
         enum: ["totp", "sms"],
       },
-    },
-    socialAuth: {
-      googleId: { type: String, default: null },
-      facebookId: { type: String, default: null },
-      linkedInId: { type: String, default: null },
     },
     tokens: {
       accessToken: { type: String },
