@@ -11,6 +11,7 @@ import FileUpload from "../Common/FileUpload";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
 import { API_CONFIG } from "@config/api";
+import { MaxWords } from "../Common/wordValidation";
 
 /**
  * OurVision Component
@@ -175,7 +176,7 @@ const OurVision = () => {
   };
 
   return (
-    <div className="max-w-[1300px] mx-auto container px-4 py-10">
+    <div className="max-w-[1300px] mx-auto container px-4 py-20">
       <div className="flex flex-col md:flex-row md:space-x-4">
         {/* Text Box Section */}
         <div className="bg-white p-2 md:p-6 mb-4 md:mb-0 flex-1 flex flex-col justify-center md:order-2">
@@ -184,12 +185,12 @@ const OurVision = () => {
               <input
                 type="text"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => setTitle(MaxWords(e.target.value, 3))}
                 className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-[#1F2329] border border-gray-300 p-2 rounded w-full"
               />
               <textarea
                 value={paragraph}
-                onChange={(e) => setParagraph(e.target.value)}
+                onChange={(e) => setParagraph(MaxWords(e.target.value, 84))}
                 className="text-[#1F2329] text-base border border-gray-300 p-2 rounded w-full"
                 rows={6}
               />

@@ -89,7 +89,7 @@ jobs:
             NODE_ENV=production
             PORT=3000
             FRONTEND_URL=http://dev.starteryou.com:8080
-            VITE_BACKEND_URL=http://dev.starteryou.com:3000
+            BACKEND_URL=${{ secrets.BACKEND_URL }}
             DEV_JWT_SECRET=${{ secrets.DEV_JWT_SECRET }}
             MONGO_USER=${{ secrets.MONGO_USER }}
             MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}

@@ -7,7 +7,6 @@ require("dotenv").config();
 const backendUrl = process.env.BACKEND_URL || "http://localhost:3000";
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-
 const router = express.Router();
 
 // Initialize GridFSBucket

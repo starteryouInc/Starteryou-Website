@@ -1,6 +1,6 @@
 require('dotenv').config({ path: '.env.server' }); 
 const express = require("express");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/UserModel");
 const swaggerJsDoc = require("swagger-jsdoc");
