@@ -3,9 +3,12 @@ const express = require("express");
 const router = express.Router();
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-const TextContent = require("../models/TextContent"); // Adjust path as needed
+const TextContent = require("../models/TextContent");
+const cacheMiddleware = require("../cache/utils/cacheMiddleware");
+const { invalidateCache } = require("../cache/utils/invalidateCache");
 require("dotenv").config();
 const backendUrl = process.env.BACKEND_URL || "http://localhost:3000";
+
 // Swagger setup
 const swaggerOptions = {
   swaggerDefinition: {
@@ -13,16 +16,15 @@ const swaggerOptions = {
     info: {
       title: "Text Content API",
       version: "1.0.0",
-      description:
-        "API for managing text content associated with specific components",
+      description: "API for managing text content associated with specific components",
     },
     servers: [
       {
-        url: `${backendUrl}/api/text`, // Replace with your base URL
+        url: `${backendUrl}/api/text`,
       },
     ],
   },
-  apis: [__filename], // Specify the file where your API routes are defined
+  apis: [__filename],
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
@@ -61,7 +63,7 @@ router.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *       500:
  *         description: Server error.
  */
-router.get("/text", async (req, res) => {
+router.get("/text", cacheMiddleware, async (req, res) => {
   const { page, component } = req.query;
 
   if (!page) {
@@ -77,24 +79,23 @@ router.get("/text", async (req, res) => {
       });
     }
 
+    let content;
     if (component) {
-      const content = await TextContent.findOne({ page, component }).maxTimeMS(
-        10000
-      );
+      content = await TextContent.findOne({ page, component }).maxTimeMS(10000);
       if (!content) {
         return res.status(404).json({
           message: "Content not found for the specified page and component.",
         });
       }
-      return res.json(content);
+    } else {
+      content = await TextContent.find({ page }).maxTimeMS(10000);
+      if (!content || content.length === 0) {
+        return res.status(404).json({
+          message: `No content found for the specified page: ${page}`,
+        });
+      }
     }
 
-    const content = await TextContent.find({ page }).maxTimeMS(10000);
-    if (!content || content.length === 0) {
-      return res.status(404).json({
-        message: `No content found for the specified page: ${page}`,
-      });
-    }
     return res.json(content);
   } catch (error) {
     res.status(500).json({
@@ -139,6 +140,7 @@ router.get("/text", async (req, res) => {
  */
 router.put("/text", async (req, res) => {
   const { page, component, content, paragraphs } = req.body;
+  const cacheKey = `text:${page}:${component}`;
 
   if (!page || !component) {
     return res.status(400).json({
@@ -147,15 +149,12 @@ router.put("/text", async (req, res) => {
   }
   if (content === undefined && !Array.isArray(paragraphs)) {
     return res.status(400).json({
-      message:
-        "At least one of 'content' or 'paragraphs' is required in the request body.",
+      message: "At least one of 'content' or 'paragraphs' is required in the request body.",
     });
   }
 
   try {
-    let textContent = await TextContent.findOne({ page, component }).maxTimeMS(
-      10000
-    );
+    let textContent = await TextContent.findOne({ page, component }).maxTimeMS(10000);
 
     if (!textContent) {
       textContent = new TextContent({ page, component });
@@ -170,6 +169,9 @@ router.put("/text", async (req, res) => {
     }
 
     await textContent.save();
+
+    // Invalidate cache
+    await invalidateCache(cacheKey);
     res.json(textContent);
   } catch (error) {
     res.status(500).json({
@@ -212,6 +214,7 @@ router.put("/text", async (req, res) => {
  */
 router.delete("/text", async (req, res) => {
   const { page, component } = req.query;
+  const cacheKey = `text:${page}:${component}`;
 
   if (!page || !component) {
     return res.status(400).json({
@@ -229,6 +232,9 @@ router.delete("/text", async (req, res) => {
         message: "No content found for the specified page and component.",
       });
     }
+
+    // Invalidate cache
+    await invalidateCache(cacheKey);
     res.json({ message: "Content deleted successfully." });
   } catch (error) {
     res.status(500).json({

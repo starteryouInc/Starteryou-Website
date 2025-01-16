@@ -8,6 +8,8 @@ const backendUrl = process.env.BACKEND_URL || "http://localhost:3000";
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const router = express.Router();
+const cacheMiddleware = require("../cache/utils/cacheMiddleware");
+const { invalidateCache } = require("../cache/utils/invalidateCache");
 
 // Initialize GridFSBucket
 let bucket;
@@ -213,6 +215,10 @@ router.put("/update/:title", upload.single("file"), async (req, res) => {
         fileMetadata.size = req.file.size;
 
         await fileMetadata.save();
+
+        // Invalidate cache
+        await invalidateCache(req.originalUrl);
+
         res.json({
           success: true,
           message: "File updated successfully",
@@ -256,7 +262,7 @@ router.put("/update/:title", upload.single("file"), async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-router.get("/download/:title", async (req, res) => {
+router.get("/download/:title", cacheMiddleware, async (req, res) => {
   try {
     const gridFsBucket = ensureBucket();
 

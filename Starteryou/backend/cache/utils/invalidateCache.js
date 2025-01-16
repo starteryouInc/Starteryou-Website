@@ -1,4 +1,4 @@
-const { mongoConnection } = require('../../db');
+const mongoConnection = require('../../db');
 const Cache = require('../models/cache');
 
 const invalidateCache = async (key) => {

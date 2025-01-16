@@ -10,7 +10,7 @@ const router = express.Router();
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 const Employee = require("../models/EmployeeModel");
 const cacheMiddleware = require("../cache/utils/cacheMiddleware");
-const invalidateCache = require("../cache/utils/invalidateCache");
+const { invalidateCache } = require("../cache/utils/invalidateCache");
 
 //dev_jwt_secret key
 const jwtSecret = process.env.DEV_JWT_SECRET;
@@ -67,7 +67,6 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
 // Use Swagger UI
 router.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-
 
 /**
  * @swagger
@@ -208,6 +207,9 @@ const register = async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
+    // Invalidate cache for user list or related data
+    await invalidateCache(`/user/${user._id}`);
+
     return res.status(201).json({
       message: "User registered successfully",
       success: true,
@@ -231,7 +233,6 @@ const register = async (req, res) => {
     // General error handler for other issues
     handleError(res, error);
   }
-  await invalidateCache(req.originalUrl);
 };
 
 
@@ -327,6 +328,9 @@ const login = async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
+    // Invalidate cache for user list or related data
+    await invalidateCache(`/user/${user._id}`);
+
     res.status(200).json({
       message: "Login successful",
       success: true,
@@ -336,12 +340,64 @@ const login = async (req, res) => {
   } catch (error) {
     handleError(res, error);
   }
-  await invalidateCache(req.originalUrl);
 };
- 
+
+// Example GET route with cache middleware
+router.get("/user/:id", cacheMiddleware, async (req, res) => {
+  const { id } = req.params;
+  console.log(`Fetching user with ID: ${id}`); 
+  try {
+    const user = await User.findById(id);
+    if (!user) {
+      console.log(`User not found with ID: ${id}`); 
+      return res.status(404).json({ message: "User not found", success: false });
+    }
+    console.log(`User found: ${user}`); 
+    res.json({ user, success: true });
+  } catch (error) {
+    handleError(res, error);
+  }
+});
+
+// Example PUT route with cache invalidation
+router.put("/user/:id", async (req, res) => {
+  const { id } = req.params;
+  console.log(`Updating user with ID: ${id}`); 
+  try {
+    const user = await User.findByIdAndUpdate(id, req.body, { new: true });
+    if (!user) {
+      console.log(`User not found with ID: ${id}`); 
+      return res.status(404).json({ message: "User not found", success: false });
+    }
+    await invalidateCache(`/user/${id}`);
+    console.log(`User updated and cache invalidated for ID: ${id}`); 
+    res.json({ user, success: true });
+  } catch (error) {
+    handleError(res, error);
+  }
+});
+
+// Example DELETE route with cache invalidation
+router.delete("/user/:id", async (req, res) => {
+  const { id } = req.params;
+  console.log(`Deleting user with ID: ${id}`);
+  try {
+    const user = await User.findByIdAndDelete(id);
+    if (!user) {
+      console.log(`User not found with ID: ${id}`); 
+      return res.status(404).json({ message: "User not found", success: false });
+    }
+    await invalidateCache(`/user/${id}`);
+    console.log(`User deleted and cache invalidated for ID: ${id}`); 
+    res.json({ message: "User deleted successfully", success: true });
+  } catch (error) {
+    handleError(res, error);
+  }
+});
+
 
 // Set up router
+router.post("/register", cacheMiddleware, register);
+router.post("/login", cacheMiddleware, login);
 
-router.post("/register",cacheMiddleware, register);
-router.post("/login",cacheMiddleware, login);
 module.exports = router;

@@ -1,46 +1,27 @@
-const { cacheQuery } = require("../../db"); // Import shared cacheQuery utility
-const cacheConfig = require("../config/cacheConfig"); // Cache configurations
+const mongoose = require('mongoose');
+const Cache = require('./cache/models/cache');
 
-const cacheMiddleware = async (req, res, next) => {
-    try {
-        const ttl = cacheConfig.defaultTTL; // Default TTL for cache entries
-        const key = req.originalUrl; // Use the request URL as the cache key
-
-        // Check if a cached response exists
-        const cachedResponse = await cacheQuery(
-            key,
-            async () => null, // Placeholder query function for middleware
-            ttl
-        );
-
-        if (cachedResponse) {
-            console.log(`✅ Cache hit for key: ${key}`);
-            return res.json(cachedResponse); // Send cached response
-        }
-
-        console.log(`❌ Cache miss for key: ${key}`);
-
-        // Overwrite `res.json` to cache the response
-        const originalSend = res.json.bind(res);
-        res.json = async (body) => {
-            try {
-                console.log(`🔄 Caching response for key: ${key}`);
-                await cacheQuery(
-                    key,
-                    async () => body, // Store the response body
-                    ttl
-                );
-            } catch (error) {
-                console.error(`❌ Error caching response for key: ${key}`, error);
-            }
-            originalSend(body); // Send the original response
-        };
-
-        next(); // Proceed to the next middleware or route handler
-    } catch (error) {
-        console.error("❌ Error in cacheMiddleware:", error);
-        next(); // Ensure the request proceeds even if cache logic fails
+const cacheQuery = async (key, queryFn, ttl) => {
+  try {
+    const cachedEntry = await Cache.findOne({ key });
+    if (cachedEntry && new Date() < new Date(cachedEntry.expiresAt)) {
+      return cachedEntry.value;
     }
+
+    const value = await queryFn();
+    const expiresAt = new Date(Date.now() + ttl * 1000);
+
+    await Cache.updateOne(
+      { key },
+      { key, value, expiresAt },
+      { upsert: true }
+    );
+
+    return value;
+  } catch (error) {
+    console.error(`❌ Error in cacheQuery for key: ${key}`, error);
+    return null;
+  }
 };
 
-module.exports = cacheMiddleware;
+module.exports = { cacheQuery };
