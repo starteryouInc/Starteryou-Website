@@ -24,7 +24,7 @@ const LoginPage = () => {
     e.preventDefault();
 
     if (!validateEmail(email)) {
-      toast.error("Email must end with @starteryou.com and be in the correct format.");
+      toast.error("Email must end with @starteryou.com.");
       return;
     }
 

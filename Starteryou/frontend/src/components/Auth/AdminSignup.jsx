@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useUserContext } from "../../context/UserContext"; 
 import { API_CONFIG } from "@config/api";
-
 const AdminSignup = () => {
   const { setUser } = useUserContext(); 
   const navigate = useNavigate();
@@ -13,7 +12,8 @@ const AdminSignup = () => {
   const [password, setPassword] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [username, setUsername] = useState("");
-
+  
+//validate email
   const validateEmail = (email) => {
     const regex = /^[a-zA-Z0-9._%+-]+@starteryou\.com$/i;
     return regex.test(email);

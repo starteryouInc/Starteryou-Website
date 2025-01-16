@@ -25,7 +25,7 @@ import FileUpload from "../Common/FileUpload";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
 import { API_CONFIG } from "@config/api";
-
+import { MaxWords } from "../Common/wordValidation";
 const OurMission = () => {
   // State for title, paragraph, and image preview
   const [title, setTitle] = useState("OUR MISSION");
@@ -149,15 +149,17 @@ const OurMission = () => {
    *
    * @param {Event} e - The change event from the input field.
    */
-  const handleChangeTitle = (e) => setTitle(e.target.value);
+  const handleChangeTitle = (e) => setTitle(MaxWords(e.target.value, 3));
 
   /**
    * Updates the paragraph state based on the input value.
    *
    * @param {Event} e - The change event from the textarea field.
    */
-  const handleChangeParagraph = (e) => setParagraph(e.target.value);
 
+  const handleChangeParagraph = (e) => {
+    setParagraph(MaxWords(e.target.value, 84)); // Limit to 84 words
+  };
   /**
    * Saves the edited title and paragraph content to the server.
    *
