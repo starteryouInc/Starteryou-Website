@@ -13,7 +13,7 @@ const { mountRoutes } = require("./routes"); // Main routes including API docs
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 // Initialize Express app
 const app = express();
-
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 // Middleware
 dotenv.config();
 app.use(cors());
@@ -41,7 +41,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: `http://dev.starteryou.com:${process.env.PORT || 3000}/api`,
+        url: `${BACKEND_URL}/api`,
       },
     ],
     tags: [
@@ -126,7 +126,9 @@ app.use((err, req, res, next) => {
 });
 
 // Start Server
+// Start Server
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://dev.starteryou.com:${PORT}`);
   console.log(
