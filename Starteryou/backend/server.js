@@ -12,7 +12,6 @@ const teamRoutes = require("./routes/teamRoutes");
 const { mountRoutes } = require("./routes"); // Main routes including API docs
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 const authRoutes = require("./routes/authRoutes");
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 // Initialize Express app
 const app = express();
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
@@ -147,7 +146,6 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-
   console.log(`🚀 Server running at http://dev.starteryou.com:${PORT}`);
   console.log(
     `📖 Swagger Docs available at http://dev.starteryou.com:${PORT}/api-test`
@@ -165,4 +163,4 @@ app.listen(PORT, () => {
   console.log(
     `⚙️ File Verification: http://dev.starteryou.com:${PORT}/api/system/verify-all`
   );
-  });
+});
