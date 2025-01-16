@@ -75,7 +75,7 @@ const convertImageToBase64 = (imagePath) => {
  *         description: Server error
  */
 router.post("/team", upload.single("image"), async (req, res) => {
-  const { name, position, about, linkedin } = req.body;
+  const { name, position, about, linkedin, team } = req.body; // Add 'team' to the destructured body
 
   const imageBase64 = req.file ? convertImageToBase64(req.file.path) : null;
 
@@ -86,6 +86,7 @@ router.post("/team", upload.single("image"), async (req, res) => {
       about,
       linkedin,
       image: imageBase64,
+      team, // Save the team property
     });
 
     await teamMember.save();
@@ -136,14 +137,18 @@ router.post("/team", upload.single("image"), async (req, res) => {
  *         description: Server error
  */
 router.get("/team", async (req, res) => {
-  const { page = 1, limit = 10 } = req.query;
+  const { page = 1, limit = 10, team } = req.query; // Add 'team' to query parameters
 
   try {
-    const teamMembers = await TeamMember.find()
+    // Create a filter object
+    const filter = team ? { team } : {};
+
+    // Apply the filter when fetching data
+    const teamMembers = await TeamMember.find(filter)
       .skip((page - 1) * limit)
       .limit(Number(limit));
 
-    const total = await TeamMember.countDocuments();
+    const total = await TeamMember.countDocuments(filter); // Count documents with the filter
 
     res.status(200).json({ data: teamMembers, total });
   } catch (error) {

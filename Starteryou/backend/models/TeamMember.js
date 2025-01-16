@@ -12,7 +12,7 @@ const teamMemberSchema = new mongoose.Schema(
     },
     about: {
       type: String,
-      required: true,
+      required: false,
     },
     image: {
       type: String, // Store the Base64 string of the image
@@ -21,6 +21,10 @@ const teamMemberSchema = new mongoose.Schema(
     linkedin: {
       type: String,
       required: true,
+    },
+    team: {
+      type: String, // Add the 'team' field
+      required: true, // Ensure it's always provided
     },
   },
   { timestamps: true }

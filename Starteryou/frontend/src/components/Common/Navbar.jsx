@@ -31,19 +31,16 @@ const Navbar = ({ isEduHero }) => {
       }`}
     >
       <div className="flex items-center space-x-2">
-        {" "}
         <img
-          src="/JobPortalPage/Placeholder Image.png"
+          src="/prelogo.png"
           alt="Logo"
-          className="w-10 h-10 rounded-full object-cover"
+          className="w-12 h-12 rounded-full object-cover"
         />
-        <div
-          className={`text-xl md:text-lg lg:text-3xl font-bold uppercase transition-colors duration-300  ${
-            isScrolled ? "text-black" : "text-white"
-          }`}
-        >
-          StarterYou
-        </div>
+        <img
+          src="/starteryou text white.png"
+          alt="Logo"
+          className="w-[190px] h-[60px] mt-2 self-center object-cover"
+        />
       </div>
 
       {/* Navigation Links for Medium and Large Screens */}
