@@ -11,5 +11,7 @@ export const API_CONFIG = {
     fileCleanup: "/api/files/cleanup",
     textApi: "/api/text",
     teamApi: "/api/team",
+    authLogin: "/api/v1/auth/login",
+    authRegister: "/api/v1/auth/register",
   },
 };

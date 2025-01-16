@@ -6,10 +6,12 @@ import Team from "../components/About/Team";
 import TechTeam from "../components/About/TechTeam";
 import Contact from "../components/Landing/Contact";
 import InProgressPage from "../components/Common/InProgressPage";
+import { ToastContainer } from "react-toastify";
 export default function AboutPage() {
   const deployReady = true;
   return deployReady ? (
     <div>
+      <ToastContainer />
       <HeroAbout />
       <BetterFuture />
       <OurMission />
