@@ -9,6 +9,10 @@ const validator = require("validator");
 const router = express.Router();
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 const Employee = require("../models/EmployeeModel");
+const cacheQuery = require("../cache/utils/cacheQuery");
+const cacheMiddleware = require("../cache/utils/cacheMiddleware");
+const { invalidateCache } = require("../cache/utils/invalidateCache");
+
 
 //dev_jwt_secret key
 const jwtSecret = process.env.DEV_JWT_SECRET;
@@ -307,31 +311,49 @@ const login = async (req, res) => {
     }
 
   try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: "User does not exist", success: false });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials", success: false });
-    }
+    const cacheKey = `login:${email}`;
+    const ttl = 3600;
     
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
+    // Invalidate the cache for the login endpoint
+    console.log(`🔄 Invalidating cache for key: ${cacheKey}`);
+    await invalidateCache(cacheKey);
 
-    // Store the refresh token in the database
-    user.refreshToken = refreshToken;
-    await user.save();
+    const cachedResponse = await cacheQuery(cacheKey, async () => {
+      const user = await User.findOne({ email });
+      if (!user) {
+        return { status: 400, response: { message: "User does not exist", success: false } };
+      }
 
-    res.status(200).json({
-      message: "Login successful",
-      success: true,
-      tokens: { accessToken, refreshToken },
-      user: { id: user._id, username: user.username, email: user.email ,role: user.role},
-    });
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return { status: 401, response: { message: "Invalid credentials", success: false } };
+      }
+    
+      const accessToken = generateAccessToken(user);
+      const refreshToken = generateRefreshToken(user);
+
+      // Store the refresh token in the database
+      user.refreshToken = refreshToken;
+      await user.save();
+
+      return {
+        status: 200,
+        response: {
+          message: "Login successful",
+          success: true,
+          tokens: { accessToken, refreshToken },
+          user: { id: user._id, username: user.username, email: user.email, role: user.role },
+        },
+      };
+    }, ttl);
+    console.log(`✅ Cache set for key: ${cacheKey}`);
+    return res.status(cachedResponse.status).json(cachedResponse.response);
   } catch (error) {
-    handleError(res, error);
+    console.error("Error during login:", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+      success: false,
+    });
   }
 };
  
@@ -339,5 +361,5 @@ const login = async (req, res) => {
 // Set up router
 
 router.post("/register", register);
-router.post("/login", login);
+router.post("/login", cacheMiddleware, login);
 module.exports = router;
