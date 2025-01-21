@@ -10,11 +10,9 @@ const router = express.Router();
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 const Employee = require("../models/EmployeeModel");
 const cacheQuery = require("../cache/utils/cacheQuery");
-const cacheMiddleware = require("../cache/utils/cacheMiddleware");
 const { invalidateCache } = require("../cache/utils/invalidateCache");
+const cacheConfig = require("../cache/config/cacheConfig");
 
-
-//dev_jwt_secret key
 const jwtSecret = process.env.DEV_JWT_SECRET;
 if (!jwtSecret) {
   console.error("Error: DEV_JWT_SECRET is missing in the environment variables.");
@@ -35,6 +33,7 @@ const generateRefreshToken = (user) => {
     expiresIn: "7d",
   });
 };
+
 /**
  * Centralized error handler
  */
@@ -69,7 +68,6 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
 // Use Swagger UI
 router.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-
 
 /**
  * @swagger
@@ -235,7 +233,6 @@ const register = async (req, res) => {
   }
 };
 
-
 /**
  * @swagger
  * /v1/auth/login:
@@ -305,30 +302,30 @@ const login = async (req, res) => {
   }
 
   const validEmployee = await Employee.findOne({ email });
-    console.log("Valid Employee:", validEmployee); // Log the valid employee for debugging
-    if (!validEmployee) {
-      return res.status(400).json({ message: "This email is not associated with a valid employee", success: false });
-    }
+  console.log("Valid Employee:", validEmployee); // Log the valid employee for debugging
+  if (!validEmployee) {
+    return res.status(400).json({ message: "This email is not associated with a valid employee", success: false });
+  }
 
   try {
-    const cacheKey = `login:${email}`;
-    const ttl = 3600;
-    
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "User does not exist", success: false });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials", success: false });
+    }
+
+    const cacheKey = `login:${user._id}`;
+    const ttl = cacheConfig.defaultTTL; // Time to live in seconds (1 hour)
+
     // Invalidate the cache for the login endpoint
     console.log(`🔄 Invalidating cache for key: ${cacheKey}`);
     await invalidateCache(cacheKey);
 
     const cachedResponse = await cacheQuery(cacheKey, async () => {
-      const user = await User.findOne({ email });
-      if (!user) {
-        return { status: 400, response: { message: "User does not exist", success: false } };
-      }
-
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return { status: 401, response: { message: "Invalid credentials", success: false } };
-      }
-    
       const accessToken = generateAccessToken(user);
       const refreshToken = generateRefreshToken(user);
 
@@ -346,6 +343,7 @@ const login = async (req, res) => {
         },
       };
     }, ttl);
+
     console.log(`✅ Cache set for key: ${cacheKey}`);
     return res.status(cachedResponse.status).json(cachedResponse.response);
   } catch (error) {
@@ -356,10 +354,8 @@ const login = async (req, res) => {
     });
   }
 };
- 
 
 // Set up router
-
 router.post("/register", register);
-router.post("/login", cacheMiddleware, login);
+router.post("/login", login);
 module.exports = router;
