@@ -32,12 +32,18 @@ const Navbar = ({ isEduHero }) => {
     >
       <div className="flex items-center space-x-2">
         <img
+
           src="/prelogo.svg"
+=======
+
+
           alt="Logo"
           className="w-12 h-12 rounded-full object-cover"
         />
         <img
+
           src="/starteryou text white.svg"
+
           alt="Logo"
           className="w-[190px] h-[60px] mt-2 self-center object-cover"
         />
