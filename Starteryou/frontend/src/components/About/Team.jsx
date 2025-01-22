@@ -154,9 +154,7 @@ const Team = () => {
                   imgSrc: response.data.image || member.imgSrc,
                   position: response.data.component,
                   name: response.data.content,
-                  about:
-                    response.data.paragraphs[0] ||
-                    "No additional information available.",
+                  about: response.data.paragraphs[0],
                   _id: response.data._id,
                   linkedin: member.linkedin, // Preserve LinkedIn URL
                 };
@@ -377,7 +375,6 @@ const Team = () => {
       const formData = new FormData();
       formData.append("name", newMember.name);
       formData.append("position", newMember.position);
-      formData.append("about", newMember.about);
       formData.append("linkedin", newMember.linkedin);
       formData.append("image", newMember.imageFile);
       formData.append("team", "leaderteam"); // Assign the 'techteam' identifier

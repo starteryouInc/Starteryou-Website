@@ -8,13 +8,14 @@
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export const MaxWords = (value, maxWords) => {
+export const MaxWords = (value, maxWords, setCounter) => {
   const words = value.trim().split(/\s+/); // Split by spaces, ignoring extra spaces
+  setCounter(maxWords - words.length); // Update the live word counter
 
   if (words.length > maxWords) {
     toast.error(`Word limit exceeded! Maximum allowed is ${maxWords} words.`, {
-      position: "top-right", // Use string literals
-      autoClose: 3000, // 3 seconds
+      position: "top-right",
+      autoClose: 3000,
     });
   }
 

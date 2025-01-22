@@ -3,6 +3,7 @@ import { useNavigation } from "../../context/NavigationContext";
 import { API_CONFIG } from "@config/api";
 import { FaPencilAlt } from "react-icons/fa";
 import axios from "axios";
+import { MaxWords } from "../Common/wordValidation";
 
 const Banner = () => {
   const { isAdmin } = useNavigation();
@@ -68,13 +69,13 @@ const Banner = () => {
           <div className="mt-10 flex flex-col space-y-4 z-50">
             <textarea
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => setTitle(MaxWords(e.target.value, 5))}
               placeholder="Title here..."
               className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
             />
             <textarea
               value={paragraph}
-              onChange={(e) => setParagraph(e.target.value)}
+              onChange={(e) => setParagraph(MaxWords(e.target.value, 15))}
               placeholder="Paragraph here..."
               className="lg:w-[700px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
             />
@@ -98,7 +99,9 @@ const Banner = () => {
             <h1 className="text-3xl md:text-4xl font-extrabold mb-4">
               {title}
             </h1>
-            <p className="text-[#767676] mb-4 lg:max-w-[800px] whitespace-pre-wrap">{paragraph}</p>
+            <p className="text-[#767676] mb-4 lg:max-w-[800px] whitespace-pre-wrap">
+              {paragraph}
+            </p>
             <button className="px-6 py-3 bg-[#D9502E] text-white rounded-md">
               Learn more
             </button>

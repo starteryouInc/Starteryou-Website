@@ -32,12 +32,18 @@ const Navbar = ({ isEduHero }) => {
     >
       <div className="flex items-center space-x-2">
         <img
-          src="/prelogo.png"
+
+          src="/prelogo.svg"
+=======
+
+
           alt="Logo"
           className="w-12 h-12 rounded-full object-cover"
         />
         <img
-          src="/starteryou text white.png"
+
+          src="/starteryou text white.svg"
+
           alt="Logo"
           className="w-[190px] h-[60px] mt-2 self-center object-cover"
         />
@@ -85,10 +91,10 @@ const Navbar = ({ isEduHero }) => {
           Sign up
         </Link>
         <Link
-          to="/start-free-trial"
-          className="bg-white text-[#D9502E] border-[2px] font-bold border-[#D9502E] px-3 py-1 lg:px-4 lg:py-2 rounded-lg"
+          to="/EmpSignUp"
+          className="bg-[#D9502E] text-sm sm:text-base lg:text-xl text-[white] border-[2px] font-bold border-[#D9502E] px-3 py-1 lg:px-4 lg:py-2 rounded-lg uppercase"
         >
-          Start free trial
+          List Job
         </Link>
       </div>
 
@@ -210,10 +216,10 @@ const Navbar = ({ isEduHero }) => {
             Sign up
           </Link>
           <Link
-            to="/start-free-trial"
+            to="/EmpSignUp"
             className=" bg-white text-[#D9502E] border-[2px] font-bold border-[#D9502E] px-3 py-2  text-center"
           >
-            Start free trial
+            List Job
           </Link>
         </div>
       </div>

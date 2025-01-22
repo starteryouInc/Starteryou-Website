@@ -4,6 +4,7 @@ import FileUpload from "../Common/FileUpload";
 import { API_CONFIG } from "@config/api";
 import { FaPencilAlt } from "react-icons/fa";
 import axios from "axios";
+import { MaxWords } from "../Common/wordValidation";
 
 const icons = [
   {
@@ -154,7 +155,7 @@ const BestJob4 = () => {
           <div className="flex flex-col items-center space-y-4 z-50">
             <textarea
               value={titleBJ4}
-              onChange={(e) => setTitleBJ4(e.target.value)}
+              onChange={(e) => setTitleBJ4(MaxWords(e.target.value, 6))}
               placeholder="Title here..."
               className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
             />
