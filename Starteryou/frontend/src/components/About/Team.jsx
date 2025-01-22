@@ -48,20 +48,20 @@ const Team = () => {
       about: "Managing the company’s finances.",
       linkedin: "https://www.linkedin.com/in/nikshepkulli/",
     },
-    {
-      imgSrc: "/AboutPage/Team/sales.jpg",
-      position: "SALES OFFICER",
-      name: "Ujjwal Geed",
-      about: "Overseeing operations and strategies.",
-      linkedin: "https://www.linkedin.com/in/ujwal-geed-8a0063218/",
-    },
-    {
-      imgSrc: "/AboutPage/Team/market.jpg",
-      position: "MARKETING MANAGER",
-      name: "Miles Hill",
-      about: "Leading the marketing team.",
-      linkedin: "https://www.linkedin.com/in/miles-hill-04a355342/",
-    },
+    // {
+    //   imgSrc: "/AboutPage/Team/sales.jpg",
+    //   position: "Research Analyst",
+    //   name: "Ujjwal Geed",
+    //   about: "Overseeing operations and strategies.",
+    //   linkedin: "https://www.linkedin.com/in/ujwal-geed-8a0063218/",
+    // },
+    // {
+    //   imgSrc: "/AboutPage/Team/market.jpg",
+    //   position: "MARKETING MANAGER",
+    //   name: "Miles Hill",
+    //   about: "Leading the marketing team.",
+    //   linkedin: "https://www.linkedin.com/in/miles-hill-04a355342/",
+    // },
   ];
 
   const { isAdmin } = useNavigation(); // Get admin status from context
@@ -105,8 +105,13 @@ const Team = () => {
    *   .catch(err => console.error(err));
    */
   const handleDeleteUser = async (index) => {
-    const memberId = teamMembers[index]._id; // Assuming `_id` is the unique identifier for each member
+    const member = teamMembers[index];
+    const memberId = member?._id; // Get _id from the member object
 
+    if (!memberId) {
+      alert("Error: Unable to delete. Member ID is missing.");
+      return;
+    }
     try {
       const response = await fetch(
         `http://localhost:3000/api/team/${memberId}`,
@@ -149,9 +154,7 @@ const Team = () => {
                   imgSrc: response.data.image || member.imgSrc,
                   position: response.data.component,
                   name: response.data.content,
-                  about:
-                    response.data.paragraphs[0] ||
-                    "No additional information available.",
+                  about: response.data.paragraphs[0],
                   _id: response.data._id,
                   linkedin: member.linkedin, // Preserve LinkedIn URL
                 };
@@ -198,7 +201,6 @@ const Team = () => {
       const updatedMembers = [...teamMembers];
       updatedMembers[index] = member;
       setTeamMembers(updatedMembers); // Update the team member list
-
       setEditingIndex(null); // Exit editing mode
     } catch (error) {
       console.error("Error saving updated data:", error);
@@ -261,7 +263,7 @@ const Team = () => {
               const url = URL.createObjectURL(blob);
               return { position: member.position, imgSrc: url };
             } else {
-              console.error(`Failed to fetch image for ${member.position}`);
+              // console.error(`Failed to fetch image for ${member.position}`);
               return null;
             }
           } catch (error) {
@@ -315,7 +317,7 @@ const Team = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          `${API_CONFIG.baseURL}${API_CONFIG.endpoints.teamApi}`
+          `${API_CONFIG.baseURL}${API_CONFIG.endpoints.teamApi}?team=leaderteam`
         );
         // Check if the response status is OK (200)
         if (response.status === 200) {
@@ -361,11 +363,10 @@ const Team = () => {
     if (
       !newMember.name ||
       !newMember.position ||
-      !newMember.about ||
       !newMember.imageFile ||
       !newMember.linkedin
     ) {
-      alert("Please fill in all fields and upload an image.");
+      alert("Please fill in all fields");
       return;
     }
 
@@ -374,10 +375,9 @@ const Team = () => {
       const formData = new FormData();
       formData.append("name", newMember.name);
       formData.append("position", newMember.position);
-      formData.append("about", newMember.about);
       formData.append("linkedin", newMember.linkedin);
       formData.append("image", newMember.imageFile);
-
+      formData.append("team", "leaderteam"); // Assign the 'techteam' identifier
       // Send the POST request to save the new member
       const response = await axios.post(
         `${API_CONFIG.baseURL}${API_CONFIG.endpoints.teamApi}`,
@@ -416,7 +416,7 @@ const Team = () => {
   return (
     <div className="bg-white py-20 px-4 text-center">
       <h2 className="text-2xl text-[#252B42] md:text-4xl font-bold mb-8 md:mb-10">
-        Meet Our Team
+        Meet Our Leadership Team
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center max-w-[930px] mx-auto">

@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
-const Signup = () => {
+const UserLogin = () => {
   const reviews = [
     {
       stars: 5,
@@ -44,7 +44,7 @@ const Signup = () => {
   return (
     <div className="flex flex-col lg:flex-row h-auto lg:h-screen">
       {/* Left Section */}
-      <div className="relative hidden w-full lg:w-2/5 bg-[#6A54DF] md:flex  flex-col text-white p-8 overflow-hidden">
+      <div className="relative hidden  w-full lg:w-2/5 bg-[#6A54DF] md:flex flex-col text-white p-8 overflow-hidden">
         {/* Circle in the top-left */}
         <div className="h-40 w-40 bg-transparent border-4 border-[#8574e4] rounded-full absolute top-0 left-0 transform -translate-x-1/2 -translate-y-1/2"></div>
 
@@ -52,7 +52,7 @@ const Signup = () => {
         <div className="h-40 w-40 bg-transparent border-4 border-white rounded-full absolute bottom-0 right-0 transform translate-x-1/2 translate-y-1/2"></div>
 
         <div className="mt-20 ml-16 flex flex-col justify-center items-start">
-          <h1 className="text-4xl lg:text-5xl font-bold">Welcome</h1>
+          <h1 className="text-4xl lg:text-5xl font-bold">Welcome Back!</h1>
           <p className="mt-4 text-lg max-w-[400px]">
             Starteryou simplifies the job application process for students.
           </p>
@@ -116,6 +116,7 @@ const Signup = () => {
 
         {/* Circle in the bottom-right */}
         <div className="md:hidden h-32 w-32 bg-transparent border-4 border-[#8574e4] rounded-full absolute bottom-[39px] right-[13px] transform translate-x-1/2 translate-y-1/2"></div>
+
         <div className="w-full lg:w-3/4 max-w-md">
           <h2 className="text-3xl font-bold mb-2">Join Starteryou</h2>
           <p className="text-gray-600 mb-6">
@@ -124,53 +125,24 @@ const Signup = () => {
 
           {/* Input Fields */}
           <form>
-            <div className="mb-4">
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Full name
-              </label>
-              <input
-                type="text"
-                id="username"
-                className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm "
-                placeholder="Enter your Full name"
-              />
-            </div>
-
+            {/* Email Input */}
             <div className="mb-4">
               <label
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
               >
-                Email
+                Email address
               </label>
               <input
-                type="email"
+                type="text"
                 id="email"
-                className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm "
+                className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm"
                 placeholder="Enter your email"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                placeholder="Enter your phone number"
-                pattern="[0-9]{10}"
                 required
               />
             </div>
 
+            {/* Password Input */}
             <div className="mb-4">
               <label
                 htmlFor="password"
@@ -201,32 +173,42 @@ const Signup = () => {
               </div>
             </div>
 
-            {/* Checkbox and Remember Me */}
-            <div className="flex items-center mb-6">
-              <input
-                type="checkbox"
-                id="remember"
-                className="h-4 w-4 text-indigo-600 border border-[#CBD5E1] rounded focus:ring-indigo-500"
-              />
-              <label
-                htmlFor="remember"
-                className="ml-2 block text-sm text-gray-700"
+            {/* Remember Me and Forgot Password */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="remember"
+                  className="h-4 w-4 text-indigo-600 border border-[#CBD5E1] rounded focus:ring-indigo-500"
+                />
+                <label
+                  htmlFor="remember"
+                  className="ml-2 block text-sm text-gray-700"
+                >
+                  Remember me
+                </label>
+              </div>
+              <Link
+                to="/ForgotPswd"
+                className="text-sm text-[#6A54DF] font-medium hover:underline"
               >
-                Remember me
-              </label>
+                Forgot Password?
+              </Link>
             </div>
 
             {/* Submit Button */}
             <button
               type="submit"
-              className="bg-[#6A54DF] text-white py-2 px-6 rounded-md hover:bg-indigo-700 transition duration-200"
+              className="bg-[#6A54DF] text-white py-2  px-6 rounded-md hover:bg-indigo-700 transition duration-200"
             >
-              Signup
+              Login
             </button>
+
+            {/* Create Account */}
             <p className="pt-3 text-[#64748B]">
-              Already have an account?{" "}
-              <Link to="/UserLogin" className="text-[#6A54DF] font-medium">
-                Login
+              Don&apos;t have an account?{" "}
+              <Link to="/signup" className="text-[#6A54DF] font-medium">
+                Create an account
               </Link>
             </p>
           </form>
@@ -236,4 +218,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default UserLogin;

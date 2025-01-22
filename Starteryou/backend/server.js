@@ -12,10 +12,9 @@ const teamRoutes = require("./routes/teamRoutes");
 const { mountRoutes } = require("./routes"); // Main routes including API docs
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 const authRoutes = require("./routes/authRoutes");
-// const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 // Initialize Express app
 const app = express();
-
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 // Middleware
 dotenv.config();
 app.use(cors());

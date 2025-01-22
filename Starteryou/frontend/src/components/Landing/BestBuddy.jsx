@@ -4,6 +4,7 @@ import FileUpload from "../Common/FileUpload";
 import { API_CONFIG } from "@config/api";
 import { FaPencilAlt } from "react-icons/fa";
 import axios from "axios";
+import { MaxWords } from "../Common/wordValidation";
 
 const icons = [
   {
@@ -155,13 +156,13 @@ const BestBuddy = () => {
         <div className="mt-10 flex flex-col items-center space-y-4 z-50">
           <textarea
             value={titleBB}
-            onChange={(e) => setTitleBB(e.target.value)}
+            onChange={(e) => setTitleBB(MaxWords(e.target.value, 6))}
             placeholder="Title here..."
             className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
           />
           <textarea
             value={paragraphBB}
-            onChange={(e) => setParagraphBB(e.target.value)}
+            onChange={(e) => setParagraphBB(MaxWords(e.target.value, 30))}
             placeholder="Paragraph here..."
             className="lg:w-[700px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
           />

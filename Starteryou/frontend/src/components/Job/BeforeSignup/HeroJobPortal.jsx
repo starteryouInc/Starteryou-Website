@@ -3,19 +3,81 @@ import axios from "axios"; // Ensure axios is imported
 import { FaPencilAlt } from "react-icons/fa"; // Ensure icon is imported
 import { useNavigation } from "../../../context/NavigationContext";
 import FileUpload from "../../Common/FileUpload";
+import { MaxWords } from "../../Common/wordValidation";
+
 import { API_CONFIG } from "@config/api";
 const HeroJobPortal = () => {
-  const [preview, setPreview] = useState(null);
   const { isAdmin } = useNavigation();
-  const [title, setTitle] = useState(
-    "Empowering College Students to Discover Job Opportunities"
+  const title = "JobHeroBefore";
+
+  const [titlee, setTitlee] = useState(
+    "Empowering College Students to Discover Job Opportunities" // Set default title
   );
+
   const [paragraph, setParagraph] = useState(
     "Starteryou is your go-to platform for college students seeking job listings that match their skills and aspirations. With a user-friendly interface and tailored opportunities, we make job hunting a breeze."
   );
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState("");
   const page = "JobBeforeSignup";
+  const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images
+  const [hasFetchedOnce, setHasFetchedOnce] = useState(false); // State to track fetch attempt
+  const [titleWordsLeft, setTitleWordsLeft] = useState(8); // Counter for the title
+  const [paragraphWordsLeft, setParagraphWordsLeft] = useState(30); //
+  const fetchUploadedFile = async () => {
+    if (hasFetchedOnce) return; // Prevent redundant fetches.
+
+    try {
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch the image.");
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      setUploadedFile(url);
+      setError(null);
+    } catch (error) {
+      console.error("Error fetching uploaded file:", error);
+      setError("Failed to load image.");
+    } finally {
+      setHasFetchedOnce(true);
+    }
+  };
+
+  useEffect(() => {
+    fetchUploadedFile();
+  }, []);
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("title", title);
+
+    try {
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`,
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to upload the image.");
+      }
+
+      setUploadedFile(URL.createObjectURL(file));
+      setError(null);
+    } catch (error) {
+      console.error("Error updating image:", error);
+      setError("Error updating image.");
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -23,15 +85,16 @@ const HeroJobPortal = () => {
         const response = await axios.get(
           `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
           {
-            params: { page, component: "HeroJobBefore" },
+            params: {
+              page,
+              component:
+                "Empowering College Students to Discover Job Opportunities",
+            },
           }
         );
 
         if (response.data) {
-          setTitle(
-            response.data.content ||
-              "Empowering College Students to Discover Job Opportunities"
-          );
+          setTitlee(response.data.content || "JobHeroBefore");
           setParagraph(
             Array.isArray(response.data.paragraphs)
               ? response.data.paragraphs.join("\n")
@@ -47,17 +110,17 @@ const HeroJobPortal = () => {
     fetchData();
   }, []);
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setPreview(URL.createObjectURL(file));
-    console.log("Selected file:", file);
+  const handleEdit = () => {
+    if (isAdmin) {
+      setIsEditing(true);
+    }
   };
 
-  const handleEdit = () => isAdmin && setIsEditing(true);
+  const handleChangeTitle = (e) =>
+    setTitlee(MaxWords(e.target.value, 8, setTitleWordsLeft));
 
-  const handleChangeTitle = (e) => setTitle(e.target.value);
-
-  const handleChangeParagraph = (e) => setParagraph(e.target.value);
+  const handleChangeParagraph = (e) =>
+    setParagraph(MaxWords(e.target.value, 30, setParagraphWordsLeft));
 
   const saveContent = async () => {
     try {
@@ -68,7 +131,7 @@ const HeroJobPortal = () => {
       await axios.put(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`, {
         page: "JobBeforeSignup",
         component: "HeroJobBefore",
-        content: title.trim(),
+        content: titlee.trim(),
         paragraphs: normalizedParagraphs,
       });
 
@@ -85,12 +148,24 @@ const HeroJobPortal = () => {
       <div className="text-center max-w-[700px] mx-auto">
         {isEditing ? (
           <div>
+            <span className="text-white text-sm">
+              {titleWordsLeft >= 0
+                ? `${titleWordsLeft} words left`
+                : `Word limit exceeded by ${Math.abs(titleWordsLeft)} words`}
+            </span>
             <input
               type="text"
-              value={title}
+              value={titlee}
               onChange={handleChangeTitle}
               className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-[#1F2329] border border-gray-300 p-2 rounded w-full"
             />
+            <span className="text-white text-sm">
+              {paragraphWordsLeft >= 0
+                ? `${paragraphWordsLeft} words left`
+                : `Word limit exceeded by ${Math.abs(
+                    paragraphWordsLeft
+                  )} words`}
+            </span>
             <textarea
               value={paragraph}
               onChange={handleChangeParagraph}
@@ -107,7 +182,7 @@ const HeroJobPortal = () => {
         ) : (
           <div>
             <h1 className="text-3xl md:text-5xl font-bold mb-4 text-white">
-              {title}
+              {titlee}
             </h1>
             <p className="text-lg md:text-xl mb-6 text-white">{paragraph}</p>
             {isAdmin && (
@@ -129,22 +204,20 @@ const HeroJobPortal = () => {
         </div>
       </div>
       <div className="relative">
-        {preview ? (
+        {uploadedFile ? (
           <img
-            src={preview}
+            src={uploadedFile}
             alt="Job Opportunities Preview"
             className="relative w-[1500px] lg:h-[800px] md:px-20 lg:mt-10"
           />
         ) : (
-          <img
-            src="/JobPortalPage/portalHero.svg"
-            alt="Job Opportunities"
-            className="relative w-[1500px] lg:h-[800px] md:px-20 lg:mt-10"
-          />
+          <p className="text-sm text-center text-gray-500">
+            Image preview will appear here...
+          </p>
         )}
         {isAdmin && (
           <div className="absolute right-1 top-0 md:top-14 md:right-20">
-            <FileUpload handleFileChange={handleFileChange} />
+            <FileUpload handleFileChange={handleFileChange} error={error} />
           </div>
         )}
       </div>

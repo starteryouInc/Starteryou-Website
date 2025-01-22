@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
-const Signup = () => {
+const EmployerSignUp = () => {
   const reviews = [
     {
       stars: 5,
@@ -117,28 +117,46 @@ const Signup = () => {
         {/* Circle in the bottom-right */}
         <div className="md:hidden h-32 w-32 bg-transparent border-4 border-[#8574e4] rounded-full absolute bottom-[39px] right-[13px] transform translate-x-1/2 translate-y-1/2"></div>
         <div className="w-full lg:w-3/4 max-w-md">
-          <h2 className="text-3xl font-bold mb-2">Join Starteryou</h2>
+          <h2 className="text-3xl font-bold mb-2">Join as Employer</h2>
           <p className="text-gray-600 mb-6">
             Starteryou simplifies the job application process for students.
           </p>
 
           {/* Input Fields */}
           <form>
+            {/* Company Name */}
             <div className="mb-4">
               <label
-                htmlFor="username"
+                htmlFor="companyName"
                 className="block text-sm font-medium text-gray-700"
               >
-                Full name
+                Company Name
               </label>
               <input
                 type="text"
-                id="username"
-                className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm "
-                placeholder="Enter your Full name"
+                id="companyName"
+                className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm"
+                placeholder="Enter your company name"
+                required
+              />
+            </div>
+            {/* Company Website */}
+            <div className="mb-4">
+              <label
+                htmlFor="website"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Company Website
+              </label>
+              <input
+                type="url"
+                id="website"
+                className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm"
+                placeholder="Enter your company website URL"
               />
             </div>
 
+            {/* Email */}
             <div className="mb-4">
               <label
                 htmlFor="email"
@@ -149,28 +167,13 @@ const Signup = () => {
               <input
                 type="email"
                 id="email"
-                className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm "
+                className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm"
                 placeholder="Enter your email"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                placeholder="Enter your phone number"
-                pattern="[0-9]{10}"
                 required
               />
             </div>
 
+            {/* Password */}
             <div className="mb-4">
               <label
                 htmlFor="password"
@@ -182,7 +185,6 @@ const Signup = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   id="password"
-                  name="password"
                   className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   placeholder="Enter your password"
                   required
@@ -193,26 +195,27 @@ const Signup = () => {
                   className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
                 >
                   {showPassword ? (
-                    <AiFillEyeInvisible size={20} /> // Eye-slash icon for hiding
+                    <AiFillEyeInvisible size={20} />
                   ) : (
-                    <AiFillEye size={20} /> // Eye icon for showing
+                    <AiFillEye size={20} />
                   )}
                 </button>
               </div>
             </div>
 
-            {/* Checkbox and Remember Me */}
+            {/* Checkbox */}
             <div className="flex items-center mb-6">
               <input
                 type="checkbox"
-                id="remember"
+                id="terms"
                 className="h-4 w-4 text-indigo-600 border border-[#CBD5E1] rounded focus:ring-indigo-500"
+                required
               />
               <label
-                htmlFor="remember"
+                htmlFor="terms"
                 className="ml-2 block text-sm text-gray-700"
               >
-                Remember me
+                I agree to the terms and conditions
               </label>
             </div>
 
@@ -223,6 +226,8 @@ const Signup = () => {
             >
               Signup
             </button>
+
+            {/* Redirect to Login */}
             <p className="pt-3 text-[#64748B]">
               Already have an account?{" "}
               <Link to="/UserLogin" className="text-[#6A54DF] font-medium">
@@ -236,4 +241,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default EmployerSignUp;
