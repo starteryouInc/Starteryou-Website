@@ -114,7 +114,7 @@ const Team = () => {
     }
     try {
       const response = await fetch(
-        `http://localhost:3000/api/team/${memberId}`,
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.teamApi}/${memberId}`,
         {
           method: "DELETE",
         }
@@ -154,9 +154,7 @@ const Team = () => {
                   imgSrc: response.data.image || member.imgSrc,
                   position: response.data.component,
                   name: response.data.content,
-                  about:
-                    response.data.paragraphs[0] ||
-                    "No additional information available.",
+                  about: response.data.paragraphs[0],
                   _id: response.data._id,
                   linkedin: member.linkedin, // Preserve LinkedIn URL
                 };
@@ -377,7 +375,6 @@ const Team = () => {
       const formData = new FormData();
       formData.append("name", newMember.name);
       formData.append("position", newMember.position);
-      formData.append("about", newMember.about);
       formData.append("linkedin", newMember.linkedin);
       formData.append("image", newMember.imageFile);
       formData.append("team", "leaderteam"); // Assign the 'techteam' identifier
@@ -429,7 +426,7 @@ const Team = () => {
             member.image && member.image.startsWith("data:image")
               ? member.image // Directly use the Base64 string
               : member.image && member.image.startsWith("/uploads")
-              ? `http://localhost:3000${member.image}` // Handle uploaded images
+              ? `${API_CONFIG.baseURL}${member.image}` // Handle uploaded images
               : fetchedImages[member.position] ||
                 member.imgSrc ||
                 "/AboutPage/Team/avatar.png"; // Fallback to other sources

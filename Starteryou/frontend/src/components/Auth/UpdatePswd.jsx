@@ -1,11 +1,40 @@
-import { faStar } from "@fortawesome/free-solid-svg-icons";
+import { faEye, faEyeSlash, faStar } from "@fortawesome/free-solid-svg-icons";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from "react-responsive-carousel";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Link } from "react-router-dom";
 import { useState } from "react";
-import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
-const Signup = () => {
+import { useNavigate } from "react-router-dom";
+
+const UpdatePswd = () => {
+  const navigate = useNavigate();
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    // Handle password update logic here
+
+    // After successful password update, redirect to login page
+    navigate("/UserLogin");
+  };
+
+  const toggleVisibility = (field) => {
+    if (field === "newPassword") {
+      setShowNewPassword(!showNewPassword);
+    } else if (field === "confirmPassword") {
+      setShowConfirmPassword(!showConfirmPassword);
+    }
+  };
+
   const reviews = [
     {
       stars: 5,
@@ -36,15 +65,11 @@ const Signup = () => {
       userImg: "/Reviewer/avatar-4.jpeg",
     },
   ];
-  const [showPassword, setShowPassword] = useState(false);
 
-  const togglePasswordVisibility = () => {
-    setShowPassword((prev) => !prev);
-  };
   return (
     <div className="flex flex-col lg:flex-row h-auto lg:h-screen">
       {/* Left Section */}
-      <div className="relative hidden w-full lg:w-2/5 bg-[#6A54DF] md:flex  flex-col text-white p-8 overflow-hidden">
+      <div className="relative hidden w-full lg:w-2/5 bg-[#6A54DF] md:flex flex-col text-white p-8 overflow-hidden">
         {/* Circle in the top-left */}
         <div className="h-40 w-40 bg-transparent border-4 border-[#8574e4] rounded-full absolute top-0 left-0 transform -translate-x-1/2 -translate-y-1/2"></div>
 
@@ -52,9 +77,10 @@ const Signup = () => {
         <div className="h-40 w-40 bg-transparent border-4 border-white rounded-full absolute bottom-0 right-0 transform translate-x-1/2 translate-y-1/2"></div>
 
         <div className="mt-20 ml-16 flex flex-col justify-center items-start">
-          <h1 className="text-4xl lg:text-5xl font-bold">Welcome</h1>
+          <h1 className="text-4xl lg:text-5xl font-bold">Welcome Back!</h1>
           <p className="mt-4 text-lg max-w-[400px]">
-            Starteryou simplifies the job application process for students.
+            Starteryou simplifies the job application process for
+            students.
           </p>
         </div>
 
@@ -73,7 +99,6 @@ const Signup = () => {
           >
             {reviews.map((review, index) => (
               <div key={index} className="p-4">
-                {/* Stars */}
                 <div className="flex space-x-1 text-yellow-400 mb-4">
                   {Array(review.stars)
                     .fill(0)
@@ -81,23 +106,20 @@ const Signup = () => {
                       <FontAwesomeIcon key={idx} icon={faStar} />
                     ))}
                 </div>
-                {/* Review Text */}
                 <p className="text-white mb-4 text-left text-base font-light">
                   &quot;{review.text}&quot;
                 </p>
-                {/* Review Details */}
                 <div className="flex items-center text-left">
                   <img
-                    src={review.userImg} // Assuming review.userImg holds the image URL
+                    src={review.userImg}
                     alt={review.name}
                     style={{
                       width: "3rem",
                       height: "3rem",
                       objectFit: "cover",
-                    }} // Width is set to 3rem and height is equal for circular shape
+                    }}
                     className="rounded-full mr-4"
                   />
-                  {/* Name and Position */}
                   <div>
                     <h3 className="text-white font-bold">{review.name}</h3>
                     <p className="text-white">{review.position}</p>
@@ -117,118 +139,69 @@ const Signup = () => {
         {/* Circle in the bottom-right */}
         <div className="md:hidden h-32 w-32 bg-transparent border-4 border-[#8574e4] rounded-full absolute bottom-[39px] right-[13px] transform translate-x-1/2 translate-y-1/2"></div>
         <div className="w-full lg:w-3/4 max-w-md">
-          <h2 className="text-3xl font-bold mb-2">Join Starteryou</h2>
+          <h2 className="text-3xl font-bold mb-2">Update Your Password</h2>
           <p className="text-gray-600 mb-6">
-            Starteryou simplifies the job application process for students.
+            Update your password to secure your account. Please enter a new
+            password and confirm it below.
           </p>
-
-          {/* Input Fields */}
-          <form>
-            <div className="mb-4">
+          <form onSubmit={handleSubmit}>
+            {/* New Password Input */}
+            <div className="mb-4 relative">
               <label
-                htmlFor="username"
+                htmlFor="new-password"
                 className="block text-sm font-medium text-gray-700"
               >
-                Full name
+                New Password
               </label>
               <input
-                type="text"
-                id="username"
-                className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm "
-                placeholder="Enter your Full name"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm "
-                placeholder="Enter your email"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                placeholder="Enter your phone number"
-                pattern="[0-9]{10}"
+                type={showNewPassword ? "text" : "password"}
+                id="new-password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm"
+                placeholder="Enter your new password"
                 required
               />
+              <FontAwesomeIcon
+                icon={showNewPassword ? faEyeSlash : faEye}
+                className="absolute top-9 right-4 cursor-pointer text-gray-500"
+                onClick={() => toggleVisibility("newPassword")}
+              />
             </div>
 
-            <div className="mb-4">
+            {/* Confirm Password Input */}
+            <div className="mb-4 relative">
               <label
-                htmlFor="password"
+                htmlFor="confirm-password"
                 className="block text-sm font-medium text-gray-700"
               >
-                Password
+                Confirm Password
               </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  name="password"
-                  className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  placeholder="Enter your password"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={togglePasswordVisibility}
-                  className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
-                >
-                  {showPassword ? (
-                    <AiFillEyeInvisible size={20} /> // Eye-slash icon for hiding
-                  ) : (
-                    <AiFillEye size={20} /> // Eye icon for showing
-                  )}
-                </button>
-              </div>
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                id="confirm-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm"
+                placeholder="Re-enter your new password"
+                required
+              />
+              <FontAwesomeIcon
+                icon={showConfirmPassword ? faEyeSlash : faEye}
+                className="absolute top-9 right-4 cursor-pointer text-gray-500"
+                onClick={() => toggleVisibility("confirmPassword")}
+              />
             </div>
 
-            {/* Checkbox and Remember Me */}
-            <div className="flex items-center mb-6">
-              <input
-                type="checkbox"
-                id="remember"
-                className="h-4 w-4 text-indigo-600 border border-[#CBD5E1] rounded focus:ring-indigo-500"
-              />
-              <label
-                htmlFor="remember"
-                className="ml-2 block text-sm text-gray-700"
-              >
-                Remember me
-              </label>
-            </div>
+            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
             {/* Submit Button */}
             <button
               type="submit"
-              className="bg-[#6A54DF] text-white py-2 px-6 rounded-md hover:bg-indigo-700 transition duration-200"
+              className="bg-[#6A54DF] w-full text-white py-2 px-6 rounded-md hover:bg-indigo-700 transition duration-200"
             >
-              Signup
+              Update Password
             </button>
-            <p className="pt-3 text-[#64748B]">
-              Already have an account?{" "}
-              <Link to="/UserLogin" className="text-[#6A54DF] font-medium">
-                Login
-              </Link>
-            </p>
           </form>
         </div>
       </div>
@@ -236,4 +209,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default UpdatePswd;

@@ -5,6 +5,7 @@ import { API_CONFIG } from "@config/api";
 import { toast } from "react-toastify";
 import { FaPencilAlt } from "react-icons/fa";
 import axios from "axios";
+import { MaxWords } from "../Common/wordValidation";
 
 const Hero = () => {
   const { isAdmin } = useNavigation();
@@ -152,16 +153,16 @@ const Hero = () => {
       <div className="absolute inset-0 top-0 w-full h-full bg-[radial-gradient(circle_farthest-side_at_50%_-150%,_rgba(229,241,255,1),_#2700D3),linear-gradient(to_bottom,_#2700D3,_rgba(229,241,255,1))] opacity-80 z-1"></div>
 
       {isEditing ? (
-        <div className="mt-10 lg:mt-40 flex flex-col items-center space-y-4 z-50">
+        <div className="mt-10 lg:mt-40 flex flex-col items-center space-y-4 z-10">
           <textarea
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => setTitle(MaxWords(e.target.value, 3))}
             placeholder="Title here..."
             className="lg:w-[400px] p-2 bg-transparent border border-white rounded outline-none resize-none text-2xl text-gray-200 scrollbar"
           />
           <textarea
             value={paragraph}
-            onChange={(e) => setParagraph(e.target.value)}
+            onChange={(e) => setParagraph(MaxWords(e.target.value, 11))}
             placeholder="Paragraph here..."
             className="lg:w-[700px] p-2 bg-transparent border border-white rounded outline-none resize-none text-xl text-gray-200 scrollbar"
           />
@@ -182,7 +183,7 @@ const Hero = () => {
         </div>
       ) : (
         // Main Heading and Subheading container:
-        <div className="relative mt-[120px] lg:mt-[190px] flex flex-col items-center z-50">
+        <div className="relative mt-[120px] lg:mt-[190px] flex flex-col items-center z-10">
           <h1 className="font-bold text-[40px] sm:text-[64px] leading-tight text-black uppercase">
             {title}
           </h1>

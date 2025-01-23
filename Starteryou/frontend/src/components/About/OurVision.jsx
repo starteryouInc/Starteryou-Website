@@ -44,7 +44,8 @@ const OurVision = () => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
   const page = "AboutPage"; // Specify the page name for the current component.
-
+  const [titleWordsLeft, setTitleWordsLeft] = useState(3); // Counter for the title
+  const [paragraphWordsLeft, setParagraphWordsLeft] = useState(84); // Counter for the paragraph
   /**
    * Fetches the uploaded image from the server and sets it for preview.
    * Ensures the fetch happens only once.
@@ -182,15 +183,33 @@ const OurVision = () => {
         <div className="bg-white p-2 md:p-6 mb-4 md:mb-0 flex-1 flex flex-col justify-center md:order-2">
           {isEditing ? (
             <div>
+              <span className="text-gray-500 text-sm">
+                {titleWordsLeft >= 0
+                  ? `${titleWordsLeft} words left`
+                  : `Word limit exceeded by ${Math.abs(titleWordsLeft)} words`}
+              </span>
               <input
                 type="text"
                 value={title}
-                onChange={(e) => setTitle(MaxWords(e.target.value, 3))}
+                onChange={(e) =>
+                  setTitle(MaxWords(e.target.value, 3, setTitleWordsLeft))
+                }
                 className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-[#1F2329] border border-gray-300 p-2 rounded w-full"
               />
+              <span className="text-gray-500 text-sm">
+                {paragraphWordsLeft >= 0
+                  ? `${paragraphWordsLeft} words left`
+                  : `Word limit exceeded by ${Math.abs(
+                      paragraphWordsLeft
+                    )} words`}
+              </span>
               <textarea
                 value={paragraph}
-                onChange={(e) => setParagraph(MaxWords(e.target.value, 84))}
+                onChange={(e) =>
+                  setParagraph(
+                    MaxWords(e.target.value, 84, setParagraphWordsLeft)
+                  )
+                }
                 className="text-[#1F2329] text-base border border-gray-300 p-2 rounded w-full"
                 rows={6}
               />

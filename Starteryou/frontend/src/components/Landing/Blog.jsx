@@ -3,6 +3,7 @@ import { useNavigation } from "../../context/NavigationContext";
 import { API_CONFIG } from "@config/api";
 import { FaPencilAlt } from "react-icons/fa";
 import axios from "axios";
+import { MaxWords } from "../Common/wordValidation";
 
 const Blog = () => {
   const { isAdmin } = useNavigation();
@@ -127,13 +128,13 @@ const Blog = () => {
           <div className="mt-10 flex flex-col space-y-4 z-50">
             <textarea
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => setTitle(MaxWords(e.target.value, 4))}
               placeholder="Title here..."
               className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
             />
             <textarea
               value={paragraph}
-              onChange={(e) => setParagraph(e.target.value)}
+              onChange={(e) => setParagraph(MaxWords(e.target.value, 17))}
               placeholder="Paragraph here..."
               className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
             />

@@ -29,6 +29,11 @@ import JobPageAfter from "./pages/JobPageAfter"; // Ensure this file exists in t
 import JobFeedPage from "./pages/JobFeedPage";
 import NewsLetter from "./components/Common/NewsLetter";
 import UserProfile from "./pages/UserProfile";
+import UserLogin from "./components/Auth/UserLogin";
+import ForgotPswd from "./components/Auth/ForgotPswd";
+import ResetCode from "./components/Auth/ResetCode";
+import UpdatePswd from "./components/Auth/UpdatePswd";
+import EmployerSignUp from "./components/Auth/EmployerSignUp";
 
 const Layout = () => {
   const location = useLocation();
@@ -37,10 +42,19 @@ const Layout = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]); // This will run on every route change
-
+  const hideNavbarFooter = [
+    "/login",
+    "/AdminSignup",
+    "/signup",
+    "/UserLogin",
+    "/ForgotPswd",
+    "/ResetCode",
+    "/UpdatePswd",
+    "/EmpSignUp",
+  ].includes(location.pathname);
   return (
     <div className="font-montserrat scroll-smooth">
-      {(location.pathname !== "/login" && location.pathname !== "/AdminSignup") && <Navbar />}
+      {!hideNavbarFooter && <Navbar />}
 
       <Routes>
         {/* Default Routes for everyone */}
@@ -54,9 +68,14 @@ const Layout = () => {
         <Route path="/InProgressPage" element={<InProgressPage />} />
         <Route path="/job2" element={<JobPageAfter />} />
         <Route path="/jobfeeds" element={<JobFeedPage />} />
-        
+        <Route path="/UserLogin" element={<UserLogin />} />
+        <Route path="/ForgotPswd" element={<ForgotPswd />} />
+        <Route path="/ResetCode" element={<ResetCode />} />
+        <Route path="/UpdatePswd" element={<UpdatePswd />} />
+        <Route path="/EmpSignUp" element={<EmployerSignUp />} />
+
         {/* New User Profile Page ( COMPLETED ) */}
-        <Route path="/userprofile" element={<UserProfile/>}></Route>
+        <Route path="/userprofile" element={<UserProfile />}></Route>
 
         {/* Admin Protected Routes */}
         <Route
@@ -83,9 +102,9 @@ const Layout = () => {
 
       {/* New Letter has beeen installed in the website ( IN PROGRESS ) */}
       <div className="flex justify-center items-center">
-        {(location.pathname !== "/login" && location.pathname !== "/AdminSignup") && <NewsLetter/>}
+        {!hideNavbarFooter && <NewsLetter />}
       </div>
-      {(location.pathname !== "/login" && location.pathname !== "/AdminSignup") && <Footer/>}
+      {!hideNavbarFooter && <Footer />}
     </div>
   );
 };

@@ -4,6 +4,7 @@ import FileUpload from "../Common/FileUpload";
 import { API_CONFIG } from "@config/api";
 import { FaPencilAlt } from "react-icons/fa";
 import axios from "axios";
+import { MaxWords } from "../Common/wordValidation";
 
 const BestJob3 = () => {
   const { isAdmin } = useNavigation();
@@ -141,7 +142,7 @@ const BestJob3 = () => {
             <div className="mt-10 flex flex-col space-y-4 z-50">
               <textarea
                 value={titleBJ3}
-                onChange={(e) => setTitleBJ3(e.target.value)}
+                onChange={(e) => setTitleBJ3(MaxWords(e.target.value, 5))}
                 placeholder="Title here..."
                 className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
               />
@@ -150,7 +151,7 @@ const BestJob3 = () => {
                 onChange={(e) => {
                   setParagraphBJ3((prev) => {
                     const updatedParagraphs = [...prev];
-                    updatedParagraphs[0] = e.target.value;
+                    updatedParagraphs[0] = MaxWords(e.target.value, 10);
                     setParagraphBJ3(updatedParagraphs);
                     return updatedParagraphs;
                   });

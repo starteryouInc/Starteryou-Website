@@ -39,6 +39,8 @@ const OurMission = () => {
   const page = "AboutPage"; // Specify the page name for the current component.
   const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false); // State to track fetch attempt
+  const [titleWordsLeft, setTitleWordsLeft] = useState(3); // Counter for the title
+  const [paragraphWordsLeft, setParagraphWordsLeft] = useState(84); // Counter for the paragraph
 
   /**
    * Fetches mission content from the server.
@@ -149,17 +151,17 @@ const OurMission = () => {
    *
    * @param {Event} e - The change event from the input field.
    */
-  const handleChangeTitle = (e) => setTitle(MaxWords(e.target.value, 3));
+  const handleChangeTitle = (e) =>
+    setTitle(MaxWords(e.target.value, 3, setTitleWordsLeft)); // Limit to 3 words
 
   /**
    * Updates the paragraph state based on the input value.
    *
    * @param {Event} e - The change event from the textarea field.
    */
+  const handleChangeParagraph = (e) =>
+    setParagraph(MaxWords(e.target.value, 84, setParagraphWordsLeft)); // Limit to 84 words
 
-  const handleChangeParagraph = (e) => {
-    setParagraph(MaxWords(e.target.value, 84)); // Limit to 84 words
-  };
   /**
    * Saves the edited title and paragraph content to the server.
    *
@@ -196,13 +198,26 @@ const OurMission = () => {
           {isEditing ? (
             <div>
               {/* Input for title editing */}
+              <span className="text-gray-500 text-sm">
+                {titleWordsLeft >= 0
+                  ? `${titleWordsLeft} words left`
+                  : `Word limit exceeded by ${Math.abs(titleWordsLeft)} words`}
+              </span>
               <input
                 type="text"
                 value={title}
                 onChange={handleChangeTitle}
                 className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-[#1F2329] border border-gray-300 p-2 rounded w-full"
               />
+
               {/* Textarea for paragraph editing */}
+              <span className="text-gray-500 text-sm">
+                {paragraphWordsLeft >= 0
+                  ? `${paragraphWordsLeft} words left`
+                  : `Word limit exceeded by ${Math.abs(
+                      paragraphWordsLeft
+                    )} words`}
+              </span>
               <textarea
                 value={paragraph}
                 onChange={handleChangeParagraph}
