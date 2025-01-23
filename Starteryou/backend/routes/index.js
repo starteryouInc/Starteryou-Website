@@ -4,9 +4,11 @@ const router = express.Router();
 const fileRoutes = require("./fileRoutes");
 const textRoutes = require("./textRoutes.js");
 const authRoutes = require("./authRoutes");
+const userAuthRoutes = require("./userAuthRoutes");
 const jobRoutes = require("./jobRoutes");
 const profileRoutes = require("./profileRoutes");
-const applicationRoutes = require("./applicationRoutes");
+const jobApplicationRoutes = require("./jobApplicationRoutes");
+const bookmarkRoutes = require("./bookmarkRoutes");
 const authenticate = require("../middleware/authMiddleware");
 
 // Store all API endpoints and their descriptions
@@ -457,9 +459,15 @@ const apiEndpoints = [
 router.use("/api/files", fileRoutes);
 router.use("/api/text", textRoutes);
 router.use("/api/v1/auth", authRoutes);
+router.use("/api/v1/userAuth", userAuthRoutes);
 router.use("/api/v1/jobportal/jobs", authenticate, jobRoutes);
 router.use("/api/v1/jobportal/profile", authenticate, profileRoutes);
-router.use("/api/v1/jobportal/applications", authenticate, applicationRoutes);
+router.use(
+  "/api/v1/jobportal/applications",
+  authenticate,
+  jobApplicationRoutes
+);
+router.use("/api/v1/jobportal/bookmarks", authenticate, bookmarkRoutes);
 
 // API documentation endpoint with enhanced information
 router.get("/api/docs", (req, res) => {
