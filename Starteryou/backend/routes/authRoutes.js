@@ -318,12 +318,33 @@ const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials", success: false });
     }
 
+    /**
+     * Generates a unique cache key for user login
+     * @type {string}
+     */
     const cacheKey = `login:${user._id}`;
     const ttl = cacheConfig.defaultTTL; // Time to live in seconds (1 hour)
+
+    /**
+     * Invalidates existing cache entry before creating a new one
+     * Prevents serving stale login data
+     * 
+     * @param {string} cacheKey - Unique identifier for the cache entry
+     */
 
     // Invalidate the cache for the login endpoint
     console.log(`🔄 Invalidating cache for key: ${cacheKey}`);
     await invalidateCache(cacheKey);
+    
+    /**
+     * Caches login response with tokens and user information
+     * 
+     * @param {string} cacheKey - Unique cache identifier
+     * @param {Function} fetchFunction - Generates fresh login response
+     * @param {number} ttl - Time-to-live for cache entry
+     * 
+     * @returns {Object} Cached login response with status and user details
+     */
 
     const cachedResponse = await cacheQuery(cacheKey, async () => {
       const accessToken = generateAccessToken(user);
