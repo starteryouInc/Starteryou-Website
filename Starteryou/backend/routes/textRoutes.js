@@ -86,15 +86,6 @@ router.get("/text", cacheMiddleware, async (req, res) => {
       ? `/api/text?page=${page}&component=${component}`
       : `/api/text?page=${page}`;
 
-    /**
-     * Queries the cache or fetches and caches content if not found
-     * 
-     * @param {string} cacheKey - Unique key for caching the content
-     * @param {Function} fetchFunction - Async function to retrieve content if not in cache
-     * @param {number} ttl - Time-to-live for the cache entry
-     * 
-     * @returns {Object} Cached or freshly retrieved content with status
-     */
     const cachedResponse = await cacheQuery(cacheKey, async () => {
       if (component) {
         const content = await TextContent.findOne({ page, component }).maxTimeMS(
@@ -189,24 +180,10 @@ router.put("/text", async (req, res) => {
 
     await textContent.save();
 
-    // Cache invalidation after update
-    /**
-     * Invalidates the existing cache entry for the updated content
-     * 
-     * @param {string} cacheKey - Unique key for the content cache
-     */
     // Invalidate the cache for the updated content
     const cacheKey = `/api/text?page=${page}&component=${component}`;
     await invalidateCache(cacheKey);
 
-    // Re-cache the updated content
-    /**
-     * Caches the newly updated content
-     * 
-     * @param {string} cacheKey - Unique key for caching the content
-     * @param {Function} cacheFunction - Function to return the content to cache
-     * @param {number} ttl - Time-to-live for the cache entry
-     */
     // Set the updated content in the cache
     await cacheQuery(cacheKey, async () => {
       return { status: 200, response: textContent };
@@ -272,12 +249,6 @@ router.delete("/text", async (req, res) => {
       });
     }
 
-     // Cache invalidation after deletion
-    /**
-     * Removes the cache entry for the deleted content
-     * 
-     * @param {string} cacheKey - Unique key for the content cache
-     */
     // Invalidate the cache for the deleted content
     const cacheKey = `/api/text?page=${page}&component=${component}`;
     await invalidateCache(cacheKey);
