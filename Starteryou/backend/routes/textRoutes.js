@@ -199,7 +199,7 @@ router.put("/text", async (req, res) => {
 
     // Re-cache the updated content
     /**
-     * Caches the newly updated content
+     * Caches newly updated content
      * 
      * @param {string} cacheKey - Unique key for caching the content
      * @param {Function} cacheFunction - Function to return the content to cache
