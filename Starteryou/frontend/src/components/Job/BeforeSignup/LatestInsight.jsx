@@ -1,15 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FileUpload from "../../Common/FileUpload";
 import { useNavigation } from "../../../context/NavigationContext";
+import { API_CONFIG } from "@config/api";
 
 const LatestInsight = () => {
   const { isAdmin } = useNavigation();
-  const [insightImages, setInsightImages] = useState({
-    1: "/JobPortalPage/Placeholder Image.png",
-    2: "/JobPortalPage/Placeholder Image.png",
-    3: "/JobPortalPage/Placeholder Image.png",
-  });
-
+  const [uploadedFiles, setUploadedFiles] = useState([null, null, null]);
+  const [error, setError] = useState(null);
+  const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
+  const title = ["blog1", "blog2", "blog3"];
   const insights = [
     {
       id: 1,
@@ -37,19 +36,59 @@ const LatestInsight = () => {
       link: "/read-more-3",
     },
   ];
+  const fetchUploadedImages = async () => {
+    if (hasFetchedOnce) return;
 
-  // Handle image upload for insights
-  const handleImageUpload = (e, id) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setInsightImages((prevState) => ({
-          ...prevState,
-          [id]: reader.result,
-        }));
-      };
-      reader.readAsDataURL(file);
+    try {
+      const fetchedImages = await Promise.all(
+        title.map(async (title) => {
+          const response = await fetch(
+            `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`
+          );
+          if (!response.ok) throw new Error(`Failed to fetch image: ${title}`);
+          const blob = await response.blob();
+          return URL.createObjectURL(blob);
+        })
+      );
+      setUploadedFiles(fetchedImages);
+      setError(null);
+    } catch (error) {
+      console.error("Error fetching uploaded images:", error);
+      setError("Failed to load images");
+    } finally {
+      setHasFetchedOnce(true);
+    }
+  };
+
+  useEffect(() => {
+    fetchUploadedImages();
+  }, []);
+  const handleFileChange = async (event, index) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("title", title[index]);
+
+    try {
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title[index])}`,
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
+      if (!response.ok)
+        throw new Error(`Failed to upload image: ${title[index]}`);
+
+      const updatedFiles = [...uploadedFiles];
+      updatedFiles[index] = URL.createObjectURL(file);
+      setUploadedFiles(updatedFiles);
+      setError(null);
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      setError(`Error uploading image: ${title[index]}`);
     }
   };
 
@@ -72,14 +111,14 @@ const LatestInsight = () => {
             className="bg-[#FAF6FE] border border-black overflow-hidden"
           >
             <img
-              src={insightImages[id]}
+              src={uploadedFiles[id - 1]}
               alt={title}
               className="w-full h-48 object-cover relative"
             />
             {isAdmin && (
               <div className="relative top-0 right-2 ">
                 <FileUpload
-                  handleFileChange={(e) => handleImageUpload(e, id)}
+                  handleFileChange={(e) => handleFileChange(e, id - 1)}
                 />
               </div>
             )}

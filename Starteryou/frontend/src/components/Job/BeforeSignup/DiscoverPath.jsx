@@ -5,11 +5,11 @@ import { useNavigation } from "../../../context/NavigationContext";
 import { API_CONFIG } from "@config/api";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
+import { MaxWords } from "../../Common/wordValidation";
 
 const DiscoverPath = () => {
   const [opportunities, setOpportunities] = useState([
     {
-      img: "/JobPortalPage/Placeholder Image.png",
       title:
         "Gain Real-World Experience with Internships and Part-Time Opportunities",
       description:
@@ -18,7 +18,6 @@ const DiscoverPath = () => {
       linkUrl: "#",
     },
     {
-      img: "/JobPortalPage/Placeholder Image.png",
       title: "Access Essential Career Resources to Boost Your Job Search",
       description:
         "Utilize our comprehensive resources to enhance your job readiness and skills.",
@@ -26,7 +25,6 @@ const DiscoverPath = () => {
       linkUrl: "#",
     },
     {
-      img: "/JobPortalPage/Placeholder Image.png",
       title:
         "Streamlined Job Listings for Students Seeking Flexible Work Options",
       description:
@@ -37,15 +35,75 @@ const DiscoverPath = () => {
   ]);
 
   const { isAdmin } = useNavigation();
-  const [title, setTitle] = useState(
+  const [uploadedFiles, setUploadedFiles] = useState([null, null, null]);
+  const [error, setError] = useState(null);
+  const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
+  const title = ["discover1", "discover2", "discover3"];
+  const [titlee, setTitlee] = useState(
     "Discover Your Path: Opportunities for Students at Your Fingertips"
   );
   const [paragraph, setParagraph] = useState(
     "Our platform simplifies the job application process for college students. With just a few clicks, you can apply for internships and part-time jobs that fit your schedule. Say goodbye to complicated applications and hello to your future!"
   );
   const [isEditing, setIsEditing] = useState(false);
-  const [error, setError] = useState("");
   const page = "JobBeforeSignup";
+
+  const fetchUploadedImages = async () => {
+    if (hasFetchedOnce) return;
+
+    try {
+      const fetchedImages = await Promise.all(
+        title.map(async (title) => {
+          const response = await fetch(
+            `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`
+          );
+          if (!response.ok) throw new Error(`Failed to fetch image: ${title}`);
+          const blob = await response.blob();
+          return URL.createObjectURL(blob);
+        })
+      );
+      setUploadedFiles(fetchedImages);
+      setError(null);
+    } catch (error) {
+      console.error("Error fetching uploaded images:", error);
+      setError("Failed to load images");
+    } finally {
+      setHasFetchedOnce(true);
+    }
+  };
+
+  useEffect(() => {
+    fetchUploadedImages();
+  }, []);
+
+  const handleFileChange = async (event, index) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("title", title[index]);
+
+    try {
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title[index])}`,
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
+      if (!response.ok)
+        throw new Error(`Failed to upload image: ${title[index]}`);
+
+      const updatedFiles = [...uploadedFiles];
+      updatedFiles[index] = URL.createObjectURL(file);
+      setUploadedFiles(updatedFiles);
+      setError(null);
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      setError(`Error uploading image: ${title[index]}`);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,7 +116,7 @@ const DiscoverPath = () => {
         );
 
         if (response.data) {
-          setTitle(
+          setTitlee(
             response.data.content ||
               "Discover Your Path: Opportunities for Students at Your Fingertips"
           );
@@ -79,9 +137,10 @@ const DiscoverPath = () => {
 
   const handleEdit = () => isAdmin && setIsEditing(true);
 
-  const handleChangeTitle = (e) => setTitle(e.target.value);
+  const handleChangeTitle = (e) => setTitlee(MaxWords(e.target.value, 10));
 
-  const handleChangeParagraph = (e) => setParagraph(e.target.value);
+  const handleChangeParagraph = (e) =>
+    setParagraph(MaxWords(e.target.value, 35));
 
   const saveContent = async () => {
     try {
@@ -92,7 +151,7 @@ const DiscoverPath = () => {
       await axios.put(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`, {
         page: "JobBeforeSignup",
         component: "DiscoverPath",
-        content: title.trim(),
+        content: titlee.trim(),
         paragraphs: normalizedParagraphs,
       });
 
@@ -104,16 +163,6 @@ const DiscoverPath = () => {
     }
   };
 
-  const handleFileChange = (e, index) => {
-    const file = e.target.files[0];
-    const newImageUrl = URL.createObjectURL(file);
-
-    const updatedOpportunities = opportunities.map((opportunity, i) =>
-      i === index ? { ...opportunity, img: newImageUrl } : opportunity
-    );
-    setOpportunities(updatedOpportunities);
-  };
-
   return (
     <div className="mx-auto max-w-[1430px] px-4 lg:px-10 py-16">
       {/* Top Section */}
@@ -122,7 +171,7 @@ const DiscoverPath = () => {
           <div className="w-full">
             <input
               type="text"
-              value={title}
+              value={titlee}
               onChange={handleChangeTitle}
               className="text-2xl lg:text-4xl font-bold mb-6 md:mb-0 text-black md:text-left md:max-w-[320px] lg:max-w-[600px] w-full"
             />
@@ -143,7 +192,7 @@ const DiscoverPath = () => {
           <>
             <div className="flex-1 md:text-left md:max-w-[320px] lg:max-w-[600px]">
               <h1 className="text-2xl lg:text-4xl font-bold mb-2 text-black">
-                {title}
+                {titlee}
               </h1>
               {isAdmin && (
                 <FaPencilAlt
@@ -165,7 +214,9 @@ const DiscoverPath = () => {
         {opportunities.map((opportunity, index) => (
           <div key={index} className="relative">
             <img
-              src={opportunity.img}
+              src={
+                uploadedFiles[index] || "https://via.placeholder.com/800x600"
+              }
               alt={opportunity.title}
               className="relative w-[500px] h-[250px] mb-4"
             />
@@ -198,6 +249,7 @@ const DiscoverPath = () => {
             >
               {opportunity.linkText} &gt;
             </a>
+            {error && <p className="text-red-500 mt-4">{error}</p>}
           </div>
         ))}
       </div>

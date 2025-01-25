@@ -1,12 +1,18 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useNavigation } from "../../context/NavigationContext";
+import { useUserContext } from "../../context/UserContext";
+import { FaRegUserCircle } from "react-icons/fa";
 
 const Navbar = ({ isEduHero }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
   const { isAdmin } = useNavigation(); // Access isAdmin from context
+
+  const { user } = useUserContext();
+  const token = user?.token;
+  const role = user?.authenticatedUser.role;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,19 +37,16 @@ const Navbar = ({ isEduHero }) => {
       }`}
     >
       <div className="flex items-center space-x-2">
-        {" "}
         <img
-          src="/JobPortalPage/Placeholder Image.png"
+          src="/prelogo.svg"
           alt="Logo"
-          className="w-10 h-10 rounded-full object-cover"
+          className="w-12 h-12 rounded-full object-cover"
         />
-        <div
-          className={`text-xl md:text-lg lg:text-3xl font-bold uppercase transition-colors duration-300  ${
-            isScrolled ? "text-black" : "text-white"
-          }`}
-        >
-          StarterYou
-        </div>
+        <img
+          src="/starteryou text white.svg"
+          alt="Logo"
+          className="w-[190px] h-[60px] mt-2 self-center object-cover"
+        />
       </div>
 
       {/* Navigation Links for Medium and Large Screens */}
@@ -80,20 +83,37 @@ const Navbar = ({ isEduHero }) => {
       </ul>
 
       {/* Signup Button Links */}
-      <div className="hidden md:flex items-center md:space-x-2 lg:space-x-6">
-        <Link
-          to="/signup"
-          className="text-sm sm:text-base lg:text-xl font-bold  z-10 uppercase"
-        >
-          Sign up
-        </Link>
-        <Link
-          to="/start-free-trial"
-          className="bg-white text-[#D9502E] border-[2px] font-bold border-[#D9502E] px-3 py-1 lg:px-4 lg:py-2 rounded-lg"
-        >
-          Start free trial
-        </Link>
-      </div>
+      {!token ? (
+        <div className="hidden md:flex items-center md:space-x-2 lg:space-x-6">
+          <Link
+            to="/signup"
+            className="text-sm sm:text-base lg:text-xl font-bold  z-10 uppercase"
+          >
+            Sign up
+          </Link>
+          <Link
+            to="/EmpSignUp"
+            className="bg-[#D9502E] text-sm sm:text-base lg:text-xl text-[white] border-[2px] font-bold border-[#D9502E] px-3 py-1 lg:px-4 lg:py-2 rounded-lg uppercase"
+          >
+            List Job
+          </Link>
+        </div>
+      ) : (
+        <div className="after-login hidden md:flex items-center md:space-x-2 lg:space-x-6">
+          <button className="text-sm sm:text-base lg:text-xl font-bold  z-10 uppercase">
+            Log Out
+          </button>
+          {role === "employer" ? (
+            <button className="bg-[#D9502E] text-sm sm:text-base lg:text-xl text-[white] border-[2px] font-bold border-[#D9502E] px-3 py-1 lg:px-4 lg:py-2 rounded-lg uppercase">
+              <Link to="">List Job</Link>
+            </button>
+          ) : (
+            <Link to="/userprofile">
+              <FaRegUserCircle className="text-4xl" />
+            </Link>
+          )}
+        </div>
+      )}
 
       {/* Mobile Menu Button */}
       <div className="md:hidden">
@@ -213,10 +233,10 @@ const Navbar = ({ isEduHero }) => {
             Sign up
           </Link>
           <Link
-            to="/start-free-trial"
+            to="/EmpSignUp"
             className=" bg-white text-[#D9502E] border-[2px] font-bold border-[#D9502E] px-3 py-2  text-center"
           >
-            Start free trial
+            List Job
           </Link>
         </div>
       </div>

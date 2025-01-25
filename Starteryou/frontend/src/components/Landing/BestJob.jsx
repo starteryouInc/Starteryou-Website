@@ -5,6 +5,7 @@ import { API_CONFIG } from "@config/api";
 import { toast } from "react-toastify";
 import { FaPencilAlt } from "react-icons/fa";
 import axios from "axios";
+import { MaxWords } from "../Common/wordValidation";
 
 const BestJob = () => {
   const { isAdmin } = useNavigation();
@@ -159,13 +160,13 @@ const BestJob = () => {
             <div className="mt-10 flex flex-col space-y-4 z-50">
               <textarea
                 value={titleBJ}
-                onChange={(e) => setTitleBJ(e.target.value)}
+                onChange={(e) => setTitleBJ(MaxWords(e.target.value, 5))}
                 placeholder="Title here..."
                 className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
               />
               <textarea
                 value={paragraphBJ}
-                onChange={(e) => setParagraphBJ(e.target.value)}
+                onChange={(e) => setParagraphBJ(MaxWords(e.target.value, 8))}
                 placeholder="Paragraph here..."
                 className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
               />
@@ -189,7 +190,9 @@ const BestJob = () => {
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-1 leading-tight">
                 {titleBJ}
               </h2>
-              <p className="text-gray-600 mb-2 md:text-lg whitespace-pre-wrap">{paragraphBJ}</p>
+              <p className="text-gray-600 mb-2 md:text-lg whitespace-pre-wrap">
+                {paragraphBJ}
+              </p>
               {isAdmin && (
                 <FaPencilAlt
                   onClick={handleEdit}

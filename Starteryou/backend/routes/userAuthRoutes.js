@@ -3,6 +3,7 @@ const router = Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Users = require("../models/UsersModel");
+const Employers = require("../models/EmployersModel");
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 
 require("dotenv").config({ path: ".env.server" });
@@ -21,8 +22,78 @@ const generateAccessToken = (user) => {
   });
 };
 
+// Route for registering the New Employer
+router.post("/users-emp-register", async (req, res) => {
+  const { companyName, email, companyWebsite, password, role } = req.body;
+
+  if (!companyName || !email || !password || !role) {
+    return res.status(400).json({
+      success: false,
+      msg: "All fields are required",
+    });
+  }
+  if (!validRoles.includes(role)) {
+    return res.status(400).json({ msg: "Invalid role specified" });
+  }
+
+  const passwordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  if (!passwordRegex.test(password)) {
+    return res.status(400).json({
+      message:
+        "Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, one number, and one special character",
+      success: false,
+    });
+  }
+
+  try {
+    const existingJobSeeker = await Users.findOne({ email, role: "jobSeeker" });
+    if (existingJobSeeker) {
+      return res.status(409).json({
+        success: false,
+        msg: "This email is already associated with a job seeker account",
+      });
+    }
+    const existingEmployer = await Employers.findOne({
+      $or: [{ email }, { companyName }],
+    });
+
+    if (existingEmployer) {
+      return res.status(409).json({
+        success: false,
+        msg: "Company name or email already registered",
+      });
+    }
+
+    const saltRounds = parseInt(process.env.SALT_ROUNDS) || 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const newEmployer = await Employers.create({
+      companyName,
+      email,
+      companyWebsite,
+      password: hashedPassword,
+      role,
+    });
+
+    const accessToken = generateAccessToken(newEmployer);
+    await newEmployer.save();
+    res.status(201).json({
+      success: true,
+      msg: "Employer registered successfully",
+      token: { accessToken },
+      newEmployer,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      msg: "Some error occured while registering the new employer",
+      error,
+    });
+  }
+});
+
 // Route for registering the New Users
-router.post("/users-register", async (req, res) => {
+router.post("/users-seeker-register", async (req, res) => {
   const { username, email, phoneNumber, password, role } = req.body;
 
   if (!username || !email || !phoneNumber || !password || !role) {
@@ -131,4 +202,4 @@ router.post("/users-login", async (req, res) => {
   }
 });
 
-module.exports = router
+module.exports = router;

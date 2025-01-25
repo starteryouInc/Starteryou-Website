@@ -2,17 +2,22 @@ const mongoose = require("mongoose");
 
 const UserProfileSchema = new mongoose.Schema(
   {
+    userRegistrationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     name: {
       type: String,
       required: true,
     },
     professionalTitle: {
       type: String,
-      required: true,
+      // required: true,
     },
     location: {
       type: String,
-      required: true,
+      // required: true,
     },
     currentCompany: {
       type: String,

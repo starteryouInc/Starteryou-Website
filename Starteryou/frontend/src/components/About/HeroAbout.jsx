@@ -3,6 +3,7 @@ import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
 import { useNavigation } from "../../context/NavigationContext";
 import { API_CONFIG } from "@config/api";
+import { MaxWords } from "../Common/wordValidation";
 /**
  * HeroAbout component that displays and allows editing of a title and paragraph content.
  * The component is primarily for admins who can edit the content, while others can only view it.
@@ -15,7 +16,8 @@ const HeroAbout = () => {
   const [isEditing, setIsEditing] = useState(false);
   const { isAdmin } = useNavigation();
   const page = "AboutPage"; // Specify the page name for the current component.
-
+  const [titleWordsLeft, setTitleWordsLeft] = useState(8); // Counter for the title
+  const [paragraphWordsLeft, setParagraphWordsLeft] = useState(8); // Counter for the paragraph
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -43,9 +45,11 @@ const HeroAbout = () => {
   }, []);
 
   const handleEdit = () => isAdmin && setIsEditing(true);
-  const handleChangeTitle = (e) => setTitle(e.target.value);
-  const handleChangeParagraph = (e) => setParagraph(e.target.value);
-
+  const handleChangeTitle = (e) =>
+    setTitle(MaxWords(e.target.value, 8, setTitleWordsLeft));
+  const handleChangeParagraph = (e) => {
+    setParagraph(MaxWords(e.target.value, 8, setParagraphWordsLeft)); // Limit to 8 words
+  };
   const saveContent = async () => {
     try {
       const normalizedParagraphs = Array.isArray(paragraph)
@@ -82,11 +86,25 @@ const HeroAbout = () => {
           <div className="w-full md:w-1/2 flex flex-col justify-center items-center md:items-start text-center md:text-left space-y-4 pt-[100px] md:pt-0">
             {isEditing ? (
               <div>
+                <span className="text-white text-sm">
+                  {titleWordsLeft >= 0
+                    ? `${titleWordsLeft} words left`
+                    : `Word limit exceeded by ${Math.abs(
+                        titleWordsLeft
+                      )} words`}
+                </span>
                 <textarea
                   value={title}
                   onChange={handleChangeTitle}
                   className="text-3xl lg:text-4xl font-semibold text-white bg-transparent border border-white p-2 rounded resize-none focus:outline-none"
                 />
+                <span className="text-white text-sm">
+                  {paragraphWordsLeft >= 0
+                    ? `${paragraphWordsLeft} words left`
+                    : `Word limit exceeded by ${Math.abs(
+                        paragraphWordsLeft
+                      )} words`}
+                </span>
                 <textarea
                   value={paragraph}
                   onChange={handleChangeParagraph}

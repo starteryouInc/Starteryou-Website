@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./styles/LeftSide.css";
 import Flag from "/UserProfile/Flag.svg";
 import EditPen from "/UserProfile/EditPen.svg";
@@ -19,51 +19,186 @@ import {
   IoMailOutline,
 } from "react-icons/io5";
 import SocialPresenceForm from "./LeftSideComponent/SocialPresenceForm";
+import { API_CONFIG } from "../../config/api";
+import { useUserContext } from "../../context/UserContext";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 const LeftSide = () => {
+  const { user } = useUserContext();
+  const navigate = useNavigate();
+  const [isEditing, setIsEditing] = useState(false);
   const [openSocialForm, setOpenSocialForm] = useState(false);
+  const handleEdit = () => setIsEditing(!isEditing);
+  const [profileData, setProfileData] = useState({
+    name: "John Oliver",
+    professionalTitle: "UI / UX Designer",
+    location: "New York, USA",
+    companyName: "Starter You",
+    experience: "4 Months",
+    email: "xyz@starteryou.com",
+    phoneNo: 7894561230,
+  });
+
+  const token = user?.token;
+
+  const getUserProfile = async () => {
+    if (!user?.token) {
+      toast.error("Pls login to continue...");
+      navigate("/UserLogin");
+      return;
+    }
+    const userId = user?.authenticatedUser?._id;
+    console.log("user: ", user?.authenticatedUser?._id)
+    try {
+      const { data } = await axios.get(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getUserProfile(userId)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      // Check if the data array is not empty
+    if (data.data.length > 0) {
+      const profile = data.data[0]; // Access the first profile object
+      setProfileData((prev) => ({
+        ...prev,
+        name: profile.name || prev.name,
+        professionalTitle: profile.professionalTitle || prev.professionalTitle,
+        location: profile.location || prev.location,
+        companyName: profile.companyName || prev.companyName,
+        experience: profile.experience || prev.experience,
+        email: profile.email || prev.email,
+        phoneNo: profile.phoneNo || prev.phoneNo,
+      }));
+
+      console.log("Fetched Profile Data: ", profile);
+      toast.success(data.msg || "Profile fetched successfully!");
+    } else {
+      toast.error("No profile found!");
+    }
+    } catch (error) {
+      toast.error(error.response?.data?.msg);
+      console.error("Not eorkingf")
+    }
+  };
+
+  useEffect(() => {
+    getUserProfile();
+  }, []);
+
   return (
     <>
       <section className="left md:w-[560px] lg:w-[660px] xl:w-[460px]">
         {/* Profile Card */}
         <div className="profile-card">
           <p className="purple-section">
-            <img src={WhiteEditPen} alt="edit btn" />
+            <img src={WhiteEditPen} onClick={handleEdit} alt="edit btn" />
           </p>
           <div className="profile-card-sub space-y-10">
-            {/* Personal Details */}
-            <ul className="first-list flex flex-col items-center space-y-2">
-              <li>
-                <FaRegCircleUser className="text-[60px] text-white bg-[#e7e6e9] rounded-full" />
-              </li>
-              <li>
-                <img src={Flag} alt="" />
-              </li>
-              <li className="text-[24px] font-semibold uppercase">
-                John Oliver
-              </li>
-              <li>UI / UX Designer</li>
-              <li className="line-style"></li>
-              <li className="flex items-center">
-                <MdLocationOn className="icon-style mr-2" />
-                New York
-              </li>
-            </ul>
+            {isEditing ? (
+              <ul className="first-list flex flex-col items-center space-y-4">
+                <li>
+                  <FaRegCircleUser className="text-[60px] text-white bg-[#e7e6e9] rounded-full" />
+                </li>
+                <li>
+                  <img src={Flag} alt="Country Flag" />
+                </li>
+                <li>
+                  <input
+                    type="text"
+                    value={profileData.name}
+                    onChange={(e) => setProfileData.name(e.target.value)}
+                    className="text-[24px] font-semibold uppercase bg-transparent border-b border-gray-300 outline-none text-center"
+                    placeholder="Enter name"
+                  />
+                </li>
+                <li>
+                  <input
+                    type="text"
+                    value={profileData.professionalTitle}
+                    onChange={(e) =>
+                      setProfileData.professionalTitle(e.target.value)
+                    }
+                    className="bg-transparent border-b border-gray-300 outline-none text-center"
+                    placeholder="Enter job title"
+                  />
+                </li>
+                <li className="line-style"></li>
+                <li className="flex items-center">
+                  <MdLocationOn className="icon-style mr-2" />
+                  <input
+                    type="text"
+                    value={profileData.location}
+                    onChange={(e) => setProfileData.location(e.target.value)}
+                    className="bg-transparent border-b border-gray-300 outline-none"
+                    placeholder="Enter location"
+                  />
+                </li>
+              </ul>
+            ) : (
+              <ul className="first-list flex flex-col items-center space-y-2">
+                <li>
+                  <FaRegCircleUser className="text-[60px] text-white bg-[#e7e6e9] rounded-full" />
+                </li>
+                <li>
+                  <img src={Flag} alt="Country Flag" />
+                </li>
+                <li className="text-[24px] font-semibold uppercase">
+                  {profileData.name}
+                </li>
+                <li>{profileData.professionalTitle}</li>
+                <li className="line-style"></li>
+                <li className="flex items-center">
+                  <MdLocationOn className="icon-style mr-2" />
+                  {profileData.location}
+                </li>
+              </ul>
+            )}
 
             {/* Contact Info */}
             <ul className="space-y-4 secondary-text-color">
               {[
-                { icon: PiBuildingOfficeLight, text: "ABCDEF" },
-                { icon: PiBagSimpleFill, text: "Exp: 4 Months" },
-                { icon: FaPhoneAlt, text: "+91 1234567890", editable: true },
-                { icon: IoMailOutline, text: "xyz@gmail.com", editable: true },
-              ].map(({ icon: Icon, text, editable }, idx) => (
+                {
+                  icon: PiBuildingOfficeLight,
+                  text: profileData.companyName,
+                  onChange: setProfileData.companyName,
+                },
+                {
+                  icon: PiBagSimpleFill,
+                  text: `Exp: ${profileData.experience}`,
+                  onChange: setProfileData.experience,
+                },
+                {
+                  icon: FaPhoneAlt,
+                  text: profileData.phoneNo,
+                  editable: true,
+                  onChange: setProfileData.phoneNo,
+                },
+                {
+                  icon: IoMailOutline,
+                  text: profileData.email,
+                  editable: true,
+                  onChange: setProfileData.email,
+                },
+              ].map(({ icon: Icon, text, editable, onChange }, idx) => (
                 <li key={idx} className="flex justify-between items-center">
-                  <h3 className="flex items-center">
+                  <div className="flex items-center">
                     <Icon className="icon-style mr-4" />
-                    {text}
-                  </h3>
-                  {editable && (
+                    {isEditing && editable ? (
+                      <input
+                        type="text"
+                        value={text}
+                        onChange={(e) => onChange(e.target.value)}
+                        className="bg-transparent border-b border-gray-300 outline-none"
+                      />
+                    ) : (
+                      <span>{text}</span>
+                    )}
+                  </div>
+                  {editable && !isEditing && (
                     <div className="flex items-center space-x-4">
                       <img src={EditPen} alt="Edit" />
                       <img src={GreenTick} alt="Verified" />

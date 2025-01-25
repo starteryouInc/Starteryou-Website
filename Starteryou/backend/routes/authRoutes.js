@@ -8,15 +8,16 @@ const swaggerUi = require("swagger-ui-express");
 const validator = require("validator");
 const router = express.Router();
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
+const Employee = require("../models/EmployeeModel");
 
-//jwt secret key
+//dev_jwt_secret key
 const jwtSecret = process.env.DEV_JWT_SECRET;
 if (!jwtSecret) {
   console.error("Error: DEV_JWT_SECRET is missing in the environment variables.");
   process.exit(1); // Stop the app if DEV_JWT_SECRET is not defined
 }
 
-const validRoles = ["admin", "jobSeeker", "employer"]; // Add more roles as needed
+const validRoles = ["admin", "user"]; // Add more roles as needed
 
 // Helper functions to generate tokens
 const generateAccessToken = (user) => {
@@ -93,7 +94,7 @@ router.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *                 example: "password123"
  *               role:
  *                 type: string
- *                 example: "user"  # Example: "admin" or "user"
+ *                 example: "admin"  # Example: "admin" or "user"
  *     responses:
  *       201:
  *         description: User registered successfully
@@ -124,10 +125,24 @@ router.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  */
 const register = async (req, res) => {
   try {
-    const { username, email, password, role } = req.body;
-
-    if (!username || !email || !password || !role) {
+    const { username, email, phoneNumber, password, role } = req.body;
+    if (!username || !email || !phoneNumber || !password || !role) {
       return res.status(400).json({ message: "All fields are required", success: false });
+    }
+    
+     // Validate email
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@starteryou\.com$/i;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({
+      message: "Email must be a valid starteryou.com email address",
+      success: false,
+    });
+  }
+
+    const validEmployee = await Employee.findOne({ email });
+    console.log("Valid Employee:", validEmployee); // Log the valid employee for debugging
+    if (!validEmployee) {
+      return res.status(400).json({ message: "This email is not associated with a valid employee", success: false });
     }
 
     // Validate role
@@ -146,17 +161,17 @@ const register = async (req, res) => {
     }
 
     // Validate phone number
-    // const numericPhoneNumber = Number(phoneNumber);
-    // if (!numericPhoneNumber || numericPhoneNumber.toString().length !== 10) {
-    //   return res.status(400).json({
-    //     message: "Phone number must be 10 digits and numeric",
-    //     success: false,
-    //   });
-    // }
+    const numericPhoneNumber = Number(phoneNumber);
+    if (!numericPhoneNumber || numericPhoneNumber.toString().length !== 10) {
+      return res.status(400).json({
+        message: "Phone number must be 10 digits and numeric",
+        success: false,
+      });
+    }
 
     // Check if email or phone number already exists
     const existingUser = await User.findOne({
-      $or: [{ email }],
+      $or: [{ email }, { phoneNumber }],
     });
 
     if (existingUser) {
@@ -166,12 +181,12 @@ const register = async (req, res) => {
           success: false,
         });
       }
-      // if (existingUser.phoneNumber === phoneNumber) {
-      //   return res.status(409).json({
-      //     message: "Phone number already registered",
-      //     success: false,
-      //   });
-      // }
+      if (existingUser.phoneNumber === phoneNumber) {
+        return res.status(409).json({
+          message: "Phone number already registered",
+          success: false,
+        });
+      }
     }
 
     // Hash the password before saving
@@ -180,7 +195,7 @@ const register = async (req, res) => {
     const user = await User.create({
       username,
       email,
-      // phoneNumber,
+      phoneNumber,
       password: hashedPassword,
       role,
     });
@@ -189,7 +204,6 @@ const register = async (req, res) => {
 
     // Save the refresh token in the database
     user.refreshToken = refreshToken;
-
     await user.save();
 
     return res.status(201).json({
@@ -207,7 +221,7 @@ const register = async (req, res) => {
     // Handle MongoDB duplicate key error (E11000)
     if (error.code === 11000) {
       return res.status(409).json({
-        message: "Duplicate entry. This email is already registered.",
+        message: "Duplicate entry. This email or phone number is already registered.",
         success: false,
       });
     } 
@@ -277,6 +291,21 @@ const login = async (req, res) => {
       success: false,
     });
   }
+  // Validate email
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@starteryou\.com$/i;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({
+      message: "Email must be a valid starteryou.com email address",
+      success: false,
+    });
+  }
+
+  const validEmployee = await Employee.findOne({ email });
+    console.log("Valid Employee:", validEmployee); // Log the valid employee for debugging
+    if (!validEmployee) {
+      return res.status(400).json({ message: "This email is not associated with a valid employee", success: false });
+    }
+
   try {
     const user = await User.findOne({ email });
     if (!user) {

@@ -3,6 +3,7 @@ import SaveJob from "/JobFeedPage/SaveJob.svg";
 import LocationIcon from "/JobFeedPage/Location.svg";
 import ExperienceIcon from "/JobFeedPage/Experience.svg";
 import componayLogo from "/JobFeedPage/CompanyLogo.svg";
+import { FaBookmark, FaRegBookmark } from "react-icons/fa";
 // import { formatDistanceToNow, differenceInDays } from "date-fns";
 
 const JobCard = (props) => {
@@ -24,7 +25,8 @@ const JobCard = (props) => {
           />
           <h1 className="job-title">{props.jobTitle}</h1>
         </div>
-        <img src={SaveJob} alt="save icon" />
+        {/* <img src={SaveJob} alt="save icon" /> */}
+        <FaRegBookmark/>
       </div>
       <ul className="job-details text-[#9894A7] space-y-2">
         <li>{props.companyName ? props.companyName : "Unknown"}</li>

@@ -8,7 +8,7 @@ router.post(
   "/:jobId/bookmarked-job",
   authorize("jobSeeker"),
   async (req, res) => {
-    const userId = req.user.id;
+    const userId = req.user?.id;
     const {
       params: { jobId },
     } = req;
@@ -41,7 +41,8 @@ router.get(
   authorize("jobSeeker"),
   async (req, res) => {
     try {
-      const userId = req.user.id;
+      // const { params: { userId } } = req;
+      const userId = req.user?.id;
       const bookmarked = await BookmarkedJob.find({ userId });
       if (!bookmarked) {
         return res.status(404).json({ msg: "No bookmarked jobs" });

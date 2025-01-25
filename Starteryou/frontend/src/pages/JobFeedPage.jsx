@@ -6,11 +6,13 @@ import "./styles/JobFeedPage.css";
 import JobCard from "../components/JobFeedPage/JobCard";
 import JobDetailCard from "../components/JobFeedPage/JobDetailCard";
 import { useUserContext } from "../context/UserContext";
+import { useNavigate } from "react-router-dom";
 import { API_CONFIG } from "../config/api";
 import { toast } from "react-toastify";
 import axios from "axios";
 
 const JobFeedPage = () => {
+  const navigate = useNavigate();
   const { user } = useUserContext();
   const [jobData, setJobData] = useState([]);
   const [appliedJobs, setAppliedJobs] = useState([]);
@@ -22,7 +24,11 @@ const JobFeedPage = () => {
   const token = user?.token;
 
   const getJobs = useCallback(async () => {
-    if (!user?.token) return;
+    if (!user?.token) {
+      toast.error("Pls login to continue...");
+      navigate("/UserLogin");
+      return;
+    }
     try {
       const { data } = await axios.get(
         `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getJobs}`,
@@ -35,9 +41,9 @@ const JobFeedPage = () => {
       setJobData(data.data);
       toast.success(data.msg);
     } catch (error) {
-      toast.error(error.response.data.msg);
+      toast.error(error.response?.data?.msg);
     }
-  }, []); // Using `useCallback` to memoize the function
+  }, [token, navigate]); // Using `useCallback` to memoize the function
 
   const [jobID, setJobID] = useState("");
 
@@ -60,17 +66,15 @@ const JobFeedPage = () => {
       );
       setSingleJob(data.data);
     } catch (error) {
-      toast.error(error.response.data.msg);
+      toast.error(error.response?.data?.msg);
     }
   };
 
   const getAppliedJobs = async () => {
-    const userId = user?.authenticatedUser._id;
-    console.log(userId);
     if (!user?.token) return;
     try {
       const { data } = await axios.get(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getAppliedJobs(userId)}`,
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getAppliedJobs}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -78,55 +82,95 @@ const JobFeedPage = () => {
         }
       );
 
-    // Fetch job details for each jobId in the applications list
-    const jobs = await Promise.all(
-      data.applications.map(async (application) => {
-        const jobResponse = await axios.get(
-          `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getJobById(
-            application.jobId
-          )}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        return jobResponse.data.data;
-      })
-    );
+      // Fetch job details for each jobId in the applications list
+      const appliedJobs = await Promise.all(
+        data.applications.map(async (application) => {
+          const jobResponse = await axios.get(
+            `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getJobById(
+              application.jobId
+            )}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          return jobResponse.data.data;
+        })
+      );
 
-
-      setAppliedJobs(jobs);
-      console.log(appliedJobs);
+      setAppliedJobs(appliedJobs);
     } catch (error) {
-      // toast.error(error.response.data.msg);
-      console.log("not working")
+      toast.error(error.response?.data?.msg);
     }
   };
 
-  // const getBookmarkedJobs = async () => {
-  //   if (!user?.token) return;
-  //   try {
-  //     const { data } = await axios.get(
-  //       `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getBookmarkedJobs}`,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-  //     setSavedJobs(data.data);
-  //     console.log(data.data)
-  //   } catch (error) {
-  //     toast.error(error.response.data.msg);
-  //   }
-  // };
+  const getSavedJobs = async () => {
+    if (!user?.token) return;
+    try {
+      const { data } = await axios.get(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getBookmarkedJobs}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const savedJobs = await Promise.all(
+        data.bookmarked.map(async (saved) => {
+          const jobResponse = await axios.get(
+            `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getJobById(
+              saved.jobId
+            )}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          return jobResponse.data.data;
+        })
+      );
+      setSavedJobs(savedJobs);
+    } catch (error) {
+      toast.error(error.response.data.msg);
+    }
+  };
+
+  const saveJob = async (jobId) => {
+    const token = user?.token;
+    if (!token) return;
+    try {
+      const { data } = await axios.post(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.bookmarkJob(jobId)}`,
+        { jobId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success("Job is bookmarked");
+      getSavedJobs();
+    } catch (error) {
+      toast.error(error.response?.data?.msg || "An error occurred");
+    }
+  };
 
   useEffect(() => {
     getJobs();
-    getAppliedJobs();
-    // getBookmarkedJobs();
   }, []);
+
+  const handleTabClick = (tab) => {
+    setSelectedTab(tab);
+    setDetailCardPop(false);
+    setJobID("");
+    if (tab === "Applied") {
+      getAppliedJobs();
+    } else if (tab === "Saved") {
+      getSavedJobs();
+    }
+  };
 
   // Calculating the window size for mobile responsiveness of the Detailed Card Component
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -164,7 +208,7 @@ const JobFeedPage = () => {
                 className={`cursor-pointer ${
                   selectedTab === tab ? "text-[#8d00ff] font-bold" : ""
                 }`}
-                onClick={() => setSelectedTab(tab)}
+                onClick={() => handleTabClick(tab)}
               >
                 {tab}
               </li>
@@ -182,38 +226,43 @@ const JobFeedPage = () => {
           </div>
           <div className="job-listing-container flex justify-center md:space-x-4">
             <div className="job-lists space-y-4 md:h-[1235px] lg:h-[995px] overflow-y-scroll">
-              {filteredJobs.map((e) => {
-                return (
-                  <div
-                    key={e._id}
-                    onClick={() => {
-                      setJobID(e._id),
-                        getJobById(e._id),
-                        setDetailCardPop(true);
-                    }}
-                    className={`transition-shadow duration-300 ${
-                      jobID === e._id
-                        ? "border border-[#8d00ff] rounded-[5px]"
-                        : ""
-                    }`}
-                  >
-                    <JobCard
-                      companyLogo={e.compImgSrc}
-                      jobTitle={e.title}
-                      companyName={e.compName}
-                      experienceReq={e.experienceLevel}
-                      location={e.location}
-                      datePosted={e.createdAt}
-                    />
-                  </div>
-                );
-              })}
+              {filteredJobs.length !== 0 ? (
+                filteredJobs.map((e) => {
+                  return (
+                    <div
+                      key={e._id}
+                      onClick={() => {
+                        setJobID(e._id),
+                          getJobById(e._id),
+                          setDetailCardPop(true);
+                      }}
+                      className={`transition-shadow duration-300 ${
+                        jobID === e._id
+                          ? "border border-[#8d00ff] rounded-[5px]"
+                          : ""
+                      }`}
+                    >
+                      <JobCard
+                        companyLogo={e.compImgSrc}
+                        jobTitle={e.title}
+                        companyName={e.compName}
+                        experienceReq={e.experienceLevel}
+                        location={e.location}
+                        datePosted={e.createdAt}
+                      />
+                    </div>
+                  );
+                })
+              ) : (
+                <p>not data</p>
+              )}
             </div>
             <div className="job-details hidden md:block">
-              {!isMobile && singleJob && (
+              {detailCardPop && singleJob && (
                 <JobDetailCard
                   jobDetails={singleJob}
                   onClose={() => setDetailCardPop(false)}
+                  savedJob={saveJob}
                 />
               )}
             </div>
@@ -227,6 +276,7 @@ const JobFeedPage = () => {
             <JobDetailCard
               jobDetails={singleJob}
               onClose={() => setDetailCardPop(false)}
+              savedJob={saveJob}
             />
           </div>
         </div>

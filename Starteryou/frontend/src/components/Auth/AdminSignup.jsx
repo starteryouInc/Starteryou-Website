@@ -2,71 +2,61 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useUserContext } from "../../context/UserContext";
+import { useUserContext } from "../../context/UserContext"; 
 import { API_CONFIG } from "@config/api";
-
 const AdminSignup = () => {
-  const { setUser } = useUserContext();
+  const { setUser } = useUserContext(); 
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [username, setUserName] = useState("");
-  const [role, setRole] = useState("jobSeeker");
-
-
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [username, setUsername] = useState("");
+  
+//validate email
   const validateEmail = (email) => {
     const regex = /^[a-zA-Z0-9._%+-]+@starteryou\.com$/i;
     return regex.test(email);
-  };
+    };
 
   const handleAdminSignup = async (e) => {
     e.preventDefault();
 
-    console.log(username, email, password, role);
-
     if (!validateEmail(email)) {
-      toast.error(
-        "Email must end with @starteryou.com and be in the correct format."
-      );
+      toast.error("Email must end with @starteryou.com and be in the correct format.");
       return;
     }
 
     try {
-      const response = await fetch(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.authRegister}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email,
-            password,
-            username,
-            role, // Adjust role as needed (e.g., "employer", "jobSeeker")
-          }),
-        }
-      );
+    const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.authRegister}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        phoneNumber,
+        username,
+        role: "admin",
+      }),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (response.ok) {
-        toast.success("Admin signup successful! You can now log in.");
-        setUser(data.user);
-        navigate("/login");
-      } else if (response.status === 409) {
-        toast.error(
-          data.message ||
-            "A user with this email already exists. Please log in."
-        );
-      } else {
-        toast.error(data.message || "Signup failed. Please try again.");
-      }
-    } catch (error) {
-      toast.error("An error occurred during signup.");
+    if (response.ok) {
+      toast.success("Admin signup successful! You can now log in.");
+      setUser(data.user);
+      navigate("/login");
+    } else if (response.status === 409) {
+      toast.error(data.message || "A user with this email already exists. Please log in.");
+    } else {
+      toast.error(data.message || "Signup failed. Please try again.");
     }
-  };
+  } catch (error) {
+    toast.error("An error occurred during signup.");
+  }
+};
 
   return (
     <div
@@ -74,32 +64,24 @@ const AdminSignup = () => {
       style={{ backgroundImage: "url(/AboutPage/Aboutbg.svg)" }}
     >
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md border border-gray-200">
-        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
-          Admin Sign Up
-        </h2>
+        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Admin Sign Up</h2>
         <form onSubmit={handleAdminSignup} className="space-y-6">
           <div>
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Name
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+              Username
             </label>
             <input
               type="text"
-              id="name"
+              id="username"
               value={username}
-              onChange={(e) => setUserName(e.target.value)}
+              onChange={(e) => setUsername(e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg"
               required
             />
           </div>
 
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email
             </label>
             <input
@@ -113,10 +95,7 @@ const AdminSignup = () => {
           </div>
 
           <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               Password
             </label>
             <input
@@ -130,23 +109,17 @@ const AdminSignup = () => {
           </div>
 
           <div>
-            <label
-              htmlFor="role"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Role
+            <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+              Phone Number
             </label>
-            <select
-              id="role"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
+            <input
+              type="tel"
+              id="phoneNumber"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg"
               required
-            >
-              <option value="admin">Admin</option>
-              <option value="jobSeeker">Job Seeker</option>
-              <option value="employer">Employer</option>
-            </select>
+            />
           </div>
 
           <button

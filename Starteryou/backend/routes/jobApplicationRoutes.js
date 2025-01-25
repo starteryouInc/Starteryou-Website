@@ -35,10 +35,10 @@ router.post("/:jobId/apply-job", authorize("jobSeeker"), async (req, res) => {
 });
 
 // Route to fetch all the applied jobs by the particular user
-router.get("/fetch-applied-jobs/:userId", authorize("jobSeeker"), async (req, res) => {
+router.get("/fetch-applied-jobs", authorize("jobSeeker"), async (req, res) => {
   try {
-    const { params: { userId } } = req;
-    // const userId = req.user.id;
+    // const { params: { userId } } = req;
+    const userId = req.user?.id;
     const applications = await Application.find({ userId });
     if (!applications) {
       return res.status(404).json({ msg: "No applied Job application" });

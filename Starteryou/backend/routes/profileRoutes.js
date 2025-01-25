@@ -12,8 +12,21 @@ const authorize = require("../middleware/roleMiddleware");
 
 // Route to create the profile of the user
 router.post("/create-profile", authorize("jobSeeker"), async (req, res) => {
+  const { userRegistrationId, name, email, phoneNo } = req.body;
+  if(!userRegistrationId || !name || !email){
+    return res.status(400).json({
+      success: false,
+      msg: "Required fields (userRegistrationId, name, email) are missing"
+    })
+  }
   try {
-    const newProfile = new UserProfile(req.body);
+    // const newProfile = new UserProfile(req.body);
+    const newProfile = new UserProfile({
+      userRegistrationId,
+      name,
+      email,
+      phoneNo,
+    })
     const response = await newProfile.save();
     res.status(201).json({
       success: true,
@@ -31,11 +44,12 @@ router.post("/create-profile", authorize("jobSeeker"), async (req, res) => {
 
 // Route to fetch the full profile of the user
 router.get(
-  "/fetch-profile",
+  "/fetch-profile/:userId",
   authorize("jobSeeker", "employer"),
   async (req, res) => {
+    const { params: { userId } } = req;
     try {
-      const fetchProfile = await UserProfile.find();
+      const fetchProfile = await UserProfile.find({ userRegistrationId: userId });
       if (!fetchProfile || fetchProfile.length === 0) {
         return res.status(404).json({ msg: "No profile found!" });
       }

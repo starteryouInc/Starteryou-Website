@@ -8,6 +8,7 @@ const textRoutes = require("./routes/textRoutes");
 const fileRoutes = require("./routes/fileRoutes");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
+const teamRoutes = require("./routes/teamRoutes");
 const { mountRoutes } = require("./routes"); // Main routes including API docs
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 const authRoutes = require("./routes/authRoutes");
@@ -15,7 +16,6 @@ const { router } = require("./routes/index");
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 // Initialize Express app
 const app = express();
-
 // Middleware
 dotenv.config();
 app.use(cors());
@@ -61,6 +61,7 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use("/api/system", verificationRoutes);
+
 mountRoutes(app); // This mounts the main routes including API docs
 
 // Routes
@@ -135,14 +136,25 @@ app.use((err, req, res, next) => {
 });
 
 // Start Server
+// Start Server
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at ${BACKEND_URL}`);
-  console.log(`📖 Swagger Docs available at ${BACKEND_URL}/api-test`);
-  console.log(`💻 Health Check: ${BACKEND_URL}/health`);
-  console.log(`🗄️ Database Status: ${BACKEND_URL}/db-status`);
-  console.log(`📚 API Documentation: ${BACKEND_URL}/api/docs`);
-  console.log(`📋 Postman Collection: ${BACKEND_URL}/api/docs/postman`);
-  console.log(`⚙️ File Verification: ${BACKEND_URL}/api/system/verify-all`);
+  console.log(`🚀 Server running at http://dev.starteryou.com:${PORT}`);
+  console.log(
+    `📖 Swagger Docs available at http://dev.starteryou.com:${PORT}/api-test`
+  );
+  console.log(`💻 Health Check: http://dev.starteryou.com:${PORT}/health`);
+  console.log(
+    `🗄️ Database Status: http://dev.starteryou.com:${PORT}/db-status`
+  );
+  console.log(
+    `📚 API Documentation: http://dev.starteryou.com:${PORT}/api/docs`
+  );
+  console.log(
+    `📋 Postman Collection: http://dev.starteryou.com:${PORT}/api/docs/postman`
+  );
+  console.log(
+    `⚙️ File Verification: http://dev.starteryou.com:${PORT}/api/system/verify-all`
+  );
 });

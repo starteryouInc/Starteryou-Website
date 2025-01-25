@@ -4,9 +4,10 @@ import LocationIcon from "/JobFeedPage/Location.svg";
 import ExperienceIcon from "/JobFeedPage/Experience.svg";
 import MissingSkillsIcon from "/JobFeedPage/Missing.svg";
 import componayLogo from "/JobFeedPage/CompanyLogo.svg";
+import { FaBookmark, FaRegBookmark } from "react-icons/fa";
 // import { differenceInDays } from "date-fns";
 
-const JobDetailCard = ({ jobDetails, onClose }) => {
+const JobDetailCard = ({ jobDetails, onClose, savedJob }) => {
   // const isEarlyApplicant = (createdAt) => {
   //   const daysDifference = differenceInDays(new Date(), new Date(createdAt));
   //   return daysDifference < 7;
@@ -30,7 +31,7 @@ const JobDetailCard = ({ jobDetails, onClose }) => {
       </div>
       <div className="flex justify-between items-start">
         <h1 className="text-xl font-semibold">{jobDetails.title}</h1>
-        <img src={SaveJob} alt="save icon" />
+        <FaRegBookmark className="cursor-pointer" onClick={() => savedJob(jobDetails._id)}/>
       </div>
       <ul className="text-[#9894A7] space-y-2">
         <li>{jobDetails.compName ? jobDetails.compName : "Unknown"}</li>

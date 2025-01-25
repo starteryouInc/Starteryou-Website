@@ -4,20 +4,75 @@ import FileUpload from "../../Common/FileUpload";
 import { API_CONFIG } from "@config/api";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
+import { MaxWords } from "../../Common/wordValidation";
 
 const UnlockPotential = () => {
-  const [preview, setPreview] = useState(null);
+  const title = "UnlockPotential";
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
   const { isAdmin } = useNavigation();
-  const [title, setTitle] = useState(
+  const [titlee, setTitlee] = useState(
     "Unlock Your Potential with Starteryou: Your Path to Career Success"
   );
-  const [paragraph, setParagraph] = useState(
+  const [paragraphh, setParagraphh] = useState(
     "Starteryou offers students the chance to gain valuable work experience while balancing their studies. With flexible job opportunities tailored to your schedule, you can enhance your resume and prepare for a successful career."
   );
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState("");
   const page = "JobBeforeSignup";
 
+  const fetchUploadedFile = async () => {
+    if (hasFetchedOnce) return; // Prevent fetching again if already attempted
+
+    try {
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`
+      );
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const blob = await response.blob(); // Get the response as a Blob
+      const url = URL.createObjectURL(blob); // Create a local URL for the Blob
+      setUploadedFile(url); // Set the uploaded file data with its local URL
+      setError(null); // Reset error state on successful fetch
+    } catch (error) {
+      console.error("Error fetching uploaded file:", error);
+      setError("Failed to load image"); // Set error message
+    } finally {
+      setHasFetchedOnce(true); // Mark as fetch attempt made
+    }
+  };
+
+  useEffect(() => {
+    fetchUploadedFile(); // Fetch the specific image on component mount
+  }, []);
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("title", title);
+
+    try {
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(title)}`,
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      setUploadedFile(URL.createObjectURL(file));
+      setError(null);
+    } catch (error) {
+      console.error("Error updating image:", error);
+      setError("Error updating image");
+    }
+  };
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -29,11 +84,11 @@ const UnlockPotential = () => {
         );
 
         if (response.data) {
-          setTitle(response.data.content || title);
-          setParagraph(
+          setTitlee(response.data.content || titlee);
+          setParagraphh(
             Array.isArray(response.data.paragraphs)
               ? response.data.paragraphs.join("\n")
-              : paragraph
+              : paragraphh
           );
         }
       } catch {
@@ -43,24 +98,25 @@ const UnlockPotential = () => {
     };
 
     fetchData();
-  }, [title, paragraph]);
+  }, [titlee, paragraphh]);
 
   const handleEdit = () => isAdmin && setIsEditing(true);
 
-  const handleChangeTitle = (e) => setTitle(e.target.value);
+  const handleChangeTitle = (e) => setTitlee(MaxWords(e.target.value, 10));
 
-  const handleChangeParagraph = (e) => setParagraph(e.target.value);
+  const handleChangeParagraph = (e) =>
+    setParagraphh(MaxWords(e.target.value, 30));
 
   const saveContent = async () => {
     try {
-      const normalizedParagraphs = Array.isArray(paragraph)
-        ? paragraph
-        : [paragraph.trim()];
+      const normalizedParagraphs = Array.isArray(paragraphh)
+        ? paragraphh
+        : [paragraphh.trim()];
 
       await axios.put(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`, {
         page,
         component: "UnlockPotential",
-        content: title.trim(),
+        content: titlee.trim(),
         paragraphs: normalizedParagraphs,
       });
 
@@ -72,12 +128,6 @@ const UnlockPotential = () => {
     }
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setPreview(URL.createObjectURL(file));
-    console.log("Selected file:", file);
-  };
-
   return (
     <div className="max-w-[1430px] mx-auto px-4 lg:px-10 py-7 md:py-20">
       <div className="flex flex-col md:flex-row md:items-center space-y-6 md:space-y-0 md:space-x-6">
@@ -87,12 +137,12 @@ const UnlockPotential = () => {
             <div>
               <input
                 type="text"
-                value={title}
+                value={titlee}
                 onChange={handleChangeTitle}
                 className="text-2xl md:text-4xl font-bold mb-4 border border-gray-300 p-2 rounded w-full"
               />
               <textarea
-                value={paragraph}
+                value={paragraphh}
                 onChange={handleChangeParagraph}
                 className="text-base border border-gray-300 p-2 rounded w-full"
                 rows={6}
@@ -107,9 +157,9 @@ const UnlockPotential = () => {
           ) : (
             <div>
               <h2 className="text-2xl md:text-4xl font-bold mb-6 text-black lg:max-w-[500px]">
-                {title}
+                {titlee}
               </h2>
-              <p className="text-base text-black max-w-[470px]">{paragraph}</p>
+              <p className="text-base text-black max-w-[470px]">{paragraphh}</p>
               {isAdmin && (
                 <FaPencilAlt
                   onClick={handleEdit}
@@ -122,9 +172,9 @@ const UnlockPotential = () => {
 
         {/* Right Section */}
         <div className="flex-1 relative bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] rounded-xl overflow-hidden flex justify-center items-center">
-          {preview ? (
+          {uploadedFile ? (
             <img
-              src={preview}
+              src={uploadedFile}
               alt="Preview"
               className="relative w-[340px] h-[250px] md:w-[550px] md:h-[400px] lg:w-[680px] lg:h-[500px] rounded-xl left-[30px] top-[30px] md:left-[58px] md:top-[80px]"
             />
@@ -137,7 +187,11 @@ const UnlockPotential = () => {
           )}
           {isAdmin && (
             <div className="absolute top-2 right-2">
-              <FileUpload handleFileChange={handleFileChange} />
+              <FileUpload
+                handleFileChange={handleFileChange}
+                uploadedFile={uploadedFile}
+                error={error}
+              />
             </div>
           )}
         </div>
