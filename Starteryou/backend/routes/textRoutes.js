@@ -6,7 +6,7 @@ const swaggerUi = require("swagger-ui-express");
 const TextContent = require("../models/TextContent"); // Adjust path as needed
 const cacheMiddleware = require("../cache/utils/cacheMiddleware");
 const cacheQuery = require("../cache/utils/cacheQuery");
-const invalidateCache = require("../cache/utils/invalidateCache");
+const { invalidateCache } = require("../cache/utils/invalidateCache");
 const cacheConfig = require("../cache/config/cacheConfig");
 require("dotenv").config();
 const backendUrl = process.env.BACKEND_URL || "http://localhost:3000";
@@ -18,8 +18,7 @@ const swaggerOptions = {
     info: {
       title: "Text Content API",
       version: "1.0.0",
-      description:
-        "API for managing text content associated with specific components",
+      description: "API for managing text content associated with specific components",
     },
     servers: [
       {
@@ -81,25 +80,31 @@ router.get("/text", cacheMiddleware, async (req, res) => {
         message: "MongoDB connection lost or not ready.",
       });
     }
-
     const cacheKey = component
       ? `/api/text?page=${page}&component=${component}`
       : `/api/text?page=${page}`;
 
-    // Fetch content from the database
-    const textContent = await TextContent.findOne({ page, component });
-
-    if (!textContent) {
-      return res.status(404).json({
-        message: "No content found for the specified page and component.",
-      });
+    if (component) {
+      const content = await TextContent.findOne({ page, component }).maxTimeMS(10000);
+      if (!content) {
+        return res.status(404).json({
+          message: "Content not found for the specified page and component.",
+        });
+      }
+      await cacheQuery(cacheKey, async () => content, cacheConfig.defaultTTL);
+      return res.json(content);
     }
 
-    // Cache the fetched content
-    await cacheQuery(cacheKey, async () => textContent, cacheConfig.defaultTTL);
-
-    res.json(textContent);
+    const content = await TextContent.find({ page }).maxTimeMS(10000);
+    if (!content || content.length === 0) {
+      return res.status(404).json({
+        message: `No content found for the specified page: ${page}`,
+      });
+    }
+    await cacheQuery(cacheKey, async () => content, cacheConfig.defaultTTL);
+    return res.json(content);
   } catch (error) {
+    console.error("Error retrieving content:", error);
     res.status(500).json({
       message: "An error occurred while retrieving content.",
       error: error.message,
@@ -150,38 +155,33 @@ router.put("/text", async (req, res) => {
   }
   if (content === undefined && !Array.isArray(paragraphs)) {
     return res.status(400).json({
-      message:
-        "At least one of 'content' or 'paragraphs' is required in the request body.",
+      message: "At least one of 'content' or 'paragraphs' is required in the request body.",
     });
   }
 
   try {
-    let textContent = await TextContent.findOne({ page, component }).maxTimeMS(
-      10000
-    );
+    let textContent = await TextContent.findOne({ page, component }).maxTimeMS(10000);
 
     if (!textContent) {
-      textContent = new TextContent({ page, component, content, paragraphs });
-    } else {
-      if (content !== undefined) {
-        textContent.content = content;
-      }
-      if (Array.isArray(paragraphs)) {
-        textContent.paragraphs = paragraphs;
-      }
+      textContent = new TextContent({ page, component });
+    }
+
+    if (content !== undefined) {
+      textContent.content = content;
+    }
+
+    if (Array.isArray(paragraphs)) {
+      textContent.paragraphs = paragraphs;
     }
 
     await textContent.save();
-
-    // Cache invalidation after update
     const cacheKey = `/api/text?page=${page}&component=${component}`;
+    console.log(`Invalidating cache for key: ${cacheKey}`);
     await invalidateCache(cacheKey);
-
-    // Re-cache the updated content
     await cacheQuery(cacheKey, async () => textContent, cacheConfig.defaultTTL);
-
     res.json(textContent);
   } catch (error) {
+    console.error("Error updating content:", error);
     res.status(500).json({
       message: "An error occurred while updating content.",
       error: error.message,
@@ -239,13 +239,12 @@ router.delete("/text", async (req, res) => {
         message: "No content found for the specified page and component.",
       });
     }
-
-    // Cache invalidation after deletion
     const cacheKey = `/api/text?page=${page}&component=${component}`;
+    console.log(`Invalidating cache for key: ${cacheKey}`);
     await invalidateCache(cacheKey);
-
     res.json({ message: "Content deleted successfully." });
   } catch (error) {
+    console.error("Error deleting content:", error);
     res.status(500).json({
       message: "An error occurred while deleting content.",
       error: error.message,
