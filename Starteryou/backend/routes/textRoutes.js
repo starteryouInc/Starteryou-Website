@@ -75,36 +75,62 @@ router.get("/text", cacheMiddleware, async (req, res) => {
   }
 
   try {
+    // Check MongoDB connection
     if (mongoose.connection.readyState !== 1) {
+      console.error("MongoDB connection not ready");
       return res.status(500).json({
         message: "MongoDB connection lost or not ready.",
       });
     }
-    const cacheKey = component
-      ? `/api/text?page=${page}&component=${component}`
-      : `/api/text?page=${page}`;
 
-    if (component) {
-      const content = await TextContent.findOne({ page, component }).maxTimeMS(10000);
-      if (!content) {
-        return res.status(404).json({
-          message: "Content not found for the specified page and component.",
-        });
-      }
-      await cacheQuery(cacheKey, async () => content, cacheConfig.defaultTTL);
-      return res.json(content);
-    }
+    // Create a cache key
+    const cacheKey = `/api/text?page=${page}${
+      component ? `&component=${component}` : ""
+    }`;
+    console.log(`Cache Key: ${cacheKey}`);
 
-    const content = await TextContent.find({ page }).maxTimeMS(10000);
-    if (!content || content.length === 0) {
+    // Fetch data from cache or database
+    const cachedContent = await cacheQuery(
+      cacheKey,
+      async () => {
+        console.log("Cache miss, querying database...");
+        if (component) {
+          const content = await TextContent.findOne({ page, component })
+            .maxTimeMS(10000)
+            .lean();
+
+          if (!content) {
+            console.error(
+              `No content found for page: ${page}, component: ${component}`
+            );
+            throw new Error("Content not found.");
+          }
+          return content;
+        }
+
+        const content = await TextContent.find({ page })
+          .maxTimeMS(10000)
+          .lean();
+
+        if (!content || content.length === 0) {
+          console.error(`No content found for page: ${page}`);
+          throw new Error(`No content found for the specified page: ${page}`);
+        }
+        return content;
+      },
+      cacheConfig.defaultTTL
+    );
+
+    if (!cachedContent) {
+      console.error("Content not found in cache or database.");
       return res.status(404).json({
-        message: `No content found for the specified page: ${page}`,
+        message: "Content not found in cache or database.",
       });
     }
-    await cacheQuery(cacheKey, async () => content, cacheConfig.defaultTTL);
-    return res.json(content);
+
+    return res.json(cachedContent);
   } catch (error) {
-    console.error("Error retrieving content:", error);
+    console.error("Error fetching text content:", error);
     res.status(500).json({
       message: "An error occurred while retrieving content.",
       error: error.message,
