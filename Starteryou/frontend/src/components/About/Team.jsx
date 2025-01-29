@@ -114,7 +114,7 @@ const Team = () => {
     }
     try {
       const response = await fetch(
-        `http://localhost:3000/api/team/${memberId}`,
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.teamApi}/${memberId}`,
         {
           method: "DELETE",
         }
@@ -426,7 +426,7 @@ const Team = () => {
             member.image && member.image.startsWith("data:image")
               ? member.image // Directly use the Base64 string
               : member.image && member.image.startsWith("/uploads")
-              ? `http://localhost:3000${member.image}` // Handle uploaded images
+              ? `${API_CONFIG.baseURL}${member.image}` // Handle uploaded images
               : fetchedImages[member.position] ||
                 member.imgSrc ||
                 "/AboutPage/Team/avatar.png"; // Fallback to other sources
