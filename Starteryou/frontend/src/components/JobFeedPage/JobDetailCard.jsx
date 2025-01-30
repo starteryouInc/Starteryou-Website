@@ -5,13 +5,13 @@ import ExperienceIcon from "/JobFeedPage/Experience.svg";
 import MissingSkillsIcon from "/JobFeedPage/Missing.svg";
 import componayLogo from "/JobFeedPage/CompanyLogo.svg";
 import { FaBookmark, FaRegBookmark } from "react-icons/fa";
-// import { differenceInDays } from "date-fns";
+import { differenceInDays } from "date-fns";
 
 const JobDetailCard = ({ jobDetails, onClose, savedJob }) => {
-  // const isEarlyApplicant = (createdAt) => {
-  //   const daysDifference = differenceInDays(new Date(), new Date(createdAt));
-  //   return daysDifference < 7;
-  // };
+  const isEarlyApplicant = (createdAt) => {
+    const daysDifference = differenceInDays(new Date(), new Date(createdAt));
+    return daysDifference < 7;
+  };
   const formatSalaryRange = (salaryRange) => {
     if (!salaryRange || !salaryRange.min || !salaryRange.max) return "N/A";
     const { min, max } = salaryRange;
@@ -35,11 +35,11 @@ const JobDetailCard = ({ jobDetails, onClose, savedJob }) => {
       </div>
       <ul className="text-[#9894A7] space-y-2">
         <li>{jobDetails.compName ? jobDetails.compName : "Unknown"}</li>
-        {/* {isEarlyApplicant(jobDetails.createdAt) && (
+        {isEarlyApplicant(jobDetails.createdAt) && (
           <li className="bg-green-100 text-green-500 py-1 px-3 rounded-md w-fit">
             Be an early applicant
           </li>
-        )} */}
+        )}
         <li>
           <img src={ExperienceIcon} alt="experience icon" className="mr-2" />
           Experience Level: {jobDetails.experienceLevel}

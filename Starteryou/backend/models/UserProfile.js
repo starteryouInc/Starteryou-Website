@@ -13,11 +13,9 @@ const UserProfileSchema = new mongoose.Schema(
     },
     professionalTitle: {
       type: String,
-      // required: true,
     },
     location: {
       type: String,
-      // required: true,
     },
     currentCompany: {
       type: String,
@@ -45,8 +43,9 @@ const UserProfileSchema = new mongoose.Schema(
       {
         institution: { type: String, required: true },
         degree: { type: String, required: true },
-        startYear: { type: Number, required: true },
-        endYear: { type: Number },
+        specialization: { type: String },
+        startYear: { type: Date, required: true },
+        endYear: { type: Date },
         Marks: { type: Number },
         description: { type: String },
       },
@@ -58,7 +57,7 @@ const UserProfileSchema = new mongoose.Schema(
       {
         title: { type: String, required: true },
         issuedBy: { type: String, required: true },
-        issueDate: { type: Date },
+        expiryDate: { type: Date },
         certificateURL: { type: String },
       },
     ],
@@ -66,7 +65,7 @@ const UserProfileSchema = new mongoose.Schema(
       {
         title: { type: String, required: true },
         description: { type: String },
-        endYear: { type: Number },
+        endYear: { type: Date },
         technologiesUsed: { type: [String] },
         projectURL: { type: String },
       },

@@ -4,16 +4,16 @@ import LocationIcon from "/JobFeedPage/Location.svg";
 import ExperienceIcon from "/JobFeedPage/Experience.svg";
 import componayLogo from "/JobFeedPage/CompanyLogo.svg";
 import { FaBookmark, FaRegBookmark } from "react-icons/fa";
-// import { formatDistanceToNow, differenceInDays } from "date-fns";
+import { formatDistanceToNow, differenceInDays } from "date-fns";
 
 const JobCard = (props) => {
-  // const timeAgo = (isoDateString) => {
-  //   return formatDistanceToNow(new Date(isoDateString), { addSuffix: true });
-  // };
-  // const isEarlyApplicant = (createdAt) => {
-  //   const daysDifference = differenceInDays(new Date(), new Date(createdAt));
-  //   return daysDifference < 7;
-  // };
+  const timeAgo = (isoDateString) => {
+    return formatDistanceToNow(new Date(isoDateString), { addSuffix: true });
+  };
+  const isEarlyApplicant = (createdAt) => {
+    const daysDifference = differenceInDays(new Date(), new Date(createdAt));
+    return daysDifference < 7;
+  };
   return (
     <div className="card-container w-[395px] md:w-[340px] xl:w-[445px] space-y-[14px]">
       <div className="flex justify-between items-start">
@@ -38,8 +38,8 @@ const JobCard = (props) => {
           <img src={LocationIcon} alt="location icon" className="mr-2" />
           {props.location}
         </li>
-        {/* {isEarlyApplicant(props.datePosted) && <li className="bg-green-100 text-green-500 py-1 px-3 rounded-md w-fit">Early Applicant</li>} */}
-        {/* <li>{timeAgo(props.datePosted)}</li> */}
+        {isEarlyApplicant(props.datePosted) && <li className="bg-green-100 text-green-500 py-1 px-3 rounded-md w-fit">Early Applicant</li>}
+        <li>{timeAgo(props.datePosted)}</li>
       </ul>
     </div>
   );

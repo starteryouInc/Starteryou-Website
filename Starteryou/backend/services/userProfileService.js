@@ -1,10 +1,14 @@
 const UserProfile = require("../models/UserProfile");
 
-const addSubdocument = async (userId, field, data, res) => {
+const addSubdocument = async (userRegistrationId, field, data, res) => {
   try {
-    const user = await UserProfile.findById(userId);
+    const user = await UserProfile.findOne({ userRegistrationId });
     if (!user) {
       return res.status(404).json({ msg: "User not found!" });
+    }
+    // Ensure the field is initialized as an array
+    if (!Array.isArray(user[field])) {
+      user[field] = [];
     }
     user[field].push(data);
     await user.save();
@@ -23,9 +27,15 @@ const addSubdocument = async (userId, field, data, res) => {
   }
 };
 
-const updateSubdocument = async (userId, subDocId, field, updates, res) => {
+const updateSubdocument = async (
+  userRegistrationId,
+  subDocId,
+  field,
+  updates,
+  res
+) => {
   try {
-    const user = await UserProfile.findById(userId);
+    const user = await UserProfile.findOne({ userRegistrationId });
     if (!user) {
       return res.status(404).json({ msg: "User not found!" });
     }
@@ -49,9 +59,9 @@ const updateSubdocument = async (userId, subDocId, field, updates, res) => {
   }
 };
 
-const deleteSubdocument = async (userId, subDocId, field, res) => {
+const deleteSubdocument = async (userRegistrationId, subDocId, field, res) => {
   try {
-    const user = await UserProfile.findById(userId);
+    const user = await UserProfile.findOne({ userRegistrationId });
     if (!user) {
       return res.status(404).json({ msg: "User not found!" });
     }
@@ -76,7 +86,7 @@ const deleteSubdocument = async (userId, subDocId, field, res) => {
   }
 };
 
-const addStringToArray = async (userId, field, value, res) => {
+const addStringToArray = async (userRegistrationId, field, value, res) => {
   try {
     if (!value || typeof value !== "string" || value.trim() === "") {
       return res.status(400).json({
@@ -85,7 +95,7 @@ const addStringToArray = async (userId, field, value, res) => {
       });
     }
 
-    const user = await UserProfile.findById(userId);
+    const user = await UserProfile.findOne({ userRegistrationId });
     if (!user) {
       return res.status(404).json({ msg: "User not found!" });
     }
@@ -108,9 +118,9 @@ const addStringToArray = async (userId, field, value, res) => {
   }
 };
 
-const deleteStringFromArray = async (userId, field, value, res) => {
+const deleteStringFromArray = async (userRegistrationId, field, value, res) => {
   try {
-    const user = await UserProfile.findById(userId);
+    const user = await UserProfile.findOne({ userRegistrationId });
     if (!user) {
       return res.status(404).json({ msg: "User not found!" });
     }

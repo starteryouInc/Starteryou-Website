@@ -17,86 +17,94 @@ import {
   IoLogoInstagram,
   IoLogoTwitter,
   IoMailOutline,
+  IoCloseOutline,
 } from "react-icons/io5";
 import SocialPresenceForm from "./LeftSideComponent/SocialPresenceForm";
 import { API_CONFIG } from "../../config/api";
 import { useUserContext } from "../../context/UserContext";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
 
-const LeftSide = () => {
+const LeftSide = ({ UserProfile, getProfileFunction }) => {
   const { user } = useUserContext();
-  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [openSocialForm, setOpenSocialForm] = useState(false);
-  const handleEdit = () => setIsEditing(!isEditing);
-  const [profileData, setProfileData] = useState({
-    name: "John Oliver",
-    professionalTitle: "UI / UX Designer",
-    location: "New York, USA",
-    companyName: "Starter You",
-    experience: "4 Months",
-    email: "xyz@starteryou.com",
-    phoneNo: 7894561230,
-  });
-
+  const [updateProfileData, setUpdateProfileData] = useState({});
   const token = user?.token;
 
-  const getUserProfile = async () => {
+  useEffect(() => {
+    setUpdateProfileData({
+      name: UserProfile?.name || "John Oliver",
+      professionalTitle: UserProfile?.professionalTitle || "Unknown",
+      location: UserProfile?.location || " ",
+      companyName: UserProfile?.currentCompany || "Starter You",
+      experience: UserProfile?.totalExperience || " ",
+      email: UserProfile?.email || "xyz@starteryou.com",
+      phoneNo: UserProfile?.phoneNo || "7845129630",
+    });
+  }, [UserProfile]);
+
+  const handleUpdateProfile = async () => {
+    console.log(updateProfileData);
     if (!user?.token) {
       toast.error("Pls login to continue...");
-      navigate("/UserLogin");
       return;
     }
     const userId = user?.authenticatedUser?._id;
-    console.log("user: ", user?.authenticatedUser?._id)
     try {
-      const { data } = await axios.get(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getUserProfile(userId)}`,
+      const { data } = await axios.patch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.updateUserProfile(
+          userId
+        )}`,
+        {
+          professionalTitle: updateProfileData.professionalTitle,
+          location: updateProfileData.location,
+          currentCompany: updateProfileData.companyName,
+          totalExperience: updateProfileData.experience,
+          phoneNo: updateProfileData.phoneNo,
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      // Check if the data array is not empty
-    if (data.data.length > 0) {
-      const profile = data.data[0]; // Access the first profile object
-      setProfileData((prev) => ({
-        ...prev,
-        name: profile.name || prev.name,
-        professionalTitle: profile.professionalTitle || prev.professionalTitle,
-        location: profile.location || prev.location,
-        companyName: profile.companyName || prev.companyName,
-        experience: profile.experience || prev.experience,
-        email: profile.email || prev.email,
-        phoneNo: profile.phoneNo || prev.phoneNo,
-      }));
-
-      console.log("Fetched Profile Data: ", profile);
-      toast.success(data.msg || "Profile fetched successfully!");
-    } else {
-      toast.error("No profile found!");
-    }
+      toast.success(data.msg);
+      setIsEditing(false);
+      getProfileFunction();
     } catch (error) {
       toast.error(error.response?.data?.msg);
-      console.error("Not eorkingf")
     }
   };
-
-  useEffect(() => {
-    getUserProfile();
-  }, []);
 
   return (
     <>
       <section className="left md:w-[560px] lg:w-[660px] xl:w-[460px]">
         {/* Profile Card */}
         <div className="profile-card">
-          <p className="purple-section">
-            <img src={WhiteEditPen} onClick={handleEdit} alt="edit btn" />
-          </p>
+          <div className="purple-section">
+            {isEditing ? (
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={handleUpdateProfile}
+                  className="bg-green-600 text-white py-2 px-4 rounded"
+                >
+                  Save
+                </button>
+                <IoCloseOutline
+                  onClick={() => setIsEditing(false)}
+                  className="text-2xl text-white cursor-pointer"
+                />
+              </div>
+            ) : (
+              <img
+                src={WhiteEditPen}
+                onClick={() => setIsEditing(true)}
+                alt="edit btn"
+                className="cursor-pointer"
+              />
+            )}
+          </div>
           <div className="profile-card-sub space-y-10">
             {isEditing ? (
               <ul className="first-list flex flex-col items-center space-y-4">
@@ -106,21 +114,18 @@ const LeftSide = () => {
                 <li>
                   <img src={Flag} alt="Country Flag" />
                 </li>
-                <li>
-                  <input
-                    type="text"
-                    value={profileData.name}
-                    onChange={(e) => setProfileData.name(e.target.value)}
-                    className="text-[24px] font-semibold uppercase bg-transparent border-b border-gray-300 outline-none text-center"
-                    placeholder="Enter name"
-                  />
+                <li className="text-[24px] font-semibold uppercase">
+                  {updateProfileData.name}
                 </li>
                 <li>
                   <input
                     type="text"
-                    value={profileData.professionalTitle}
+                    value={updateProfileData.professionalTitle}
                     onChange={(e) =>
-                      setProfileData.professionalTitle(e.target.value)
+                      setUpdateProfileData((prev) => ({
+                        ...prev,
+                        professionalTitle: e.target.value,
+                      }))
                     }
                     className="bg-transparent border-b border-gray-300 outline-none text-center"
                     placeholder="Enter job title"
@@ -131,8 +136,13 @@ const LeftSide = () => {
                   <MdLocationOn className="icon-style mr-2" />
                   <input
                     type="text"
-                    value={profileData.location}
-                    onChange={(e) => setProfileData.location(e.target.value)}
+                    value={updateProfileData.location}
+                    onChange={(e) =>
+                      setUpdateProfileData((prev) => ({
+                        ...prev,
+                        location: e.target.value,
+                      }))
+                    }
                     className="bg-transparent border-b border-gray-300 outline-none"
                     placeholder="Enter location"
                   />
@@ -147,13 +157,13 @@ const LeftSide = () => {
                   <img src={Flag} alt="Country Flag" />
                 </li>
                 <li className="text-[24px] font-semibold uppercase">
-                  {profileData.name}
+                  {updateProfileData.name}
                 </li>
-                <li>{profileData.professionalTitle}</li>
+                <li>{updateProfileData.professionalTitle}</li>
                 <li className="line-style"></li>
                 <li className="flex items-center">
                   <MdLocationOn className="icon-style mr-2" />
-                  {profileData.location}
+                  {updateProfileData.location}
                 </li>
               </ul>
             )}
@@ -163,49 +173,66 @@ const LeftSide = () => {
               {[
                 {
                   icon: PiBuildingOfficeLight,
-                  text: profileData.companyName,
-                  onChange: setProfileData.companyName,
+                  text: updateProfileData.companyName,
+                  noChange: false,
+                  onChange: (value) =>
+                    setUpdateProfileData((prev) => ({
+                      ...prev,
+                      companyName: value,
+                    })),
                 },
                 {
                   icon: PiBagSimpleFill,
-                  text: `Exp: ${profileData.experience}`,
-                  onChange: setProfileData.experience,
+                  text: updateProfileData.experience,
+                  noChange: false,
+                  onChange: (value) =>
+                    setUpdateProfileData((prev) => ({
+                      ...prev,
+                      experience: value,
+                    })),
                 },
                 {
                   icon: FaPhoneAlt,
-                  text: profileData.phoneNo,
+                  text: updateProfileData.phoneNo,
                   editable: true,
-                  onChange: setProfileData.phoneNo,
+                  noChange: false,
+                  onChange: (value) =>
+                    setUpdateProfileData((prev) => ({
+                      ...prev,
+                      phoneNo: value,
+                    })),
                 },
                 {
                   icon: IoMailOutline,
-                  text: profileData.email,
+                  text: updateProfileData.email,
                   editable: true,
-                  onChange: setProfileData.email,
+                  noChange: true,
                 },
-              ].map(({ icon: Icon, text, editable, onChange }, idx) => (
-                <li key={idx} className="flex justify-between items-center">
-                  <div className="flex items-center">
-                    <Icon className="icon-style mr-4" />
-                    {isEditing && editable ? (
-                      <input
-                        type="text"
-                        value={text}
-                        onChange={(e) => onChange(e.target.value)}
-                        className="bg-transparent border-b border-gray-300 outline-none"
-                      />
-                    ) : (
-                      <span>{text}</span>
-                    )}
-                  </div>
-                  {editable && !isEditing && (
-                    <div className="flex items-center space-x-4">
-                      <img src={EditPen} alt="Edit" />
-                      <img src={GreenTick} alt="Verified" />
+              ].map(
+                ({ icon: Icon, text, editable, noChange, onChange }, idx) => (
+                  <li key={idx} className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <Icon className="icon-style mr-4" />
+                      {isEditing && !noChange ? (
+                        <input
+                          type="text"
+                          value={text}
+                          onChange={(e) => onChange(e.target.value)}
+                          className="bg-transparent border-b border-gray-300 outline-none"
+                        />
+                      ) : (
+                        <span>{text}</span>
+                      )}
                     </div>
-                  )}
-                </li>
-              ))}
+                    {editable && !isEditing && (
+                      <div className="flex items-center space-x-4">
+                        <img src={EditPen} alt="Edit" />
+                        <img src={GreenTick} alt="Verified" />
+                      </div>
+                    )}
+                  </li>
+                )
+              )}
             </ul>
 
             {/* Profile Completion */}

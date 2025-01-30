@@ -13,11 +13,11 @@ const authorize = require("../middleware/roleMiddleware");
 // Route to create the profile of the user
 router.post("/create-profile", authorize("jobSeeker"), async (req, res) => {
   const { userRegistrationId, name, email, phoneNo } = req.body;
-  if(!userRegistrationId || !name || !email){
+  if (!userRegistrationId || !name || !email) {
     return res.status(400).json({
       success: false,
-      msg: "Required fields (userRegistrationId, name, email) are missing"
-    })
+      msg: "Required fields (userRegistrationId, name, email) are missing",
+    });
   }
   try {
     // const newProfile = new UserProfile(req.body);
@@ -26,7 +26,7 @@ router.post("/create-profile", authorize("jobSeeker"), async (req, res) => {
       name,
       email,
       phoneNo,
-    })
+    });
     const response = await newProfile.save();
     res.status(201).json({
       success: true,
@@ -47,9 +47,13 @@ router.get(
   "/fetch-profile/:userId",
   authorize("jobSeeker", "employer"),
   async (req, res) => {
-    const { params: { userId } } = req;
+    const {
+      params: { userId },
+    } = req;
     try {
-      const fetchProfile = await UserProfile.find({ userRegistrationId: userId });
+      const fetchProfile = await UserProfile.find({
+        userRegistrationId: userId,
+      });
       if (!fetchProfile || fetchProfile.length === 0) {
         return res.status(404).json({ msg: "No profile found!" });
       }
@@ -69,61 +73,129 @@ router.get(
   }
 );
 
-// Work Experience Routes
-router.post(
-  "/add-workExperience/:userId",
+router.patch(
+  "/update-profile/:userRegistrationId",
   authorize("jobSeeker"),
   async (req, res) => {
     const {
-      params: { userId },
+      params: { userRegistrationId },
     } = req;
-    await addSubdocument(userId, "workExperience", req.body, res);
+    const {
+      professionalTitle,
+      location,
+      currentCompany,
+      totalExperience,
+      phoneNo,
+    } = req.body;
+
+    try {
+      const updatedProfile = await UserProfile.findOneAndUpdate(
+        { userRegistrationId },
+        {
+          ...(professionalTitle && { professionalTitle }),
+          ...(location && { location }),
+          ...(currentCompany && { currentCompany }),
+          ...(totalExperience && { totalExperience }),
+          ...(phoneNo && { phoneNo }),
+        },
+        {
+          new: true,
+        }
+      );
+      if (!updatedProfile) {
+        return res.status(404).json({
+          success: false,
+          msg: "User Profile not found!",
+        });
+      }
+      res.status(200).json({
+        success: true,
+        msg: "Profile updated successfully",
+        data: updatedProfile,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        msg: "Some error occured while updating the profile",
+        error,
+      });
+    }
+  }
+);
+
+// Work Experience Routes
+router.post(
+  "/add-workExperience/:userRegistrationId",
+  authorize("jobSeeker"),
+  async (req, res) => {
+    const {
+      params: { userRegistrationId },
+    } = req;
+    await addSubdocument(userRegistrationId, "workExperience", req.body, res);
   }
 );
 
 router.put(
-  "/update-workExperience/:userId/:subDocId",
+  "/update-workExperience/:userRegistrationId/:subDocId",
   authorize("jobSeeker"),
   async (req, res) => {
     const {
-      params: { userId, subDocId },
+      params: { userRegistrationId, subDocId },
     } = req;
-    await updateSubdocument(userId, subDocId, "workExperience", req.body, res);
+    await updateSubdocument(
+      userRegistrationId,
+      subDocId,
+      "workExperience",
+      req.body,
+      res
+    );
   }
 );
 
 router.delete(
-  "/delete-workExperience/:userId/:subDocId",
+  "/delete-workExperience/:userRegistrationId/:subDocId",
   authorize("jobSeeker"),
   async (req, res) => {
     const {
-      params: { userId, subDocId },
+      params: { userRegistrationId, subDocId },
     } = req;
-    await deleteSubdocument(userId, subDocId, "workExperience", res);
+    await deleteSubdocument(
+      userRegistrationId,
+      subDocId,
+      "workExperience",
+      res
+    );
   }
 );
 
 // Education Details Routes
 router.post(
-  "/add-educationDetails/:userId",
+  "/add-educationDetails/:userRegistrationId",
   authorize("jobSeeker"),
   async (req, res) => {
-    const {
-      params: { userId },
-    } = req;
-    await addSubdocument(userId, "educationDetails", req.body, res);
+    try {
+      const { userRegistrationId } = req.params;
+      await addSubdocument(
+        userRegistrationId,
+        "educationDetails",
+        req.body,
+        res
+      );
+    } catch (error) {
+      res.status(500).json({ success: false, msg: "Server error", error });
+    }
   }
 );
 
 router.put(
-  "/update-educationDetails/:userId/:subDocId",
+  "/update-educationDetails/:userRegistrationId/:subDocId",
   authorize("jobSeeker"),
   async (req, res) => {
     const {
-      params: { userId, subDocId },
+      params: { userRegistrationId, subDocId },
     } = req;
     await updateSubdocument(
-      userId,
+      userRegistrationId,
       subDocId,
       "educationDetails",
       req.body,
@@ -133,127 +205,153 @@ router.put(
 );
 
 router.delete(
-  "/delete-educationDetails/:userId/:subDocId",
+  "/delete-educationDetails/:userRegistrationId/:subDocId",
   authorize("jobSeeker"),
   async (req, res) => {
     const {
-      params: { userId, subDocId },
+      params: { userRegistrationId, subDocId },
     } = req;
-    await deleteSubdocument(userId, subDocId, "educationDetails", res);
+    await deleteSubdocument(
+      userRegistrationId,
+      subDocId,
+      "educationDetails",
+      res
+    );
   }
 );
 
 // Skills Routes
-router.post("/add-skills/:userId", authorize("jobSeeker"), async (req, res) => {
-  const {
-    params: { userId },
-  } = req;
-  const { skill } = req.body;
-  await addStringToArray(userId, "skills", skill, res);
-});
-
-router.delete(
-  "/delete-skills/:userId",
+router.post(
+  "/add-skills/:userRegistrationId",
   authorize("jobSeeker"),
   async (req, res) => {
     const {
-      params: { userId },
+      params: { userRegistrationId },
     } = req;
     const { skill } = req.body;
-    await deleteStringFromArray(userId, "skills", skill, res);
+    await addStringToArray(userRegistrationId, "skills", skill, res);
+  }
+);
+
+router.delete(
+  "/delete-skills/:userRegistrationId",
+  authorize("jobSeeker"),
+  async (req, res) => {
+    const {
+      params: { userRegistrationId },
+    } = req;
+    const { skill } = req.body;
+    await deleteStringFromArray(userRegistrationId, "skills", skill, res);
   }
 );
 
 // Certificates Routes
 router.post(
-  "/add-certifications/:userId",
+  "/add-certifications/:userRegistrationId",
   authorize("jobSeeker"),
   async (req, res) => {
     const {
-      params: { userId },
+      params: { userRegistrationId },
     } = req;
-    await addSubdocument(userId, "certifications", req.body, res);
+    await addSubdocument(userRegistrationId, "certifications", req.body, res);
   }
 );
 
 router.put(
-  "/update-certifications/:userId/:subDocId",
+  "/update-certifications/:userRegistrationId/:subDocId",
   authorize("jobSeeker"),
   async (req, res) => {
     const {
-      params: { userId, subDocId },
+      params: { userRegistrationId, subDocId },
     } = req;
-    await updateSubdocument(userId, subDocId, "certifications", req.body, res);
+    await updateSubdocument(
+      userRegistrationId,
+      subDocId,
+      "certifications",
+      req.body,
+      res
+    );
   }
 );
 
 router.delete(
-  "/delete-certifications/:userId/:subDocId",
+  "/delete-certifications/:userRegistrationId/:subDocId",
   authorize("jobSeeker"),
   async (req, res) => {
     const {
-      params: { userId, subDocId },
+      params: { userRegistrationId, subDocId },
     } = req;
-    await deleteSubdocument(userId, subDocId, "certifications", res);
+    await deleteSubdocument(
+      userRegistrationId,
+      subDocId,
+      "certifications",
+      res
+    );
   }
 );
 
 // Projects Routes
 router.post(
-  "/add-projects/:userId",
+  "/add-projects/:userRegistrationId",
   authorize("jobSeeker"),
   async (req, res) => {
     const {
-      params: { userId },
+      params: { userRegistrationId },
     } = req;
-    await addSubdocument(userId, "projects", req.body, res);
+    await addSubdocument(userRegistrationId, "projects", req.body, res);
   }
 );
 
 router.put(
-  "/update-projects/:userId/:subDocId",
+  "/update-projects/:userRegistrationId/:subDocId",
   authorize("jobSeeker"),
   async (req, res) => {
     const {
-      params: { userId, subDocId },
+      params: { userRegistrationId, subDocId },
     } = req;
-    await updateSubdocument(userId, subDocId, "projects", req.body, res);
+    await updateSubdocument(
+      userRegistrationId,
+      subDocId,
+      "projects",
+      req.body,
+      res
+    );
   }
 );
 
 router.delete(
-  "/delete-projects/:userId/:subDocId",
+  "/delete-projects/:userRegistrationId/:subDocId",
   authorize("jobSeeker"),
   async (req, res) => {
     const {
-      params: { userId, subDocId },
+      params: { userRegistrationId, subDocId },
     } = req;
-    await deleteSubdocument(userId, subDocId, "projects", res);
+    await deleteSubdocument(userRegistrationId, subDocId, "projects", res);
   }
 );
 
 // Languages Routes
 router.post(
-  "/add-languages/:userId",
+  "/add-languages/:userRegistrationId",
   authorize("jobSeeker"),
   async (req, res) => {
     const {
-      params: { userId },
+      params: { userRegistrationId },
     } = req;
     const { language } = req.body;
-    await addStringToArray(userId, "languages", language, res);
+    await addStringToArray(userRegistrationId, "languages", language, res);
   }
 );
 
 router.delete(
-  "/delete-languages/:userId",
+  "/delete-languages/:userRegistrationId",
   authorize("jobSeeker"),
   async (req, res) => {
     const {
-      params: { userId },
+      params: { userRegistrationId },
     } = req;
     const { language } = req.body;
-    await deleteStringFromArray(userId, "languages", language, res);
+    await deleteStringFromArray(userRegistrationId, "languages", language, res);
   }
 );
 

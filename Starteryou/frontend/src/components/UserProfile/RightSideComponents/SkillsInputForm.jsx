@@ -1,40 +1,69 @@
 import React, { useState } from "react";
+import { useUserContext } from "../../../context/UserContext";
+import { API_CONFIG } from "../../../config/api";
+import { toast } from "react-toastify";
+import axios from "axios";
 
-const SkillsInputForm = ({ openSkillForm }) => {
-  const [skills, setSkills] = useState([
-    "JAVA",
-    "CSS",
-    "JavaScript",
-    "HTML",
-    "JSON",
-  ]);
+const SkillsInputForm = ({ openSkillForm, data }) => {
+  const { user } = useUserContext();
+  const token = user?.token;
+  const [skills, setSkills] = useState(data);
   const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // Add skill
-  const addSkill = (e) => {
+  // Function to add skill via API
+  const addSkill = async (e) => {
     e.preventDefault();
     const newSkill = input.trim();
-    if (newSkill && !skills.includes(newSkill)) {
-      setSkills([...skills, newSkill]);
+    if (!newSkill || skills.includes(newSkill)) return;
+
+    setLoading(true);
+
+    try {
+      const userId = user?.authenticatedUser?._id;
+      const { data } = await axios.post(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.addSkill(userId)}`,
+        { skill: newSkill }, // Fixed body format
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      toast.success(data.msg);
+      setSkills([...skills, newSkill]); // Update skills state
       setInput("");
+      openSkillForm();
+    } catch (error) {
+      toast.error(error.response?.data?.msg);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Remove skill
-  const removeSkill = (skillToRemove) => {
-    setSkills(skills.filter((skill) => skill !== skillToRemove));
-  };
+  // Remove skill from local state and API
+  const removeSkill = async (skillToRemove) => {
+    try {
+      const userId = user?.authenticatedUser?._id;
+      const { data } = await axios.delete(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.deleteSkill(userId)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          data: { skill: skillToRemove }, // ✅ Send skill in `data`
+        }
+      );
 
-  // Handle Save button
-  const handleSave = () => {
-    alert("Skills saved successfully:\n" + skills.join(", "));
-    console.log("Saved Skills:", skills);
-  };
-
-  // Handle Cancel button
-  const handleCancel = () => {
-    setInput("");
-    openSkillForm();
+      toast.success(data.msg);
+      setSkills(skills.filter((skill) => skill !== skillToRemove)); // ✅ Remove skill locally
+      openSkillForm();
+    } catch (error) {
+      toast.error(error.response?.data?.msg || "Failed to remove skill.");
+      console.error("Error removing skill:", error);
+    }
   };
 
   return (
@@ -57,11 +86,12 @@ const SkillsInputForm = ({ openSkillForm }) => {
             </button>
           </div>
         ))}
+
         {/* Input Field */}
         <form onSubmit={addSkill} className="flex-1">
           <input
             type="text"
-            placeholder="Enter or select your skills"
+            placeholder="Enter your skill"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             className="w-full outline-none p-1"
@@ -73,16 +103,17 @@ const SkillsInputForm = ({ openSkillForm }) => {
       <div className="flex justify-end space-x-4 mt-4">
         <button
           type="button"
-          onClick={handleCancel}
+          onClick={openSkillForm}
           className="text-purple-600"
         >
           Cancel
         </button>
         <button
-          onClick={handleSave}
+          onClick={addSkill}
           className="bg-purple-600 text-white py-2 px-6 rounded hover:bg-purple-700"
+          disabled={loading}
         >
-          Save
+          {loading ? "Saving..." : "Save"}
         </button>
       </div>
     </div>

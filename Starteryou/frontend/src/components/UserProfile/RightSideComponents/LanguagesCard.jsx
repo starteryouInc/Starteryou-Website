@@ -1,56 +1,41 @@
 import React from "react";
 import "../styles/RightSide.css";
 import EditPen from "/UserProfile/EditPen.svg";
-import { IoLanguageSharp } from "react-icons/io5";
+import { PiListChecksBold } from "react-icons/pi";
 
-const LanguagesCard = ({ openLanguageForm }) => {
-    const ProjectList = [
-        {
-          langID: 1,
-          language: "English",
-          proficiency: "Native",
-        },
-        {
-            langID: 2,
-            language: "Spanish",
-            proficiency: "Readable",
-          },
-      ];
+const LanguagesCard = ({ openLanguageForm, data }) => {
   return (
-    <div
-    className={`language-display-card ${
-      ProjectList.length !== 0 ? "space-y-4" : "space-y-0"
-    } `}
-  >
-    <div className="flex justify-between items-center">
-      <h2 className="text-2xl">Languages</h2>
-      <button onClick={openLanguageForm} className="text-[#6a54df] font-semibold">+ Add</button>
+    <div className="language-display-card relative">
+      {/* Header */}
+      <div
+        className={`flex items-center justify-between ${
+          data.length !== 0 ? "mb-4" : "mb-0"
+        }`}
+      >
+        <div className="flex items-center">
+          <PiListChecksBold className="text-2xl text-gray-700 mr-2" />
+          <h2 className="text-xl">Languages</h2>
+        </div>
+
+        {/* Edit Button */}
+        <button onClick={openLanguageForm}>
+          <img src={EditPen} alt="Edit Skills" />
+        </button>
+      </div>
+
+      {/* Skills */}
+      <div className="flex flex-wrap gap-4">
+        {data.map((language, index) => (
+          <span
+            key={index}
+            className="px-4 py-2 bg-purple-100 text-black font-semibold rounded-md text-sm"
+          >
+            {language}
+          </span>
+        ))}
+      </div>
     </div>
-    <section className="flex flex-col items-start justify-between space-y-4">
-      {ProjectList.length !== 0
-        ? ProjectList.map((e) => (
-            <div key={e.langID} className="flex items-start w-full">
-              {/* Icon */}
-              <IoLanguageSharp className="icon-style mr-4"/>
+  );
+};
 
-              {/* Details */}
-              <div className="space-y-2">
-                <h1 className="text-xl font-semibold">{e.language}</h1>
-                <h2 className="text-lg text-[#777585]">{e.proficiency}</h2>
-              </div>
-
-              {/* Edit Icon */}
-              <img
-                src={EditPen}
-                alt="Edit Experience"
-                className="cursor-pointer ml-auto"
-              />
-            </div>
-          ))
-        : ""}
-    </section>
-  </div>
-  )
-}
-
-export default LanguagesCard
+export default LanguagesCard;

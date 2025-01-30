@@ -34,5 +34,41 @@ export const API_CONFIG = {
     createUserProfile: "/api/v1/jobportal/profile/create-profile",
     getUserProfile: (userId) =>
       `/api/v1/jobportal/profile/fetch-profile/${userId}`,
+    updateUserProfile: (userId) =>
+      `/api/v1/jobportal/profile/update-profile/${userId}`,
+
+    // Work Experience:
+    addWorkExperience: (userId) =>
+      `/api/v1/jobportal/profile/add-workExperience/${userId}`,
+    deleteWorkExperience: (userId, subDocId) =>
+      `/api/v1/jobportal/profile/delete-workExperience/${userId}/${subDocId}`,
+
+    // Education Details:
+    addEducation: (userId) =>
+      `/api/v1/jobportal/profile/add-educationDetails/${userId}`,
+    deleteEducation: (userId, subDocId) =>
+      `/api/v1/jobportal/profile/delete-educationDetails/${userId}/${subDocId}`,
+
+    // Skills:
+    addSkill: (userId) => `/api/v1/jobportal/profile/add-skills/${userId}`,
+    deleteSkill: (userId) =>
+      `/api/v1/jobportal/profile/delete-skills/${userId}`,
+
+    // Certifications:
+    addCertificate: (userId) =>
+      `/api/v1/jobportal/profile/add-certifications/${userId}`,
+    deleteCertificate: (userId, subDocId) =>
+      `/api/v1/jobportal/profile/delete-certifications/${userId}/${subDocId}`,
+
+    // Projects:
+    addProject: (userId) => `/api/v1/jobportal/profile/add-projects/${userId}`,
+    deleteProject: (userId, subDocId) =>
+      `/api/v1/jobportal/profile/delete-projects/${userId}/${subDocId}`,
+
+    // Languages:
+    addLanguage: (userId) =>
+      `/api/v1/jobportal/profile/add-languages/${userId}`,
+    deleteLanguage: (userId) =>
+      `/api/v1/jobportal/profile/delete-languages/${userId}`,
   },
 };
