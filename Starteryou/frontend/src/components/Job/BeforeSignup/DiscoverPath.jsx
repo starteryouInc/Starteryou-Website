@@ -5,6 +5,7 @@ import { useNavigation } from "../../../context/NavigationContext";
 import { API_CONFIG } from "@config/api";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
+import { toast } from "react-toastify";
 import { MaxWords } from "../../Common/wordValidation";
 
 const DiscoverPath = () => {
@@ -45,6 +46,8 @@ const DiscoverPath = () => {
   const [paragraph, setParagraph] = useState(
     "Our platform simplifies the job application process for college students. With just a few clicks, you can apply for internships and part-time jobs that fit your schedule. Say goodbye to complicated applications and hello to your future!"
   );
+  const [titleCounter, setTitleCounter] = useState(10);
+  const [paragraphCounter, setParagraphCounter] = useState(35);
   const [isEditing, setIsEditing] = useState(false);
   const page = "JobBeforeSignup";
 
@@ -137,10 +140,11 @@ const DiscoverPath = () => {
 
   const handleEdit = () => isAdmin && setIsEditing(true);
 
-  const handleChangeTitle = (e) => setTitlee(MaxWords(e.target.value, 10));
+  const handleChangeTitle = (e) =>
+    setTitlee(MaxWords(e.target.value, 10, setTitleCounter));
 
   const handleChangeParagraph = (e) =>
-    setParagraph(MaxWords(e.target.value, 35));
+    setParagraph(MaxWords(e.target.value, 35, setParagraphCounter));
 
   const saveContent = async () => {
     try {
@@ -175,12 +179,16 @@ const DiscoverPath = () => {
               onChange={handleChangeTitle}
               className="text-2xl lg:text-4xl font-bold mb-6 md:mb-0 text-black md:text-left md:max-w-[320px] lg:max-w-[600px] w-full"
             />
+            <p className="text-sm text-gray-500 mb-2">
+              {titleCounter} words remaining
+            </p>
             <textarea
               value={paragraph}
               onChange={handleChangeParagraph}
               className="text-[#1F2329] text-base border border-gray-300 p-2 rounded w-full"
               rows={6}
             />
+            <p className="text-sm text-gray-500">{paragraphCounter} words remaining</p>
             <button
               onClick={saveContent}
               className="mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"

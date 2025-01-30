@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
-import axios from "axios"; // Ensure axios is imported
-import { FaPencilAlt } from "react-icons/fa"; // Ensure icon is imported
+import axios from "axios";
+import { FaPencilAlt } from "react-icons/fa";
+import { toast } from "react-toastify";
 import { useNavigation } from "../../../context/NavigationContext";
 import FileUpload from "../../Common/FileUpload";
 import { MaxWords } from "../../Common/wordValidation";
 
 import { API_CONFIG } from "@config/api";
+
 const HeroJobPortal = () => {
   const { isAdmin } = useNavigation();
   const title = "JobHeroBefore";
 
   const [titlee, setTitlee] = useState(
-    "Empowering College Students to Discover Job Opportunities" // Set default title
+    "Empowering College Students to Discover Job Opportunities"
   );
 
   const [paragraph, setParagraph] = useState(
@@ -20,12 +22,13 @@ const HeroJobPortal = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState("");
   const page = "JobBeforeSignup";
-  const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images
-  const [hasFetchedOnce, setHasFetchedOnce] = useState(false); // State to track fetch attempt
-  const [titleWordsLeft, setTitleWordsLeft] = useState(8); // Counter for the title
-  const [paragraphWordsLeft, setParagraphWordsLeft] = useState(30); //
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
+  const [titleWordsLeft, setTitleWordsLeft] = useState(8);
+  const [paragraphWordsLeft, setParagraphWordsLeft] = useState(30);
+
   const fetchUploadedFile = async () => {
-    if (hasFetchedOnce) return; // Prevent redundant fetches.
+    if (hasFetchedOnce) return;
 
     try {
       const response = await fetch(
@@ -73,9 +76,11 @@ const HeroJobPortal = () => {
 
       setUploadedFile(URL.createObjectURL(file));
       setError(null);
+      toast.success("Image uploaded successfully!");
     } catch (error) {
       console.error("Error updating image:", error);
       setError("Error updating image.");
+      toast.error("Failed to upload the image.");
     }
   };
 
@@ -87,14 +92,16 @@ const HeroJobPortal = () => {
           {
             params: {
               page,
-              component:
-                "Empowering College Students to Discover Job Opportunities",
+              component: "HeroJobBefore",
             },
           }
         );
 
         if (response.data) {
-          setTitlee(response.data.content || "JobHeroBefore");
+          setTitlee(
+            response.data.content ||
+              "Empowering College Students to Discover Job Opportunities"
+          );
           setParagraph(
             Array.isArray(response.data.paragraphs)
               ? response.data.paragraphs.join("\n")
@@ -137,9 +144,11 @@ const HeroJobPortal = () => {
 
       setError("");
       setIsEditing(false);
+      toast.success("Content saved successfully!");
     } catch {
       console.error("Error saving content");
       setError("Error saving content. Please try again later.");
+      toast.error("Failed to save content.");
     }
   };
 

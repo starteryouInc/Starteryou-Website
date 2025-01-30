@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"; // Added useEffect import
 import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
 import { API_CONFIG } from "@config/api";
+import { toast } from "react-toastify";
 import { FaPencilAlt } from "react-icons/fa";
 import axios from "axios";
 import { MaxWords } from "../Common/wordValidation";
@@ -12,13 +13,17 @@ const BestJob3 = () => {
   const title = "bestjob3"; // Set the title for fetching and uploading
   const [error, setError] = useState(null); // Error state for handling errors
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false); // State to track fetch attempt
-  //States and Variables for TEXT EDITING API
+
+  // States for text content and live counters
   const [titleBJ3, setTitleBJ3] = useState("Best Job 3");
   const [paragraphBJ3, setParagraphBJ3] = useState([
     "Let us handle the grunt work so you can do the fun stuff.",
     "Lorem Ipsum",
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
   ]);
+  const [titleCounter, setTitleCounter] = useState(5); // Live word counter for title
+  const [paragraphCounter1, setParagraphCounter1] = useState(10); // Live word counter for paragraph 1
+  const [paragraphCounter2, setParagraphCounter2] = useState(10); // Live word counter for paragraph 2
   const [isEditing, setIsEditing] = useState(false);
   const page = "HomePage";
 
@@ -80,12 +85,6 @@ const BestJob3 = () => {
       setError("Error updating image"); // Set error message
     }
   };
-  // const box = {
-  //   id: 0,
-  //   iconSrc: "/LandingPage/Icons/pen.png",
-  //   title: "Lorem Ipsum",
-  //   description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-  // };
 
   const handleEdit = () => isAdmin && setIsEditing(true);
 
@@ -123,7 +122,7 @@ const BestJob3 = () => {
       console.log("BestJob3Comp Data is saved: ", response);
     } catch (error) {
       console.log(
-        "Error occured while saving the content(BestJob3Comp): ",
+        "Error occurred while saving the content (BestJob3Comp): ",
         error
       );
     }
@@ -142,23 +141,29 @@ const BestJob3 = () => {
             <div className="mt-10 flex flex-col space-y-4 z-50">
               <textarea
                 value={titleBJ3}
-                onChange={(e) => setTitleBJ3(MaxWords(e.target.value, 5))}
+                onChange={(e) => setTitleBJ3(MaxWords(e.target.value, 5, setTitleCounter))}
                 placeholder="Title here..."
                 className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
               />
+              <p className="text-sm text-white">{titleCounter} words remaining</p>
+
               <textarea
                 value={paragraphBJ3[0]}
                 onChange={(e) => {
                   setParagraphBJ3((prev) => {
                     const updatedParagraphs = [...prev];
-                    updatedParagraphs[0] = MaxWords(e.target.value, 10);
-                    setParagraphBJ3(updatedParagraphs);
+                    updatedParagraphs[0] = MaxWords(
+                      e.target.value,
+                      10,
+                      setParagraphCounter1
+                    );
                     return updatedParagraphs;
                   });
                 }}
                 placeholder="Paragraph here..."
                 className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
               />
+              <p className="text-sm text-grey-400">{paragraphCounter1} words remaining</p>
             </div>
           ) : (
             <div className="relative">
@@ -195,27 +200,33 @@ const BestJob3 = () => {
                   onChange={(e) => {
                     setParagraphBJ3((prev) => {
                       const updatedParagraphs = [...prev];
-                      updatedParagraphs[1] = e.target.value;
-                      setParagraphBJ3(updatedParagraphs);
+                      updatedParagraphs[1] = MaxWords(
+                        e.target.value,
+                        10,
+                        setParagraphCounter2
+                      );
                       return updatedParagraphs;
                     });
                   }}
                   placeholder="Title here..."
                   className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
                 />
+                <p className="text-sm text-grey-400">{paragraphCounter2} words remaining</p>
+
                 <textarea
                   value={paragraphBJ3[2]}
                   onChange={(e) => {
                     setParagraphBJ3((prev) => {
                       const updatedParagraphs = [...prev];
                       updatedParagraphs[2] = e.target.value;
-                      setParagraphBJ3(updatedParagraphs);
                       return updatedParagraphs;
                     });
                   }}
-                  placeholder="Title here..."
+                  placeholder="Description here..."
                   className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
                 />
+                <p className="text-sm text-grey-400">{paragraphCounter2} words remaining</p>
+
               </div>
             </div>
           ) : (

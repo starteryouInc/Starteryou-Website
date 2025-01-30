@@ -9,6 +9,8 @@ const Blog = () => {
   const { isAdmin } = useNavigation();
   const [title, setTitle] = useState("Our Blog");
   const [paragraph, setParagraph] = useState("Perfectly working Blog");
+  const [titleCounter, setTitleCounter] = useState(4); // Word counter for title
+  const [paragraphCounter, setParagraphCounter] = useState(17); // Word counter for paragraph
   const [isEditing, setIsEditing] = useState(false);
   const page = "HomePage";
 
@@ -52,7 +54,7 @@ const Blog = () => {
       setIsEditing(false);
       console.log("BlogsComp Data is saved: ", response);
     } catch (error) {
-      console.log("Error occured while saving the content(BlogsComp): ", error);
+      console.log("Error occurred while saving the content(BlogsComp): ", error);
     }
   };
 
@@ -128,16 +130,20 @@ const Blog = () => {
           <div className="mt-10 flex flex-col space-y-4 z-50">
             <textarea
               value={title}
-              onChange={(e) => setTitle(MaxWords(e.target.value, 4))}
+              onChange={(e) => setTitle(MaxWords(e.target.value, 4, setTitleCounter))}
               placeholder="Title here..."
               className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
             />
+            <p className="text-sm text-grey-400">{titleCounter} words remaining</p>
+
             <textarea
               value={paragraph}
-              onChange={(e) => setParagraph(MaxWords(e.target.value, 17))}
+              onChange={(e) => setParagraph(MaxWords(e.target.value, 17, setParagraphCounter))}
               placeholder="Paragraph here..."
               className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
             />
+            <p className="text-sm text-grey-400">{paragraphCounter} words remaining</p>
+
             <div className="lg:w-[400px] flex items-center justify-between space-x-2 text-white">
               <button
                 onClick={saveContent}
@@ -154,23 +160,28 @@ const Blog = () => {
             </div>
           </div>
         ) : (
-          <div className="relative md:w-2/3">
-            <h2 className="text-3xl font-bold md:text-4xl md:font-extrabold mb-4 text-left">
+          <div className="flex-1 relative">
+            <h1 className="text-3xl md:text-4xl font-extrabold mb-4">
               {title}
-            </h2>
-            <p className="text-[#121417] font-normal max-w-[600px] mt-2 italic text-left whitespace-pre-wrap">
+            </h1>
+            <p className="text-[#767676] mb-4 lg:max-w-[800px] whitespace-pre-wrap">
               {paragraph}
             </p>
+            <button className="px-6 py-3 bg-[#D9502E] text-white rounded-md">
+              Learn more
+            </button>
             {isAdmin && (
               <FaPencilAlt
-                onClick={handleEdit}
-                className="cursor-pointer absolute top-0 -right-2 lg:-right-5"
+              onClick={handleEdit}
+              className="cursor-pointer absolute top-0 -right-2 lg:-right-5 text-base"
               />
+            
             )}
           </div>
         )}
 
-        <div className="mt-4 md:mt-0">
+       
+<div className="mt-4 md:mt-0">
           <button className="bg-[#D9502E] text-white py-2 px-4 rounded-lg">
             Show All
           </button>
