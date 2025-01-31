@@ -6,7 +6,7 @@ services:
     container_name: starteryou-backend
     restart: unless-stopped
     env_file:
-      - ${ENV_FILE:-.env.server} # Dynamically use environment-specific .env
+      - ${ENV_FILE:-.env.prodserver} # Dynamically use environment-specific .env
     volumes:
       - ${MONGO_TLS_CA_PATH}:/certificates/ca.crt:ro
       - ${MONGO_TLS_CERT_PATH}:/certificates/server.pem:ro
@@ -43,7 +43,7 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      BACKEND_URL: ${BACKEND_URL:-http://starteryou.com:3000}
+      BACKEND_URL: ${BACKEND_URL:-http://starteryou.com}
     depends_on:
       - backend
     volumes:
