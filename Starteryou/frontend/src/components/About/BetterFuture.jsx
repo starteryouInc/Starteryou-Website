@@ -7,6 +7,8 @@ import {
   faPencilAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
+import { API_CONFIG } from "@config/api";
+import { MaxWords } from "../Common/wordValidation";
 
 /**
  * `BetterFuture` Component
@@ -40,7 +42,9 @@ const BetterFuture = () => {
 
   // Check if the user is an admin
   const { isAdmin } = useNavigation();
-
+  const page = "AboutPage"; // Specify the page name for the current component.
+  const [titleWordsLeft, setTitleWordsLeft] = useState(4); // Counter for the title
+  const [paragraphWordsLeft, setParagraphWordsLeft] = useState(44); // Counter for the paragraph
   /**
    * Fetches the text content from the backend API.
    * Updates the heading and paragraph states with the fetched data.
@@ -48,16 +52,19 @@ const BetterFuture = () => {
   useEffect(() => {
     const fetchTextContent = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/text", {
-          params: { component: "BetterFuture" }, // Identifies the component in the backend
-        });
+        const response = await axios.get(
+          `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+          {
+            params: { page, component: "BetterFuture" }, // Identifies the component in the backend
+          }
+        );
 
         // Update content and paragraphs with fetched data
         const { content, paragraphs } = response.data;
         setContent(content || "Build Better Future");
         setParagraphs(paragraphs || []);
-      } catch (error) {
-        console.error("Error fetching text content:", error);
+      } catch {
+        console.error("Error fetching text content");
       }
     };
 
@@ -89,14 +96,15 @@ const BetterFuture = () => {
    */
   const saveContent = async () => {
     try {
-      await axios.put("http://localhost:3000/api/text", {
+      await axios.put(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`, {
+        page: "AboutPage",
         component: "BetterFuture",
         content: content.trim(), // Trim whitespace from content
         paragraphs: paragraphs.map((para) => para.trim()), // Trim each paragraph
       });
       setIsEditing(false); // Exit editing mode on success
-    } catch (error) {
-      console.error("Error saving content:", error);
+    } catch {
+      console.error("Error saving content");
     }
   };
 
@@ -105,12 +113,21 @@ const BetterFuture = () => {
       {/* Heading Section */}
       <div className="relative">
         {isEditing ? (
-          <input
-            type="text"
-            value={content} // Controlled input for editing heading
-            onChange={(e) => setContent(e.target.value)}
-            className="text-4xl font-bold md:font-extrabold mb-4 text-[#252B42] border border-gray-300 p-2 rounded w-full"
-          />
+          <>
+            <span className="text-gray-500 text-sm">
+              {titleWordsLeft >= 0
+                ? `${titleWordsLeft} words left`
+                : `Word limit exceeded by ${Math.abs(titleWordsLeft)} words`}
+            </span>
+            <input
+              type="text"
+              value={content} // Controlled input for editing heading
+              onChange={(e) =>
+                setContent(MaxWords(e.target.value, 4, setTitleWordsLeft))
+              }
+              className="text-4xl font-bold md:font-extrabold mb-4 text-[#252B42] border border-gray-300 p-2 rounded w-full"
+            />
+          </>
         ) : (
           <h1 className="text-4xl font-bold md:font-extrabold mb-4 text-[#252B42]">
             {content}
@@ -129,20 +146,31 @@ const BetterFuture = () => {
 
       {/* Description Section */}
       {isEditing ? (
-        <textarea
-          value={paragraphs[0]} // Controlled textarea for first paragraph
-          onChange={(e) =>
-            setParagraphs((prev) => {
-              const updated = [...prev];
-              updated[0] = e.target.value; // Update specific paragraph
-              return updated;
-            })
-          }
-          className="text-[#737373] mb-8 md:mb-14 max-w-[600px] mx-auto border border-gray-300 p-2 rounded w-full"
-          rows={4}
-        />
+        <>
+          <span className="text-gray-500 text-sm">
+            {paragraphWordsLeft >= 0
+              ? `${paragraphWordsLeft} words left`
+              : `Word limit exceeded by ${Math.abs(paragraphWordsLeft)} words`}
+          </span>
+          <textarea
+            value={paragraphs[0]} // Controlled textarea for first paragraph
+            onChange={(e) =>
+              setParagraphs((prev) => {
+                const updated = [...prev];
+                updated[0] = MaxWords(
+                  e.target.value,
+                  44,
+                  setParagraphWordsLeft
+                ); // Update specific paragraph
+                return updated;
+              })
+            }
+            className="text-[#737373] mb-8 md:mb-14 max-w-[600px] mx-auto border border-gray-300 p-2 rounded w-full"
+            rows={4}
+          />
+        </>
       ) : (
-        <p className="text-[#737373] mb-8 md:mb-14 max-w-[600px] mx-auto">
+        <p className="text-[#737373] mb-8 md:mb-14 max-w-[600px] mx-auto whitespace-pre-wrap">
           {paragraphs[0]}
         </p>
       )}
@@ -197,26 +225,26 @@ const BetterFuture = () => {
                 rows={3}
               />
             ) : (
-              paragraphs[1]
+              <span className="whitespace-pre-wrap">{paragraphs[1]}</span>
             )}
           </h2>
 
-          <p className="text-[#737373] text-start max-w-[400px] text-base pb-6">
+          <p className="text-[#737373] text-start max-w-[454px] text-base pb-6">
             {isEditing ? (
               <textarea
                 value={paragraphs[2]} // Editable third paragraph
                 onChange={(e) =>
                   setParagraphs((prev) => {
                     const updated = [...prev];
-                    updated[2] = e.target.value;
+                    updated[2] = MaxWords(e.target.value, 25);
                     return updated;
                   })
                 }
-                className="text-[#737373] text-start max-w-[400px] text-base pb-6 border border-gray-300 p-2 rounded w-full"
+                className="text-[#737373] text-start max-w-[454px] text-base pb-6 border border-gray-300 p-2 rounded w-full whitespace-pre-wrap"
                 rows={3}
               />
             ) : (
-              paragraphs[2]
+              <span className="whitespace-pre-wrap">{paragraphs[2]}</span>
             )}
           </p>
 
@@ -237,28 +265,31 @@ const BetterFuture = () => {
                         value={paragraphs[titleIndex]} // Title input
                         onChange={(e) => {
                           const updated = [...paragraphs];
-                          updated[titleIndex] = e.target.value;
+                          updated[titleIndex] = MaxWords(e.target.value, 5);
                           setParagraphs(updated);
                         }}
-                        className="text-xl text-left font-semibold text-[#252B42] border border-gray-300 p-2 rounded w-full"
+                        className="text-xl text-left font-semibold max-w-[400px] text-[#252B42] border border-gray-300 p-2 rounded w-full whitespace-pre-wrap "
                       />
                       <textarea
                         value={paragraphs[titleIndex + 1]} // Paragraph input
                         onChange={(e) => {
                           const updated = [...paragraphs];
-                          updated[titleIndex + 1] = e.target.value;
+                          updated[titleIndex + 1] = MaxWords(
+                            e.target.value,
+                            17
+                          );
                           setParagraphs(updated);
                         }}
-                        className="text-[#737373] text-left text-sm border border-gray-300 p-2 rounded w-full"
+                        className="text-[#737373] text-left max-w-[400px] text-sm border border-gray-300 p-2 rounded w-full"
                         rows={2}
                       />
                     </>
                   ) : (
                     <>
-                      <h3 className="text-xl text-left font-semibold text-[#252B42]">
+                      <h3 className="text-xl text-left max-w-[400px] font-semibold text-[#252B42] whitespace-pre-wrap">
                         {paragraphs[titleIndex]}
                       </h3>
-                      <p className="text-[#737373] text-left text-sm">
+                      <p className="text-[#737373] text-left max-w-[400px] text-sm whitespace-pre-wrap">
                         {paragraphs[titleIndex + 1]}
                       </p>
                     </>

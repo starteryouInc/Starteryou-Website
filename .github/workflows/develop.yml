@@ -1,4 +1,4 @@
-name: Deploy to AWS EC2s
+name: Deploy to AWS EC2-DEV-SERVER
 
 on:
   push:
@@ -20,21 +20,6 @@ jobs:
           DB_EC2_SSH_KEY: ${{ secrets.DB_EC2_SSH_KEY }}
           DB_EC2_HOST: ${{ secrets.DB_EC2_HOST }}
           DB_EC2_USER: ${{ secrets.DB_EC2_USER }}
-        run: |
-          set -e
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          ssh-keyscan -H $DB_EC2_HOST >> ~/.ssh/known_hosts
-          echo "$DB_EC2_SSH_KEY" > ~/.ssh/db_key.pem
-          chmod 600 ~/.ssh/db_key.pem
-
-          echo "Fetching certificates from DB server..."
-          ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo cat /etc/ssl/mongodb/ca.crt" > ./ca.crt
-          ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo cat /etc/ssl/mongodb/server.pem" > ./server.pem
-
-      # Step 3: Transfer Certificates to Target EC2 Server
-      - name: Transfer Certificates to Target EC2
-        env:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ${{ secrets.EC2_USER }}
@@ -42,44 +27,51 @@ jobs:
           set -e
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+
+          # Create db_key.pem for accessing DB server
+          echo "$DB_EC2_SSH_KEY" > ~/.ssh/db_key.pem
+          chmod 600 ~/.ssh/db_key.pem
+          ssh-keyscan -H $DB_EC2_HOST >> ~/.ssh/known_hosts
+
+          echo "Fetching certificates from DB server..."
+          ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo cat /etc/ssl/mongodb/ca.crt" > ./ca.crt
+          ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST "sudo cat /etc/ssl/mongodb/server.pem" > ./server.pem
+
+          # Ensure db_key.pem exists before transferring
+          if [ -f ~/.ssh/db_key.pem ]; then
+            echo "db_key.pem exists. Transferring db_key.pem to EC2 server..."
+          else
+            echo "Error: db_key.pem does not exist!"
+            exit 1
+          fi
+
+          # Transfer certificates to target EC2 server
           echo "$EC2_SSH_KEY" > ~/.ssh/ec2_key.pem
           chmod 600 ~/.ssh/ec2_key.pem
+          ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
 
-          echo "Transferring certificates to EC2 server..."
           scp -i ~/.ssh/ec2_key.pem ./ca.crt $EC2_USER@$EC2_HOST:/tmp/ca.crt
           scp -i ~/.ssh/ec2_key.pem ./server.pem $EC2_USER@$EC2_HOST:/tmp/server.pem
+          scp -i ~/.ssh/ec2_key.pem ~/.ssh/db_key.pem $EC2_USER@$EC2_HOST:/tmp/db_key.pem
 
-      # Step 4: Deploy Application on Target EC2 Server
+      # Step 3: Deploy Application on Target EC2 Server
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.DB_EC2_SSH_KEY }}
+          key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
             sudo mkdir -p /etc/ssl/mongodb
             sudo mv /tmp/ca.crt /etc/ssl/mongodb/ca.crt
             sudo mv /tmp/server.pem /etc/ssl/mongodb/server.pem
+            sudo mv /tmp/db_key.pem /etc/ssl/mongodb/db_key.pem
             sudo chmod 600 /etc/ssl/mongodb/*
-
-            # Initialize Docker Swarm if not already active
-            if ! docker info --format '{{.Swarm.LocalNodeState}}' | grep -q "active"; then
-              echo "Initializing Docker Swarm..."
-              docker swarm init
-            else
-              echo "Docker Swarm already active."
-            fi
-
-            echo "Recreating Docker secrets..."
-            docker secret rm mongo_tls_ca mongo_tls_cert || true
-            docker secret create mongo_tls_ca /etc/ssl/mongodb/ca.crt
-            docker secret create mongo_tls_cert /etc/ssl/mongodb/server.pem
 
             PROJECT_ROOT="/home/ec2-user/Starteryou-Website"
             REPO_DIR="${PROJECT_ROOT}/Starteryou"
-            ENV_FILE="${REPO_DIR}/.env"
+            ENV_FILE="${REPO_DIR}/.env.server"
 
             mkdir -p "$PROJECT_ROOT"
             cd "$PROJECT_ROOT"
@@ -91,34 +83,37 @@ jobs:
               git fetch origin develop
               git reset --hard origin/develop
             fi
-
-            echo "Generating .env file..."
+  
+            echo "Generating .env.server file..."
             cat > "$ENV_FILE" << EOF
             NODE_ENV=production
             PORT=3000
-            FRONTEND_URL=http://54.196.202.145:8080
-            VITE_BACKEND_URL=http://54.196.202.145:3000
+            FRONTEND_URL=http://dev.starteryou.com:8080
+            BACKEND_URL=${{ secrets.BACKEND_URL }}
+            DEV_JWT_SECRET=${{ secrets.DEV_JWT_SECRET }}
             MONGO_USER=${{ secrets.MONGO_USER }}
             MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
-            MONGO_HOST=localhost
-            MONGO_PORT=27017
+            MONGO_HOST=${{ secrets.MONGO_HOST }}
+            MONGO_PORT=${{ secrets.MONGO_PORT }}
             MONGO_DB=${{ secrets.MONGO_DB }}
             MONGO_AUTH_SOURCE=${{ secrets.MONGO_AUTH_SOURCE }}
-            MONGO_TLS=true
-            MONGO_TLS_CA=/etc/ssl/mongodb/ca.crt
-            MONGO_TLS_CERT=/etc/ssl/mongodb/server.pem
+            MONGO_TLS=${{ secrets.MONGO_TLS }}
+            MONGO_TLS_CA=${{ secrets.MONGO_TLS_CA }}
+            MONGO_TLS_CERT=${{ secrets.MONGO_TLS_CERT }}
+            MONGO_TLS_CA_PATH=${{ secrets.MONGO_TLS_CA_PATH }}
+            MONGO_TLS_CERT_PATH=${{ secrets.MONGO_TLS_CERT_PATH }}
             MONGO_APP_NAME=${{ secrets.MONGO_APP_NAME }}
             DB_EC2_HOST=${{ secrets.DB_EC2_HOST }}
             DB_EC2_USER=${{ secrets.DB_EC2_USER }}
             EOF
 
-            # Source the .env file to make variables available to the session
+
+            # Source the .env.server file to make variables available to the session
             set -a
             source "$ENV_FILE"
             set +a
-
             chmod 600 "$ENV_FILE"
 
             echo "Deploying Docker services..."
-            docker-compose down --volumes --remove-orphans
-            docker-compose up --build -d
+            docker-compose --profile server --env-file "$ENV_FILE" down --volumes --remove-orphans
+            docker-compose --profile server --env-file "$ENV_FILE" up --build -d

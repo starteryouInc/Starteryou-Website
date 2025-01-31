@@ -1,0 +1,50 @@
+.pop-up::-webkit-scrollbar {
+  width: 0px;
+}
+
+.work-display-card,
+.educational-display-card,
+.license-display-card,
+.project-display-card,
+.language-display-card,
+.skills-card {
+  margin: 24px 16px;
+  padding: 18px 24px;
+  border: 1px solid #e7e6e9;
+  border-radius: 18px;
+  box-shadow: 0px 2px 10px #e7e6e9;
+}
+.icon-style {
+  font-size: 24px;
+}
+
+@media (min-width: 768px) {
+  .work-display-card,
+  .educational-display-card,
+  .license-display-card,
+  .project-display-card,
+  .language-display-card,
+  .skills-card {
+    width: 560px;
+  }
+}
+@media (min-width: 1024px) {
+  .work-display-card,
+  .educational-display-card,
+  .license-display-card,
+  .project-display-card,
+  .language-display-card,
+  .skills-card {
+    width: 660px;
+  }
+}
+@media (min-width: 1200px) {
+  .work-display-card,
+  .educational-display-card,
+  .license-display-card,
+  .project-display-card,
+  .language-display-card,
+  .skills-card {
+    width: 760px;
+  }
+}
