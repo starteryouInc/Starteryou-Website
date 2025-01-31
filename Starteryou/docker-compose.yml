@@ -1,40 +1,4 @@
 services:
-  sshtunnel:
-    image: alpine:latest
-    container_name: sshtunnel
-    entrypoint: >
-      sh -c "
-      apk add --no-cache openssh &&
-      ssh-keyscan -H ${DB_EC2_HOST} >> /etc/ssh/ssh_known_hosts &&
-      ssh -N -L 27017:localhost:27017 ${DB_EC2_USER}@${DB_EC2_HOST} -i /root/db_key.pem
-      "
-    environment:
-      DB_EC2_HOST: ${DB_EC2_HOST}
-      DB_EC2_USER: ${DB_EC2_USER}
-    volumes:
-      - ./db_key.pem:/root/db_key.pem:ro
-    restart: always
-
-  cert-fetcher:
-    image: alpine:latest
-    container_name: cert-fetcher
-    entrypoint: >
-      sh -c "
-      apk add --no-cache openssh &&
-      mkdir -p /certificates &&
-      ssh-keyscan -H $DB_EC2_HOST >> /etc/ssh/ssh_known_hosts &&
-      ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST \"sudo cat /etc/ssl/mongodb/ca.crt\" > /certificates/ca.crt &&
-      ssh -i ~/.ssh/db_key.pem $DB_EC2_USER@$DB_EC2_HOST \"sudo cat /etc/ssl/mongodb/server.pem\" > /certificates/server.pem &&
-      sleep infinity"
-    environment:
-      DB_EC2_HOST: ${DB_EC2_HOST:-default-db-host}
-      DB_EC2_USER: ${DB_EC2_USER:-default-db-user}
-    volumes:
-      - cert-vol:/certificates
-      - ./db_key.pem:/root/db_key.pem:ro
-    networks:
-      - backend-network
-
   backend:
     build:
       context: ./backend
@@ -42,35 +6,32 @@ services:
     container_name: starteryou-backend
     restart: unless-stopped
     env_file:
-      - .env
-    environment:
-      NODE_ENV: production
-      PORT: 3000
-      FRONTEND_URL: https://starteryou.com
-      VITE_BACKEND_URL: https://starteryou.com
-      MONGO_TLS: "true"
-      MONGO_HOST: localhost
-      MONGO_PORT: 27017
-      MONGO_TLS_CA: /certificates/ca.crt
-      MONGO_TLS_CERT: /certificates/server.pem
-      MONGO_USER: ${MONGO_USER}
-      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      - ${ENV_FILE:-.env.server} # Dynamically use environment-specific .env
     volumes:
-      - cert-vol:/certificates:ro
+      - ${MONGO_TLS_CA_PATH}:/certificates/ca.crt:ro
+      - ${MONGO_TLS_CERT_PATH}:/certificates/server.pem:ro
       - ./backend:/usr/src/app
       - ./backend/uploads:/usr/src/app/uploads
+      - /usr/src/app/node_modules # Prevent overwriting node_modules
+    ports:
+      - "3000:3000"
     networks:
       - backend-network
-      - frontend-network
-    depends_on:
-      - sshtunnel
-      - cert-fetcher
     healthcheck:
-      test: ["CMD", "wget", "--spider", "http://localhost:3000/health"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--spider",
+          "${HEALTHCHECK_URL:-http://starteryou.com:3000/health}",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
+    profiles:
+      - local
+      - server
 
   frontend:
     build:
@@ -82,24 +43,17 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      BACKEND_URL: https://starteryou.com
+      BACKEND_URL: ${BACKEND_URL:-http://starteryou.com:3000}
     depends_on:
       - backend
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "http://localhost:80/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro
     networks:
-      - frontend-network
+      - backend-network
+    profiles:
+      - local
+      - server
 
 networks:
-  frontend-network:
-    driver: bridge
   backend-network:
     driver: bridge
-
-volumes:
-  cert-vol:
