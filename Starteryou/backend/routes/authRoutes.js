@@ -10,11 +10,11 @@ const router = express.Router();
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 const Employee = require("../models/EmployeeModel");
 
-//dev_jwt_secret key
-const jwtSecret = process.env.DEV_JWT_SECRET;
+//PROD_JWT_SECRET key
+const jwtSecret = process.env.PROD_JWT_SECRET;
 if (!jwtSecret) {
-  console.error("Error: DEV_JWT_SECRET is missing in the environment variables.");
-  process.exit(1); // Stop the app if DEV_JWT_SECRET is not defined
+  console.error("Error: PROD_JWT_SECRET is missing in the environment variables.");
+  process.exit(1); // Stop the app if PROD_JWT_SECRET is not defined
 }
 
 const validRoles = ["admin", "user"]; // Add more roles as needed
