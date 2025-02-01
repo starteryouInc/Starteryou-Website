@@ -4,7 +4,7 @@ import { API_CONFIG } from "../../../config/api";
 import { toast } from "react-toastify";
 import axios from "axios";
 
-const SkillsInputForm = ({ openSkillForm, data }) => {
+const SkillsInputForm = ({ openSkillForm, data, getProfileFieldData }) => {
   const { user } = useUserContext();
   const token = user?.token;
   const [skills, setSkills] = useState(data);
@@ -33,6 +33,7 @@ const SkillsInputForm = ({ openSkillForm, data }) => {
       );
       toast.success(data.msg);
       setSkills([...skills, newSkill]); // Update skills state
+      getProfileFieldData();
       setInput("");
       openSkillForm();
     } catch (error) {
@@ -59,10 +60,10 @@ const SkillsInputForm = ({ openSkillForm, data }) => {
 
       toast.success(data.msg);
       setSkills(skills.filter((skill) => skill !== skillToRemove)); // ✅ Remove skill locally
+      getProfileFieldData();
       openSkillForm();
     } catch (error) {
       toast.error(error.response?.data?.msg || "Failed to remove skill.");
-      console.error("Error removing skill:", error);
     }
   };
 

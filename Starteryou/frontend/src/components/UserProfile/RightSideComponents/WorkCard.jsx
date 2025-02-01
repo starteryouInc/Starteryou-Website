@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import "../styles/RightSide.css";
 import EditPen from "/UserProfile/EditPen.svg";
 import { PiBagSimpleFill } from "react-icons/pi";
@@ -8,26 +8,7 @@ import { useUserContext } from "../../../context/UserContext";
 import { toast } from "react-toastify";
 import axios from "axios";
 
-const WorkCard = ({ openWorkForm, data }) => {
-  // const Experience = [
-  //   {
-  //     experienceID: 1,
-  //     position: "UX Designer",
-  //     company: "Starter You",
-  //     duration: "Aug 2024 to present",
-  //     noticePeriod: "Immediately available",
-  //   },
-  //   {
-  //     experienceID: 2,
-  //     position: "Content Writer",
-  //     company: "Starter You",
-  //     duration: "Aug 2024 to present",
-  //     noticePeriod: "Immediately available",
-  //   },
-  // ];
-
-  // console.log("work", data)
-
+const WorkCard = ({ openWorkForm, data, getProfileFieldData }) => {
   const { user } = useUserContext();
 
   const token = user?.token;
@@ -58,6 +39,7 @@ const WorkCard = ({ openWorkForm, data }) => {
         }
       );
       toast.success(data.msg);
+      getProfileFieldData();
     } catch (error) {
       toast.error(error.response?.data?.msg);
     }

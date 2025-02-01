@@ -1,30 +1,71 @@
-import React, {useState} from 'react'
+import React, { useState } from "react";
+import { useUserContext } from "../../context/UserContext";
+import { API_CONFIG } from "../../config/api";
+import { toast } from "react-toastify";
+import axios from "axios";
 
-const ApplyJobCard = () => {
-    const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        whyHire: ''
-      });
-    
-      const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({
-          ...formData,
-          [name]: value
-        });
-      };
-    
-      const handleSubmit = (e) => {
-        e.preventDefault();
-        // Handle form submission
-        console.log(formData);
-      };
+const ApplyJobCard = ({ jobID, closeApplyJob }) => {
+  const { user } = useUserContext();
+  const token = user?.token;
+  const email = user?.authenticatedUser?.email || "";
+
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email,
+    whyHire: "",
+  });
+
+  const clearAllFields = () => {
+    setFormData({
+      firstName: "",
+      lastName: "",
+      email,
+      whyHire: "",
+    });
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!jobID) {
+      toast.error("Job id is missing!");
+      return;
+    }
+
+    try {
+      const { data } = await axios.post(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.applyJob(jobID)}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success(data.msg);
+      closeApplyJob();
+      clearAllFields();
+    } catch (error) {
+      toast.error(error.response?.data?.msg);
+    }
+  };
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-8 mx-4 border-2 rounded-lg w-full max-w-md">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white p-8 mx-4 border rounded-lg w-full max-w-md"
+    >
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">First name</label>
+        <label className="block font-semibold text-[#777585]">
+          First name <span className="text-red-500">*</span>
+        </label>
         <input
           type="text"
           name="firstName"
@@ -35,7 +76,9 @@ const ApplyJobCard = () => {
         />
       </div>
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">Last name</label>
+        <label className="block font-semibold text-[#777585]">
+          Last name <span className="text-red-500">*</span>
+        </label>
         <input
           type="text"
           name="lastName"
@@ -46,18 +89,21 @@ const ApplyJobCard = () => {
         />
       </div>
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">Email</label>
+        <label className="block font-semibold text-[#777585]">
+          Email <span className="text-red-500">*</span>
+        </label>
         <input
           type="email"
           name="email"
           value={formData.email}
-          onChange={handleChange}
-          required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+          disabled
+          className="mt-1 block w-full px-3 py-2 bg-blue-100 cursor-not-allowed border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
         />
       </div>
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">Why should we hire you?</label>
+        <label className="block font-semibold text-[#777585]">
+          Why should we hire you?
+        </label>
         <textarea
           name="whyHire"
           value={formData.whyHire}
@@ -74,17 +120,25 @@ const ApplyJobCard = () => {
             required
             className="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
           />
-          <span className="ml-2 text-sm text-gray-600">You agree to our friendly privacy policy.</span>
+          <span className="ml-2 font-medium text-[#777585]">
+            You agree to our friendly privacy policy.
+          </span>
         </label>
       </div>
       <button
         type="submit"
-        className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+        className="w-full mb-3 bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
       >
         Apply now!
       </button>
+      <button
+        onClick={closeApplyJob}
+        className="w-full bg-white text-purple-600 py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2"
+      >
+        Cancel
+      </button>
     </form>
-  )
-}
+  );
+};
 
-export default ApplyJobCard
+export default ApplyJobCard;

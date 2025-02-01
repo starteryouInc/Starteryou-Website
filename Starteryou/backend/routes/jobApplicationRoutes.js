@@ -5,6 +5,13 @@ const authorize = require("../middleware/roleMiddleware");
 
 // Route to apply for the job
 router.post("/:jobId/apply-job", authorize("jobSeeker"), async (req, res) => {
+  const { firstName, lastName, email, whyHire } = req.body;
+  if (!firstName || !lastName || !email) {
+    return res.status(400).json({
+      success: false,
+      msg: "Required fields (firstName, lastName, email) are missing!",
+    });
+  }
   try {
     const userId = req.user.id;
     const {
@@ -18,7 +25,14 @@ router.post("/:jobId/apply-job", authorize("jobSeeker"), async (req, res) => {
         .json({ msg: "You have already applied to this Job" });
     }
 
-    const application = new Application({ userId, jobId });
+    const application = new Application({
+      userId,
+      jobId,
+      firstName,
+      lastName,
+      email,
+      whyHire,
+    });
     await application.save();
     res.status(201).json({
       success: true,

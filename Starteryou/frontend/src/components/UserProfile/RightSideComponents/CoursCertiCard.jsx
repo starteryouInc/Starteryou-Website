@@ -8,23 +8,11 @@ import { useUserContext } from "../../../context/UserContext";
 import { toast } from "react-toastify";
 import axios from "axios";
 
-const CoursCertiCard = ({ openCertificationForm, data }) => {
-  // const CourAndCertiList = [
-  //   {
-  //       ID: 1,
-  //       name: "Google's UX Design Course",
-  //       issuedBy: "Google",
-  //       expiryDate: "Lifetime",
-  //       //   credentialID: " ",
-  //     },{
-  //       ID: 2,
-  //       name: "Google's UX Design Course",
-  //       issuedBy: "Google",
-  //       expiryDate: "Lifetime",
-  //       //   credentialID: " ",
-  //     },
-  // ];
-
+const CoursCertiCard = ({
+  openCertificationForm,
+  data,
+  getProfileFieldData,
+}) => {
   const { user } = useUserContext();
   const token = user?.token;
 
@@ -52,6 +40,7 @@ const CoursCertiCard = ({ openCertificationForm, data }) => {
         }
       );
       toast.success(data.msg);
+      getProfileFieldData("");
     } catch (error) {
       toast.error(error.response?.data?.msg);
     }

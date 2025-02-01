@@ -5,6 +5,7 @@ import FilterButtons from "../components/JobFeedPage/FilterButtons";
 import "./styles/JobFeedPage.css";
 import JobCard from "../components/JobFeedPage/JobCard";
 import JobDetailCard from "../components/JobFeedPage/JobDetailCard";
+import ApplyJobCard from "../components/JobFeedPage/ApplyJobCard";
 import { useUserContext } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import { API_CONFIG } from "../config/api";
@@ -20,8 +21,10 @@ const JobFeedPage = () => {
   const [singleJob, setSingleJob] = useState([]);
   const [detailCardPop, setDetailCardPop] = useState(false);
   const [selectedTab, setSelectedTab] = useState("Recommended");
+  const [loading, setLoading] = useState(false);
 
   const token = user?.token;
+  const role = user?.authenticatedUser?.role;
 
   const getJobs = useCallback(async () => {
     if (!user?.token) {
@@ -29,6 +32,7 @@ const JobFeedPage = () => {
       navigate("/UserLogin");
       return;
     }
+    setLoading(true);
     try {
       const { data } = await axios.get(
         `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getJobs}`,
@@ -42,6 +46,8 @@ const JobFeedPage = () => {
       toast.success(data.msg);
     } catch (error) {
       toast.error(error.response?.data?.msg);
+    } finally {
+      setLoading(false);
     }
   }, [token, navigate]); // Using `useCallback` to memoize the function
 
@@ -72,6 +78,7 @@ const JobFeedPage = () => {
 
   const getAppliedJobs = async () => {
     if (!user?.token) return;
+    setLoading(true);
     try {
       const { data } = await axios.get(
         `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getAppliedJobs}`,
@@ -102,11 +109,14 @@ const JobFeedPage = () => {
       setAppliedJobs(appliedJobs);
     } catch (error) {
       toast.error(error.response?.data?.msg);
+    } finally {
+      setLoading(false);
     }
   };
 
   const getSavedJobs = async () => {
     if (!user?.token) return;
+    setLoading(true);
     try {
       const { data } = await axios.get(
         `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getBookmarkedJobs}`,
@@ -134,6 +144,8 @@ const JobFeedPage = () => {
       setSavedJobs(savedJobs);
     } catch (error) {
       toast.error(error.response.data.msg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -199,10 +211,7 @@ const JobFeedPage = () => {
         </section>
         <section className="section-two">
           <ul className="flex justify-between md:justify-start md:space-x-4">
-            {/* <li>Recommended</li>
-            <li>Applied</li>
-            <li>Saved Network Jobs</li> */}
-            {["Recommended", "Applied", "Saved"].map((tab) => (
+            {["Recommended", ...(role !== "employer" ? ["Applied", "Saved"] : [])].map((tab) => (
               <li
                 key={tab}
                 className={`cursor-pointer ${
@@ -226,7 +235,11 @@ const JobFeedPage = () => {
           </div>
           <div className="job-listing-container flex justify-center md:space-x-4">
             <div className="job-lists space-y-4 md:h-[1235px] lg:h-[995px] overflow-y-scroll">
-              {filteredJobs.length !== 0 ? (
+              {loading ? (
+                <h1 className="mt-20 text-center text-xl font-bold">
+                  Loading wait...
+                </h1>
+              ) : filteredJobs.length !== 0 ? (
                 filteredJobs.map((e) => {
                   return (
                     <div
@@ -245,7 +258,7 @@ const JobFeedPage = () => {
                       <JobCard
                         companyLogo={e.compImgSrc}
                         jobTitle={e.title}
-                        companyName={e.compName}
+                        companyName={e.companyName}
                         experienceReq={e.experienceLevel}
                         location={e.location}
                         datePosted={e.createdAt}
@@ -263,6 +276,7 @@ const JobFeedPage = () => {
                   jobDetails={singleJob}
                   onClose={() => setDetailCardPop(false)}
                   savedJob={saveJob}
+                  // openApplyJob={() => setOpenApplyJob(true)}
                 />
               )}
             </div>
@@ -277,6 +291,7 @@ const JobFeedPage = () => {
               jobDetails={singleJob}
               onClose={() => setDetailCardPop(false)}
               savedJob={saveJob}
+              // openApplyJob={() => setOpenApplyJob(true)}
             />
           </div>
         </div>

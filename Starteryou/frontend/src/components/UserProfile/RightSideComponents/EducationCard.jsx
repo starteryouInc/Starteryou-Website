@@ -8,26 +8,7 @@ import { useUserContext } from "../../../context/UserContext";
 import { toast } from "react-toastify";
 import axios from "axios";
 
-const EducationCard = ({ openEducationForm, data = [] }) => {
-  // const EducationalDetails = [
-  //   {
-  //     educationID: 1,
-  //     qualification: "B.Tech",
-  //     specialisation: "Computer Science",
-  //     institute: "Bits Pilani",
-  //     duration: "Aug 2022 to July 2025",
-  //     marks: 8.2,
-  //   },
-  //   {
-  //       educationID: 2,
-  //       qualification: "B.Tech",
-  //       specialisation: "Computer Science",
-  //       institute: "Bits Pilani",
-  //       duration: "Aug 2022 to July 2025",
-  //       marks: 8.2,
-  //     },
-  // ];
-
+const EducationCard = ({ openEducationForm, data, getProfileFieldData }) => {
   const { user } = useUserContext();
   const token = user?.token;
 
@@ -57,6 +38,7 @@ const EducationCard = ({ openEducationForm, data = [] }) => {
         }
       );
       toast.success(data.msg);
+      getProfileFieldData();
     } catch (error) {
       toast.error(error.response?.data?.msg);
     }

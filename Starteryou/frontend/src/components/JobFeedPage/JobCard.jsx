@@ -39,7 +39,7 @@ const JobCard = (props) => {
           {props.location}
         </li>
         {isEarlyApplicant(props.datePosted) && <li className="bg-green-100 text-green-500 py-1 px-3 rounded-md w-fit">Early Applicant</li>}
-        <li>{timeAgo(props.datePosted)}</li>
+        <li className="capitalize">{timeAgo(props.datePosted)}</li>
       </ul>
     </div>
   );

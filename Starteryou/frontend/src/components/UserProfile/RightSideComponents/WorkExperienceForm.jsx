@@ -4,7 +4,7 @@ import { useUserContext } from "../../../context/UserContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 
-const WorkExperienceForm = ({ openWorkForm, getProfileFunction }) => {
+const WorkExperienceForm = ({ openWorkForm, getProfileFieldData }) => {
   const { user } = useUserContext();
   const token = user?.token;
 
@@ -87,7 +87,7 @@ const WorkExperienceForm = ({ openWorkForm, getProfileFunction }) => {
         }
       );
       toast.success(data.msg);
-      getProfileFunction();
+      getProfileFieldData();
       clearAllFields();
       openWorkForm();
     } catch (error) {

@@ -4,7 +4,7 @@ import { API_CONFIG } from "../../../config/api";
 import { toast } from "react-toastify";
 import axios from "axios";
 
-const LanguageForm = ({ openLanguageForm, data }) => {
+const LanguageForm = ({ openLanguageForm, data, getProfileFieldData }) => {
   const { user } = useUserContext();
   const token = user?.token;
   const [languages, setLanguages] = useState(data);
@@ -32,6 +32,7 @@ const LanguageForm = ({ openLanguageForm, data }) => {
       );
       toast.success(data.msg);
       setLanguages([...languages, newLanguage]); // Update skills state
+      getProfileFieldData();
       setInput("");
       openLanguageForm();
     } catch (error) {
@@ -60,6 +61,7 @@ const LanguageForm = ({ openLanguageForm, data }) => {
       setLanguages(
         languages.filter((language) => language !== languageToRemove)
       ); // ✅ Remove skill locally
+      getProfileFieldData();
       openLanguageForm();
     } catch (error) {
       toast.error(error.response?.data?.msg);

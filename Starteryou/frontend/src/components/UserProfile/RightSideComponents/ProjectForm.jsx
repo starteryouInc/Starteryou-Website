@@ -4,7 +4,7 @@ import { useUserContext } from "../../../context/UserContext";
 import axios from "axios";
 import { API_CONFIG } from "../../../config/api";
 
-const ProjectForm = ({ openProjectForm }) => {
+const ProjectForm = ({ openProjectForm, getProfileFieldData }) => {
   const { user } = useUserContext();
   const token = user?.token;
 
@@ -66,12 +66,11 @@ const ProjectForm = ({ openProjectForm }) => {
         }
       );
       toast.success(data.msg);
+      getProfileFieldData();
       clearAllFields();
       openProjectForm();
-      console.log("Working fine");
     } catch (error) {
       toast.error(error.response?.data?.msg);
-      console.error("Not working");
     }
   };
 

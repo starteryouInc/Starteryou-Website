@@ -4,7 +4,7 @@ import { useUserContext } from "../../../context/UserContext";
 import { toast } from "react-toastify";
 import axios from "axios";
 
-const CoursCertiForm = ({ openCertificationForm }) => {
+const CoursCertiForm = ({ openCertificationForm, getProfileFieldData }) => {
   const { user } = useUserContext();
 
   const token = user?.token;
@@ -70,12 +70,12 @@ const CoursCertiForm = ({ openCertificationForm }) => {
         }
       );
       toast.success(data.msg);
+      getProfileFieldData();
       clearAllFields();
       openCertificationForm();
     } catch (error) {
       toast.error(error.response?.data?.msg);
     }
-
   };
 
   return (

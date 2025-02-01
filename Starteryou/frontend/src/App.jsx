@@ -34,6 +34,7 @@ import ForgotPswd from "./components/Auth/ForgotPswd";
 import ResetCode from "./components/Auth/ResetCode";
 import UpdatePswd from "./components/Auth/UpdatePswd";
 import EmployerSignUp from "./components/Auth/EmployerSignUp";
+import CreateJobCard from "./components/JobFeedPage/CreateJobCard";
 
 const Layout = () => {
   const location = useLocation();
@@ -76,6 +77,7 @@ const Layout = () => {
 
         {/* New User Profile Page ( COMPLETED ) */}
         <Route path="/userprofile" element={<UserProfile />}></Route>
+        <Route path="/listJob" element={<CreateJobCard/>}></Route>
 
         {/* Admin Protected Routes */}
         <Route

@@ -123,6 +123,54 @@ router.patch(
   }
 );
 
+router.get(
+  "/get-profile-fields/:userRegistrationId",
+  authorize("jobSeeker"),
+  async (req, res) => {
+    const {
+      params: { userRegistrationId },
+    } = req;
+    const { field } = req.query;
+
+    try {
+      if (!field) {
+        return res.status(400).json({ msg: "Field parameter is required!" });
+      }
+      const validFields = [
+        "workExperience",
+        "educationDetails",
+        "skills",
+        "certifications",
+        "projects",
+        "languages",
+      ];
+      if (!validFields.includes(field)) {
+        return res.status(400).json({ msg: "Invalid field requested!" });
+      }
+      // Fetch only the requested field
+      const user = await UserProfile.findOne(
+        { userRegistrationId },
+        { [field]: 1, _id: 0 } // Only return the requested field
+      );
+
+      if (!user) {
+        return res.status(404).json({ msg: "User not found!" });
+      }
+      res.status(200).json({
+        success: true,
+        msg: `${field} fetched successfully`,
+        data: user[field],
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        msg: `Some error occured while fetching the ${field}`,
+        error,
+      });
+    }
+  }
+);
+
 // Work Experience Routes
 router.post(
   "/add-workExperience/:userRegistrationId",

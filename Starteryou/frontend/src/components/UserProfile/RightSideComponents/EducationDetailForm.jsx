@@ -4,7 +4,7 @@ import { useUserContext } from "../../../context/UserContext";
 import { toast } from "react-toastify";
 import axios from "axios";
 
-const EducationalDetailsForm = ({ openEducationForm }) => {
+const EducationalDetailsForm = ({ openEducationForm, getProfileFieldData }) => {
   const { user } = useUserContext();
   const token = user?.token;
 
@@ -73,6 +73,7 @@ const EducationalDetailsForm = ({ openEducationForm }) => {
         }
       );
       toast.success(data.msg);
+      getProfileFieldData();
       clearAllFields();
       openEducationForm();
     } catch (error) {

@@ -45,7 +45,6 @@ const LeftSide = ({ UserProfile, getProfileFunction }) => {
   }, [UserProfile]);
 
   const handleUpdateProfile = async () => {
-    console.log(updateProfileData);
     if (!user?.token) {
       toast.error("Pls login to continue...");
       return;

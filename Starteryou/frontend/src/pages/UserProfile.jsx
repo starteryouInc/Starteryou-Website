@@ -22,9 +22,8 @@ const UserProfile = () => {
       return;
     }
 
-    const userId = user?.authenticatedUser?._id;
-
     try {
+      const userId = user?.authenticatedUser?._id;
       const { data } = await axios.get(
         `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getUserProfile(userId)}`,
         {
@@ -46,6 +45,28 @@ const UserProfile = () => {
     }
   };
 
+  // Function to fetch particular user profile fields
+  const getUserProfileField = async (fieldName) => {
+    try {
+      const userId = user?.authenticatedUser?._id;
+      const { data } = await axios.get(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getUserProfileField(
+          userId
+        )}?field=${fieldName}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return data.data;
+    } catch (error) {
+      toast.error(error.response?.data?.msg);
+      console.error("Not working");
+      return null;
+    }
+  };
+
   useEffect(() => {
     getUserProfile();
   }, []);
@@ -58,7 +79,7 @@ const UserProfile = () => {
           UserProfile={profileData}
           getProfileFunction={getUserProfile}
         />
-        <RightSide UserProfile={profileData} getProfileFunction={getUserProfile}/>
+        <RightSide getProfileFieldFunction={getUserProfileField} />
       </div>
     </div>
   );

@@ -8,24 +8,7 @@ import axios from "axios";
 import { API_CONFIG } from "../../../config/api";
 import { toast } from "react-toastify";
 
-const ProjectCard = ({ openProjectForm, data }) => {
-  // const ProjectList = [
-  //   {
-  //     projectID: 1,
-  //     projectName: "Youtube Clone",
-  //     projectURL: "https://www.google.com",
-  //     finishedDate: "Aug 2024",
-  //     // projectDetail: " ",
-  //   },
-  //   {
-  //     projectID: 2,
-  //     projectName: "Youtube Clone",
-  //     projectURL: "https://www.google.com",
-  //     finishedDate: "Aug 2024",
-  //     //   projectDetail: " ",
-  //   },
-  // ];
-
+const ProjectCard = ({ openProjectForm, data, getProfileFieldData }) => {
   const { user } = useUserContext();
   const token = user?.token;
 
@@ -53,10 +36,9 @@ const ProjectCard = ({ openProjectForm, data }) => {
         }
       );
       toast.success(data.msg);
-      console.log("working fine");
+      getProfileFieldData();
     } catch (error) {
       toast.error(error.response?.data?.msg);
-      console.error("Not working");
     }
   };
   return (
