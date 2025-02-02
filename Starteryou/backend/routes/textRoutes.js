@@ -17,8 +17,7 @@ const swaggerOptions = {
     info: {
       title: "Text Content API",
       version: "1.0.0",
-      description:
-        "API for managing text content associated with specific components",
+      description: "API for managing text content associated with specific components",
     },
     servers: [
       {
@@ -181,15 +180,12 @@ router.put("/text", async (req, res) => {
   }
   if (content === undefined && !Array.isArray(paragraphs)) {
     return res.status(400).json({
-      message:
-        "At least one of 'content' or 'paragraphs' is required in the request body.",
+      message: "At least one of 'content' or 'paragraphs' is required in the request body.",
     });
   }
 
   try {
-    let textContent = await TextContent.findOne({ page, component }).maxTimeMS(
-      10000
-    );
+    let textContent = await TextContent.findOne({ page, component }).maxTimeMS(10000);
 
     if (!textContent) {
       textContent = new TextContent({ page, component });
@@ -204,8 +200,16 @@ router.put("/text", async (req, res) => {
     }
 
     await textContent.save();
+<<<<<<< HEAD
+=======
+    const cacheKey = `/api/text?page=${page}&component=${component}`;
+    console.log(`Invalidating cache for key: ${cacheKey}`);
+    await invalidateCache(cacheKey);
+    await cacheQuery(cacheKey, async () => textContent, cacheConfig.defaultTTL);
+>>>>>>> bd72f5faef789c234fe38b2fa63a196031d598ae
     res.json(textContent);
   } catch (error) {
+    console.error("Error updating content:", error);
     res.status(500).json({
       message: "An error occurred while updating content.",
       error: error.message,
@@ -263,8 +267,15 @@ router.delete("/text", async (req, res) => {
         message: "No content found for the specified page and component.",
       });
     }
+<<<<<<< HEAD
+=======
+    const cacheKey = `/api/text?page=${page}&component=${component}`;
+    console.log(`Invalidating cache for key: ${cacheKey}`);
+    await invalidateCache(cacheKey);
+>>>>>>> bd72f5faef789c234fe38b2fa63a196031d598ae
     res.json({ message: "Content deleted successfully." });
   } catch (error) {
+    console.error("Error deleting content:", error);
     res.status(500).json({
       message: "An error occurred while deleting content.",
       error: error.message,

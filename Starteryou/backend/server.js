@@ -13,6 +13,7 @@ const teamRoutes = require("./routes/teamRoutes");
 const { mountRoutes } = require("./routes"); // Main routes including API docs
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 const authRoutes = require("./routes/authRoutes");
+const path = require("path");
 // Initialize Express app
 const app = express();
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
@@ -32,6 +33,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
   }
 })();
 
+const cacheOptions = {
+  maxAge: "1y", // Cache for 1 year
+  immutable: true, // Prevent revalidation if the file hasn't changed
+};
+app.use("/docs", express.static(path.join(__dirname, "docs"), cacheOptions));
+console.log("📂 Serving static files from:", path.join(__dirname, "docs"));
 // Swagger Configuration
 const swaggerOptions = {
   definition: {
@@ -167,3 +174,4 @@ app.listen(PORT, () => {
     `⚙️ File Verification: http://localhost:${PORT}/api/system/verify-all`
   );
 });
+

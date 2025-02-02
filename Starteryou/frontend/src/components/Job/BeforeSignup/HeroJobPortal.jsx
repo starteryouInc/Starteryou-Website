@@ -88,7 +88,7 @@ const HeroJobPortal = () => {
             params: {
               page,
               component:
-                "Empowering College Students to Discover Job Opportunities",
+                "HeroJobBefore",
             },
           }
         );
