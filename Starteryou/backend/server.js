@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require("path");
 const { connectToMongoDB } = require("./db");
 const textRoutes = require("./routes/textRoutes");
 const fileRoutes = require("./routes/fileRoutes");
@@ -60,7 +61,6 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use("/api/system", verificationRoutes);
-
 mountRoutes(app); // This mounts the main routes including API docs
 
 // Routes
@@ -109,8 +109,18 @@ app.use("/api/v1/auth", authRoutes);
 app.get("/health", (req, res) => {
   res.status(200).json({ message: "Server is running!" });
 });
+// Serve static files from the Vite `dist` folder
+// app.use(
+//   express.static(path.join(__dirname, "../frontend/dist"), {
+//     maxAge: "1y", // Cache for 1 year
+//     immutable: true, // File content won't change
+//   })
+// );
 
-// MongoDB Connection Status Route
+// // Catch-all handler for React routes (SPA)
+// app.get("*", (req, res) => {
+//   res.sendFile(path.resolve(__dirname, "../frontend/dist", "index.html"));
+// });
 /**
  * @swagger
  * /db-status:
@@ -142,25 +152,18 @@ app.use((err, req, res, next) => {
 });
 
 // Start Server
-// Start Server
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://dev.starteryou.com:${PORT}`);
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`📖 Swagger Docs available at http://localhost:${PORT}/api-test`);
+  console.log(`💻 Health Check: http://localhost:${PORT}/health`);
+  console.log(`🗄️ Database Status: http://localhost:${PORT}/db-status`);
+  console.log(`📚 API Documentation: http://localhost:${PORT}/api/docs`);
   console.log(
-    `📖 Swagger Docs available at http://dev.starteryou.com:${PORT}/api-test`
-  );
-  console.log(`💻 Health Check: http://dev.starteryou.com:${PORT}/health`);
-  console.log(
-    `🗄️ Database Status: http://dev.starteryou.com:${PORT}/db-status`
-  );
-  console.log(
-    `📚 API Documentation: http://dev.starteryou.com:${PORT}/api/docs`
+    `📋 Postman Collection: http://localhost:${PORT}/api/docs/postman`
   );
   console.log(
-    `📋 Postman Collection: http://dev.starteryou.com:${PORT}/api/docs/postman`
-  );
-  console.log(
-    `⚙️ File Verification: http://dev.starteryou.com:${PORT}/api/system/verify-all`
+    `⚙️ File Verification: http://localhost:${PORT}/api/system/verify-all`
   );
 });
