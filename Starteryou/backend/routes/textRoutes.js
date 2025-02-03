@@ -7,7 +7,7 @@ const TextContent = require("../models/TextContent"); // Adjust path as needed
 require("dotenv").config();
 const backendUrl = process.env.BACKEND_URL || "http://localhost:3000";
 const cacheMiddleware = require("../cache/utils/cacheMiddleware");
-// const { invalidateCache } = require("../cache/utils/invalidateCache");
+const { invalidateCache } = require("../cache/utils/invalidateCache");
 const cacheQuery = require("../cache/utils/cacheQuery");
 const cacheConfig = require("../cache/config/cacheConfig");
 // Swagger setup
