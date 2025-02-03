@@ -212,7 +212,6 @@ const BetterFuture = () => {
           {/* Display editable or static content */}
           <h2 className="text-3xl font-semibold text-start text-[#252B42] pb-3">
             {isEditing ? (
-              
               <textarea
                 value={paragraphs[1]} // Editable second paragraph
                 onChange={(e) =>

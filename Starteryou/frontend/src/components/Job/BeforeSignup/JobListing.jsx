@@ -4,7 +4,11 @@ import FileUpload from "../../Common/FileUpload";
 import axios from "axios"; // Ensure axios is imported
 import { FaPencilAlt } from "react-icons/fa"; // Ensure icon is imported
 import { API_CONFIG } from "@config/api";
+import { MaxWords } from "../../Common/wordValidation";
+import { toast } from "react-toastify"; // Import toast notifications
+import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 
+toast.configure();
 
 const JobListing = () => {
   const title = "JobList";
@@ -14,14 +18,18 @@ const JobListing = () => {
     "Discover Job Listings Curated Specifically for College Students"
   );
   const [paragraphh, setParagraphh] = useState(
-    " At Starteryou, we understand the unique needs of college students seeking job opportunities. Our platform offers a tailored selection of job listings designed to help you kickstart your career."
+    "At Starteryou, we understand the unique needs of college students seeking job opportunities. Our platform offers a tailored selection of job listings designed to help you kickstart your career."
   );
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState("");
   const page = "JobBeforeSignup";
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
+
+  const [titleWordsLeft, setTitleWordsLeft] = useState(8); // Word counter for title
+  const [paragraphWordsLeft, setParagraphWordsLeft] = useState(50); // Word counter for paragraph
+
   const fetchUploadedFile = async () => {
-    if (hasFetchedOnce) return; // Prevent fetching again if already attempted
+    if (hasFetchedOnce) return;
 
     try {
       const response = await fetch(
@@ -32,21 +40,22 @@ const JobListing = () => {
         throw new Error("Network response was not ok");
       }
 
-      const blob = await response.blob(); // Get the response as a Blob
-      const url = URL.createObjectURL(blob); // Create a local URL for the Blob
-      setUploadedFile(url); // Set the uploaded file data with its local URL
-      setError(null); // Reset error state on successful fetch
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      setUploadedFile(url);
+      setError(null);
     } catch (error) {
       console.error("Error fetching uploaded file:", error);
-      setError("Failed to load image"); // Set error message
+      setError("Failed to load image");
     } finally {
-      setHasFetchedOnce(true); // Mark as fetch attempt made
+      setHasFetchedOnce(true);
     }
   };
 
   useEffect(() => {
-    fetchUploadedFile(); // Fetch the specific image on component mount
+    fetchUploadedFile();
   }, []);
+
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     const formData = new FormData();
@@ -65,10 +74,12 @@ const JobListing = () => {
         throw new Error("Network response was not ok");
       }
       setUploadedFile(URL.createObjectURL(file));
+      toast.success("Image updated successfully!");
       setError(null);
     } catch (error) {
       console.error("Error updating image:", error);
       setError("Error updating image");
+      toast.error("Failed to update image.");
     }
   };
 
@@ -96,6 +107,7 @@ const JobListing = () => {
       } catch {
         console.error("Error fetching data");
         setError("Error fetching content. Please try again later.");
+        toast.error("Failed to fetch content.");
       }
     };
 
@@ -104,9 +116,12 @@ const JobListing = () => {
 
   const handleEdit = () => isAdmin && setIsEditing(true);
 
-  const handleChangeTitle = (e) => setTitlee(e.target.value);
+  const handleChangeTitle = (e) =>
+    setTitlee(MaxWords(e.target.value, 8, setTitleWordsLeft));
 
-  const handleChangeParagraph = (e) => setParagraphh(e.target.value);
+  const handleChangeParagraph = (e) =>
+    setParagraphh(MaxWords(e.target.value, 50, setParagraphWordsLeft));
+
   const saveContent = async () => {
     try {
       const normalizedParagraphs = Array.isArray(paragraphh)
@@ -122,11 +137,14 @@ const JobListing = () => {
 
       setError("");
       setIsEditing(false);
+      toast.success("Content saved successfully!");
     } catch {
       console.error("Error saving content");
       setError("Error saving content. Please try again later.");
+      toast.error("Failed to save content.");
     }
   };
+
   const jobInfo = [
     {
       id: 1,
@@ -152,12 +170,22 @@ const JobListing = () => {
         <div className="flex-1 bg-white  flex flex-col justify-center">
           {isEditing ? (
             <div>
+              <span className="text-gray-500 text-sm">
+                {titleWordsLeft >= 0
+                  ? `${titleWordsLeft} words left`
+                  : `Word limit exceeded by ${Math.abs(titleWordsLeft)} words`}
+              </span>
               <input
                 type="text"
                 value={titlee}
                 onChange={handleChangeTitle}
                 className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-[#1F2329] border border-gray-300 p-2 rounded w-full"
               />
+              <span className="text-gray-500 text-sm">
+                {paragraphWordsLeft >= 0
+                  ? `${paragraphWordsLeft} words left`
+                  : `Word limit exceeded by ${Math.abs(paragraphWordsLeft)} words`}
+              </span>
               <textarea
                 value={paragraphh}
                 onChange={handleChangeParagraph}
@@ -218,7 +246,6 @@ const JobListing = () => {
           {/* Admin file upload section */}
           {isAdmin && (
             <div className=" absolute top-0 right-2 ">
-              {" "}
               <FileUpload
                 handleFileChange={handleFileChange}
                 uploadedFile={uploadedFile}
