@@ -13,7 +13,7 @@ const teamRoutes = require("./routes/teamRoutes");
 const { mountRoutes } = require("./routes"); // Main routes including API docs
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 const authRoutes = require("./routes/authRoutes");
-const path = require("path");
+
 // Initialize Express app
 const app = express();
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
@@ -39,6 +39,7 @@ const cacheOptions = {
 };
 app.use("/docs", express.static(path.join(__dirname, "docs"), cacheOptions));
 console.log("📂 Serving static files from:", path.join(__dirname, "docs"));
+
 // Swagger Configuration
 const swaggerOptions = {
   definition: {
@@ -151,21 +152,21 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`🚀 Server running at http://dev.starteryou.com:${PORT}`);
   console.log(
-    `📖 Swagger Docs available at http://localhost:${PORT}/api-test`
+    `📖 Swagger Docs available at http://dev.starteryou.com:${PORT}/api-test`
   );
-  console.log(`💻 Health Check: http://localhost:${PORT}/health`);
+  console.log(`💻 Health Check: http://dev.starteryou.com:${PORT}/health`);
   console.log(
-    `🗄️ Database Status: http://localhost:${PORT}/db-status`
-  );
-  console.log(
-    `📚 API Documentation: http://localhost:${PORT}/api/docs`
+    `🗄️ Database Status: http://dev.starteryou.com:${PORT}/db-status`
   );
   console.log(
-    `📋 Postman Collection: http://localhost:${PORT}/api/docs/postman`
+    `📚 API Documentation: http://dev.starteryou.com:${PORT}/api/docs`
   );
   console.log(
-    `⚙️ File Verification: http://localhost:${PORT}/api/system/verify-all`
+    `📋 Postman Collection: http://dev.starteryou.com:${PORT}/api/docs/postman`
+  );
+  console.log(
+    `⚙️ File Verification: http://dev.starteryou.com:${PORT}/api/system/verify-all`
   );
 });

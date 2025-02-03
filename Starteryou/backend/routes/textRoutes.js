@@ -200,13 +200,10 @@ router.put("/text", async (req, res) => {
     }
 
     await textContent.save();
-<<<<<<< HEAD
-=======
     const cacheKey = `/api/text?page=${page}&component=${component}`;
     console.log(`Invalidating cache for key: ${cacheKey}`);
     await invalidateCache(cacheKey);
     await cacheQuery(cacheKey, async () => textContent, cacheConfig.defaultTTL);
->>>>>>> bd72f5faef789c234fe38b2fa63a196031d598ae
     res.json(textContent);
   } catch (error) {
     console.error("Error updating content:", error);
@@ -267,12 +264,9 @@ router.delete("/text", async (req, res) => {
         message: "No content found for the specified page and component.",
       });
     }
-<<<<<<< HEAD
-=======
     const cacheKey = `/api/text?page=${page}&component=${component}`;
     console.log(`Invalidating cache for key: ${cacheKey}`);
     await invalidateCache(cacheKey);
->>>>>>> bd72f5faef789c234fe38b2fa63a196031d598ae
     res.json({ message: "Content deleted successfully." });
   } catch (error) {
     console.error("Error deleting content:", error);
