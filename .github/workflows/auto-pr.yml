@@ -1,0 +1,28 @@
+name: Auto PR from develop to main
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:  # Allows manual trigger
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: main
+          head: develop  # Changed from 'branch' to 'head'
+          title: 'Automatic PR from develop to main'
+          body: |
+            This pull request was automatically created by the GitHub Actions workflow.
