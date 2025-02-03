@@ -145,7 +145,7 @@ const BestJob3 = () => {
                 placeholder="Title here..."
                 className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
               />
-              <p className="text-sm text-white">{titleCounter} words remaining</p>
+              <p className="text-sm text-grey-400">{titleCounter} words remaining</p>
 
               <textarea
                 value={paragraphBJ3[0]}

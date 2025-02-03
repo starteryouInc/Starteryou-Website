@@ -5,8 +5,22 @@ import { useNavigation } from "../../../context/NavigationContext";
 import { API_CONFIG } from "@config/api";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
-import { toast } from "react-toastify";
-import { MaxWords } from "../../Common/wordValidation";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+// Helper function for word validation
+export const MaxWords = (value, maxWords, setCounter) => {
+  const words = value.split(/\s+/).filter(Boolean); // Split input into words
+  setCounter(maxWords - words.length); // Update remaining word count
+  if (words.length > maxWords) {
+    toast.error(`Word limit exceeded! Maximum allowed is ${maxWords} words.`, {
+      position: "top-right",
+      autoClose: 3000,
+    });
+    return words.slice(0, maxWords).join(" "); // Truncate the input
+  }
+  return value;
+};
 
 const DiscoverPath = () => {
   const [opportunities, setOpportunities] = useState([
@@ -51,6 +65,7 @@ const DiscoverPath = () => {
   const [isEditing, setIsEditing] = useState(false);
   const page = "JobBeforeSignup";
 
+  // Fetch uploaded images
   const fetchUploadedImages = async () => {
     if (hasFetchedOnce) return;
 
@@ -102,9 +117,17 @@ const DiscoverPath = () => {
       updatedFiles[index] = URL.createObjectURL(file);
       setUploadedFiles(updatedFiles);
       setError(null);
+      toast.success(`Image for ${title[index]} uploaded successfully!`, {
+        position: "top-right",
+        autoClose: 3000,
+      });
     } catch (error) {
       console.error("Error uploading image:", error);
       setError(`Error uploading image: ${title[index]}`);
+      toast.error(`Error uploading image for ${title[index]}.`, {
+        position: "top-right",
+        autoClose: 3000,
+      });
     }
   };
 
@@ -131,7 +154,11 @@ const DiscoverPath = () => {
         }
       } catch {
         console.error("Error fetching data");
-        setError("Error fetching  content. Please try again later.");
+        setError("Error fetching content. Please try again later.");
+        toast.error("Error fetching content. Please try again later.", {
+          position: "top-right",
+          autoClose: 3000,
+        });
       }
     };
 
@@ -161,14 +188,23 @@ const DiscoverPath = () => {
 
       setError("");
       setIsEditing(false);
+      toast.success("Content saved successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
     } catch {
       console.error("Error saving content");
       setError("Error saving content. Please try again later.");
+      toast.error("Error saving content. Please try again later.", {
+        position: "top-right",
+        autoClose: 3000,
+      });
     }
   };
 
   return (
     <div className="mx-auto max-w-[1430px] px-4 lg:px-10 py-16">
+      <ToastContainer />
       {/* Top Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center md:pb-6 gap-4">
         {isEditing ? (
