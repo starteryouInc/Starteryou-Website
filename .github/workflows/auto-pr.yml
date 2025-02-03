@@ -1,4 +1,4 @@
-name: Auto PR from develop to Main
+name: Auto PR from develop to main
 
 on:
   push:
@@ -15,14 +15,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           base: main
-          branch: develop
+          head: develop  # Changed from 'branch' to 'head'
           title: 'Automatic PR from develop to main'
           body: |
             This pull request was automatically created by the GitHub Actions workflow.
