@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require("path");
 const { connectToMongoDB } = require("./db");
 const textRoutes = require("./routes/textRoutes");
 const fileRoutes = require("./routes/fileRoutes");
@@ -67,7 +68,6 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use("/api/system", verificationRoutes);
-
 mountRoutes(app); // This mounts the main routes including API docs
 
 // Routes
@@ -117,7 +117,6 @@ app.get("/health", (req, res) => {
   res.status(200).json({ message: "Server is running!" });
 });
 
-// MongoDB Connection Status Route
 /**
  * @swagger
  * /db-status:
@@ -149,7 +148,6 @@ app.use((err, req, res, next) => {
 });
 
 // Start Server
-// Start Server
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
@@ -171,4 +169,3 @@ app.listen(PORT, () => {
     `⚙️ File Verification: http://localhost:${PORT}/api/system/verify-all`
   );
 });
-
