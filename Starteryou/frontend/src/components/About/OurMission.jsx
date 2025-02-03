@@ -30,7 +30,7 @@ const OurMission = () => {
   // State for title, paragraph, and image preview
   const [title, setTitle] = useState("OUR MISSION");
   const [paragraph, setParagraph] = useState(
-    "Starteryou is dedicated to empowering students by providing a vibrant and inclusive platform for discovering career opportunities. We foster a supportive community that bridges the gap between students and employers, facilitating skill development and guiding them towards meaningful career paths. We aim to transform the student learning experience, equipping individuals with essential career skills often overlooked in traditional education settings."
+    "Starteryou is dedicated to empowering students by providing a vibrant and inclusive platform for discovering career opportunities. We foster a supportive community that bridges the gap between students and employers, facilitating skill development and guiding them towards meaningful career paths. We aim to transform the student learning experience, equipping individuals with essential career skills often overlooked in traditional education settingss."
   );
 
   const [isEditing, setIsEditing] = useState(false); // Edit mode state
