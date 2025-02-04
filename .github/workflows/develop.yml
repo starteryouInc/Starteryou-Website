@@ -8,8 +8,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    outputs:
-      deployment_status: success
       
     steps:
       # Step 1: Checkout Code
