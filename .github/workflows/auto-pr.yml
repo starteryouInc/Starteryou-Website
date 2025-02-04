@@ -16,13 +16,27 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensures full history for comparison
 
+      - name: Check if `develop` is ahead of `main`
+        id: check_changes
+        run: |
+          git fetch origin main
+          ahead_count=$(git rev-list --count main..develop)
+          if [ "$ahead_count" -eq 0 ]; then
+            echo "No new commits in develop. Skipping PR creation."
+            exit 0
+          fi
+          echo "New commits detected in develop. Proceeding with PR."
+      
       - name: Create pull request
+        if: success()  # Runs only if previous step didn't exit
         uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           base: main
-          head: develop  # Changed from 'branch' to 'head'
+          head: develop
           title: 'Automatic PR from develop to main'
           body: |
             This pull request was automatically created by the GitHub Actions workflow.
