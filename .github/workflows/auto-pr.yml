@@ -1,10 +1,10 @@
 name: Auto PR from develop to main
 
 on:
-  push:
-    branches:
-      - develop
-  workflow_dispatch:  # Allows manual trigger
+  workflow_run:
+    workflows: ["Deploy to AWS EC2-DEV-SERVER"]  # Replace with the actual name of your deploy workflow
+    types:
+      - completed
 
 permissions:
   contents: write
