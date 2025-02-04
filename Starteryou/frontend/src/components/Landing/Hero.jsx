@@ -109,7 +109,7 @@ const Hero = () => {
 
   const saveContent = async () => {
     try {
-      const noramlizedParagraphs = Array.isArray(paragraph)
+      const normalizedParagraphs = Array.isArray(paragraph)
         ? paragraph
         : [paragraph.trim()];
       const response = await axios.put(
@@ -118,13 +118,13 @@ const Hero = () => {
           page: "HomePage",
           component: "Hero",
           content: title.trim(),
-          paragraphs: noramlizedParagraphs,
+          paragraphs: normalizedParagraphs,
         }
       );
       setIsEditing(false);
       console.log("HeroComp Data is saved: ", response);
     } catch (error) {
-      console.log("Error occured while saving the content(HeroComp): ", error);
+      console.log("Error occurred while saving the content(HeroComp): ", error);
     }
   };
 
