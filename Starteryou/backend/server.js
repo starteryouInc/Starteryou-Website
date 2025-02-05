@@ -13,6 +13,7 @@ const teamRoutes = require("./routes/teamRoutes");
 const { mountRoutes } = require("./routes"); // Main routes including API docs
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 const authRoutes = require("./routes/authRoutes");
+const cookieParser = require("cookie-parser");
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 // Initialize Express app
 const app = express();
@@ -21,7 +22,7 @@ dotenv.config();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
+app.use(cookieParser());
 // MongoDB connection
 (async () => {
   try {

@@ -5,13 +5,9 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/UserModel");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-const validator = require("validator");
 const router = express.Router();
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 const Employee = require("../models/EmployeeModel");
-const cacheQuery = require("../cache/utils/cacheQuery");
-const { invalidateCache } = require("../cache/utils/invalidateCache");
-const cacheConfig = require("../cache/config/cacheConfig");
 
 const jwtSecret = process.env.DEV_JWT_SECRET;
 if (!jwtSecret) {
@@ -31,6 +27,24 @@ const generateAccessToken = (user) => {
 const generateRefreshToken = (user) => {
   return jwt.sign({ id: user._id }, jwtSecret, {
     expiresIn: "7d",
+  });
+};
+
+// Helper function to set cookies
+const setCookies = (res, accessToken, refreshToken) => {
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 15 * 60 * 1000, // 15 minutes
+    path: "/",
+  });
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 };
 
@@ -154,10 +168,10 @@ const register = async (req, res) => {
 
     // Validate password
     const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
-        message: "Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, one number, and one special character",
+        message: "Password must be at least 8 and atmost 16 characters long and include one uppercase letter, one lowercase letter, one number, and one special character",
         success: false,
       });
     }
@@ -207,6 +221,7 @@ const register = async (req, res) => {
     // Save the refresh token in the database
     user.refreshToken = refreshToken;
     await user.save();
+    
 
     return res.status(201).json({
       message: "User registered successfully",
@@ -292,6 +307,7 @@ const login = async (req, res) => {
       success: false,
     });
   }
+
   // Validate email
   const emailRegex = /^[a-zA-Z0-9._%+-]+@starteryou\.com$/i;
   if (!emailRegex.test(email)) {
@@ -318,55 +334,21 @@ const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials", success: false });
     }
 
-    /**
-     * Generates a unique cache key for user login
-     * @type {string}
-     */
-    const cacheKey = `login:${user._id}`;
-    const ttl = cacheConfig.defaultTTL; // Time to live in seconds (1 hour)
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
 
-    /**
-     * Invalidates existing cache entry before creating a new one
-     * Prevents serving stale login data
-     * 
-     * @param {string} cacheKey - Unique identifier for the cache entry
-     */
+    setCookies(res, accessToken, refreshToken); // Set cookies
 
-    // Invalidate the cache for the login endpoint
-    console.log(`🔄 Invalidating cache for key: ${cacheKey}`);
-    await invalidateCache(cacheKey);
-    
-    /**
-     * Caches login response with tokens and user information
-     * 
-     * @param {string} cacheKey - Unique cache identifier
-     * @param {Function} fetchFunction - Generates fresh login response
-     * @param {number} ttl - Time-to-live for cache entry
-     * 
-     * @returns {Object} Cached login response with status and user details
-     */
+    // Store the refresh token in the database
+    user.refreshToken = refreshToken;
+    await user.save();
 
-    const cachedResponse = await cacheQuery(cacheKey, async () => {
-      const accessToken = generateAccessToken(user);
-      const refreshToken = generateRefreshToken(user);
-
-      // Store the refresh token in the database
-      user.refreshToken = refreshToken;
-      await user.save();
-
-      return {
-        status: 200,
-        response: {
-          message: "Login successful",
-          success: true,
-          tokens: { accessToken, refreshToken },
-          user: { id: user._id, username: user.username, email: user.email, role: user.role },
-        },
-      };
-    }, ttl);
-
-    console.log(`✅ Cache set for key: ${cacheKey}`);
-    return res.status(cachedResponse.status).json(cachedResponse.response);
+    return res.status(200).json({
+      message: "Login successful",
+      success: true,
+      tokens: { accessToken, refreshToken },
+      user: { id: user._id, username: user.username, email: user.email, role: user.role },
+    });
   } catch (error) {
     console.error("Error during login:", error);
     return res.status(500).json({
@@ -376,7 +358,10 @@ const login = async (req, res) => {
   }
 };
 
+
+
 // Set up router
 router.post("/register", register);
 router.post("/login", login);
+
 module.exports = router;
