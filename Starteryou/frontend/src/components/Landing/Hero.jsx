@@ -15,7 +15,6 @@ const Hero = () => {
   const [image2, setImage2] = useState("/LandingPage/Heroimg2.jpg");
   const [image3, setImage3] = useState("/LandingPage/Heroimg3.png");
   // States and Variables for TEXT EDITING API
-
   const [title, setTitle] = useState("Collaborate Togetherr");
   const [paragraph, setParagraph] = useState("Perfectly working Hero");
   const [isEditing, setIsEditing] = useState(false);
