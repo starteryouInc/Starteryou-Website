@@ -1,0 +1,52 @@
+name: Auto PR from develop to main
+
+on:
+  workflow_run:
+    workflows: ["Deploy to AWS EC2-DEV-SERVER"]  # Replace with the actual name of your deploy workflow
+    types:
+      - completed
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensures full history
+
+      - name: Fetch all branches
+        run: |
+          git fetch --all
+          git branch -r  # Debug: List all remote branches
+
+      - name: Check if `develop` is ahead of `main`
+        id: check_changes
+        run: |
+          # Ensure the develop branch exists
+          if ! git show-ref --quiet refs/heads/develop; then
+            echo "Error: 'develop' branch not found locally. Exiting."
+            exit 1
+          fi
+
+          ahead_count=$(git rev-list --count origin/main..origin/develop)
+          if [ "$ahead_count" -eq 0 ]; then
+            echo "No new commits in develop. Skipping PR creation."
+            exit 0
+          fi
+          echo "New commits detected in develop. Proceeding with PR."
+
+      - name: Create pull request
+        if: success()
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: main
+          head: develop
+          title: 'Automatic PR from develop to main'
+          body: |
+            This pull request was automatically created by the GitHub Actions workflow.
