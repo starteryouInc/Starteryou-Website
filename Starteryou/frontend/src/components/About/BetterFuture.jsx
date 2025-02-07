@@ -8,8 +8,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { API_CONFIG } from "@config/api";
-import { MaxWords } from "../Common/wordValidation";
-
 /**
  * `BetterFuture` Component
  *
@@ -43,8 +41,7 @@ const BetterFuture = () => {
   // Check if the user is an admin
   const { isAdmin } = useNavigation();
   const page = "AboutPage"; // Specify the page name for the current component.
-  const [titleWordsLeft, setTitleWordsLeft] = useState(4); // Counter for the title
-  const [paragraphWordsLeft, setParagraphWordsLeft] = useState(44); // Counter for the paragraph
+  
   /**
    * Fetches the text content from the backend API.
    * Updates the heading and paragraph states with the fetched data.
@@ -114,16 +111,12 @@ const BetterFuture = () => {
       <div className="relative">
         {isEditing ? (
           <>
-            <span className="text-gray-500 text-sm">
-              {titleWordsLeft >= 0
-                ? `${titleWordsLeft} words left`
-                : `Word limit exceeded by ${Math.abs(titleWordsLeft)} words`}
-            </span>
+           
             <input
               type="text"
               value={content} // Controlled input for editing heading
               onChange={(e) =>
-                setContent(MaxWords(e.target.value, 4, setTitleWordsLeft))
+                setContent((e.target.value))
               }
               className="text-4xl font-bold md:font-extrabold mb-4 text-[#252B42] border border-gray-300 p-2 rounded w-full"
             />
@@ -147,21 +140,13 @@ const BetterFuture = () => {
       {/* Description Section */}
       {isEditing ? (
         <>
-          <span className="text-gray-500 text-sm">
-            {paragraphWordsLeft >= 0
-              ? `${paragraphWordsLeft} words left`
-              : `Word limit exceeded by ${Math.abs(paragraphWordsLeft)} words`}
-          </span>
+         
           <textarea
             value={paragraphs[0]} // Controlled textarea for first paragraph
             onChange={(e) =>
               setParagraphs((prev) => {
                 const updated = [...prev];
-                updated[0] = MaxWords(
-                  e.target.value,
-                  44,
-                  setParagraphWordsLeft
-                ); // Update specific paragraph
+                updated[0] = (e.target.value); // Update specific paragraph
                 return updated;
               })
             }
@@ -236,7 +221,7 @@ const BetterFuture = () => {
                 onChange={(e) =>
                   setParagraphs((prev) => {
                     const updated = [...prev];
-                    updated[2] = MaxWords(e.target.value, 25);
+                    updated[2] = (e.target.value);
                     return updated;
                   })
                 }
@@ -265,7 +250,7 @@ const BetterFuture = () => {
                         value={paragraphs[titleIndex]} // Title input
                         onChange={(e) => {
                           const updated = [...paragraphs];
-                          updated[titleIndex] = MaxWords(e.target.value, 5);
+                          updated[titleIndex] = (e.target.value);
                           setParagraphs(updated);
                         }}
                         className="text-xl text-left font-semibold max-w-[400px] text-[#252B42] border border-gray-300 p-2 rounded w-full whitespace-pre-wrap "
@@ -274,9 +259,8 @@ const BetterFuture = () => {
                         value={paragraphs[titleIndex + 1]} // Paragraph input
                         onChange={(e) => {
                           const updated = [...paragraphs];
-                          updated[titleIndex + 1] = MaxWords(
-                            e.target.value,
-                            17
+                          updated[titleIndex + 1] =(
+                            e.target.value
                           );
                           setParagraphs(updated);
                         }}
