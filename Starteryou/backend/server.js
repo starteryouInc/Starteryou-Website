@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require("path");
 const { connectToMongoDB } = require("./db");
 const textRoutes = require("./routes/textRoutes");
 const fileRoutes = require("./routes/fileRoutes");
@@ -13,13 +14,12 @@ const { mountRoutes } = require("./routes"); // Main routes including API docs
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 const authRoutes = require("./routes/authRoutes");
 
-
 const newsletterRoutes = require("./routes/newsletterRoutes"); //newsletter subscribers
 
 
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 // Initialize Express app
 const app = express();
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 // Middleware
 dotenv.config();
 app.use(cors());
@@ -38,6 +38,13 @@ app.use("/api/newsletter", newsletterRoutes);  //Newsletter subscribers
     console.error("❌ MongoDB Connection Error:", err.message);
   }
 })();
+
+const cacheOptions = {
+  maxAge: "1y", // Cache for 1 year
+  immutable: true, // Prevent revalidation if the file hasn't changed
+};
+app.use("/docs", express.static(path.join(__dirname, "docs"), cacheOptions));
+console.log("📂 Serving static files from:", path.join(__dirname, "docs"));
 
 // Swagger Configuration
 const swaggerOptions = {
@@ -70,7 +77,6 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use("/api/system", verificationRoutes);
-
 mountRoutes(app); // This mounts the main routes including API docs
 
 // Routes
@@ -120,7 +126,6 @@ app.get("/health", (req, res) => {
   res.status(200).json({ message: "Server is running!" });
 });
 
-// MongoDB Connection Status Route
 /**
  * @swagger
  * /db-status:
@@ -151,7 +156,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start Server
 // Start Server
 const PORT = process.env.PORT || 3000;
 

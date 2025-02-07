@@ -17,7 +17,7 @@ const Hero = () => {
   const [image3, setImage3] = useState("/LandingPage/Heroimg3.png");
 
   // States and Variables for TEXT EDITING API
-  const [title, setTitle] = useState("Collaborate Together");
+  const [title, setTitle] = useState("Collaborate Togetherr");
   const [paragraph, setParagraph] = useState("Perfectly working Hero");
   const [titleCounter, setTitleCounter] = useState(3); // Counter for remaining words in title
   const [paragraphCounter, setParagraphCounter] = useState(11); // Counter for remaining words in paragraph
@@ -114,7 +114,7 @@ const Hero = () => {
 
   const saveContent = async () => {
     try {
-      const noramlizedParagraphs = Array.isArray(paragraph)
+      const normalizedParagraphs = Array.isArray(paragraph)
         ? paragraph
         : [paragraph.trim()];
       const response = await axios.put(
@@ -123,13 +123,14 @@ const Hero = () => {
           page: "HomePage",
           component: "Hero",
           content: title.trim(),
-          paragraphs: noramlizedParagraphs,
+          paragraphs: normalizedParagraphs,
         }
       );
       setIsEditing(false);
       console.log("HeroComp Data is saved: ", response);
     } catch (error) {
-      console.log("Error occurred while saving the content (HeroComp): ", error);
+
+      console.log("Error occurred while saving the content(HeroComp): ", error);
     }
   };
 

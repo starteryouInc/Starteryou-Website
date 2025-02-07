@@ -92,7 +92,10 @@ const HeroJobPortal = () => {
           {
             params: {
               page,
-              component: "HeroJobBefore",
+
+
+              component:
+                "HeroJobBefore",
             },
           }
         );
