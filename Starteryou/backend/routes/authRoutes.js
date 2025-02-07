@@ -13,12 +13,12 @@ const cacheQuery = require("../cache/utils/cacheQuery");
 const { invalidateCache } = require("../cache/utils/invalidateCache");
 const cacheConfig = require("../cache/config/cacheConfig");
 
-const jwtSecret = process.env.DEV_JWT_SECRET;
+const jwtSecret = process.env.PROD_JWT_SECRET;
 if (!jwtSecret) {
   console.error(
-    "Error: DEV_JWT_SECRET is missing in the environment variables."
+    "Error: PROD_JWT_SECRET is missing in the environment variables."
   );
-  process.exit(1); // Stop the app if DEV_JWT_SECRET is not defined
+  process.exit(1); // Stop the app if PROD_JWT_SECRET is not defined
 }
 
 const validRoles = ["admin", "user"]; // Add more roles as needed
