@@ -83,7 +83,7 @@ jobs:
               git fetch origin main
               git reset --hard origin/main
             fi
-  
+
             echo "Generating .env.server file..."
             cat > "$ENV_FILE" << EOF
             NODE_ENV=production

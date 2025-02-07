@@ -87,14 +87,16 @@ const HeroJobPortal = () => {
           {
             params: {
               page,
-              component:
-                "Empowering College Students to Discover Job Opportunities",
+              component: "HeroJobBefore",
             },
           }
         );
 
         if (response.data) {
-          setTitlee(response.data.content || "JobHeroBefore");
+          setTitlee(
+            response.data.content ||
+              "Empowering College Students to Discover Job Opportunities"
+          );
           setParagraph(
             Array.isArray(response.data.paragraphs)
               ? response.data.paragraphs.join("\n")
