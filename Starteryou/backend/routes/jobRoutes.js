@@ -18,7 +18,7 @@ router.post("/create-job", authorize("employer"), async (req, res) => {
     res.status(500).json({
       success: false,
       msg: "Some error occured while listing New Job",
-      error,
+      error: error.message,
     });
   }
 });
@@ -76,7 +76,7 @@ router.get(
       res.status(500).json({
         success: false,
         msg: "Some error occured while listing New Job",
-        error,
+        error: error.message,
       });
     }
   }
@@ -103,7 +103,7 @@ router.get(
       res.status(500).json({
         success: false,
         msg: "Some error occured while fetching this Job",
-        error,
+        error: error.message,
       });
     }
   }
@@ -129,7 +129,7 @@ router.put("/update-job/:id", authorize("employer"), async (req, res) => {
     res.status(500).json({
       success: false,
       msg: "Some error occured while updating the Jobs",
-      error,
+      error: error.message,
     });
   }
 });
@@ -142,16 +142,41 @@ router.delete("/delete-job/:id", authorize("employer"), async (req, res) => {
     const deleteJob = await Job.findByIdAndDelete(id);
     if (!deleteJob) {
       return res.status(404).json({
-        success: true,
-        msg: "Job deleted successfully",
-        data: deleteJob,
+        success: false,
+        msg: "Job not found!",
       });
     }
+    res.status(200).json({
+      success: true,
+      msg: "Job deleted successfully",
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
       msg: "Some error occured while deleting the job",
-      error,
+      error: error.message,
+    });
+  }
+});
+
+router.get("/fetch-posted-jobs", authorize("employer"), async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    const postedJobs = await Job.find({ postedBy: userId });
+    if (postedJobs.length === 0) {
+      return res.status(404).json({ msg: "No jobs found for this employer" });
+    }
+    res.status(200).json({
+      success: true,
+      length: postedJobs.length,
+      msg: "Posted jobs fetched successfully",
+      data: postedJobs,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      msg: "Some error occured while fetching the posted jobs",
+      error: error.message,
     });
   }
 });

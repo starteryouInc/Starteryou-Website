@@ -9,6 +9,7 @@ const jobRoutes = require("./jobRoutes");
 const profileRoutes = require("./profileRoutes");
 const jobApplicationRoutes = require("./jobApplicationRoutes");
 const bookmarkRoutes = require("./bookmarkRoutes");
+const companyProfileRoutes = require("./companyProfileRoutes");
 const authenticate = require("../middleware/authMiddleware");
 
 // Store all API endpoints and their descriptions
@@ -468,6 +469,11 @@ router.use(
   jobApplicationRoutes
 );
 router.use("/api/v1/jobportal/bookmarks", authenticate, bookmarkRoutes);
+router.use(
+  "/api/v1/jobportal/companyProfile",
+  authenticate,
+  companyProfileRoutes
+);
 
 // API documentation endpoint with enhanced information
 router.get("/api/docs", (req, res) => {

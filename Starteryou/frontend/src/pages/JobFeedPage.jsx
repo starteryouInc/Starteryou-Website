@@ -92,21 +92,29 @@ const JobFeedPage = () => {
       // Fetch job details for each jobId in the applications list
       const appliedJobs = await Promise.all(
         data.applications.map(async (application) => {
-          const jobResponse = await axios.get(
-            `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getJobById(
-              application.jobId
-            )}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
+          try {
+            const jobResponse = await axios.get(
+              `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getJobById(
+                application.jobId
+              )}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            return jobResponse.data.data;
+          } catch (error) {
+            if (error.response?.status === 404) {
+              console.warn(`Job ${application.jobId} not found, skipping it.`);
+              return null;
             }
-          );
-          return jobResponse.data.data;
+            throw error;
+          }
         })
       );
 
-      setAppliedJobs(appliedJobs);
+      setAppliedJobs(appliedJobs.filter((job) => job !== null));
     } catch (error) {
       toast.error(error.response?.data?.msg);
     } finally {
@@ -128,20 +136,28 @@ const JobFeedPage = () => {
       );
       const savedJobs = await Promise.all(
         data.bookmarked.map(async (saved) => {
-          const jobResponse = await axios.get(
-            `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getJobById(
-              saved.jobId
-            )}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
+          try {
+            const jobResponse = await axios.get(
+              `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getJobById(
+                saved.jobId
+              )}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            return jobResponse.data.data;
+          } catch (error) {
+            if (error.response?.status === 404) {
+              console.warn(`Job ${saved.jobId} not found, skipping it.`);
+              return null;
             }
-          );
-          return jobResponse.data.data;
+            throw error;
+          }
         })
       );
-      setSavedJobs(savedJobs);
+      setSavedJobs(savedJobs.filter((job) => job !== null));
     } catch (error) {
       toast.error(error.response.data.msg);
     } finally {
@@ -211,7 +227,10 @@ const JobFeedPage = () => {
         </section>
         <section className="section-two">
           <ul className="flex justify-between md:justify-start md:space-x-4">
-            {["Recommended", ...(role !== "employer" ? ["Applied", "Saved"] : [])].map((tab) => (
+            {[
+              "Recommended",
+              ...(role !== "employer" ? ["Applied", "Saved"] : []),
+            ].map((tab) => (
               <li
                 key={tab}
                 className={`cursor-pointer ${

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "../styles/RightSide.css";
 import EditPen from "/UserProfile/EditPen.svg";
 import { PiBagSimpleFill } from "react-icons/pi";
@@ -7,8 +7,11 @@ import { API_CONFIG } from "../../../config/api";
 import { useUserContext } from "../../../context/UserContext";
 import { toast } from "react-toastify";
 import axios from "axios";
+import EditWork from "./EditableForms/EditWork";
 
 const WorkCard = ({ openWorkForm, data, getProfileFieldData }) => {
+  const [selectedExp, setSelectedExp] = useState(null);
+  const [openEditWork, setOpenEditWork] = useState(false);
   const { user } = useUserContext();
 
   const token = user?.token;
@@ -85,6 +88,10 @@ const WorkCard = ({ openWorkForm, data, getProfileFieldData }) => {
                 <div className="icons flex items-center space-x-2">
                   <img
                     src={EditPen}
+                    onClick={() => {
+                      setSelectedExp(e);
+                      setOpenEditWork(true);
+                    }}
                     alt="Edit Experience"
                     className="cursor-pointer ml-auto"
                   />
@@ -98,6 +105,18 @@ const WorkCard = ({ openWorkForm, data, getProfileFieldData }) => {
             ))
           : ""}
       </section>
+      {openEditWork && (
+        <div
+          className="pop-up py-3 fixed inset-0 bg-black bg-opacity-50 flex items-start
+         justify-center z-50 overflow-y-scroll"
+        >
+          <EditWork
+            getProfileFieldData={getProfileFieldData}
+            job={selectedExp}
+            closeEditWork={() => setOpenEditWork(false)}
+          />
+        </div>
+      )}
     </div>
   );
 };

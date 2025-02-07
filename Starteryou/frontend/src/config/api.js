@@ -23,6 +23,7 @@ export const API_CONFIG = {
     getJobById: (id) => `/api/v1/jobportal/jobs/fetch-job/${id}`,
     updateJob: (id) => `/api/v1/jobportal/jobs/update-job/${id}`,
     deleteJob: (id) => `/api/v1/jobportal/jobs/delete-job/${id}`,
+    getPostedJobs: "/api/v1/jobportal/jobs/fetch-posted-jobs",
     // Register and Login API's
     userEmpRegister: "/api/v1/userAuth/users-emp-register",
     userSeekerRegister: "/api/v1/userAuth/users-seeker-register",
@@ -35,6 +36,8 @@ export const API_CONFIG = {
     // Bookmark Job API's
     bookmarkJob: (jobId) =>
       `/api/v1/jobportal/bookmarks/${jobId}/bookmarked-job`,
+    unbookmarkJob: (jobId) =>
+      `/api/v1/jobportal/bookmarks/${jobId}/unbookmark-job`,
     getBookmarkedJobs: "/api/v1/jobportal/bookmarks/fetch-bookmarked-jobs",
     // User Profile API's
     createUserProfile: "/api/v1/jobportal/profile/create-profile",
@@ -50,12 +53,16 @@ export const API_CONFIG = {
     // Work Experience:
     addWorkExperience: (userId) =>
       `/api/v1/jobportal/profile/add-workExperience/${userId}`,
+    updateWorkExperience: (userId, subDocId) =>
+      `/api/v1/jobportal/profile/update-workExperience/${userId}/${subDocId}`,
     deleteWorkExperience: (userId, subDocId) =>
       `/api/v1/jobportal/profile/delete-workExperience/${userId}/${subDocId}`,
 
     // Education Details:
     addEducation: (userId) =>
       `/api/v1/jobportal/profile/add-educationDetails/${userId}`,
+    updateEducation: (userId, subDocId) =>
+      `/api/v1/jobportal/profile/update-educationDetails/${userId}/${subDocId}`,
     deleteEducation: (userId, subDocId) =>
       `/api/v1/jobportal/profile/delete-educationDetails/${userId}/${subDocId}`,
 
@@ -67,11 +74,15 @@ export const API_CONFIG = {
     // Certifications:
     addCertificate: (userId) =>
       `/api/v1/jobportal/profile/add-certifications/${userId}`,
+    updateCertificate: (userId, subDocId) =>
+      `/api/v1/jobportal/profile/update-certifications/${userId}/${subDocId}`,
     deleteCertificate: (userId, subDocId) =>
       `/api/v1/jobportal/profile/delete-certifications/${userId}/${subDocId}`,
 
     // Projects:
     addProject: (userId) => `/api/v1/jobportal/profile/add-projects/${userId}`,
+    updateProject: (userId, subDocId) =>
+      `/api/v1/jobportal/profile/update-projects/${userId}/${subDocId}`,
     deleteProject: (userId, subDocId) =>
       `/api/v1/jobportal/profile/delete-projects/${userId}/${subDocId}`,
 

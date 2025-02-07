@@ -6,22 +6,22 @@ import { API_CONFIG } from "../../config/api";
 import { toast } from "react-toastify";
 import axios from "axios";
 
-const CreateJobCard = ({ closeCreateJobCard }) => {
+const EditJobCard = ({ closeEditJobCard, editJob, getPostedJobs }) => {
   const navigate = useNavigate();
   const { user } = useUserContext();
   const token = user?.token;
   const [job, setJob] = useState({
-    title: "",
-    location: "",
-    industry: "",
-    jobType: "Full-time",
-    experienceLevel: "Entry",
-    workplaceType: "On-site",
+    title: editJob.title,
+    location: editJob.location,
+    industry: editJob.industry,
+    jobType: editJob.jobType,
+    experienceLevel: editJob.experienceLevel,
+    workplaceType: editJob.workplaceType,
     startDate: "",
     endDate: "",
-    salaryRange: { min: "", max: "" },
-    frequency: "Per Year",
-    description: "",
+    salaryRange: { min: editJob.salaryRange.min, max: editJob.salaryRange.max },
+    frequency: editJob.frequency,
+    description: editJob.description,
   });
 
   const clearAllFields = () => {
@@ -56,19 +56,17 @@ const CreateJobCard = ({ closeCreateJobCard }) => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
 
     const startDate = job.startDate ? new Date(job.startDate) : null;
     const endDate = job.endDate ? new Date(job.endDate) : null;
 
     try {
-      const companyName = user?.authenticatedUser?.companyName;
-      const { data } = await axios.post(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.createJob}`,
+      const { data } = await axios.put(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.updateJob(editJob._id)}`,
         {
           ...job,
-          companyName,
           startDate,
           endDate,
         },
@@ -80,28 +78,29 @@ const CreateJobCard = ({ closeCreateJobCard }) => {
       );
       toast.success(data.msg);
       clearAllFields();
+      closeEditJobCard();
+      getPostedJobs();
     } catch (error) {
       toast.error(error.response?.data?.msg);
-      // console.log(error.response?.data?.error);
     }
   };
 
-  useEffect(() => {
-    if (!token) {
-      toast.error("Please login to continue...");
-      navigate("/EmpSignUp");
-    }
-  }, []);
+  //   useEffect(() => {
+  //     if (!token) {
+  //       toast.error("Please login to continue...");
+  //       navigate("/EmpSignUp");
+  //     }
+  //   }, []);
 
   return (
     <>
       {/* <NavBar isEduHero={true} /> */}
       <div className="w-screen h-screen flex justify-center items-center">
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleEditSubmit}
           className="w-full max-w-3xl p-6 bg-white shadow-lg rounded-lg border border-gray-300"
         >
-          <h2 className="text-2xl font-semibold mb-4">Create Job</h2>
+          <h2 className="text-2xl font-semibold mb-4">Edit Job</h2>
           <div className="grid grid-cols-2 gap-6">
             {/* Left Column */}
             <div className="space-y-2">
@@ -286,12 +285,17 @@ const CreateJobCard = ({ closeCreateJobCard }) => {
           </div>
           {/* Submit Button */}
           <div className="mt-6 flex space-x-6">
-            <button onClick={closeCreateJobCard} className="w-1/2 px-6 py-2 border-2 border-purple-600 rounded font-semibold text-purple-600">Cancel</button>
+            <button
+              onClick={closeEditJobCard}
+              className="w-1/2 px-6 py-2 border-2 border-purple-600 rounded font-semibold text-purple-600"
+            >
+              Cancel
+            </button>
             <button
               type="submit"
               className="w-1/2 bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 font-semibold"
             >
-              Post Job
+              Update Job
             </button>
           </div>
         </form>
@@ -300,4 +304,4 @@ const CreateJobCard = ({ closeCreateJobCard }) => {
   );
 };
 
-export default CreateJobCard;
+export default EditJobCard;

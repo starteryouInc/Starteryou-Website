@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "../styles/RightSide.css";
 import EditPen from "/UserProfile/EditPen.svg";
 import EduHat from "/UserProfile/EduHat.svg";
@@ -7,8 +7,11 @@ import { API_CONFIG } from "../../../config/api";
 import { useUserContext } from "../../../context/UserContext";
 import { toast } from "react-toastify";
 import axios from "axios";
+import EditEducation from "./EditableForms/EditEducation";
 
 const EducationCard = ({ openEducationForm, data, getProfileFieldData }) => {
+  const [selectedEdu, setSelectedEdu] = useState(null)
+  const [openEditEdu, setOpenEditEdu] = useState(false);
   const { user } = useUserContext();
   const token = user?.token;
 
@@ -95,6 +98,10 @@ const EducationCard = ({ openEducationForm, data, getProfileFieldData }) => {
                 <div className="icons flex items-center space-x-2">
                   <img
                     src={EditPen}
+                    onClick={() => {
+                      setSelectedEdu(e)
+                      setOpenEditEdu(true)
+                    }}
                     alt="Edit Education details"
                     className="cursor-pointer ml-auto"
                   />
@@ -108,6 +115,18 @@ const EducationCard = ({ openEducationForm, data, getProfileFieldData }) => {
             ))
           : ""}
       </section>
+      {openEditEdu && (
+        <div
+          className="pop-up py-3 fixed inset-0 bg-black bg-opacity-50 flex items-start
+         justify-center z-50 overflow-y-scroll"
+        >
+          <EditEducation
+            getProfileFieldData={getProfileFieldData}
+            education={selectedEdu}
+            closeEditEdu={() => setOpenEditEdu(false)}
+          />
+        </div>
+      )}
     </div>
   );
 };

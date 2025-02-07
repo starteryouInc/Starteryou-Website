@@ -5,7 +5,7 @@ import ExperienceIcon from "/JobFeedPage/Experience.svg";
 import MissingSkillsIcon from "/JobFeedPage/Missing.svg";
 import componayLogo from "/JobFeedPage/CompanyLogo.svg";
 import { FaBookmark, FaRegBookmark } from "react-icons/fa";
-import { differenceInDays } from "date-fns";
+import { differenceInDays, format } from "date-fns";
 import { useUserContext } from "../../context/UserContext";
 import ApplyJobCard from "../JobFeedPage/ApplyJobCard";
 
@@ -22,6 +22,10 @@ const JobDetailCard = ({ jobDetails, onClose, savedJob }) => {
     if (!salaryRange || !salaryRange.min || !salaryRange.max) return "N/A";
     const { min, max } = salaryRange;
     return `$${min.toLocaleString()} - $${max.toLocaleString()}`;
+  };
+  const formatDate = (dateString) => {
+    if (!dateString) return ""; 
+    return format(new Date(dateString), "dd MMMM yyyy");
   };
 
   return (
@@ -89,11 +93,17 @@ const JobDetailCard = ({ jobDetails, onClose, savedJob }) => {
               <li>Regards</li>
               <li>{jobDetails.companyName} Talent Acquisition Team</li>
               <li>More Info</li>
+              {jobDetails.startDate && (
+                <li>Start Date: {formatDate(jobDetails.startDate)}</li>
+              )}
               <li>Job Type: {jobDetails.jobType}</li>
+              <li>Workplace Type: {jobDetails.workplaceType}</li>
               <li>
                 Expected Salary:{" "}
                 {jobDetails.salaryRange
-                  ? formatSalaryRange(jobDetails.salaryRange)
+                  ? `${formatSalaryRange(jobDetails.salaryRange)} / ${
+                      jobDetails.frequency
+                    }`
                   : "N/A"}
               </li>
             </ul>

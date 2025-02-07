@@ -102,7 +102,7 @@ const Navbar = ({ isEduHero }) => {
             // onClick={handleRedirects}
             className="bg-[#D9502E] text-sm sm:text-base lg:text-xl text-[white] border-[2px] font-bold border-[#D9502E] px-3 py-1 lg:px-4 lg:py-2 rounded-lg uppercase"
           >
-            <Link to="/listJob">Post Job</Link>
+            <Link to="/companyDashboard/postedJobs">Post Job</Link>
           </button>
         </div>
       ) : (
@@ -115,7 +115,7 @@ const Navbar = ({ isEduHero }) => {
           </button>
           {role === "employer" ? (
             <button className="bg-[#D9502E] text-sm sm:text-base lg:text-xl text-[white] border-[2px] font-bold border-[#D9502E] px-3 py-1 lg:px-4 lg:py-2 rounded-lg uppercase">
-              <Link to="/listJob">Post Job</Link>
+              <Link to="/companyDashboard/postedJobs">Post Job</Link>
             </button>
           ) : (
             <button>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "../styles/RightSide.css";
 import EditPen from "/UserProfile/EditPen.svg";
 import { GrCertificate } from "react-icons/gr";
@@ -7,12 +7,15 @@ import { API_CONFIG } from "../../../config/api";
 import { useUserContext } from "../../../context/UserContext";
 import { toast } from "react-toastify";
 import axios from "axios";
+import EditCourse from "./EditableForms/EditCourse";
 
 const CoursCertiCard = ({
   openCertificationForm,
   data,
   getProfileFieldData,
 }) => {
+  const [selectedCourse, setSelectedCourse] = useState(null)
+  const [openEditCourse, setOpenEditCourse] = useState(false)
   const { user } = useUserContext();
   const token = user?.token;
 
@@ -95,6 +98,10 @@ const CoursCertiCard = ({
                 <div className="icons flex items-center space-x-2">
                   <img
                     src={EditPen}
+                    onClick={() => {
+                      setSelectedCourse(e)
+                      setOpenEditCourse(true)
+                    }}
                     alt="Edit Education details"
                     className="cursor-pointer ml-auto"
                   />
@@ -108,6 +115,18 @@ const CoursCertiCard = ({
             ))
           : ""}
       </section>
+      {openEditCourse && (
+        <div
+          className="pop-up py-3 fixed inset-0 bg-black bg-opacity-50 flex items-start
+         justify-center z-50 overflow-y-scroll"
+        >
+          <EditCourse
+            getProfileFieldData={getProfileFieldData}
+            course={selectedCourse}
+            closeEditCourse={() => setOpenEditCourse(false)}
+          />
+        </div>
+      )}
     </div>
   );
 };

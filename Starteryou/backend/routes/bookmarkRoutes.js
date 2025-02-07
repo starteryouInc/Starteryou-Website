@@ -3,7 +3,7 @@ const router = Router();
 const BookmarkedJob = require("../models/BookmarkedJobs");
 const authorize = require("../middleware/roleMiddleware");
 
-// Route to bookmark the job
+// Route to save the job
 router.post(
   "/:jobId/bookmarked-job",
   authorize("jobSeeker"),
@@ -29,13 +29,38 @@ router.post(
       res.status(500).json({
         success: false,
         msg: "Some error occured while bookmarking the job",
-        error,
+        error: error.message,
       });
     }
   }
 );
 
-// Route to fetch the bookmark jobs my particular user
+// Route to unsave the job
+router.delete(
+  "/:jobId/unbookmark-job",
+  authorize("jobSeeker"),
+  async (req, res) => {
+    const userId = req.user?.id;
+    const {
+      params: { jobId },
+    } = req;
+    try {
+      await BookmarkedJob.findOneAndDelete({ userId, jobId });
+      res.status(201).json({
+        success: true,
+        msg: "Job unsaved successfully",
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        msg: "Some error occured while unsaving the job",
+        error: error.message,
+      });
+    }
+  }
+);
+
+// Route to fetch the saved jobs my particular user
 router.get(
   "/fetch-bookmarked-jobs",
   authorize("jobSeeker"),
@@ -55,7 +80,7 @@ router.get(
       res.status(500).json({
         success: false,
         msg: "Some error occured while fetching the bookmarked jobs",
-        error,
+        error: error.message,
       });
     }
   }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "../styles/RightSide.css";
 import EditPen from "/UserProfile/EditPen.svg";
 import ProjectIcon from "/UserProfile/ProjectIcon.svg";
@@ -7,8 +7,11 @@ import { useUserContext } from "../../../context/UserContext";
 import axios from "axios";
 import { API_CONFIG } from "../../../config/api";
 import { toast } from "react-toastify";
+import EditProject from "./EditableForms/EditProject";
 
 const ProjectCard = ({ openProjectForm, data, getProfileFieldData }) => {
+  const [selectedProject, setSelectedProject] = useState(null)
+  const [openEditProject, setOpenEditProject] = useState(false)
   const { user } = useUserContext();
   const token = user?.token;
 
@@ -90,6 +93,10 @@ const ProjectCard = ({ openProjectForm, data, getProfileFieldData }) => {
                 <div className="icons flex items-center space-x-2">
                   <img
                     src={EditPen}
+                    onClick={() => {
+                      setSelectedProject(e)
+                      setOpenEditProject(true)
+                    }}
                     alt="Edit Education details"
                     className="cursor-pointer ml-auto"
                   />
@@ -103,6 +110,18 @@ const ProjectCard = ({ openProjectForm, data, getProfileFieldData }) => {
             ))
           : ""}
       </section>
+      {openEditProject && (
+        <div
+          className="pop-up py-3 fixed inset-0 bg-black bg-opacity-50 flex items-start
+         justify-center z-50 overflow-y-scroll"
+        >
+          <EditProject
+            getProfileFieldData={getProfileFieldData}
+            project={selectedProject}
+            closeEditProject={() => setOpenEditProject(false)}
+          />
+        </div>
+      )}
     </div>
   );
 };
