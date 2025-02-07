@@ -217,23 +217,27 @@ const BestBuddy = () => {
         </div>
       )}
 
-      {/* Icons and Uploaded Image */}
-      <div className="flex flex-col items-center mt-10">
+     {/* Icons and Uploaded Image */}
+     <div className="flex flex-col items-center mt-10">
         {/* Icons */}
-        <div className="flex flex-wrap justify-center space-x-6">
-          {icons.map(({ src, alt, text, link }, index) => (
-            <a href={link} key={index} className="flex items-center mb-4">
-              <img
-                src={src}
-                alt={alt}
-                className="w-[20px] h-[20px] md:w-[20px] md:h-[20px]"
-              />
-              <span className="ml-2 text-[9px] sm:text-sm italic text-[#1F2329]">
-                {text}
-              </span>
-            </a>
-          ))}
+        <div className="flex flex-col items-center space-y-4 sm:hidden">
+          <div className="flex flex-wrap justify-center space-x-6">
+            {icons.map(({ src, alt, text, link }, index) => (
+              <a href={link} key={index} className="flex items-center mb-4">
+                {" "}
+                <img
+                  src={src}
+                  alt={alt}
+                  className="w-[20px] h-[20px] md:w-[20px] md:h-[20px]"
+                />
+                <span className="ml-2 text-[9px] sm:text-sm italic text-[#1F2329]">
+                  {text}
+                </span>
+              </a>
+            ))}
+          </div>
         </div>
+
          {/*  medium and large screens */}
          <div className="hidden sm:flex flex-wrap justify-center space-x-6 ">
           {icons.map(({ src, alt, text, link }, index) => (
