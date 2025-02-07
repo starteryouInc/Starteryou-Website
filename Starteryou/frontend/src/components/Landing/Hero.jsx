@@ -17,7 +17,7 @@ const Hero = () => {
   const [image3, setImage3] = useState("/LandingPage/Heroimg3.png");
 
   // States and Variables for TEXT EDITING API
-  const [title, setTitle] = useState("Collaborate Togetherr");
+  const [title, setTitle] = useState("Collaborate Together");
   const [paragraph, setParagraph] = useState("Perfectly working Hero");
   const [titleCounter, setTitleCounter] = useState(3); // Counter for remaining words in title
   const [paragraphCounter, setParagraphCounter] = useState(11); // Counter for remaining words in paragraph
