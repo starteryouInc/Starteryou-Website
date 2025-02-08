@@ -27,18 +27,25 @@ jobs:
       - name: Check if `develop` is ahead of `main`
         id: check_changes
         run: |
-          # Ensure the develop branch exists
+          # Ensure the develop branch exists locally
           if ! git show-ref --quiet refs/heads/develop; then
-            echo "Error: 'develop' branch not found locally. Exiting."
-            exit 1
+            echo "'develop' branch not found locally. Fetching from remote..."
+            git fetch origin develop:develop
+            git checkout develop
           fi
-
+      
+          # Ensure we are on the latest version of develop
+          git checkout develop
+          git pull origin develop
+      
           ahead_count=$(git rev-list --count origin/main..origin/develop)
           if [ "$ahead_count" -eq 0 ]; then
             echo "No new commits in develop. Skipping PR creation."
             exit 0
           fi
+      
           echo "New commits detected in develop. Proceeding with PR."
+
 
       - name: Create pull request
         if: success()
