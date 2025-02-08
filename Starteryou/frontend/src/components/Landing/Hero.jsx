@@ -22,7 +22,7 @@ const Hero = () => {
   const [titleCounter, setTitleCounter] = useState(3); // Counter for remaining words in title
   const [paragraphCounter, setParagraphCounter] = useState(11); // Counter for remaining words in paragraph
   const [isEditing, setIsEditing] = useState(false);
-  const page = "HomePage";
+  const page = "HomePage-1";
 
   // Titles to identify each image in the backend
   const titles = ["hero1", "hero2", "hero3"]; // Different titles for each image
