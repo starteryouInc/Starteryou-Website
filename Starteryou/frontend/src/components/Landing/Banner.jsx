@@ -9,6 +9,8 @@ const Banner = () => {
   const { isAdmin } = useNavigation();
   const [title, setTitle] = useState("Banner Title");
   const [paragraph, setParagraph] = useState("Perfectly working Banner");
+  const [titleCounter, setTitleCounter] = useState(5); // Word counter for title
+  const [paragraphCounter, setParagraphCounter] = useState(15); // Word counter for paragraph
   const [isEditing, setIsEditing] = useState(false);
   const page = "HomePage";
 
@@ -50,7 +52,7 @@ const Banner = () => {
       console.log("BannerComp Data is saved: ", response);
     } catch (error) {
       console.log(
-        "Error occured while saving the content(BannerComp): ",
+        "Error occurred while saving the content(BannerComp): ",
         error
       );
     }
@@ -62,23 +64,25 @@ const Banner = () => {
 
   return (
     <div className="w-full px-4 md:px-8 lg:px-16 py-6 md:py-4">
-      {" "}
       <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-        {" "}
         {isEditing ? (
           <div className="mt-10 flex flex-col space-y-4 z-50">
             <textarea
               value={title}
-              onChange={(e) => setTitle(MaxWords(e.target.value, 5))}
+              onChange={(e) => setTitle(MaxWords(e.target.value, 5, setTitleCounter))}
               placeholder="Title here..."
               className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
             />
+            <p className="text-sm text-grey-400">{titleCounter} words remaining</p>
+
             <textarea
               value={paragraph}
-              onChange={(e) => setParagraph(MaxWords(e.target.value, 15))}
+              onChange={(e) => setParagraph(MaxWords(e.target.value, 15, setParagraphCounter))}
               placeholder="Paragraph here..."
               className="lg:w-[700px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
             />
+            <p className="text-sm text-grey-400">{paragraphCounter} words remaining</p>
+
             <div className="lg:w-[400px] flex items-center justify-between space-x-2 text-white">
               <button
                 onClick={saveContent}
@@ -113,10 +117,8 @@ const Banner = () => {
             )}
           </div>
         )}
-        {/*  Image */}
+        {/* Image */}
         <div className="md:flex-1 md:max-w-[35%] hidden md:block">
-          {" "}
-          {/* Reduced max width */}
           <img
             src="/LandingPage/Icons/Banner.png"
             alt="Placeholder"

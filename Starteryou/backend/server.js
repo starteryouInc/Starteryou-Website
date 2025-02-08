@@ -13,7 +13,10 @@ const teamRoutes = require("./routes/teamRoutes");
 const { mountRoutes } = require("./routes"); // Main routes including API docs
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 const authRoutes = require("./routes/authRoutes");
+const newsletterRoutes = require("./routes/newsletterRoutes"); //newsletter subscribers
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
+
+
 // Initialize Express app
 const app = express();
 // Middleware
@@ -21,6 +24,9 @@ dotenv.config();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use("/api/newsletter", newsletterRoutes);  //Newsletter subscribers
+
 
 // MongoDB connection
 (async () => {
@@ -60,6 +66,8 @@ const swaggerOptions = {
         name: "Authentication",
         description: "Routes for Authentication endpoints",
       },
+      { name: "Newsletter", description: "Routes for newsletter subscriptions" }, // Add this line
+
     ],
   },
   apis: ["./routes/*.js"], // Path to your API route files
@@ -150,6 +158,8 @@ app.use((err, req, res, next) => {
 // Start Server
 const PORT = process.env.PORT || 3000;
 
+
+// chek dev branch
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://dev.starteryou.com:${PORT}`);
   console.log(

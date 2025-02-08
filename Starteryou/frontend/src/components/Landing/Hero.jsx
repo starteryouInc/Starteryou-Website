@@ -5,18 +5,22 @@ import { API_CONFIG } from "@config/api";
 import { toast } from "react-toastify";
 import { FaPencilAlt } from "react-icons/fa";
 import axios from "axios";
-import { MaxWords } from "../Common/wordValidation";
+import { MaxWords } from "../Common/wordValidation"; // Import MaxWords function
 
 const Hero = () => {
   const { isAdmin } = useNavigation();
   const [error, setError] = useState(null); // Error state for handling errors
+
   // State variables for each image
   const [image1, setImage1] = useState("/LandingPage/Heroimg3.png");
   const [image2, setImage2] = useState("/LandingPage/Heroimg2.jpg");
   const [image3, setImage3] = useState("/LandingPage/Heroimg3.png");
+
   // States and Variables for TEXT EDITING API
-  const [title, setTitle] = useState("Collaborate Togetherr");
+  const [title, setTitle] = useState("Collaborate Together");
   const [paragraph, setParagraph] = useState("Perfectly working Hero");
+  const [titleCounter, setTitleCounter] = useState(3); // Counter for remaining words in title
+  const [paragraphCounter, setParagraphCounter] = useState(11); // Counter for remaining words in paragraph
   const [isEditing, setIsEditing] = useState(false);
   const page = "HomePage";
 
@@ -69,6 +73,7 @@ const Hero = () => {
 
       const data = await response.json();
       console.log(`Image updated successfully for ${imageType}:`, data);
+
       // Update the specific image URL in the state
       if (imageType === "image1") {
         setImage1(URL.createObjectURL(file));
@@ -124,6 +129,7 @@ const Hero = () => {
       setIsEditing(false);
       console.log("HeroComp Data is saved: ", response);
     } catch (error) {
+
       console.log("Error occurred while saving the content(HeroComp): ", error);
     }
   };
@@ -131,6 +137,15 @@ const Hero = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Update title and paragraph handlers
+  const handleTitleChange = (e) => {
+    setTitle(MaxWords(e.target.value, 3, setTitleCounter));
+  };
+
+  const handleParagraphChange = (e) => {
+    setParagraph(MaxWords(e.target.value, 11, setParagraphCounter));
+  };
 
   return (
     <section className="relative w-full min-h-screen bg-[#2700D3] flex flex-col justify-center items-center text-center text-white px-4 overflow-hidden">
@@ -156,16 +171,18 @@ const Hero = () => {
         <div className="mt-10 lg:mt-40 flex flex-col items-center space-y-4 z-10">
           <textarea
             value={title}
-            onChange={(e) => setTitle(MaxWords(e.target.value, 3))}
+            onChange={handleTitleChange}
             placeholder="Title here..."
             className="lg:w-[400px] p-2 bg-transparent border border-white rounded outline-none resize-none text-2xl text-gray-200 scrollbar"
           />
+          <p className="text-sm text-white">{titleCounter} words remaining</p>
           <textarea
             value={paragraph}
-            onChange={(e) => setParagraph(MaxWords(e.target.value, 11))}
+            onChange={handleParagraphChange}
             placeholder="Paragraph here..."
             className="lg:w-[700px] p-2 bg-transparent border border-white rounded outline-none resize-none text-xl text-gray-200 scrollbar"
           />
+          <p className="text-sm text-white">{paragraphCounter} words remaining</p>
           <div className="lg:w-[400px] flex items-center justify-between space-x-2">
             <button
               onClick={saveContent}
@@ -182,7 +199,6 @@ const Hero = () => {
           </div>
         </div>
       ) : (
-        // Main Heading and Subheading container:
         <div className="relative mt-[120px] lg:mt-[190px] flex flex-col items-center z-10">
           <h1 className="font-bold text-[40px] sm:text-[64px] leading-tight text-black uppercase">
             {title}
@@ -198,7 +214,7 @@ const Hero = () => {
           )}
         </div>
       )}
-
+      
       {/* Buttons */}
       <div className="mt-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-8 z-10">
         <button className="bg-white text-[#D9502E] font-bold px-8 py-4 rounded-md text-lg">
