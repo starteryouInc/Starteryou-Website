@@ -4,8 +4,12 @@ import { Carousel } from "react-responsive-carousel";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import TermsModal from "../Common/TermsModal";
+import Privacy from "../Common/Privacy";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 const EmployerSignUp = () => {
+  const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
   const reviews = [
     {
       stars: 5,
@@ -211,11 +215,23 @@ const EmployerSignUp = () => {
                 className="h-4 w-4 text-indigo-600 border border-[#CBD5E1] rounded focus:ring-indigo-500"
                 required
               />
-              <label
-                htmlFor="terms"
-                className="ml-2 block text-sm text-gray-700"
-              >
-                I agree to the terms and conditions
+              <label htmlFor="terms" className="ml-2 text-sm text-gray-700">
+                I agree to the
+                <button
+                  type="button"
+                  className="text-blue-600 hover:underline mx-1"
+                  onClick={() => setShowTerms(true)}
+                >
+                  Terms & Conditions
+                </button>
+                and
+                <button
+                  type="button"
+                  className="text-blue-600 hover:underline ml-1"
+                  onClick={() => setShowPrivacy(true)}
+                >
+                  Privacy Policy
+                </button>
               </label>
             </div>
 
@@ -236,6 +252,9 @@ const EmployerSignUp = () => {
             </p>
           </form>
         </div>
+        {/* Modals */}
+        <TermsModal isOpen={showTerms} onClose={() => setShowTerms(false)} />
+        <Privacy isOpen={showPrivacy} onClose={() => setShowPrivacy(false)} />
       </div>
     </div>
   );
