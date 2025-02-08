@@ -24,7 +24,6 @@ const Hero = () => {
   const [paragraphWordsLeft, setParagraphWordsLeft] = useState(25); // Counter for the
   // Titles to identify each image in the backend
   const titles = ["hero1", "hero2", "hero3"]; // Different titles for each image
-
   // Fetch images by title on component mount
   useEffect(() => {
     const fetchImages = async () => {
