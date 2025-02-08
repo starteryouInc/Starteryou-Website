@@ -8,7 +8,6 @@ const swaggerUi = require("swagger-ui-express");
 const router = express.Router();
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 const Employee = require("../models/EmployeeModel");
-
 const jwtSecret = process.env.DEV_JWT_SECRET;
 if (!jwtSecret) {
   console.error("Error: DEV_JWT_SECRET is missing in the environment variables.");
@@ -27,24 +26,6 @@ const generateAccessToken = (user) => {
 const generateRefreshToken = (user) => {
   return jwt.sign({ id: user._id }, jwtSecret, {
     expiresIn: "7d",
-  });
-};
-
-// Helper function to set cookies
-const setCookies = (res, accessToken, refreshToken) => {
-  res.cookie("accessToken", accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 15 * 60 * 1000, // 15 minutes
-    path: "/",
-  });
-
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: false,
-    sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 };
 
@@ -336,12 +317,13 @@ const login = async (req, res) => {
 
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
-
-    setCookies(res, accessToken, refreshToken); // Set cookies
-
+   
     // Store the refresh token in the database
     user.refreshToken = refreshToken;
     await user.save();
+    req.session.loggedIn = true;
+    req.session.user = { id: user._id, role: user.role, lastActive: Date.now() };
+    req.session.save();
 
     return res.status(200).json({
       message: "Login successful",
@@ -358,10 +340,19 @@ const login = async (req, res) => {
   }
 };
 
-
+const logout = (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ message: "Failed to log out", success: false });
+    }
+    res.clearCookie("connect.sid");
+    res.status(200).json({ message: "User logged out successfully", success: true });
+  });
+};
 
 // Set up router
 router.post("/register", register);
 router.post("/login", login);
+router.get("/logout", logout);
 
 module.exports = router;

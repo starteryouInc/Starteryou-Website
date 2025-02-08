@@ -14,15 +14,40 @@ const { mountRoutes } = require("./routes"); // Main routes including API docs
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 const authRoutes = require("./routes/authRoutes");
 const cookieParser = require("cookie-parser");
+const session = require("express-session");
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
+
 // Initialize Express app
 const app = express();
+
 // Middleware
 dotenv.config();
-app.use(cors());
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || "http://localhost:8080",// Frontend URL (change this)
+  methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
+  allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
+  credentials: true, // Allow cookies
+};
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Configure session middleware
+app.use(
+  session({
+    secret: 'your-secret-key',  // You can change the secret
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: false,  // Set to true if using HTTPS
+      sameSite: "strict",
+      maxAge: 2 * 6 * 1000  // Default session expires after 1 hour
+    }
+  })
+);
+
 // MongoDB connection
 (async () => {
   try {
@@ -39,6 +64,11 @@ const cacheOptions = {
 };
 app.use("/docs", express.static(path.join(__dirname, "docs"), cacheOptions));
 console.log("📂 Serving static files from:", path.join(__dirname, "docs"));
+
+// Home Page Route
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname + '/index.html'));
+});
 
 // Swagger Configuration
 const swaggerOptions = {
@@ -92,7 +122,7 @@ app.use("/api/files", fileRoutes);
  * @swagger
  * tags:
  *   - name: TeamRoutes
- *     description: Routes for file operations
+ *     description: Routes for team operations
  */
 app.use("/api", teamRoutes);
 
@@ -152,21 +182,21 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://dev.starteryou.com:${PORT}`);
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
   console.log(
-    `📖 Swagger Docs available at http://dev.starteryou.com:${PORT}/api-test`
+    `📖 Swagger Docs available at http://localhost:${PORT}/api-test`
   );
-  console.log(`💻 Health Check: http://dev.starteryou.com:${PORT}/health`);
+  console.log(`💻 Health Check: http://localhost:${PORT}/health`);
   console.log(
-    `🗄️ Database Status: http://dev.starteryou.com:${PORT}/db-status`
-  );
-  console.log(
-    `📚 API Documentation: http://dev.starteryou.com:${PORT}/api/docs`
+    `🗄️ Database Status: http://localhost:${PORT}/db-status`
   );
   console.log(
-    `📋 Postman Collection: http://dev.starteryou.com:${PORT}/api/docs/postman`
+    `📚 API Documentation: http://localhost:${PORT}/api/docs`
   );
   console.log(
-    `⚙️ File Verification: http://dev.starteryou.com:${PORT}/api/system/verify-all`
+    `📋 Postman Collection: http://localhost:${PORT}/api/docs/postman`
+  );
+  console.log(
+    `⚙️ File Verification: http://localhost:${PORT}/api/system/verify-all`
   );
 });
