@@ -22,13 +22,12 @@ const app = express();
 
 // Middleware
 dotenv.config();
-const corsOptions = {
-  origin: process.env.FRONTEND_URL || "http://localhost:8080",// Frontend URL (change this)
-  methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
-  allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
-  credentials: true, // Allow cookies
-};
-app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin: "http://localhost:8080",  // Frontend URL
+    credentials: true,  // Allow cookies to be sent
+  })
+);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -36,15 +35,15 @@ app.use(cookieParser());
 // Configure session middleware
 app.use(
   session({
-    secret: 'your-secret-key',  // You can change the secret
+    secret: "your-secret-key",
     resave: false,
     saveUninitialized: false,
     cookie: {
-      httpOnly: true,
+      httpOnly: true,  // Prevents client-side JS access
       secure: false,  // Set to true if using HTTPS
-      sameSite: "strict",
-      maxAge: 2 * 6 * 1000  // Default session expires after 1 hour
-    }
+      sameSite: "Lax", // Replace with "None" if using HTTPS
+      maxAge: 2 * 6 * 1000, // 1 hour
+    },
   })
 );
 
