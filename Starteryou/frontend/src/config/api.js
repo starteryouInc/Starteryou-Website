@@ -13,6 +13,6 @@ export const API_CONFIG = {
     teamApi: "/api/team",
     authLogin: "/api/v1/auth/login",
     authRegister: "/api/v1/auth/register",
-    newsletterApi: "/api/newsletter/subscribe"
+    newsletterApi: "/api/newsletter/subscribe",
   },
 };
