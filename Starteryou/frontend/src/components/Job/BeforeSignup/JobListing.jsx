@@ -24,9 +24,8 @@ const JobListing = () => {
   const [error, setError] = useState("");
   const page = "JobBeforeSignup";
   const [titleWordsLeft, setTitleWordsLeft] = useState(MAX_TITLE_WORDS);
-  const [paragraphWordsLeft, setParagraphWordsLeft] = useState(
-    MAX_PARAGRAPH_WORDS
-  );
+  const [paragraphWordsLeft, setParagraphWordsLeft] =
+    useState(MAX_PARAGRAPH_WORDS);
 
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
 
@@ -37,9 +36,7 @@ const JobListing = () => {
 
     if (wordCount > maxWords) {
       setCounter(maxWords - wordCount);
-      toast.error(
-        `Word limit exceeded! Maximum allowed is ${maxWords} words.`
-      );
+      toast.error(`Word limit exceeded! Maximum allowed is ${maxWords} words.`);
       return words.slice(0, maxWords).join(" "); // Truncate to max words
     }
 
@@ -63,10 +60,10 @@ const JobListing = () => {
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       setUploadedFile(url);
-      toast.success("File fetched successfully!");
+      // toast.success("File fetched successfully!");
     } catch (err) {
       console.error("Error fetching uploaded file:", err);
-      toast.error("Failed to fetch image. Please try again.");
+      // toast.error("Failed to fetch image. Please try again.");
     } finally {
       setHasFetchedOnce(true);
     }
@@ -122,7 +119,7 @@ const JobListing = () => {
               ? response.data.paragraphs.join("\n")
               : paragraphh
           );
-          toast.success("Content fetched successfully!");
+          // toast.success("Content fetched successfully!");
         }
       } catch (err) {
         console.error("Error fetching content:", err);
@@ -222,7 +219,9 @@ const JobListing = () => {
               <span className="text-sm text-gray-500">
                 {paragraphWordsLeft >= 0
                   ? `${paragraphWordsLeft} words left`
-                  : `Word limit exceeded by ${Math.abs(paragraphWordsLeft)} words`}
+                  : `Word limit exceeded by ${Math.abs(
+                      paragraphWordsLeft
+                    )} words`}
               </span>
               <textarea
                 value={paragraphh}
