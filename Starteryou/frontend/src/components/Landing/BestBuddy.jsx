@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
 import { API_CONFIG } from "@config/api";
+import { toast } from "react-toastify";
 import { FaPencilAlt } from "react-icons/fa";
 import axios from "axios";
 import { MaxWords } from "../Common/wordValidation";
@@ -44,9 +45,12 @@ const BestBuddy = () => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const title = "bestbuddy";
   const [error, setError] = useState(null);
-  // States and Variables for TEXT EDITING API
+
+  // States for text content and counters
   const [titleBB, setTitleBB] = useState("The best buddy for your career");
   const [paragraphBB, setParagraphBB] = useState("Perfectly working BestBuddy");
+  const [titleCounter, setTitleCounter] = useState(6); // Remaining word count for title
+  const [paragraphCounter, setParagraphCounter] = useState(30); // Remaining word count for paragraph
   const [isEditing, setIsEditing] = useState(false);
   const page = "HomePage";
 
@@ -130,7 +134,7 @@ const BestBuddy = () => {
       console.log("BestBuddyComp Data is saved: ", response);
     } catch (error) {
       console.log(
-        "Error occured while saving the content(BestBuddyComp): ",
+        "Error occurred while saving the content (BestBuddyComp): ",
         error
       );
     }
@@ -146,6 +150,14 @@ const BestBuddy = () => {
     };
   }, []);
 
+  // Update title and paragraph with MaxWords and counters
+  const handleTitleChange = (e) => {
+    setTitleBB(MaxWords(e.target.value, 6, setTitleCounter));
+  };
+
+  const handleParagraphChange = (e) => {
+    setParagraphBB(MaxWords(e.target.value, 30, setParagraphCounter));
+  };
   // useEffect(() => {
   //   fetchData();
   // }, []);
@@ -156,16 +168,24 @@ const BestBuddy = () => {
         <div className="mt-10 flex flex-col items-center space-y-4 z-50">
           <textarea
             value={titleBB}
-            onChange={(e) => setTitleBB(MaxWords(e.target.value, 6))}
+            onChange={handleTitleChange}
             placeholder="Title here..."
             className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
           />
+          <p className="text-sm text-grey-400">
+            {titleCounter} words remaining
+          </p>
+
           <textarea
             value={paragraphBB}
-            onChange={(e) => setParagraphBB(MaxWords(e.target.value, 30))}
+            onChange={handleParagraphChange}
             placeholder="Paragraph here..."
             className="lg:w-[700px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
           />
+          <p className="text-sm text-grey-400">
+            {paragraphCounter} words remaining
+          </p>
+
           <div className="lg:w-[400px] flex items-center justify-between space-x-2 text-white">
             <button
               onClick={saveContent}
@@ -219,6 +239,7 @@ const BestBuddy = () => {
             ))}
           </div>
         </div>
+
         {/*  medium and large screens */}
         <div className="hidden sm:flex flex-wrap justify-center space-x-6 ">
           {icons.map(({ src, alt, text, link }, index) => (

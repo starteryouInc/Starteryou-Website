@@ -12,7 +12,6 @@ const Employee = require("../models/EmployeeModel");
 const cacheQuery = require("../cache/utils/cacheQuery");
 const { invalidateCache } = require("../cache/utils/invalidateCache");
 const cacheConfig = require("../cache/config/cacheConfig");
-
 const jwtSecret = process.env.PROD_JWT_SECRET;
 if (!jwtSecret) {
   console.error(
@@ -20,7 +19,6 @@ if (!jwtSecret) {
   );
   process.exit(1); // Stop the app if PROD_JWT_SECRET is not defined
 }
-
 const validRoles = ["admin", "user"]; // Add more roles as needed
 
 // Helper functions to generate tokens
@@ -148,12 +146,10 @@ const register = async (req, res) => {
     const validEmployee = await Employee.findOne({ email });
     console.log("Valid Employee:", validEmployee); // Log the valid employee for debugging
     if (!validEmployee) {
-      return res
-        .status(400)
-        .json({
-          message: "This email is not associated with a valid employee",
-          success: false,
-        });
+      return res.status(400).json({
+        message: "This email is not associated with a valid employee",
+        success: false,
+      });
     }
 
     // Validate role
@@ -315,12 +311,10 @@ const login = async (req, res) => {
   const validEmployee = await Employee.findOne({ email });
   console.log("Valid Employee:", validEmployee); // Log the valid employee for debugging
   if (!validEmployee) {
-    return res
-      .status(400)
-      .json({
-        message: "This email is not associated with a valid employee",
-        success: false,
-      });
+    return res.status(400).json({
+      message: "This email is not associated with a valid employee",
+      success: false,
+    });
   }
 
   try {

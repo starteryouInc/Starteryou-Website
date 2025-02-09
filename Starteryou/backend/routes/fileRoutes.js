@@ -55,9 +55,7 @@ const swaggerOptions = {
   },
   apis: ["./routes/fileRoutes.js"], // Path to this file
 };
-
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
-
 // Swagger UI setup
 router.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
@@ -67,8 +65,8 @@ router.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *   post:
  *     tags:
  *       - FileRoutes
- *     summary: Upload a file and cache the response
- *     description: Uploads a file to the server and stores it in GridFS. The response for the uploaded file is cached for optimized retrieval.
+ *     summary: Upload a file with metadata
+ *     description: Upload a file and its metadata (title, uploadedBy) to the server and store it in GridFS.
  *     requestBody:
  *       required: true
  *       content:
@@ -79,16 +77,16 @@ router.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *               file:
  *                 type: string
  *                 format: binary
- *                 description: The file to be uploaded.
+ *                 description: The file to be uploaded
  *               title:
  *                 type: string
- *                 description: The title of the file (must be unique).
+ *                 description: The title of the file
  *               uploadedBy:
  *                 type: string
- *                 description: The uploader's name (optional).
+ *                 description: The user who uploaded the file (optional)
  *     responses:
  *       201:
- *         description: File uploaded successfully.
+ *         description: File uploaded successfully
  *         content:
  *           application/json:
  *             schema:
@@ -96,6 +94,7 @@ router.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *               properties:
  *                 success:
  *                   type: boolean
+ *                   example: true
  *                 message:
  *                   type: string
  *                   example: File uploaded successfully
@@ -104,20 +103,24 @@ router.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *                   properties:
  *                     title:
  *                       type: string
+ *                       example: example-file-title
  *                     originalFilename:
  *                       type: string
+ *                       example: example-file.txt
  *                     uploadedBy:
  *                       type: string
+ *                       example: john_doe
  *                     contentType:
  *                       type: string
+ *                       example: text/plain
  *                     size:
  *                       type: integer
+ *                       example: 1024
  *                     gridFsFileId:
  *                       type: string
+ *                       example: 60c72b2f9e1d4f001f8e3b3a
  *       400:
- *         description: Bad request. This can occur if:
- *           - No file is provided in the request.
- *           - The file title already exists.
+ *         description: Bad request, missing required parameters or file title already exists
  *         content:
  *           application/json:
  *             schema:
@@ -128,9 +131,9 @@ router.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *                   example: false
  *                 message:
  *                   type: string
- *                   example: No file uploaded or File title already exists.
+ *                   example: File title already exists
  *       500:
- *         description: Internal server error. This can occur due to issues with file storage or database operations.
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:
@@ -144,14 +147,9 @@ router.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *                   example: Error uploading file
  *                 error:
  *                   type: string
- *                   example: Detailed error message.
+ *                   example: Server connection failed
  */
-
-router.post(
-  "/upload",
-  upload.single("file"),
-  cacheMiddleware, // caching middleware
-  async (req, res) => {
+router.post("/upload", upload.single("file"), cacheMiddleware, async (req, res) => {
     try {
       if (!req.file) {
         return res
@@ -323,12 +321,7 @@ router.post(
  *                 error:
  *                   type: string
  */
-
-router.put(
-  "/update/:title",
-  upload.single("file"),
-  cacheMiddleware,
-  async (req, res) => {
+router.put("/update/:title", upload.single("file"), cacheMiddleware, async (req, res) => {
     try {
       const gridFsBucket = ensureBucket();
 
@@ -438,7 +431,6 @@ router.put(
  *                 error:
  *                   type: string
  */
-
 router.get("/download/:title", cacheMiddleware, async (req, res) => {
   try {
     const gridFsBucket = ensureBucket();
@@ -532,7 +524,6 @@ router.get("/download/:title", cacheMiddleware, async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-
 router.delete("/delete/:title", cacheMiddleware, async (req, res) => {
   try {
     const gridFsBucket = ensureBucket();

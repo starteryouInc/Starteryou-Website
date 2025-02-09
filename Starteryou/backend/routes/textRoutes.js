@@ -190,7 +190,6 @@ router.put("/text", async (req, res) => {
     let textContent = await TextContent.findOne({ page, component }).maxTimeMS(
       10000
     );
-
     if (!textContent) {
       textContent = new TextContent({ page, component });
     }

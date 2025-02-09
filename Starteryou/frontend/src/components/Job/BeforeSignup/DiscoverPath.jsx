@@ -5,7 +5,22 @@ import { useNavigation } from "../../../context/NavigationContext";
 import { API_CONFIG } from "@config/api";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
-import { MaxWords } from "../../Common/wordValidation";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+// Helper function for word validation
+export const MaxWords = (value, maxWords, setCounter) => {
+  const words = value.split(/\s+/).filter(Boolean); // Split input into words
+  setCounter(maxWords - words.length); // Update remaining word count
+  if (words.length > maxWords) {
+    toast.error(`Word limit exceeded! Maximum allowed is ${maxWords} words.`, {
+      position: "top-right",
+      autoClose: 3000,
+    });
+    return words.slice(0, maxWords).join(" "); // Truncate the input
+  }
+  return value;
+};
 
 const DiscoverPath = () => {
   const [opportunities, setOpportunities] = useState([
@@ -45,9 +60,12 @@ const DiscoverPath = () => {
   const [paragraph, setParagraph] = useState(
     "Our platform simplifies the job application process for college students. With just a few clicks, you can apply for internships and part-time jobs that fit your schedule. Say goodbye to complicated applications and hello to your future!"
   );
+  const [titleCounter, setTitleCounter] = useState(10);
+  const [paragraphCounter, setParagraphCounter] = useState(35);
   const [isEditing, setIsEditing] = useState(false);
   const page = "JobBeforeSignup";
 
+  // Fetch uploaded images
   const fetchUploadedImages = async () => {
     if (hasFetchedOnce) return;
 
@@ -99,9 +117,17 @@ const DiscoverPath = () => {
       updatedFiles[index] = URL.createObjectURL(file);
       setUploadedFiles(updatedFiles);
       setError(null);
+      toast.success(`Image for ${title[index]} uploaded successfully!`, {
+        position: "top-right",
+        autoClose: 3000,
+      });
     } catch (error) {
       console.error("Error uploading image:", error);
       setError(`Error uploading image: ${title[index]}`);
+      toast.error(`Error uploading image for ${title[index]}.`, {
+        position: "top-right",
+        autoClose: 3000,
+      });
     }
   };
 
@@ -128,7 +154,11 @@ const DiscoverPath = () => {
         }
       } catch {
         console.error("Error fetching data");
-        setError("Error fetching  content. Please try again later.");
+        setError("Error fetching content. Please try again later.");
+        toast.error("Error fetching content. Please try again later.", {
+          position: "top-right",
+          autoClose: 3000,
+        });
       }
     };
 
@@ -137,10 +167,11 @@ const DiscoverPath = () => {
 
   const handleEdit = () => isAdmin && setIsEditing(true);
 
-  const handleChangeTitle = (e) => setTitlee(MaxWords(e.target.value, 10));
+  const handleChangeTitle = (e) =>
+    setTitlee(MaxWords(e.target.value, 10, setTitleCounter));
 
   const handleChangeParagraph = (e) =>
-    setParagraph(MaxWords(e.target.value, 35));
+    setParagraph(MaxWords(e.target.value, 35, setParagraphCounter));
 
   const saveContent = async () => {
     try {
@@ -157,14 +188,23 @@ const DiscoverPath = () => {
 
       setError("");
       setIsEditing(false);
+      toast.success("Content saved successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
     } catch {
       console.error("Error saving content");
       setError("Error saving content. Please try again later.");
+      toast.error("Error saving content. Please try again later.", {
+        position: "top-right",
+        autoClose: 3000,
+      });
     }
   };
 
   return (
     <div className="mx-auto max-w-[1430px] px-4 lg:px-10 py-16">
+      <ToastContainer />
       {/* Top Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center md:pb-6 gap-4">
         {isEditing ? (
@@ -175,12 +215,18 @@ const DiscoverPath = () => {
               onChange={handleChangeTitle}
               className="text-2xl lg:text-4xl font-bold mb-6 md:mb-0 text-black md:text-left md:max-w-[320px] lg:max-w-[600px] w-full"
             />
+            <p className="text-sm text-gray-500 mb-2">
+              {titleCounter} words remaining
+            </p>
             <textarea
               value={paragraph}
               onChange={handleChangeParagraph}
               className="text-[#1F2329] text-base border border-gray-300 p-2 rounded w-full"
               rows={6}
             />
+            <p className="text-sm text-gray-500">
+              {paragraphCounter} words remaining
+            </p>
             <button
               onClick={saveContent}
               className="mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"

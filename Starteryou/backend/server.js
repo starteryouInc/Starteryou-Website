@@ -17,12 +17,13 @@ const authRoutes = require("./routes/authRoutes");
 const BACKEND_URL = process.env.BACKEND_URL || "http://starteryou.com:3000";
 // Initialize Express app
 const app = express();
-
+const newsletterRoutes = require("./routes/newsletterRoutes"); //newsletter subscribers
 // Middleware
 dotenv.config();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use("/api/newsletter", newsletterRoutes); //Newsletter subscribers
 
 // MongoDB connection
 (async () => {
@@ -62,6 +63,10 @@ const swaggerOptions = {
         name: "Authentication",
         description: "Routes for Authentication endpoints",
       },
+      {
+        name: "Newsletter",
+        description: "Routes for newsletter subscriptions",
+      }, // Add this line
     ],
   },
   apis: ["./routes/*.js"], // Path to your API route files
@@ -151,7 +156,6 @@ app.use((err, req, res, next) => {
 
 // Start Server
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://starteryou.com:${PORT}`);
   console.log(
