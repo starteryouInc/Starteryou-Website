@@ -39,8 +39,8 @@ const BestJob4 = () => {
   const title = "bestjob4"; // Set the title for fetching and uploading
   const [error, setError] = useState(null); // Error state for handling errors
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false); // State to track fetch attempt
-  // States and Variables for TEXT EDITING API
   const [titleBJ4, setTitleBJ4] = useState("Best Job 4 Title");
+  const [titleCounter, setTitleCounter] = useState(6); // Live word counter for title
   const [isEditing, setIsEditing] = useState(false);
   const page = "HomePage";
 
@@ -122,23 +122,19 @@ const BestJob4 = () => {
 
   const saveContent = async () => {
     try {
-      // const noramlizedParagraphs = Array.isArray(paragraph)
-      //   ? paragraph
-      //   : [paragraph.trim()];
       const response = await axios.put(
         `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
         {
           page: "HomePage",
           component: "BestJob4",
           content: titleBJ4.trim(),
-          // paragraphs: noramlizedParagraphs,
         }
       );
       setIsEditing(false);
       console.log("BestJob4Comp Data is saved: ", response);
     } catch (error) {
       console.log(
-        "Error occured while saving the content(BestJob4Comp): ",
+        "Error occurred while saving the content(BestJob4Comp): ",
         error
       );
     }
@@ -155,10 +151,13 @@ const BestJob4 = () => {
           <div className="flex flex-col items-center space-y-4 z-50">
             <textarea
               value={titleBJ4}
-              onChange={(e) => setTitleBJ4(MaxWords(e.target.value, 6))}
+              onChange={(e) =>
+                setTitleBJ4(MaxWords(e.target.value, 6, setTitleCounter))
+              }
               placeholder="Title here..."
               className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
             />
+            <p className="text-sm text-grey-400">{titleCounter} words remaining</p>
             <div className="lg:w-[400px] flex items-center justify-between space-x-2 text-white">
               <button
                 onClick={saveContent}

@@ -13,11 +13,14 @@ const BestJob = () => {
   const [image1, setImage1] = useState("/LandingPage/Rectangle.png");
   const [image2, setImage2] = useState("/LandingPage/Heroimg2.jpg");
   const [error, setError] = useState(null); // Error state for handling errors
-  //States and Variables for TEXT EDITING API
+
+  // States for text content and live counters
   const [titleBJ, setTitleBJ] = useState("Best Job Title");
   const [paragraphBJ, setParagraphBJ] = useState(
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
   );
+  const [titleCounter, setTitleCounter] = useState(5); // Live word counter for title
+  const [paragraphCounter, setParagraphCounter] = useState(8); // Live word counter for paragraph
   const [isEditing, setIsEditing] = useState(false);
   const page = "HomePage";
 
@@ -42,6 +45,7 @@ const BestJob = () => {
       description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
     },
   ];
+
   // Fetch images by title on component mount
   useEffect(() => {
     const fetchImages = async () => {
@@ -141,7 +145,7 @@ const BestJob = () => {
       console.log("BestJobComp Data is saved: ", response);
     } catch (error) {
       console.log(
-        "Error occured while saving the content(BestJobComp): ",
+        "Error occurred while saving the content (BestJobComp): ",
         error
       );
     }
@@ -150,6 +154,15 @@ const BestJob = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Handle text input changes with MaxWords and live counters
+  const handleTitleChange = (e) => {
+    setTitleBJ(MaxWords(e.target.value, 5, setTitleCounter));
+  };
+
+  const handleParagraphChange = (e) => {
+    setParagraphBJ(MaxWords(e.target.value, 8, setParagraphCounter));
+  };
 
   return (
     <div className="container mx-auto max-w-[1300px] px-4 py-12">
@@ -160,16 +173,20 @@ const BestJob = () => {
             <div className="mt-10 flex flex-col space-y-4 z-50">
               <textarea
                 value={titleBJ}
-                onChange={(e) => setTitleBJ(MaxWords(e.target.value, 5))}
+                onChange={handleTitleChange}
                 placeholder="Title here..."
                 className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
               />
+              <p className="text-sm text-grey-400">{titleCounter} words remaining</p>
+
               <textarea
                 value={paragraphBJ}
-                onChange={(e) => setParagraphBJ(MaxWords(e.target.value, 8))}
+                onChange={handleParagraphChange}
                 placeholder="Paragraph here..."
                 className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
               />
+              <p className="text-sm text-grey-400">{paragraphCounter} words remaining</p>
+
               <div className="lg:w-[400px] flex items-center justify-between space-x-2 text-white">
                 <button
                   onClick={saveContent}

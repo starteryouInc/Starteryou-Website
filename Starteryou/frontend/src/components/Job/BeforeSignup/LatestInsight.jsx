@@ -12,23 +12,27 @@ const LatestInsight = () => {
   const insights = [
     {
       id: 1,
-      type: "Education",
+      type: "Job Hunting",
       time: "5 min read",
-      title: "How to Ace Your Interviews",
-      description: "Discover tips and strategies to impress your interviewers.",
+      title:
+        "Portfolio:A Step-by-Step Guider to Crafting an Outstanding High School Portfolio",
+      description:
+        "Crafting an Outstanding High School Portfolio: A Step-by-Step Guide.",
       link: "/read-more-1",
     },
     {
       id: 2,
-      type: "Career",
+      type: "Job Applications",
       time: "5 min read",
-      title: "Top 10 Internships for College Students",
-      description: "Explore the best internships that enhance your resume.",
+      title:
+        "The Ultimate Guide for High School Students! to Applying for and Getting into College",
+      description:
+        "Applying for and Getting into College: The Ultimate Guide for High School Students!",
       link: "/read-more-2",
     },
     {
       id: 3,
-      type: "Lifestyle",
+      type: "Career Insights",
       time: "5 min read",
       title: "Budgeting Tips for Students",
       description:

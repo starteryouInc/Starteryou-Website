@@ -5,6 +5,7 @@ import { API_CONFIG } from "@config/api";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
 import { MaxWords } from "../../Common/wordValidation";
+import { toast } from "react-toastify";
 
 const UnlockPotential = () => {
   const title = "UnlockPotential";
@@ -20,9 +21,11 @@ const UnlockPotential = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState("");
   const page = "JobBeforeSignup";
+  const [titleWordsLeft, setTitleWordsLeft] = useState(10); // Counter for the title
+  const [paragraphWordsLeft, setParagraphWordsLeft] = useState(30); // Counter for the paragraph
 
   const fetchUploadedFile = async () => {
-    if (hasFetchedOnce) return; // Prevent fetching again if already attempted
+    if (hasFetchedOnce) return;
 
     try {
       const response = await fetch(
@@ -33,20 +36,20 @@ const UnlockPotential = () => {
         throw new Error("Network response was not ok");
       }
 
-      const blob = await response.blob(); // Get the response as a Blob
-      const url = URL.createObjectURL(blob); // Create a local URL for the Blob
-      setUploadedFile(url); // Set the uploaded file data with its local URL
-      setError(null); // Reset error state on successful fetch
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      setUploadedFile(url);
+      setError(null);
     } catch (error) {
       console.error("Error fetching uploaded file:", error);
-      setError("Failed to load image"); // Set error message
+      setError("Failed to load image");
     } finally {
-      setHasFetchedOnce(true); // Mark as fetch attempt made
+      setHasFetchedOnce(true);
     }
   };
 
   useEffect(() => {
-    fetchUploadedFile(); // Fetch the specific image on component mount
+    fetchUploadedFile();
   }, []);
 
   const handleFileChange = async (event) => {
@@ -68,11 +71,14 @@ const UnlockPotential = () => {
       }
       setUploadedFile(URL.createObjectURL(file));
       setError(null);
+      toast.success("Image uploaded successfully!");
     } catch (error) {
       console.error("Error updating image:", error);
       setError("Error updating image");
+      toast.error("Failed to upload the image.");
     }
   };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -98,14 +104,17 @@ const UnlockPotential = () => {
     };
 
     fetchData();
-  }, [titlee, paragraphh]);
+  }, []);
 
   const handleEdit = () => isAdmin && setIsEditing(true);
 
-  const handleChangeTitle = (e) => setTitlee(MaxWords(e.target.value, 10));
+  const handleChangeTitle = (e) => {
+    setTitlee(MaxWords(e.target.value, 10, setTitleWordsLeft));
+  };
 
-  const handleChangeParagraph = (e) =>
-    setParagraphh(MaxWords(e.target.value, 30));
+  const handleChangeParagraph = (e) => {
+    setParagraphh(MaxWords(e.target.value, 30, setParagraphWordsLeft));
+  };
 
   const saveContent = async () => {
     try {
@@ -122,9 +131,11 @@ const UnlockPotential = () => {
 
       setError("");
       setIsEditing(false);
+      toast.success("Content saved successfully!");
     } catch {
       console.error("Error saving content");
       setError("Error saving content. Please try again later.");
+      toast.error("Failed to save content.");
     }
   };
 
@@ -135,12 +146,24 @@ const UnlockPotential = () => {
         <div className="flex-1 bg-white p-4 flex flex-col justify-center">
           {isEditing ? (
             <div>
+              <span className="text-sm text-gray-500">
+                {titleWordsLeft >= 0
+                  ? `${titleWordsLeft} words left`
+                  : `Word limit exceeded by ${Math.abs(titleWordsLeft)} words`}
+              </span>
               <input
                 type="text"
                 value={titlee}
                 onChange={handleChangeTitle}
                 className="text-2xl md:text-4xl font-bold mb-4 border border-gray-300 p-2 rounded w-full"
               />
+              <span className="text-sm text-gray-500">
+                {paragraphWordsLeft >= 0
+                  ? `${paragraphWordsLeft} words left`
+                  : `Word limit exceeded by ${Math.abs(
+                      paragraphWordsLeft
+                    )} words`}
+              </span>
               <textarea
                 value={paragraphh}
                 onChange={handleChangeParagraph}

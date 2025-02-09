@@ -9,7 +9,7 @@ import Blog from "../components/Landing/Blog";
 import Collab from "../components/Landing/Collab";
 import Contact from "../components/Landing/Contact";
 import Hero from "../components/Landing/Hero";
-import Pricing from "../components/Landing/Pricing";
+// import Pricing from "../components/Landing/Pricing";
 import UpcomingFeatures from "../components/Landing/UpcomingFeatures";
 import InProgressPage from "../components/Common/InProgressPage";
 export default function HomePage() {
@@ -24,7 +24,7 @@ export default function HomePage() {
       <Collab />
       <BestJob4 />
       <Banner />
-      <Pricing />
+      {/* <Pricing /> */}
       <UpcomingFeatures />
       <Blog />
       <Contact />
