@@ -78,14 +78,16 @@ const Blog = () => {
   const blogBoxes = [
     {
       img: "/LandingPage/Blogimg1.png",
-      title: "Portfolio: A Step-by-Step Guider",
+      title:
+        "Portfolio:A Step-by-Step Guider to Crafting an Outstanding High School Portfolio",
       date: "20 Jan 2023",
       category: "Job Hunting",
       text: "Crafting an Outstanding High School Portfolio: A Step-by-Step Guide",
     },
     {
       img: "/LandingPage/Blogimg2.png",
-      title: "The Ultimate Guide for High School Students!",
+      title:
+        "The Ultimate Guide for High School Students! to Applying for and Getting into College",
       date: "21 Jan 2023",
       category: "Get Inspired",
       text: "Applying for and Getting into College: The Ultimate Guide for High School Students!",
