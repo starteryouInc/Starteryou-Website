@@ -163,7 +163,7 @@ const Footer = () => {
 
       {/* Copyright Section */}
       <div className="text-center py-6 text-gray-500">
-        © Copyright 2024, All Rights Reserved by Starteryou
+        © Copyright 2025, All Rights Reserved by Starteryou, Inc.
       </div>
     </footer>
   );
