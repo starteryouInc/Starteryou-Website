@@ -1,7 +1,6 @@
 // config/api.js
 export const API_CONFIG = {
-  baseURL: "http://localhost:3000",
-  // baseURL: "http://dev.starteryou.com:3000",
+  baseURL: "http://dev.starteryou.com:3000",
   endpoints: {
     fileByTitle: (title) => `/api/files/download/${title}`,
     fileUpload: "/api/files/upload",
@@ -15,8 +14,10 @@ export const API_CONFIG = {
     authLogin: "/api/v1/auth/login",
     authRegister: "/api/v1/auth/register",
 
-    // New API's
-
+    // Register and Login API's
+    userEmpRegister: "/api/v1/userAuth/users-emp-register",
+    userSeekerRegister: "/api/v1/userAuth/users-seeker-register",
+    userLogin: "/api/v1/userAuth/users-login",
     // Job API's
     createJob: "/api/v1/jobportal/jobs/create-job",
     getJobs: "/api/v1/jobportal/jobs/fetch-job",
@@ -24,11 +25,7 @@ export const API_CONFIG = {
     updateJob: (id) => `/api/v1/jobportal/jobs/update-job/${id}`,
     deleteJob: (id) => `/api/v1/jobportal/jobs/delete-job/${id}`,
     getPostedJobs: "/api/v1/jobportal/jobs/fetch-posted-jobs",
-    // Register and Login API's
-    userEmpRegister: "/api/v1/userAuth/users-emp-register",
-    userSeekerRegister: "/api/v1/userAuth/users-seeker-register",
-    userLogin: "/api/v1/userAuth/users-login",
-    // Apply Job API's
+    // Job Application API's
     applyJob: (jobId) => `/api/v1/jobportal/applications/${jobId}/apply-job`,
     getAppliedJobs: "/api/v1/jobportal/applications/fetch-applied-jobs",
     changeJobStatus: (applicationId) =>
@@ -91,5 +88,10 @@ export const API_CONFIG = {
       `/api/v1/jobportal/profile/add-languages/${userId}`,
     deleteLanguage: (userId) =>
       `/api/v1/jobportal/profile/delete-languages/${userId}`,
+
+    // Company profile:
+    createCompanyProfile: `/api/v1/jobportal/companyProfile/create-company-profile`,
+    getCompanyProfile: (userId) =>
+      `/api/v1/jobportal/companyProfile/get-company-profile/${userId}`,
   },
 };

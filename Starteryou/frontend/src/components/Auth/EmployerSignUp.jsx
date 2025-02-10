@@ -9,9 +9,11 @@ import { API_CONFIG } from "../../config/api";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { useUserContext } from "../../context/UserContext";
 
 const EmployerSignUp = () => {
   const navigate = useNavigate();
+  const { loginUser, user } = useUserContext();
   const [companyName, setCompanyName] = useState("");
   const [companyWebsite, setCompanyWebsite] = useState("");
   const [email, setEmail] = useState("");
@@ -31,8 +33,12 @@ const EmployerSignUp = () => {
           role: "employer",
         }
       );
+      loginUser({
+        authenticatedUser: data.newEmployer,
+        token: data.token.accessToken,
+      });
       toast.success(data.msg);
-      navigate("/UserLogin");
+      navigate("/createProfile");
     } catch (error) {
       toast.error(error.response?.data?.msg);
     }

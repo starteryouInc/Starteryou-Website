@@ -87,7 +87,7 @@ router.post("/users-emp-register", async (req, res) => {
     res.status(500).json({
       success: false,
       msg: "Some error occured while registering the new employer",
-      error,
+      error: error.message,
     });
   }
 });
@@ -162,7 +162,7 @@ router.post("/users-seeker-register", async (req, res) => {
     res.status(500).json({
       success: false,
       msg: "Some error occured while registering the new user",
-      error,
+      error: error.message,
     });
   }
 });

@@ -228,17 +228,22 @@ const JobFeedPage = () => {
         <section className="section-two">
           <ul className="flex justify-between md:justify-start md:space-x-4">
             {[
-              "Recommended",
-              ...(role !== "employer" ? ["Applied", "Saved"] : []),
-            ].map((tab) => (
+              { label: "Recommended", count: jobData.length },
+              ...(role !== "employer"
+                ? [
+                    { label: "Applied", count: appliedJobs.length },
+                    { label: "Saved", count: savedJobs.length },
+                  ]
+                : []),
+            ].map(({ label, count }) => (
               <li
-                key={tab}
+                key={label}
                 className={`cursor-pointer ${
-                  selectedTab === tab ? "text-[#8d00ff] font-bold" : ""
+                  selectedTab === label ? "text-[#8d00ff] font-bold" : ""
                 }`}
-                onClick={() => handleTabClick(tab)}
+                onClick={() => handleTabClick(label)}
               >
-                {tab}
+                {label} ({count})
               </li>
             ))}
           </ul>
