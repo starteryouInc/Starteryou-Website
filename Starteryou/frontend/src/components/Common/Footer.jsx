@@ -1,4 +1,10 @@
+import { useState } from "react";
+import TermsModal from "./TermsModal"; // Import modal
+import Privacy from "./Privacy"; // Import privacy modal
 const Footer = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalPrivacy, setIsModalPrivacy] = useState(false);
+
   return (
     <footer className="relative bg-[#F8FAFC] p-6 overflow-hidden">
       <div className="container mx-auto px-4 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-4 gap-10 lg:gap-28 py-20">
@@ -146,17 +152,32 @@ const Footer = () => {
               </a>
             </li>
             <li>
-              <a href="/" className="hover:text-black">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="hover:text-black"
+              >
                 Terms & Conditions
-              </a>
+              </button>
             </li>
             <li>
-              <a href="/" className="hover:text-black">
+              <button
+                onClick={() => setIsModalPrivacy(true)}
+                className="hover:text-black"
+              >
                 Privacy Policy
-              </a>
+              </button>
             </li>
           </ul>
         </div>
+        {/* Terms Modal */}
+        <TermsModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+        <Privacy
+          isOpen={isModalPrivacy}
+          onClose={() => setIsModalPrivacy(false)}
+        />
       </div>
       {/* Separator */}
       <div className="border-t border-[#E2E8F0] w-[92%] mx-auto"></div>

@@ -13,7 +13,6 @@ export const API_CONFIG = {
     teamApi: "/api/team",
     authLogin: "/api/v1/auth/login",
     authRegister: "/api/v1/auth/register",
-
     // Register and Login API's
     userEmpRegister: "/api/v1/userAuth/users-emp-register",
     userSeekerRegister: "/api/v1/userAuth/users-seeker-register",
@@ -93,5 +92,8 @@ export const API_CONFIG = {
     createCompanyProfile: `/api/v1/jobportal/companyProfile/create-company-profile`,
     getCompanyProfile: (userId) =>
       `/api/v1/jobportal/companyProfile/get-company-profile/${userId}`,
+
+    newsletterApi: "/api/newsletter/subscribe",
+
   },
 };

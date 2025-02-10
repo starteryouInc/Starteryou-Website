@@ -13,11 +13,14 @@ const BestJob2 = () => {
   const title = "bestjob2"; // Set the title for fetching and uploading
   const [error, setError] = useState(null); // Error state for handling errors
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false); // State to track fetch attempt
-  //States and Variables for TEXT EDITIN API
+
+  // States for text content and live counters
   const [titleBJ2, setTitleBJ2] = useState("Best Job 2 Title");
   const [paragraphBJ2, setParagraphBJ2] = useState(
     "Lorem ipsum dolor sit amet, consectetur adipiscing."
   );
+  const [titleCounter, setTitleCounter] = useState(5); // Live word counter for title
+  const [paragraphCounter, setParagraphCounter] = useState(8); // Live word counter for paragraph
   const [isEditing, setIsEditing] = useState(false);
   const page = "HomePage";
 
@@ -140,9 +143,14 @@ const BestJob2 = () => {
     fetchData();
   }, []);
 
-  // useEffect(() => {
-  //   fetchData();
-  // }, []);
+  // Handle text input changes with MaxWords and live counters
+  const handleTitleChange = (e) => {
+    setTitleBJ2(MaxWords(e.target.value, 5, setTitleCounter));
+  };
+
+  const handleParagraphChange = (e) => {
+    setParagraphBJ2(MaxWords(e.target.value, 8, setParagraphCounter));
+  };
 
   return (
     <div className="container mx-auto max-w-[1300px] px-4 py-12">
@@ -189,16 +197,22 @@ const BestJob2 = () => {
             <div className="mt-10 flex flex-col space-y-4 z-50">
               <textarea
                 value={titleBJ2}
-                onChange={(e) => setTitleBJ2(MaxWords(e.target.value, 5))}
+                onChange={handleTitleChange}
                 placeholder="Title here..."
                 className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
               />
+              <p className="text-sm text-grey-400">{titleCounter} words remaining</p>
+
               <textarea
                 value={paragraphBJ2}
-                onChange={(e) => setParagraphBJ2(MaxWords(e.target.value, 8))}
+                onChange={handleParagraphChange}
                 placeholder="Paragraph here..."
                 className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
               />
+              <p className="text-sm text-grey-400">
+                {paragraphCounter} words remaining
+              </p>
+
               <div className="lg:w-[400px] flex items-center justify-between space-x-2 text-white">
                 <button
                   onClick={saveContent}
@@ -246,34 +260,8 @@ const BestJob2 = () => {
                   <img src={box.iconSrc} alt={box.title} className="w-8 h-8" />
                   <h3 className="text-xl font-bold text-black">{box.title}</h3>
                 </div>
-                {/* <p className="mt-4 text-gray-600 text-lg font-thin text-left">
-                  {box.description}
-                </p> */}
               </div>
             ))}
-            {/* <div className="p-4 rounded-xl cursor-pointer shadow-none md:w-[300px] md:h-[200px] lg:h-auto lg:w-auto">
-              <div className="flex items-center space-x-4">
-                <img
-                  src="/LandingPage/Icons/page 1.svg"
-                  alt="Lorem Ipsum"
-                  className="w-8 h-8"
-                />
-                <h3 className="text-xl font-bold text-black">Lorem Ipsum</h3>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl cursor-pointer shadow-none md:w-[300px] md:h-[200px] lg:h-auto lg:w-auto">
-              <div className="flex items-center space-x-4">
-                <img
-                  src="/LandingPage/Icons/userr.svg"
-                  alt="Learn from the best"
-                  className="w-8 h-8"
-                />
-                <h3 className="text-xl font-bold text-black">
-                  Learn from the best
-                </h3>
-              </div>
-            </div> */}
           </div>
         </div>
       </div>

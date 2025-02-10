@@ -9,8 +9,10 @@ const validator = require("validator");
 const router = express.Router();
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 const Employee = require("../models/EmployeeModel");
+const cacheQuery = require("../cache/utils/cacheQuery");
+const { invalidateCache } = require("../cache/utils/invalidateCache");
+const cacheConfig = require("../cache/config/cacheConfig");
 
-//dev_jwt_secret key
 const jwtSecret = process.env.DEV_JWT_SECRET;
 if (!jwtSecret) {
   console.error("Error: DEV_JWT_SECRET is missing in the environment variables.");
@@ -31,6 +33,7 @@ const generateRefreshToken = (user) => {
     expiresIn: "7d",
   });
 };
+
 /**
  * Centralized error handler
  */
@@ -65,7 +68,6 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
 // Use Swagger UI
 router.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-
 
 /**
  * @swagger
@@ -231,7 +233,6 @@ const register = async (req, res) => {
   }
 };
 
-
 /**
  * @swagger
  * /v1/auth/login:
@@ -301,10 +302,10 @@ const login = async (req, res) => {
   }
 
   const validEmployee = await Employee.findOne({ email });
-    console.log("Valid Employee:", validEmployee); // Log the valid employee for debugging
-    if (!validEmployee) {
-      return res.status(400).json({ message: "This email is not associated with a valid employee", success: false });
-    }
+  console.log("Valid Employee:", validEmployee); // Log the valid employee for debugging
+  if (!validEmployee) {
+    return res.status(400).json({ message: "This email is not associated with a valid employee", success: false });
+  }
 
   try {
     const user = await User.findOne({ email });
@@ -316,28 +317,66 @@ const login = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials", success: false });
     }
+
+    /**
+     * Generates a unique cache key for user login
+     * @type {string}
+     */
+    const cacheKey = `login:${user._id}`;
+    const ttl = cacheConfig.defaultTTL; // Time to live in seconds (1 hour)
+
+    /**
+     * Invalidates existing cache entry before creating a new one
+     * Prevents serving stale login data
+     * 
+     * @param {string} cacheKey - Unique identifier for the cache entry
+     */
+
+    // Invalidate the cache for the login endpoint
+    console.log(`🔄 Invalidating cache for key: ${cacheKey}`);
+    await invalidateCache(cacheKey);
     
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
+    /**
+     * Caches login response with tokens and user information
+     * 
+     * @param {string} cacheKey - Unique cache identifier
+     * @param {Function} fetchFunction - Generates fresh login response
+     * @param {number} ttl - Time-to-live for cache entry
+     * 
+     * @returns {Object} Cached login response with status and user details
+     */
 
-    // Store the refresh token in the database
-    user.refreshToken = refreshToken;
-    await user.save();
+    const cachedResponse = await cacheQuery(cacheKey, async () => {
+      const accessToken = generateAccessToken(user);
+      const refreshToken = generateRefreshToken(user);
 
-    res.status(200).json({
-      message: "Login successful",
-      success: true,
-      tokens: { accessToken, refreshToken },
-      user: { id: user._id, username: user.username, email: user.email ,role: user.role},
-    });
+      // Store the refresh token in the database
+      user.refreshToken = refreshToken;
+      await user.save();
+
+      return {
+        status: 200,
+        response: {
+          message: "Login successful",
+          success: true,
+          tokens: { accessToken, refreshToken },
+          user: { id: user._id, username: user.username, email: user.email, role: user.role },
+        },
+      };
+    }, ttl);
+
+    console.log(`✅ Cache set for key: ${cacheKey}`);
+    return res.status(cachedResponse.status).json(cachedResponse.response);
   } catch (error) {
-    handleError(res, error);
+    console.error("Error during login:", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+      success: false,
+    });
   }
 };
- 
 
 // Set up router
-
 router.post("/register", register);
 router.post("/login", login);
 module.exports = router;
