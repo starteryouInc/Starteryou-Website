@@ -321,6 +321,7 @@ const login = async (req, res) => {
     // Store the refresh token in the database
     user.refreshToken = refreshToken;
     await user.save();
+    
     req.session.loggedIn = true;
     req.session.user = { id: user._id, role: user.role, lastActive: Date.now() };
     req.session.save();
