@@ -13,6 +13,16 @@ import CoursCertiForm from "./RightSideComponents/CoursCertiForm";
 import ProjectForm from "./RightSideComponents/ProjectForm";
 import LanguageForm from "./RightSideComponents/LanguageForm";
 
+/**
+ * RightSide component displaying user profile details such as work experience,
+ * education, skills, certifications, projects, and languages. Also includes
+ * modals for editing these details.
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {Function} props.getProfileFieldFunction - Function to fetch profile data dynamically
+ * @returns {JSX.Element} RightSide component
+ */
 const RightSide = ({ getProfileFieldFunction }) => {
   const [workExperience, setWorkExperience] = useState([]);
   const [educationDetails, setEducationDetails] = useState([]);

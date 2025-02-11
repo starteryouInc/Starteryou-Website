@@ -1,3 +1,13 @@
+/**
+ * ProjectCard Component
+ * Displays a list of projects with options to edit or delete.
+ *
+ * @param {Object} props - Component props
+ * @param {Function} props.openProjectForm - Function to open the project form
+ * @param {Array} props.data - List of projects
+ * @param {Function} props.getProfileFieldData - Function to refresh profile data
+ * @returns {JSX.Element} React component
+ */
 import React, { useState } from "react";
 import "../styles/RightSide.css";
 import EditPen from "/UserProfile/EditPen.svg";
@@ -10,11 +20,16 @@ import { toast } from "react-toastify";
 import EditProject from "./EditableForms/EditProject";
 
 const ProjectCard = ({ openProjectForm, data, getProfileFieldData }) => {
-  const [selectedProject, setSelectedProject] = useState(null)
-  const [openEditProject, setOpenEditProject] = useState(false)
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [openEditProject, setOpenEditProject] = useState(false);
   const { user } = useUserContext();
   const token = user?.token;
-
+  /**
+   * Formats the project end date.
+   *
+   * @param {string} expiryDate - Project expiry date in string format
+   * @returns {string} Formatted date (e.g., "January 2024")
+   */
   function formatProjectEndDate(expiryDate) {
     const options = { year: "numeric", month: "long" };
     const formattedDate = new Date(expiryDate).toLocaleDateString(
@@ -23,7 +38,12 @@ const ProjectCard = ({ openProjectForm, data, getProfileFieldData }) => {
     );
     return formattedDate;
   }
-
+  /**
+   * Handles project deletion.
+   *
+   * @param {string} subDocId - ID of the project to be deleted
+   * @returns {Promise<void>}
+   */
   const handleDeleteData = async (subDocId) => {
     const userId = user?.authenticatedUser?._id;
     try {
@@ -94,8 +114,8 @@ const ProjectCard = ({ openProjectForm, data, getProfileFieldData }) => {
                   <img
                     src={EditPen}
                     onClick={() => {
-                      setSelectedProject(e)
-                      setOpenEditProject(true)
+                      setSelectedProject(e);
+                      setOpenEditProject(true);
                     }}
                     alt="Edit Education details"
                     className="cursor-pointer ml-auto"

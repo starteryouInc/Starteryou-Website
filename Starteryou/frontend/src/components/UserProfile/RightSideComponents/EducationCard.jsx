@@ -8,13 +8,27 @@ import { useUserContext } from "../../../context/UserContext";
 import { toast } from "react-toastify";
 import axios from "axios";
 import EditEducation from "./EditableForms/EditEducation";
-
+/**
+ * Component for displaying and managing an education card.
+ *
+ * @param {Object} props - The component props.
+ * @param {Function} props.openEducationForm - Function to toggle the education form.
+ * @param {Object[]} props.data - Array of education records.
+ * @param {Function} props.getProfileFieldData - Function to refresh the profile field data.
+ * @returns {JSX.Element} The EducationCard component.
+ */
 const EducationCard = ({ openEducationForm, data, getProfileFieldData }) => {
-  const [selectedEdu, setSelectedEdu] = useState(null)
+  const [selectedEdu, setSelectedEdu] = useState(null);
   const [openEditEdu, setOpenEditEdu] = useState(false);
   const { user } = useUserContext();
   const token = user?.token;
-
+  /**
+   * Formats a date range into a readable string.
+   *
+   * @param {string} startDate - The start date in ISO format.
+   * @param {string|null} [endDate=null] - The optional end date in ISO format.
+   * @returns {string} The formatted date range as 'Month Year to Month Year' or 'Month Year to Present'.
+   */
   function formatDateRange(startDate, endDate = null) {
     const options = { year: "numeric", month: "long" };
 
@@ -25,7 +39,12 @@ const EducationCard = ({ openEducationForm, data, getProfileFieldData }) => {
 
     return `${start} to ${end}`;
   }
-
+  /**
+   * Deletes an education record via API and updates the profile data.
+   *
+   * @param {string} subDocId - The ID of the education record to delete.
+   * @returns {Promise<void>} A promise that resolves when the education record is deleted.
+   */
   const handleDeleteData = async (subDocId) => {
     const userId = user?.authenticatedUser?._id;
     try {
@@ -99,8 +118,8 @@ const EducationCard = ({ openEducationForm, data, getProfileFieldData }) => {
                   <img
                     src={EditPen}
                     onClick={() => {
-                      setSelectedEdu(e)
-                      setOpenEditEdu(true)
+                      setSelectedEdu(e);
+                      setOpenEditEdu(true);
                     }}
                     alt="Edit Education details"
                     className="cursor-pointer ml-auto"

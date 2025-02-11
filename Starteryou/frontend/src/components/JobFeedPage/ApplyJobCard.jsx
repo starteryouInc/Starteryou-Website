@@ -1,3 +1,12 @@
+/**
+ * React component for applying to a job.
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {string} props.jobID - The ID of the job to apply for
+ * @param {Function} props.closeApplyJob - Function to close the job application form
+ * @returns {JSX.Element} The job application form
+ */
 import React, { useState } from "react";
 import { useUserContext } from "../../context/UserContext";
 import { API_CONFIG } from "../../config/api";
@@ -15,7 +24,9 @@ const ApplyJobCard = ({ jobID, closeApplyJob }) => {
     email,
     whyHire: "",
   });
-
+  /**
+   * Clears all input fields in the form.
+   */
   const clearAllFields = () => {
     setFormData({
       firstName: "",
@@ -25,6 +36,11 @@ const ApplyJobCard = ({ jobID, closeApplyJob }) => {
     });
   };
 
+  /**
+   * Handles input change events.
+   *
+   * @param {React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>} e - The event object
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -33,6 +49,11 @@ const ApplyJobCard = ({ jobID, closeApplyJob }) => {
     });
   };
 
+  /**
+   * Handles the form submission.
+   *
+   * @param {React.FormEvent<HTMLFormElement>} e - The form submission event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!jobID) {

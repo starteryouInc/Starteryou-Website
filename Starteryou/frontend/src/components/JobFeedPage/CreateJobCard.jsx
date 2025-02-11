@@ -1,5 +1,11 @@
+/**
+ * Component for creating a job posting.
+ * @component
+ * @param {Object} props - Component props
+ * @param {Function} props.closeCreateJobCard - Function to close the job creation form
+ */
 import React, { useEffect, useState } from "react";
-import NavBar from "../Common/Navbar";
+// import NavBar from "../Common/Navbar";
 import { useUserContext } from "../../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import { API_CONFIG } from "../../config/api";
@@ -10,6 +16,11 @@ const CreateJobCard = ({ closeCreateJobCard }) => {
   const navigate = useNavigate();
   const { user } = useUserContext();
   const token = user?.token;
+
+  /**
+   * State to manage job form data.
+   * @type {Object}
+   */
   const [job, setJob] = useState({
     title: "",
     location: "",
@@ -24,6 +35,9 @@ const CreateJobCard = ({ closeCreateJobCard }) => {
     description: "",
   });
 
+  /**
+   * Clears all form fields.
+   */
   const clearAllFields = () => {
     setJob({
       title: "",
@@ -39,7 +53,10 @@ const CreateJobCard = ({ closeCreateJobCard }) => {
       description: "",
     });
   };
-
+  /**
+   * Handles input change for job details.
+   * @param {Event} e - Input change event
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setJob((prev) => ({
@@ -47,7 +64,10 @@ const CreateJobCard = ({ closeCreateJobCard }) => {
       [name]: value,
     }));
   };
-
+  /**
+   * Handles salary range input change.
+   * @param {Event} e - Input change event
+   */
   const handleSalaryChange = (e) => {
     const { name, value } = e.target;
     setJob((prev) => ({
@@ -55,7 +75,10 @@ const CreateJobCard = ({ closeCreateJobCard }) => {
       salaryRange: { ...prev.salaryRange, [name]: value },
     }));
   };
-
+  /**
+   * Handles job form submission.
+   * @param {Event} e - Form submit event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -85,7 +108,9 @@ const CreateJobCard = ({ closeCreateJobCard }) => {
       // console.log(error.response?.data?.error);
     }
   };
-
+  /**
+   * Redirects user to login page if no authentication token is found.
+   */
   useEffect(() => {
     if (!token) {
       toast.error("Please login to continue...");
@@ -286,7 +311,12 @@ const CreateJobCard = ({ closeCreateJobCard }) => {
           </div>
           {/* Submit Button */}
           <div className="mt-6 flex space-x-6">
-            <button onClick={closeCreateJobCard} className="w-1/2 px-6 py-2 border-2 border-purple-600 rounded font-semibold text-purple-600">Cancel</button>
+            <button
+              onClick={closeCreateJobCard}
+              className="w-1/2 px-6 py-2 border-2 border-purple-600 rounded font-semibold text-purple-600"
+            >
+              Cancel
+            </button>
             <button
               type="submit"
               className="w-1/2 bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 font-semibold"

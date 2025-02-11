@@ -3,7 +3,15 @@ import { useUserContext } from "../../../context/UserContext";
 import { API_CONFIG } from "../../../config/api";
 import { toast } from "react-toastify";
 import axios from "axios";
-
+/**
+ * Component for managing skills input, allowing users to add and remove skills.
+ *
+ * @param {Object} props - The component props.
+ * @param {Function} props.openSkillForm - Function to toggle the skill input form.
+ * @param {string[]} props.data - Initial array of skills.
+ * @param {Function} props.getProfileFieldData - Function to refresh the profile field data.
+ * @returns {JSX.Element} The SkillsInputForm component.
+ */
 const SkillsInputForm = ({ openSkillForm, data, getProfileFieldData }) => {
   const { user } = useUserContext();
   const token = user?.token;
@@ -11,7 +19,12 @@ const SkillsInputForm = ({ openSkillForm, data, getProfileFieldData }) => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Function to add skill via API
+  /**
+   * Adds a new skill via API and updates the state.
+   *
+   * @param {Event} e - The form submit event.
+   * @returns {Promise<void>} A promise that resolves when the skill is added.
+   */
   const addSkill = async (e) => {
     e.preventDefault();
     const newSkill = input.trim();
@@ -43,7 +56,12 @@ const SkillsInputForm = ({ openSkillForm, data, getProfileFieldData }) => {
     }
   };
 
-  // Remove skill from local state and API
+  /**
+   * Removes a skill via API and updates the state.
+   *
+   * @param {string} skillToRemove - The skill to remove.
+   * @returns {Promise<void>} A promise that resolves when the skill is removed.
+   */
   const removeSkill = async (skillToRemove) => {
     try {
       const userId = user?.authenticatedUser?._id;

@@ -8,14 +8,27 @@ import { useUserContext } from "../../../context/UserContext";
 import { toast } from "react-toastify";
 import axios from "axios";
 import EditWork from "./EditableForms/EditWork";
-
+/**
+ * Component for displaying a work experience card.
+ *
+ * @param {Object} props - The component props.
+ * @param {Function} props.openWorkForm - Function to open the work experience form.
+ * @param {Object[]} props.data - Array of work experience objects.
+ * @param {Function} props.getProfileFieldData - Function to refresh profile field data.
+ * @returns {JSX.Element} The WorkCard component.
+ */
 const WorkCard = ({ openWorkForm, data, getProfileFieldData }) => {
   const [selectedExp, setSelectedExp] = useState(null);
   const [openEditWork, setOpenEditWork] = useState(false);
   const { user } = useUserContext();
-
   const token = user?.token;
-
+  /**
+   * Formats a date range into a readable string.
+   *
+   * @param {string} startDate - The start date in ISO format.
+   * @param {string|null} [endDate=null] - The end date in ISO format, or null for 'Present'.
+   * @returns {string} The formatted date range.
+   */
   function formatDateRange(startDate, endDate = null) {
     const options = { year: "numeric", month: "long" };
 
@@ -26,7 +39,12 @@ const WorkCard = ({ openWorkForm, data, getProfileFieldData }) => {
 
     return `${start} to ${end}`;
   }
-
+  /**
+   * Handles deletion of a work experience entry.
+   *
+   * @param {string} subDocId - The ID of the work experience entry to delete.
+   * @returns {Promise<void>} A promise that resolves when the deletion is complete.
+   */
   const handleDeleteData = async (subDocId) => {
     const userId = user?.authenticatedUser?._id;
     try {

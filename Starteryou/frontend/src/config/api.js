@@ -94,6 +94,5 @@ export const API_CONFIG = {
       `/api/v1/jobportal/companyProfile/get-company-profile/${userId}`,
 
     newsletterApi: "/api/newsletter/subscribe",
-
   },
 };

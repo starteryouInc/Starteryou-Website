@@ -9,13 +9,39 @@ import { IoAnalyticsOutline } from "react-icons/io5";
 import { HiSpeakerphone } from "react-icons/hi";
 import EditJobCard from "../JobFeedPage/EditJobCard";
 
+/**
+ * JobDetailedCard2 Component
+ * Displays detailed information about a job posting, including applicants, views, engagement rate,
+ * job description, requirements, benefits, and an option to edit or close the job.
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {Object} props.job - Job details object
+ * @param {Function} props.getPostedJobs - Function to refresh job postings
+ * @param {Function} props.deleteJobFunction - Function to delete a job posting
+ * @returns {JSX.Element} The JobDetailedCard2 component
+ */
 const JobDetailedCard2 = ({ job, getPostedJobs, deleteJobFunction }) => {
   const [openEditJobCard, setOpenEditJobCard] = useState(false);
+
+  /**
+   * Formats the salary range.
+   * @param {Object} salaryRange - Salary range object
+   * @param {number} salaryRange.min - Minimum salary
+   * @param {number} salaryRange.max - Maximum salary
+   * @returns {string} Formatted salary range string
+   */
   const formatSalaryRange = (salaryRange) => {
     if (!salaryRange || !salaryRange.min || !salaryRange.max) return "N/A";
     const { min, max } = salaryRange;
     return `$${min.toLocaleString()} - $${max.toLocaleString()}`;
   };
+
+  /**
+   * Formats a date string.
+   * @param {string} dateString - Date string
+   * @returns {string} Formatted date string (dd MMMM yyyy)
+   */
   const formatDate = (dateString) => {
     if (!dateString) return "";
     return format(new Date(dateString), "dd MMMM yyyy");
@@ -135,7 +161,7 @@ const JobDetailedCard2 = ({ job, getPostedJobs, deleteJobFunction }) => {
           <div className="flex flex-col justify-between items-center space-y-4">
             <div className="w-[450px] p-4 bg-[#f7e4d7] rounded-md flex flex-col justify-center space-y-4">
               <h3 className="flex items-center font-semibold text-lg">
-                <HiSpeakerphone className="text-orange-500 mr-2"/>
+                <HiSpeakerphone className="text-orange-500 mr-2" />
                 Promote this Job
               </h3>
               <p className="text-[#a0a2a9] mx-3">
