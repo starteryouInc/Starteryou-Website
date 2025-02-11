@@ -7,59 +7,9 @@ import { useState } from "react";
 import TermsModal from "../Common/TermsModal";
 import Privacy from "../Common/Privacy";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
-import { API_CONFIG } from "../../config/api";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import axios from "axios";
-
 const Signup = () => {
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
-  const navigate = useNavigate();
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleSeekerRegister = async (e) => {
-    e.preventDefault();
-
-    try {
-      const { data: registerData } = await axios.post(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.userSeekerRegister}`,
-        {
-          username,
-          email,
-          phoneNumber,
-          password,
-          role: "jobSeeker",
-        }
-      );
-      console.log("id is here: ",registerData)
-
-      const userId = registerData.newUsers._id;
-      console.log(userId);
-      const { data: profileData } = await axios.post(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.createUserProfile}`,
-        {
-          userRegistrationId: userId,
-          name: username,
-          email,
-          phoneNo: phoneNumber,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${registerData.tokens.accessToken}`,
-          },
-        }
-      );
-      toast.success(registerData.msg);
-      navigate("/UserLogin");
-    } catch (error) {
-      toast.error(error.response?.data?.msg);
-    }
-  };
-
   const reviews = [
     {
       stars: 5,
@@ -177,7 +127,7 @@ const Signup = () => {
           </p>
 
           {/* Input Fields */}
-          <form onSubmit={handleSeekerRegister}>
+          <form>
             <div className="mb-4">
               <label
                 htmlFor="username"
@@ -188,8 +138,6 @@ const Signup = () => {
               <input
                 type="text"
                 id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
                 className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm "
                 placeholder="Enter your Full name"
               />
@@ -205,8 +153,6 @@ const Signup = () => {
               <input
                 type="email"
                 id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm "
                 placeholder="Enter your email"
               />
@@ -222,8 +168,6 @@ const Signup = () => {
                 type="tel"
                 id="phone"
                 name="phone"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
                 className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 placeholder="Enter your phone number"
                 pattern="[0-9]{10}"
@@ -243,8 +187,6 @@ const Signup = () => {
                   type={showPassword ? "text" : "password"}
                   id="password"
                   name="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                   className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   placeholder="Enter your password"
                   required

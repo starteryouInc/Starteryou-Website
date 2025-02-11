@@ -1,88 +1,40 @@
 import React, { useState } from "react";
-import { useUserContext } from "../../../context/UserContext";
-import { API_CONFIG } from "../../../config/api";
-import { toast } from "react-toastify";
-import axios from "axios";
-/**
- * Component for managing skills input, allowing users to add and remove skills.
- *
- * @param {Object} props - The component props.
- * @param {Function} props.openSkillForm - Function to toggle the skill input form.
- * @param {string[]} props.data - Initial array of skills.
- * @param {Function} props.getProfileFieldData - Function to refresh the profile field data.
- * @returns {JSX.Element} The SkillsInputForm component.
- */
-const SkillsInputForm = ({ openSkillForm, data, getProfileFieldData }) => {
-  const { user } = useUserContext();
-  const token = user?.token;
-  const [skills, setSkills] = useState(data);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  /**
-   * Adds a new skill via API and updates the state.
-   *
-   * @param {Event} e - The form submit event.
-   * @returns {Promise<void>} A promise that resolves when the skill is added.
-   */
-  const addSkill = async (e) => {
+const SkillsInputForm = ({ openSkillForm }) => {
+  const [skills, setSkills] = useState([
+    "JAVA",
+    "CSS",
+    "JavaScript",
+    "HTML",
+    "JSON",
+  ]);
+  const [input, setInput] = useState("");
+
+  // Add skill
+  const addSkill = (e) => {
     e.preventDefault();
     const newSkill = input.trim();
-    if (!newSkill || skills.includes(newSkill)) return;
-
-    setLoading(true);
-
-    try {
-      const userId = user?.authenticatedUser?._id;
-      const { data } = await axios.post(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.addSkill(userId)}`,
-        { skill: newSkill }, // Fixed body format
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      toast.success(data.msg);
-      setSkills([...skills, newSkill]); // Update skills state
-      getProfileFieldData();
+    if (newSkill && !skills.includes(newSkill)) {
+      setSkills([...skills, newSkill]);
       setInput("");
-      openSkillForm();
-    } catch (error) {
-      toast.error(error.response?.data?.msg);
-    } finally {
-      setLoading(false);
     }
   };
 
-  /**
-   * Removes a skill via API and updates the state.
-   *
-   * @param {string} skillToRemove - The skill to remove.
-   * @returns {Promise<void>} A promise that resolves when the skill is removed.
-   */
-  const removeSkill = async (skillToRemove) => {
-    try {
-      const userId = user?.authenticatedUser?._id;
-      const { data } = await axios.delete(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.deleteSkill(userId)}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          data: { skill: skillToRemove }, // ✅ Send skill in `data`
-        }
-      );
+  // Remove skill
+  const removeSkill = (skillToRemove) => {
+    setSkills(skills.filter((skill) => skill !== skillToRemove));
+  };
 
-      toast.success(data.msg);
-      setSkills(skills.filter((skill) => skill !== skillToRemove)); // ✅ Remove skill locally
-      getProfileFieldData();
-      openSkillForm();
-    } catch (error) {
-      toast.error(error.response?.data?.msg || "Failed to remove skill.");
-    }
+  // Handle Save button
+  const handleSave = () => {
+    alert("Skills saved successfully:\n" + skills.join(", "));
+    console.log("Saved Skills:", skills);
+  };
+
+  // Handle Cancel button
+  const handleCancel = () => {
+    setInput("");
+    openSkillForm();
   };
 
   return (
@@ -105,12 +57,11 @@ const SkillsInputForm = ({ openSkillForm, data, getProfileFieldData }) => {
             </button>
           </div>
         ))}
-
         {/* Input Field */}
         <form onSubmit={addSkill} className="flex-1">
           <input
             type="text"
-            placeholder="Enter your skill"
+            placeholder="Enter or select your skills"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             className="w-full outline-none p-1"
@@ -122,17 +73,16 @@ const SkillsInputForm = ({ openSkillForm, data, getProfileFieldData }) => {
       <div className="flex justify-end space-x-4 mt-4">
         <button
           type="button"
-          onClick={openSkillForm}
+          onClick={handleCancel}
           className="text-purple-600"
         >
           Cancel
         </button>
         <button
-          onClick={addSkill}
+          onClick={handleSave}
           className="bg-purple-600 text-white py-2 px-6 rounded hover:bg-purple-700"
-          disabled={loading}
         >
-          {loading ? "Saving..." : "Save"}
+          Save
         </button>
       </div>
     </div>

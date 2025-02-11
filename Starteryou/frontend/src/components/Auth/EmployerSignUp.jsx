@@ -7,47 +7,9 @@ import { useState } from "react";
 import TermsModal from "../Common/TermsModal";
 import Privacy from "../Common/Privacy";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
-import { API_CONFIG } from "../../config/api";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import axios from "axios";
-import { useUserContext } from "../../context/UserContext";
-
 const EmployerSignUp = () => {
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
-  const navigate = useNavigate();
-  const { loginUser, user } = useUserContext();
-  const [companyName, setCompanyName] = useState("");
-  const [companyWebsite, setCompanyWebsite] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleRegister = async (e) => {
-    e.preventDefault();
-
-    try {
-      const { data } = await axios.post(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.userEmpRegister}`,
-        {
-          companyName,
-          companyWebsite,
-          email,
-          password,
-          role: "employer",
-        }
-      );
-      loginUser({
-        authenticatedUser: data.newEmployer,
-        token: data.token.accessToken,
-      });
-      toast.success(data.msg);
-      navigate("/createProfile");
-    } catch (error) {
-      toast.error(error.response?.data?.msg);
-    }
-  };
-
   const reviews = [
     {
       stars: 5,
@@ -165,7 +127,7 @@ const EmployerSignUp = () => {
           </p>
 
           {/* Input Fields */}
-          <form onSubmit={handleRegister}>
+          <form>
             {/* Company Name */}
             <div className="mb-4">
               <label
@@ -177,8 +139,6 @@ const EmployerSignUp = () => {
               <input
                 type="text"
                 id="companyName"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
                 className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm"
                 placeholder="Enter your company name"
                 required
@@ -195,8 +155,6 @@ const EmployerSignUp = () => {
               <input
                 type="url"
                 id="website"
-                value={companyWebsite}
-                onChange={(e) => setCompanyWebsite(e.target.value)}
                 className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm"
                 placeholder="Enter your company website URL"
               />
@@ -213,8 +171,6 @@ const EmployerSignUp = () => {
               <input
                 type="email"
                 id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm"
                 placeholder="Enter your email"
                 required
@@ -233,8 +189,6 @@ const EmployerSignUp = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                   className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   placeholder="Enter your password"
                   required

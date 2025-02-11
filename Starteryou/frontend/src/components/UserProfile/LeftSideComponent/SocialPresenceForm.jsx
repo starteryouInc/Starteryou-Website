@@ -1,20 +1,9 @@
 import React, { useState } from "react";
 
-/**
- * A form component for adding a social media profile and link.
- *
- * @component
- * @param {Object} props - Component props.
- * @param {Function} props.openSocialForm - Function to close the form.
- * @returns {JSX.Element} The SocialPresenceForm component.
- */
 const SocialPresenceForm = ({ openSocialForm }) => {
   const [socialProfile, setsocialProfile] = useState("");
   const [link, setLink] = useState("");
 
-  /**
-   * Handles the save action by logging the form data.
-   */
   const handleSave = () => {
     const data = {
       socialProfile,
