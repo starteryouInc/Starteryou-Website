@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { useNavigation } from "../../../context/NavigationContext";
 import FileUpload from "../../Common/FileUpload";
 import { MaxWords } from "../../Common/wordValidation";
+import { Link } from "react-router-dom";
 
 import { API_CONFIG } from "@config/api";
 
@@ -208,7 +209,7 @@ const HeroJobPortal = () => {
         )}
         <div className="flex justify-center space-x-4 mb-8">
           <button className="bg-[#D9502E] text-white py-3 px-8 rounded-lg font-semibold">
-            Explore
+            <Link to="/jobfeeds">Explore</Link>
           </button>
           <button className="bg-white text-[#D9502E] py-3 px-8 rounded-lg font-semibold">
             Signup

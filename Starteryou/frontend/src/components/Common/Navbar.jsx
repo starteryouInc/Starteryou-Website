@@ -1,12 +1,25 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useNavigation } from "../../context/NavigationContext";
+import { useUserContext } from "../../context/UserContext";
+import { FaRegUserCircle } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const Navbar = ({ isEduHero }) => {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
   const { isAdmin } = useNavigation(); // Access isAdmin from context
+
+  const { user, logoutUser } = useUserContext();
+  const token = user?.token;
+  const role = user?.authenticatedUser.role;
+
+  const handleLogout = () => {
+    logoutUser();
+    navigate("/");
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -77,20 +90,42 @@ const Navbar = ({ isEduHero }) => {
       </ul>
 
       {/* Signup Button Links */}
-      <div className="hidden md:flex items-center md:space-x-2 lg:space-x-6">
-        <Link
-          to="/signup"
-          className="text-sm sm:text-base lg:text-xl font-bold  z-10 uppercase"
-        >
-          Sign up
-        </Link>
-        <Link
-          to="/EmpSignUp"
-          className="bg-[#D9502E] text-sm sm:text-base lg:text-xl text-[white] border-[2px] font-bold border-[#D9502E] px-3 py-1 lg:px-4 lg:py-2 rounded-lg uppercase"
-        >
-          List Job
-        </Link>
-      </div>
+      {!token ? (
+        <div className="hidden md:flex items-center md:space-x-2 lg:space-x-6">
+          <Link
+            to="/signup"
+            className="text-sm sm:text-base lg:text-xl font-bold  z-10 uppercase"
+          >
+            Sign up
+          </Link>
+          <button
+            // onClick={handleRedirects}
+            className="bg-[#D9502E] text-sm sm:text-base lg:text-xl text-[white] border-[2px] font-bold border-[#D9502E] px-3 py-1 lg:px-4 lg:py-2 rounded-lg uppercase"
+          >
+            <Link to="/companyDashboard/postedJobs">Post Job</Link>
+          </button>
+        </div>
+      ) : (
+        <div className="after-login hidden md:flex items-center md:space-x-2 lg:space-x-6">
+          <button
+            onClick={handleLogout}
+            className="text-sm sm:text-base lg:text-xl font-bold  z-10 uppercase"
+          >
+            Log Out
+          </button>
+          {role === "employer" ? (
+            <button className="bg-[#D9502E] text-sm sm:text-base lg:text-xl text-[white] border-[2px] font-bold border-[#D9502E] px-3 py-1 lg:px-4 lg:py-2 rounded-lg uppercase">
+              <Link to="/companyDashboard/postedJobs">Post Job</Link>
+            </button>
+          ) : (
+            <button>
+              <Link to="/userprofile">
+                <FaRegUserCircle className="text-4xl" />
+              </Link>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Mobile Menu Button */}
       <div className="md:hidden">
