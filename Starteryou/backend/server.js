@@ -15,7 +15,6 @@ const verificationRoutes = require("./routes/verificationRoutes"); // System ver
 const authRoutes = require("./routes/authRoutes");
 const newsletterRoutes = require("./routes/newsletterRoutes"); //newsletter subscribers
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
-const { router } = require("./routes/index");
 
 
 // Initialize Express app
@@ -111,12 +110,6 @@ app.use("/api", teamRoutes);
  *     description: Routes for Authentication endpoints
  */
 app.use("/api/v1/auth", authRoutes);
-
-/**
- * Uses the imported router in the Express application.
- * @param {import("express").Express} app - The Express application instance.
- */
-app.use(router);
 
 // Health Check Route
 /**

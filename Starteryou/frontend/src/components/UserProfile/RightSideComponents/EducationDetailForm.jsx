@@ -1,201 +1,187 @@
 import React, { useState } from "react";
-import { API_CONFIG } from "../../../config/api";
-import { useUserContext } from "../../../context/UserContext";
-import { toast } from "react-toastify";
-import axios from "axios";
 
-const EducationalDetailsForm = ({ openEducationForm, getProfileFieldData }) => {
-  const { user } = useUserContext();
-  const token = user?.token;
-
+const EducationalDetailsForm = ({ openEducationForm }) => {
   const [formData, setFormData] = useState({
     qualification: "",
     specialization: "",
     institute: "",
+    gradingSystem: "",
     marks: "",
-    startYear: "",
     passingYear: "",
-    description: "",
   });
 
-  // Function to clear all fields
-  const clearAllFields = () => {
-    setFormData({
-      qualification: "",
-      specialization: "",
-      institute: "",
-      marks: "",
-      startYear: "",
-      passingYear: "",
-      description: "",
-    });
+  const [errors, setErrors] = useState({});
+
+  const gradingOptions = ["Percentage", "CGPA", "GPA"];
+  const marksOptions = ["85%", "90%", "9.0", "8.5"];
+  const yearOptions = ["2023", "2022", "2021", "2020"];
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.qualification) newErrors.qualification = "Qualification is required";
+    if (!formData.specialization) newErrors.specialization = "Specialization is required";
+    if (!formData.institute) newErrors.institute = "Institute is required";
+    if (!formData.passingYear) newErrors.passingYear = "Passing Year is required";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "marks" ? parseFloat(value) || "" : value, // Ensure marks is a number
-    }));
+    setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (!formData.qualification || !formData.institute || !formData.startYear) {
-      return toast.error("Please fill out all required fields.");
-    }
-
-    const startDate = new Date(`${formData.startYear}-01-01`);
-    const endDate = formData.passingYear
-      ? new Date(`${formData.passingYear}-01-01`)
-      : "Present";
-
-    const educationDetails = {
-      institution: formData.institute,
-      degree: formData.qualification,
-      specialization: formData.specialization,
-      startYear: startDate,
-      endYear: endDate,
-      Marks: formData.marks,
-      description: formData.description || "",
-    };
-
-    try {
-      const userId = user?.authenticatedUser?._id;
-      const { data } = await axios.post(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.addEducation(userId)}`,
-        educationDetails,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      toast.success(data.msg);
-      getProfileFieldData();
-      clearAllFields();
-      openEducationForm();
-    } catch (error) {
-      toast.error(error.response?.data?.msg);
+    if (validateForm()) {
+      console.log("Form Submitted Successfully:", formData);
+      alert("Educational Details Saved Successfully!");
+      // API call or logic to save form data
     }
   };
 
   const handleCancel = () => {
-    clearAllFields();
+    setFormData({
+      qualification: "",
+      specialization: "",
+      institute: "",
+      gradingSystem: "",
+      marks: "",
+      passingYear: "",
+    });
+    setErrors({});
     openEducationForm();
   };
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="p-8 mx-4 bg-white border rounded-lg max-w-3xl md:w-[560px] xl:w-[760px]"
+      className="max-w-3xl mx-4 bg-white p-8 border rounded-lg space-y-4 md:w-[560px]"
     >
       <h2 className="text-2xl font-semibold mb-4">Educational Details</h2>
 
       {/* Qualification */}
-      <label className="block font-semibold text-[#777585] mb-2">
-        Qualification <span className="text-red-500">*</span>
-      </label>
-      <input
-        type="text"
-        name="qualification"
-        value={formData.qualification}
-        onChange={handleChange}
-        placeholder="Most recent Qualification"
-        className="border p-2 w-full mb-4 rounded"
-        required
-      />
+      <div>
+        <label className="block font-semibold text-[#777585] mb-2">Qualification <span className="text-red-500">*</span></label>
+        <select
+          name="qualification"
+          value={formData.qualification}
+          onChange={handleChange}
+          className={`w-full p-2 border rounded ${
+            errors.qualification ? "border-red-500" : "border-gray-300"
+          }`}
+        >
+          <option value="">Select Qualification</option>
+          <option value="High School">High School</option>
+          <option value="Bachelors">Bachelors</option>
+          <option value="Masters">Masters</option>
+        </select>
+        {errors.qualification && (
+          <p className="text-red-500 text-sm">{errors.qualification}</p>
+        )}
+      </div>
 
       {/* Specialization */}
-      <label className="block font-semibold text-[#777585] mb-2">
-        Specialization
-      </label>
-      <input
-        type="text"
-        name="specialization"
-        value={formData.specialization}
-        onChange={handleChange}
-        placeholder="Enter the specialisation, if have"
-        className="border p-2 w-full mb-4 rounded"
-        required
-      />
+      <div>
+        <label className="block font-semibold text-[#777585] mb-2">Specialisation <span className="text-red-500">*</span></label>
+        <select
+          name="specialization"
+          value={formData.specialization}
+          onChange={handleChange}
+          className={`w-full p-2 border rounded ${
+            errors.specialization ? "border-red-500" : "border-gray-300"
+          }`}
+        >
+          <option value="">Select Specialisation</option>
+          <option value="Science">Science</option>
+          <option value="Commerce">Commerce</option>
+          <option value="Arts">Arts</option>
+        </select>
+        {errors.specialization && (
+          <p className="text-red-500 text-sm">{errors.specialization}</p>
+        )}
+      </div>
 
       {/* Institute */}
-      <label className="block font-semibold text-[#777585] mb-2">
-        Institute <span className="text-red-500">*</span>
-      </label>
-      <input
-        type="text"
-        name="institute"
-        value={formData.institute}
-        onChange={handleChange}
-        placeholder="Enter Institute"
-        className="border p-2 w-full mb-4 rounded"
-        required
-      />
-      <label className="block font-semibold text-[#777585] mb-2">Marks</label>
-      <input
-        type="number"
-        name="marks"
-        value={formData.marks}
-        onChange={handleChange}
-        placeholder="Enter CGPA (e.g. 8.2)"
-        className="border p-2 w-full mb-4 rounded"
-        step="0.01"
-        min="0"
-        max="100"
-      />
+      <div>
+        <label className="block font-semibold text-[#777585] mb-2">Institute <span className="text-red-500">*</span></label>
+        <select
+          name="institute"
+          value={formData.institute}
+          onChange={handleChange}
+          className={`w-full p-2 border rounded ${
+            errors.institute ? "border-red-500" : "border-gray-300"
+          }`}
+        >
+          <option value="">Select Institute</option>
+          <option value="MIT">MIT</option>
+          <option value="Harvard">Harvard</option>
+          <option value="Stanford">Stanford</option>
+        </select>
+        {errors.institute && (
+          <p className="text-red-500 text-sm">{errors.institute}</p>
+        )}
+      </div>
 
-      {/* Starting & Passing Year */}
-      <label className="block font-semibold text-[#777585] mb-2">
-        Starting Year <span className="text-red-500">*</span>
-      </label>
-      <select
-        name="startYear"
-        value={formData.startYear}
-        onChange={handleChange}
-        className="border p-2 rounded w-full mb-2"
-        required
-      >
-        <option value="">Year</option>
-        {Array.from({ length: 20 }, (_, i) => (
-          <option key={i} value={2024 - i}>
-            {2024 - i}
-          </option>
-        ))}
-      </select>
+      {/* Grading System */}
+      <div>
+        <label className="block font-semibold text-[#777585] mb-2">Grading System</label>
+        <select
+          name="gradingSystem"
+          value={formData.gradingSystem}
+          onChange={handleChange}
+          className="w-full p-2 border rounded border-gray-300"
+        >
+          <option value="">Select Grading System</option>
+          {gradingOptions.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      <label className="block font-semibold text-[#777585] mb-2">
-        Passing Year <span className="text-red-500">*</span>
-      </label>
-      <select
-        name="passingYear"
-        value={formData.passingYear}
-        onChange={handleChange}
-        className="border p-2 rounded w-full mb-2"
-        required
-      >
-        <option value="">Year</option>
-        {Array.from({ length: 20 }, (_, i) => (
-          <option key={i} value={2024 - i}>
-            {2024 - i}
-          </option>
-        ))}
-      </select>
+      {/* Marks */}
+      <div>
+        <label className="block font-semibold text-[#777585] mb-2">Marks</label>
+        <select
+          name="marks"
+          value={formData.marks}
+          onChange={handleChange}
+          className="w-full p-2 border rounded border-gray-300"
+        >
+          <option value="">Select Marks</option>
+          {marksOptions.map((mark) => (
+            <option key={mark} value={mark}>
+              {mark}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      {/* Description */}
-      <label className="block font-semibold text-[#777585] mb-2">
-        Description
-      </label>
-      <textarea
-        name="description"
-        value={formData.description}
-        onChange={handleChange}
-        placeholder="Enter your description"
-        className="border p-2 w-full rounded mb-1 h-24"
-        maxLength="1000"
-      />
+      {/* Passing Year */}
+      <div>
+        <label className="block font-semibold text-[#777585] mb-2">Passing Year <span className="text-red-500">*</span></label>
+        <select
+          name="passingYear"
+          value={formData.passingYear}
+          onChange={handleChange}
+          className={`w-full p-2 border rounded ${
+            errors.passingYear ? "border-red-500" : "border-gray-300"
+          }`}
+        >
+          <option value="">Select Passing Year</option>
+          {yearOptions.map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
+        {errors.passingYear && (
+          <p className="text-red-500 text-sm">{errors.passingYear}</p>
+        )}
+      </div>
 
       {/* Buttons */}
       <div className="flex justify-end space-x-4 mt-4">

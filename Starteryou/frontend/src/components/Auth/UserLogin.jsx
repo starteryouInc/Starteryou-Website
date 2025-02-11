@@ -5,43 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
-import { useUserContext } from "../../context/UserContext";
-import { API_CONFIG } from "../../config/api";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import axios from "axios";
-
 const UserLogin = () => {
-  const { loginUser } = useUserContext();
-  const navigate = useNavigate();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const { data } = await axios.post(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.userLogin}`,
-        {
-          email,
-          password,
-        }
-      );
-      loginUser({
-        authenticatedUser: data.users,
-        token: data.tokens.accessToken,
-      });
-      toast.success(data.msg);
-      if (data.users.role === "jobSeeker") {
-        navigate("/jobfeeds");
-      } else {
-        navigate("/");
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.msg);
-    }
-  };
   const reviews = [
     {
       stars: 5,
@@ -160,7 +124,7 @@ const UserLogin = () => {
           </p>
 
           {/* Input Fields */}
-          <form onSubmit={handleLogin}>
+          <form>
             {/* Email Input */}
             <div className="mb-4">
               <label
@@ -170,10 +134,8 @@ const UserLogin = () => {
                 Email address
               </label>
               <input
-                type="email"
+                type="text"
                 id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm"
                 placeholder="Enter your email"
                 required
@@ -193,8 +155,6 @@ const UserLogin = () => {
                   type={showPassword ? "text" : "password"}
                   id="password"
                   name="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                   className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   placeholder="Enter your password"
                   required
