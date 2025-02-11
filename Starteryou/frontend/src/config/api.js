@@ -1,6 +1,7 @@
 // config/api.js
 export const API_CONFIG = {
-  baseURL: "http://dev.starteryou.com:3000",
+  // baseURL: "http://dev.starteryou.com:3000",
+  baseURL: "http://localhost:3000",
   endpoints: {
     fileByTitle: (title) => `/api/files/download/${title}`,
     fileUpload: "/api/files/upload",
@@ -13,6 +14,7 @@ export const API_CONFIG = {
     teamApi: "/api/team",
     authLogin: "/api/v1/auth/login",
     authRegister: "/api/v1/auth/register",
+    newsletterApi: "/api/newsletter/subscribe",
 
     // Register and Login API's
     userEmpRegister: "/api/v1/userAuth/users-emp-register",

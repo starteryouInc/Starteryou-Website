@@ -35,9 +35,9 @@ const LeftSide = ({ UserProfile, getProfileFunction }) => {
   useEffect(() => {
     setUpdateProfileData({
       name: UserProfile?.name || "John Oliver",
-      professionalTitle: UserProfile?.professionalTitle || "Unknown",
+      professionalTitle: UserProfile?.professionalTitle || "Professional Title",
       location: UserProfile?.location || " ",
-      companyName: UserProfile?.currentCompany || "Starter You",
+      companyName: UserProfile?.currentCompany || "Company Name",
       experience: UserProfile?.totalExperience || " ",
       email: UserProfile?.email || "xyz@starteryou.com",
       phoneNo: UserProfile?.phoneNo || "7845129630",

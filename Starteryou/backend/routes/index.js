@@ -458,7 +458,7 @@ const apiEndpoints = [
 
 // Mount routes
 router.use("/api/files", fileRoutes);
-router.use("/api/text", textRoutes);
+router.use("/api", textRoutes);
 router.use("/api/v1/auth", authRoutes);
 router.use("/api/v1/userAuth", userAuthRoutes);
 router.use("/api/v1/jobportal/jobs", authenticate, jobRoutes);

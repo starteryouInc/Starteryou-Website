@@ -43,7 +43,7 @@ const JobFeedPage = () => {
         }
       );
       setJobData(data.data);
-      toast.success(data.msg);
+      // toast.success(data.msg);
     } catch (error) {
       toast.error(error.response?.data?.msg);
     } finally {

@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require("path");
 const { connectToMongoDB } = require("./db");
 const textRoutes = require("./routes/textRoutes");
 const fileRoutes = require("./routes/fileRoutes");
@@ -12,8 +13,11 @@ const teamRoutes = require("./routes/teamRoutes");
 const { mountRoutes } = require("./routes"); // Main routes including API docs
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 const authRoutes = require("./routes/authRoutes");
+const newsletterRoutes = require("./routes/newsletterRoutes"); //newsletter subscribers
 const { router } = require("./routes/index");
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
+
+
 // Initialize Express app
 const app = express();
 // Middleware
@@ -21,6 +25,9 @@ dotenv.config();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use("/api/newsletter", newsletterRoutes);  //Newsletter subscribers
+
 
 // MongoDB connection
 (async () => {
@@ -31,6 +38,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
     console.error("❌ MongoDB Connection Error:", err.message);
   }
 })();
+
+const cacheOptions = {
+  maxAge: "1y", // Cache for 1 year
+  immutable: true, // Prevent revalidation if the file hasn't changed
+};
+app.use("/docs", express.static(path.join(__dirname, "docs"), cacheOptions));
+console.log("📂 Serving static files from:", path.join(__dirname, "docs"));
 
 // Swagger Configuration
 const swaggerOptions = {
@@ -53,6 +67,8 @@ const swaggerOptions = {
         name: "Authentication",
         description: "Routes for Authentication endpoints",
       },
+      { name: "Newsletter", description: "Routes for newsletter subscriptions" }, // Add this line
+
     ],
   },
   apis: ["./routes/*.js"], // Path to your API route files
@@ -61,7 +77,6 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use("/api/system", verificationRoutes);
-
 mountRoutes(app); // This mounts the main routes including API docs
 
 // Routes
@@ -71,7 +86,7 @@ mountRoutes(app); // This mounts the main routes including API docs
  *   - name: TextRoutes
  *     description: Routes for text operations
  */
-// app.use("/api", textRoutes);
+app.use("/api", textRoutes);
 
 /**
  * @swagger
@@ -79,7 +94,15 @@ mountRoutes(app); // This mounts the main routes including API docs
  *   - name: FileRoutes
  *     description: Routes for file operations
  */
-// app.use("/api/files", fileRoutes);
+app.use("/api/files", fileRoutes);
+
+/**
+ * @swagger
+ * tags:
+ *   - name: TeamRoutes
+ *     description: Routes for file operations
+ */
+app.use("/api", teamRoutes);
 
 /**
  * @swagger
@@ -87,7 +110,12 @@ mountRoutes(app); // This mounts the main routes including API docs
  *   - name: Authentication
  *     description: Routes for Authentication endpoints
  */
-// app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/auth", authRoutes);
+
+/**
+ * Uses the imported router in the Express application.
+ * @param {import("express").Express} app - The Express application instance.
+ */
 app.use(router);
 
 // Health Check Route
@@ -104,7 +132,6 @@ app.get("/health", (req, res) => {
   res.status(200).json({ message: "Server is running!" });
 });
 
-// MongoDB Connection Status Route
 /**
  * @swagger
  * /db-status:
@@ -136,9 +163,10 @@ app.use((err, req, res, next) => {
 });
 
 // Start Server
-// Start Server
 const PORT = process.env.PORT || 3000;
 
+
+// chek dev branch
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://dev.starteryou.com:${PORT}`);
   console.log(
