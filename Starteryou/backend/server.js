@@ -14,8 +14,8 @@ const { mountRoutes } = require("./routes"); // Main routes including API docs
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 const authRoutes = require("./routes/authRoutes");
 const newsletterRoutes = require("./routes/newsletterRoutes"); //newsletter subscribers
-const { router } = require("./routes/index");
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
+const { router } = require("./routes/index");
 
 
 // Initialize Express app

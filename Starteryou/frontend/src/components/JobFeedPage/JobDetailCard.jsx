@@ -1,3 +1,12 @@
+/**
+ * JobDetailCard Component
+ * @component
+ * @param {Object} props - Component props
+ * @param {Object} props.jobDetails - Job details data
+ * @param {Function} props.onClose - Function to close the job detail card
+ * @param {boolean} props.savedJob - Boolean indicating if the job is saved
+ * @returns {JSX.Element} A detailed job card with job information, save functionality, and application option.
+ */
 import React, { useState } from "react";
 // import SaveJob from "/JobFeedPage/SaveJob.svg";
 import LocationIcon from "/JobFeedPage/Location.svg";
@@ -13,18 +22,35 @@ const JobDetailCard = ({ jobDetails, onClose, savedJob }) => {
   const { user } = useUserContext();
   const role = user?.authenticatedUser?.role;
   const [openApplyJob, setOpenApplyJob] = useState(false);
-
+  /**
+   * Determines if the applicant is an early applicant based on job posting date.
+   * @param {string} createdAt - The job posting date in ISO format.
+   * @returns {boolean} True if the job was posted less than 7 days ago, otherwise false.
+   */
   const isEarlyApplicant = (createdAt) => {
     const daysDifference = differenceInDays(new Date(), new Date(createdAt));
     return daysDifference < 7;
   };
+  /**
+   * Formats the salary range into a readable string.
+   * @param {Object} salaryRange - Salary range object containing min and max values.
+   * @param {number} salaryRange.min - Minimum salary value.
+   * @param {number} salaryRange.max - Maximum salary value.
+   * @returns {string} Formatted salary range (e.g., "$50,000 - $70,000") or "N/A" if data is missing.
+   */
   const formatSalaryRange = (salaryRange) => {
     if (!salaryRange || !salaryRange.min || !salaryRange.max) return "N/A";
     const { min, max } = salaryRange;
     return `$${min.toLocaleString()} - $${max.toLocaleString()}`;
   };
+
+  /**
+   * Formats a date string into "dd MMMM yyyy" format.
+   * @param {string} dateString - The date string in ISO format.
+   * @returns {string} Formatted date (e.g., "10 October 2023") or an empty string if no date is provided.
+   */
   const formatDate = (dateString) => {
-    if (!dateString) return ""; 
+    if (!dateString) return "";
     return format(new Date(dateString), "dd MMMM yyyy");
   };
 

@@ -1,25 +1,58 @@
+/**
+ * Profile1 Component
+ *
+ * This component allows users to create their company profile by entering basic details
+ * such as the company name, logo, and website URL. It also provides a preview section
+ * for users to see their input in real-time.
+ */
 import { useState, useEffect } from "react";
 import { FiUpload, FiX } from "react-icons/fi";
 import Navbar from "../Common/Navbar";
 import { useNavigate } from "react-router-dom";
 
+/**
+ * Profile1 Component
+ *
+ * @param {Object} props - Component props
+ * @param {Object} props.profileData - The profile data object containing user inputs
+ * @param {Function} props.handleChange - Function to handle input changes
+ * @param {Function} props.nextPage - Function to navigate to the next page
+ * @returns {JSX.Element} Profile1 Component
+ */
 const Profile1 = ({ profileData, handleChange, nextPage }) => {
   const navigate = useNavigate();
+
+  /**
+   * State for storing company name
+   * @type {[string, Function]}
+   */
   const [companyName, setCompanyName] = useState(
     localStorage.getItem("companyName") || ""
   );
+  /**
+   * State for storing company logo URL
+   * @type {[string|null, Function]}
+   */
   const [companyLogo, setCompanyLogo] = useState(
     localStorage.getItem("companyLogo") || null
   );
-
+  /**
+   * Updates localStorage when companyName changes
+   */
   useEffect(() => {
     localStorage.setItem("companyName", companyName);
   }, [companyName]);
 
+  /**
+   * Updates localStorage when companyLogo changes
+   */
   useEffect(() => {
     localStorage.setItem("companyLogo", companyLogo);
   }, [companyLogo]);
-
+  /**
+   * Handles the company logo upload
+   * @param {Event} event - The file input change event
+   */
   const handleLogoUpload = (event) => {
     const file = event.target.files[0];
     if (file) {

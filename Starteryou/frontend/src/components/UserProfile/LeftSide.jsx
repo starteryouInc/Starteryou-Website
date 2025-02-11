@@ -25,6 +25,15 @@ import { useUserContext } from "../../context/UserContext";
 import { toast } from "react-toastify";
 import axios from "axios";
 
+/**
+ * LeftSide component displays the user's profile information, allowing for editing and updating profile details.
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {Object} props.UserProfile - User profile data
+ * @param {Function} props.getProfileFunction - Function to refresh the user profile after updates
+ * @returns {JSX.Element} - LeftSide component
+ */
 const LeftSide = ({ UserProfile, getProfileFunction }) => {
   const { user } = useUserContext();
   const [isEditing, setIsEditing] = useState(false);
@@ -32,6 +41,9 @@ const LeftSide = ({ UserProfile, getProfileFunction }) => {
   const [updateProfileData, setUpdateProfileData] = useState({});
   const token = user?.token;
 
+  /**
+   * Initializes the profile data when the component mounts or when `UserProfile` changes.
+   */
   useEffect(() => {
     setUpdateProfileData({
       name: UserProfile?.name || "John Oliver",
@@ -44,6 +56,12 @@ const LeftSide = ({ UserProfile, getProfileFunction }) => {
     });
   }, [UserProfile]);
 
+  /**
+   * Handles the update of user profile data by making a PATCH request to the API.
+   * Displays success or error messages using toast notifications.
+   *
+   * @async
+   */
   const handleUpdateProfile = async () => {
     if (!user?.token) {
       toast.error("Pls login to continue...");

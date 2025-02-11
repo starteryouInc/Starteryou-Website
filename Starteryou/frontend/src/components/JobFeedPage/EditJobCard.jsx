@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import NavBar from "../Common/Navbar";
+// import NavBar from "../Common/Navbar";
 import { useUserContext } from "../../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import { API_CONFIG } from "../../config/api";

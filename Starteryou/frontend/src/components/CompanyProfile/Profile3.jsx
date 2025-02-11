@@ -1,6 +1,19 @@
+/**
+ * Profile3 Component
+ *
+ * This component allows users to create and preview a company profile with additional details.
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {Object} props.profileData - Profile data containing tagline and about information
+ * @param {Function} props.handleChange - Function to handle input changes
+ * @param {Function} props.handlePublish - Function to handle the publish action
+ * @param {Function} props.prevPage - Function to navigate to the previous page
+ */
 import { useEffect, useState } from "react";
 import Navbar from "../Common/Navbar";
 import { useNavigate } from "react-router-dom";
+
 const Profile3 = ({ profileData, handleChange, handlePublish, prevPage }) => {
   const [companyName, setCompanyName] = useState("");
   const [companyLogo, setCompanyLogo] = useState("");
@@ -13,6 +26,7 @@ const Profile3 = ({ profileData, handleChange, handlePublish, prevPage }) => {
     setCompanyName(localStorage.getItem("companyName") || "");
     setCompanyLogo(localStorage.getItem("companyLogo") || "");
   }, []);
+
   return (
     <div>
       <Navbar isEduHero={true} />
@@ -105,22 +119,19 @@ const Profile3 = ({ profileData, handleChange, handlePublish, prevPage }) => {
                 <p>
                   <strong className="text-[#6B6E79]">Industry:</strong>
                   <span className="pl-1 text-[#A6AEBC]">
-                    {" "}
-                    {industry || "Not specified"}{" "}
+                    {industry || "Not specified"}
                   </span>
                 </p>
                 <p>
-                  <strong className="text-[#6B6E79]">Size:</strong>{" "}
+                  <strong className="text-[#6B6E79]">Size:</strong>
                   <span className="pl-1 text-[#A6AEBC]">
-                    {" "}
-                    {companySize || "Not specified"}{" "}
+                    {companySize || "Not specified"}
                   </span>
                 </p>
                 <p>
-                  <strong className="text-[#6B6E79]">Type:</strong>{" "}
+                  <strong className="text-[#6B6E79]">Type:</strong>
                   <span className="pl-1 text-[#A6AEBC]">
-                    {" "}
-                    {companyType || "Not specified"}{" "}
+                    {companyType || "Not specified"}
                   </span>
                 </p>
               </div>

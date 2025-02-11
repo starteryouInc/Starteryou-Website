@@ -57,14 +57,14 @@ const ProfilePage = () => {
                 <span>{companyProfile.industry}</span>
                 <span className="flex items-center">
                   <MdLocationOn className="mr-1" />{" "}
-                  <span>San Francisco, CA</span>
+                  <span>New Jersey, USA</span>
                 </span>
                 <span className="flex items-center">
                   <FaUsers className="mr-1" />{" "}
                   <span>{companyProfile.companySize}</span>
                 </span>
                 <span className="flex items-center">
-                  <MdDateRange className="mr-1" /> <span>Founded 2018</span>
+                  <MdDateRange className="mr-1" /> <span>Founded 2024</span>
                 </span>
               </div>
             </div>

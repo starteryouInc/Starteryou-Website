@@ -1,6 +1,12 @@
 import React from "react";
 import { VscLightbulbSparkle } from "react-icons/vsc";
 
+/**
+ * QuickTips Component - Displays a list of tips to improve job postings.
+ *
+ * @component
+ * @returns {JSX.Element} The QuickTips component.
+ */
 const QuickTips = () => {
   return (
     <div className="quick-tips w-[370px] h-[240px] px-4 border border-[#dedede] rounded-[4px] flex flex-col items-start justify-center space-y-4">
