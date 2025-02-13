@@ -35,6 +35,12 @@ const CompanyProfileSchema = new mongoose.Schema({
   companyType: {
     type: String,
   },
+  location: {
+    type: String,
+  },
+  foundedDate: {
+    type: Date,
+  },
   tagline: {
     type: String,
   },

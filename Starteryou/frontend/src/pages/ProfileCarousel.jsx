@@ -22,6 +22,8 @@ const ProfileCarousel = () => {
     industry: "",
     companySize: "",
     companyType: "",
+    location: "",
+    foundedDate: "",
     tagline: "",
     about: "",
   });
@@ -33,6 +35,8 @@ const ProfileCarousel = () => {
       industry: "",
       companySize: "",
       companyType: "",
+      location: "",
+      foundedDate: "",
       tagline: "",
       about: "",
     });
@@ -59,6 +63,9 @@ const ProfileCarousel = () => {
       toast.error("Pls fill are the required fields");
       return;
     }
+
+    const foundedYear = profileData.foundedDate ? new Date(`${profileData.foundedDate}-01-01`) : null;
+
     try {
       const userId = user?.authenticatedUser?._id;
       console.log("UserId : ", userId);
@@ -67,6 +74,7 @@ const ProfileCarousel = () => {
         {
           employerRegistrationId: userId,
           ...profileData,
+          foundedDate: foundedYear,
         },
         {
           headers: {

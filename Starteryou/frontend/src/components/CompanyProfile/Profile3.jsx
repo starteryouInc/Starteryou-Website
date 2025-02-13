@@ -10,23 +10,9 @@
  * @param {Function} props.handlePublish - Function to handle the publish action
  * @param {Function} props.prevPage - Function to navigate to the previous page
  */
-import { useEffect, useState } from "react";
 import Navbar from "../Common/Navbar";
-import { useNavigate } from "react-router-dom";
 
 const Profile3 = ({ profileData, handleChange, handlePublish, prevPage }) => {
-  const [companyName, setCompanyName] = useState("");
-  const [companyLogo, setCompanyLogo] = useState("");
-  const [industry, setIndustry] = useState("");
-  const [companySize, setCompanySize] = useState("");
-  const [companyType, setCompanyType] = useState("");
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    setCompanyName(localStorage.getItem("companyName") || "");
-    setCompanyLogo(localStorage.getItem("companyLogo") || "");
-  }, []);
-
   return (
     <div>
       <Navbar isEduHero={true} />
@@ -62,6 +48,39 @@ const Profile3 = ({ profileData, handleChange, handlePublish, prevPage }) => {
             <p className="text-[#9FA8B9]">
               Add more information to make your profile stand out
             </p>
+
+            {/* Location */}
+            <div className="mt-4">
+              <label className="block text-sm font-semibold text-[#626672]">
+                Location
+              </label>
+              <input
+                type="text"
+                className="w-full p-2 border rounded mt-1 text-[#A9B1BE]"
+                placeholder="A short, catchy description of your company"
+                value={profileData.location}
+                onChange={(e) => handleChange("location", e.target.value)}
+              />
+            </div>
+
+            {/* Founded Date */}
+            <label className="mt-4 block text-sm font-semibold text-[#626672]">
+              Founded Year
+            </label>
+            <select
+              name="foundedDate"
+              value={profileData.foundedDate}
+              onChange={(e) => handleChange("foundedDate", e.target.value)}
+              className="border p-2 rounded w-full mb-2"
+              required
+            >
+              <option value="">Year</option>
+              {Array.from({ length: 20 }, (_, i) => (
+                <option key={i} value={2024 - i}>
+                  {2024 - i}
+                </option>
+              ))}
+            </select>
 
             <div className="mt-4">
               <label className="block text-sm font-semibold text-[#626672]">
@@ -112,26 +131,28 @@ const Profile3 = ({ profileData, handleChange, handlePublish, prevPage }) => {
             </div>
             <div className="border p-4 rounded mt-4 bg-white">
               <h2 className="text-lg font-bold text-[#323645]">
-                {companyName || "Company Name"}
+                {profileData.companyName || "Company Name"}
               </h2>
-              <p className="text-[#A9B1BF]">Your company tagline</p>
+              <p className="text-[#A9B1BF]">
+                {profileData.tagline || "Your company tagline"}
+              </p>
               <div className="mt-4 pt-4 border-t">
                 <p>
                   <strong className="text-[#6B6E79]">Industry:</strong>
                   <span className="pl-1 text-[#A6AEBC]">
-                    {industry || "Not specified"}
+                    {profileData.industry || "Not specified"}
                   </span>
                 </p>
                 <p>
                   <strong className="text-[#6B6E79]">Size:</strong>
                   <span className="pl-1 text-[#A6AEBC]">
-                    {companySize || "Not specified"}
+                    {profileData.companySize || "Not specified"}
                   </span>
                 </p>
                 <p>
                   <strong className="text-[#6B6E79]">Type:</strong>
                   <span className="pl-1 text-[#A6AEBC]">
-                    {companyType || "Not specified"}
+                    {profileData.companyType || "Not specified"}
                   </span>
                 </p>
               </div>

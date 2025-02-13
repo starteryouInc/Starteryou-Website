@@ -11,22 +11,10 @@
  * @param {Function} props.nextPage - Function to navigate to the next page
  * @param {Function} props.prevPage - Function to navigate to the previous page
  */
-import { useEffect, useState } from "react";
 import Navbar from "../Common/Navbar";
-import { useNavigate } from "react-router-dom";
 
 const Profile2 = ({ profileData, handleChange, nextPage, prevPage }) => {
-  const [companyName, setCompanyName] = useState("");
-  const [companyLogo, setCompanyLogo] = useState("");
-  const [industry, setIndustry] = useState("");
-  const [companySize, setCompanySize] = useState("");
-  const [companyType, setCompanyType] = useState("");
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    setCompanyName(localStorage.getItem("companyName") || "");
-    setCompanyLogo(localStorage.getItem("companyLogo") || "");
-  }, []);
 
   return (
     <div>
@@ -142,7 +130,7 @@ const Profile2 = ({ profileData, handleChange, nextPage, prevPage }) => {
             </div>
             <div className="border p-4 rounded mt-3 bg-white">
               <h2 className="text-lg font-bold text-[#323645]">
-                {companyName || "Company Name"}
+                {profileData.companyName || "Company Name"}
               </h2>
               <p className="text-[#A9B1BF]">Your company tagline</p>
               <div className="mt-4 pt-4 border-t">
@@ -150,21 +138,21 @@ const Profile2 = ({ profileData, handleChange, nextPage, prevPage }) => {
                   <strong className="text-[#6B6E79]">Industry:</strong>
                   <span className="pl-1 text-[#A6AEBC]">
                     {" "}
-                    {industry || "Not specified"}{" "}
+                    {profileData.industry || "Not specified"}{" "}
                   </span>
                 </p>
                 <p>
                   <strong className="text-[#6B6E79]">Size:</strong>
                   <span className="pl-1 text-[#A6AEBC]">
                     {" "}
-                    {companySize || "Not specified"}{" "}
+                    {profileData.companySize || "Not specified"}{" "}
                   </span>
                 </p>
                 <p>
                   <strong className="text-[#6B6E79]">Type:</strong>
                   <span className="pl-1 text-[#A6AEBC]">
                     {" "}
-                    {companyType || "Not specified"}{" "}
+                    {profileData.companyType || "Not specified"}{" "}
                   </span>
                 </p>
               </div>

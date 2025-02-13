@@ -20,35 +20,10 @@ import { useNavigate } from "react-router-dom";
  * @returns {JSX.Element} Profile1 Component
  */
 const Profile1 = ({ profileData, handleChange, nextPage }) => {
-  const navigate = useNavigate();
-
-  /**
-   * State for storing company name
-   * @type {[string, Function]}
-   */
-  const [companyName, setCompanyName] = useState(
-    localStorage.getItem("companyName") || ""
-  );
-  /**
-   * State for storing company logo URL
-   * @type {[string|null, Function]}
-   */
   const [companyLogo, setCompanyLogo] = useState(
     localStorage.getItem("companyLogo") || null
   );
-  /**
-   * Updates localStorage when companyName changes
-   */
-  useEffect(() => {
-    localStorage.setItem("companyName", companyName);
-  }, [companyName]);
 
-  /**
-   * Updates localStorage when companyLogo changes
-   */
-  useEffect(() => {
-    localStorage.setItem("companyLogo", companyLogo);
-  }, [companyLogo]);
   /**
    * Handles the company logo upload
    * @param {Event} event - The file input change event
@@ -122,12 +97,12 @@ const Profile1 = ({ profileData, handleChange, nextPage }) => {
                 {companyLogo ? (
                   <div className="relative">
                     <img
-                      src={companyLogo}
+                      // src={companyLogo}
                       alt="Company Logo"
                       className="h-16"
                     />
                     <button
-                      onClick={() => setCompanyLogo(null)}
+                      // onClick={() => setCompanyLogo(null)}
                       className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 text-xs"
                     >
                       <FiX size={14} />
@@ -148,7 +123,7 @@ const Profile1 = ({ profileData, handleChange, nextPage }) => {
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={handleLogoUpload}
+                  // onChange={handleLogoUpload}
                 />
               </label>
             </div>
@@ -192,21 +167,30 @@ const Profile1 = ({ profileData, handleChange, nextPage }) => {
             </div>
             <div className="border p-4 rounded mt-3 bg-white">
               <h2 className="text-lg font-bold text-[#323645]">
-                {companyName || "Company Name"}
+                {profileData.companyName || "Company Name"}
               </h2>
               <p className="text-[#A9B1BF]">Your company tagline</p>
               <div className="mt-4 pt-4 border-t">
                 <p>
                   <strong className="text-[#6B6E79]">Industry:</strong>
-                  <span className="pl-1 text-[#A6AEBC]">Not specified</span>
+                  <span className="pl-1 text-[#A6AEBC]">
+                    {" "}
+                    {profileData.industry || "Not specified"}{" "}
+                  </span>
                 </p>
                 <p>
                   <strong className="text-[#6B6E79]">Size:</strong>
-                  <span className="pl-1 text-[#A6AEBC]"> Not specified </span>
+                  <span className="pl-1 text-[#A6AEBC]">
+                    {" "}
+                    {profileData.companySize || "Not specified"}{" "}
+                  </span>
                 </p>
                 <p>
                   <strong className="text-[#6B6E79]">Type:</strong>
-                  <span className="pl-1 text-[#A6AEBC]"> Not specified</span>
+                  <span className="pl-1 text-[#A6AEBC]">
+                    {" "}
+                    {profileData.companyType || "Not specified"}{" "}
+                  </span>
                 </p>
               </div>
             </div>

@@ -6,11 +6,16 @@ import { useUserContext } from "../../../context/UserContext";
 import { toast } from "react-toastify";
 import { API_CONFIG } from "../../../config/api";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 const ProfilePage = () => {
   const { user } = useUserContext();
   const [companyProfile, setCompanyProfile] = useState([]);
   const token = user?.token;
+
+  function formatFoundedYear(foundedDate) {
+    return new Date(foundedDate).getFullYear().toString();
+  }
 
   const getCompanyProfile = async () => {
     if (!token) {
@@ -57,20 +62,23 @@ const ProfilePage = () => {
                 <span>{companyProfile.industry}</span>
                 <span className="flex items-center">
                   <MdLocationOn className="mr-1" />{" "}
-                  <span>New Jersey, USA</span>
+                  <span>{companyProfile.location}</span>
                 </span>
                 <span className="flex items-center">
                   <FaUsers className="mr-1" />{" "}
                   <span>{companyProfile.companySize}</span>
                 </span>
                 <span className="flex items-center">
-                  <MdDateRange className="mr-1" /> <span>Founded 2024</span>
+                  <MdDateRange className="mr-1" />{" "}
+                  <span>
+                    Founded {formatFoundedYear(companyProfile.foundedDate)}
+                  </span>
                 </span>
               </div>
             </div>
           </div>
-          <button className="ml-auto px-4 py-2 bg-gray-200 rounded-lg">
-            Follow
+          <button className="ml-auto px-4 py-2 bg-gray-200 rounded-lg capitalize">
+            <Link to="/createProfile">Update your profile</Link>
           </button>
         </div>
 

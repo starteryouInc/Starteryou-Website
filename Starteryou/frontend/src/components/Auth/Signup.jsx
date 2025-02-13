@@ -35,7 +35,7 @@ const Signup = () => {
           role: "jobSeeker",
         }
       );
-      console.log("id is here: ",registerData)
+      console.log("id is here: ", registerData);
 
       const userId = registerData.newUsers._id;
       console.log(userId);
@@ -218,17 +218,24 @@ const Signup = () => {
               >
                 Phone Number
               </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                placeholder="Enter your phone number"
-                pattern="[0-9]{10}"
-                required
-              />
+              <div className="relative">
+                {/* Country Code Prefix */}
+                <span className="absolute bg-[#CBD5E1] px-3 inset-y-0 flex items-center rounded-sm text-gray-600">
+                   +1 
+                </span>
+
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  className="mt-1 ml-1 p-2 pl-14 block w-full rounded-md border border-[#CBD5E1] shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="Enter your phone number"
+                  pattern="[0-9]{10}"
+                  required
+                />
+              </div>
             </div>
 
             <div className="mb-4">

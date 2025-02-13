@@ -14,6 +14,8 @@ router.post(
       industry,
       companySize,
       companyType,
+      location,
+      foundedDate,
       tagline,
       about,
     } = req.body;
@@ -32,6 +34,8 @@ router.post(
         industry,
         companySize,
         companyType,
+        location,
+        foundedDate,
         tagline,
         about,
       });

@@ -61,7 +61,7 @@ router.post("/users-emp-register", async (req, res) => {
     if (existingEmployer) {
       return res.status(409).json({
         success: false,
-        msg: "Company name or email already registered",
+        msg: "Company name or email already registered, login to continue.",
       });
     }
 
@@ -118,7 +118,7 @@ router.post("/users-seeker-register", async (req, res) => {
   const numericPhoneNumber = Number(phoneNumber);
   if (!numericPhoneNumber || numericPhoneNumber.toString().length !== 10) {
     return res.status(400).json({
-      message: "Phone number must be 10 digits and numeric",
+      message: "Invalid US phone number. It must be 10 digits (with optional +1).",
       success: false,
     });
   }
@@ -197,7 +197,7 @@ router.post("/users-login", async (req, res) => {
     res.status(500).json({
       success: false,
       msg: "Some error occured while login",
-      error,
+      error: error.message,
     });
   }
 });
