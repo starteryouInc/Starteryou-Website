@@ -4,6 +4,22 @@ const BookmarkedJob = require("../models/BookmarkedJobs");
 const authorize = require("../middleware/roleMiddleware");
 
 // Route to save the job
+/**
+ * @route POST /:jobId/bookmarked-job
+ * @description Bookmarks a job for a job seeker.
+ * @access Private (Job Seeker only)
+ * @middleware authorize("jobSeeker")
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - URL parameters
+ * @param {string} req.params.jobId - ID of the job to be bookmarked
+ * @param {Object} req.user - Authenticated user data
+ * @param {string} req.user.id - ID of the job seeker
+ * @param {Object} res - Express response object
+ *
+ * @returns {Object} JSON response
+ * @throws {Error} If an internal server error occurs
+ */
 router.post(
   "/:jobId/bookmarked-job",
   authorize("jobSeeker"),
@@ -36,6 +52,22 @@ router.post(
 );
 
 // Route to unsave the job
+/**
+ * @route DELETE /:jobId/unbookmark-job
+ * @description Removes a bookmarked job for a job seeker.
+ * @access Private (Job Seeker only)
+ * @middleware authorize("jobSeeker")
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - URL parameters
+ * @param {string} req.params.jobId - ID of the job to be unbookmarked
+ * @param {Object} req.user - Authenticated user data
+ * @param {string} req.user.id - ID of the job seeker
+ * @param {Object} res - Express response object
+ *
+ * @returns {Object} JSON response
+ * @throws {Error} If an internal server error occurs
+ */
 router.delete(
   "/:jobId/unbookmark-job",
   authorize("jobSeeker"),
@@ -61,6 +93,20 @@ router.delete(
 );
 
 // Route to fetch the saved jobs my particular user
+/**
+ * @route GET /fetch-bookmarked-jobs
+ * @description Retrieves all bookmarked jobs for a job seeker.
+ * @access Private (Job Seeker only)
+ * @middleware authorize("jobSeeker")
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} req.user - Authenticated user data
+ * @param {string} req.user.id - ID of the job seeker
+ * @param {Object} res - Express response object
+ *
+ * @returns {Object} JSON response containing the list of bookmarked jobs
+ * @throws {Error} If an internal server error occurs
+ */
 router.get(
   "/fetch-bookmarked-jobs",
   authorize("jobSeeker"),

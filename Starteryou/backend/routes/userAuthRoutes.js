@@ -23,6 +23,20 @@ const generateAccessToken = (user) => {
 };
 
 // Route for registering the New Employer
+/**
+ * @route POST /users-emp-register
+ * @description Registers a new employer
+ * @access Public
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - Request body containing employer details
+ * @param {string} req.body.companyName - Name of the company (required)
+ * @param {string} req.body.email - Employer's email address (required)
+ * @param {string} [req.body.companyWebsite] - Employer's company website (optional)
+ * @param {string} req.body.password - Employer's password (must meet complexity requirements)
+ * @param {string} req.body.role - Role of the user (must be 'employer')
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with success status and message
+ */
 router.post("/users-emp-register", async (req, res) => {
   const { companyName, email, companyWebsite, password, role } = req.body;
 
@@ -121,6 +135,20 @@ router.post("/users-emp-register", async (req, res) => {
 });
 
 // Route for registering the New Users
+/**
+ * @route POST /users-seeker-register
+ * @description Registers a new job seeker
+ * @access Public
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - Request body containing user details
+ * @param {string} req.body.username - The username of the job seeker (required)
+ * @param {string} req.body.email - The email address of the job seeker (required)
+ * @param {string} req.body.phoneNumber - The phone number of the job seeker (must be 10 digits with optional +1)
+ * @param {string} req.body.password - The password (must meet complexity requirements)
+ * @param {string} req.body.role - The role of the user (must be 'jobSeeker')
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with success status and message
+ */
 router.post("/users-seeker-register", async (req, res) => {
   const { username, email, phoneNumber, password, role } = req.body;
 
@@ -151,8 +179,7 @@ router.post("/users-seeker-register", async (req, res) => {
   if (!passwordRegex.test(password)) {
     return res.status(400).json({
       success: false,
-      msg:
-        "Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, one number, and one special character",
+      msg: "Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, one number, and one special character",
     });
   }
 
@@ -219,6 +246,25 @@ router.post("/users-seeker-register", async (req, res) => {
 });
 
 // Route for the Users to login
+/**
+ * @route POST /users-login
+ * @description Authenticates a user and returns an access token upon successful login.
+ * @access Public
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - The request body
+ * @param {string} req.body.email - The email address of the user (must be in valid format).
+ * @param {string} req.body.password - The user's password.
+ * @param {Object} res - Express response object
+ *
+ * @returns {Object} JSON response
+ *
+ * @throws {400} Bad Request - If email or password is missing, or email format is invalid.
+ * @throws {404} Not Found - If the user with the provided email does not exist.
+ * @throws {401} Unauthorized - If the password is incorrect.
+ * @throws {500} Internal Server Error - If an error occurs during login processing.
+ */
+
 router.post("/users-login", async (req, res) => {
   const { email, password } = req.body;
 

@@ -3,6 +3,29 @@ const router = Router();
 const CompanyProfile = require("../models/CompanyProfile");
 const authorize = require("../middleware/roleMiddleware");
 
+/**
+ * @route POST /create-company-profile
+ * @description Creates a new company profile for an employer.
+ * @access Private (Employer only)
+ * @middleware authorize("employer")
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - Request body containing company details
+ * @param {string} req.body.employerRegistrationId - Unique employer registration ID (required)
+ * @param {string} req.body.companyName - Name of the company (required)
+ * @param {string} [req.body.companyWebsite] - Website of the company
+ * @param {string} [req.body.industry] - Industry type
+ * @param {string} [req.body.companySize] - Size of the company
+ * @param {string} [req.body.companyType] - Type of the company
+ * @param {string} [req.body.location] - Location of the company
+ * @param {string} [req.body.foundedDate] - Year the company was founded
+ * @param {string} [req.body.tagline] - Company tagline
+ * @param {string} [req.body.about] - Description about the company
+ * @param {Object} res - Express response object
+ *
+ * @returns {Object} JSON response with success status and created company profile
+ * @throws {Error} If required fields are missing or an internal server error occurs
+ */
 router.post(
   "/create-company-profile",
   authorize("employer"),
@@ -55,6 +78,20 @@ router.post(
   }
 );
 
+/**
+ * @route GET /get-company-profile/:userId
+ * @description Fetches the company profile of an employer.
+ * @access Private (Employer only)
+ * @middleware authorize("employer")
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Route parameters
+ * @param {string} req.params.userId - Employer's registration ID
+ * @param {Object} res - Express response object
+ *
+ * @returns {Object} JSON response with success status and company profile data
+ * @throws {Error} If the company profile is not found or an internal server error occurs
+ */
 router.get(
   "/get-company-profile/:userId",
   authorize("employer"),
