@@ -1,100 +1,204 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect, useCallback } from "react";
 import Navbar from "../components/Common/Navbar";
 import PenSvg from "/JobFeedPage/Pen.svg";
 import FilterButtons from "../components/JobFeedPage/FilterButtons";
 import "./styles/JobFeedPage.css";
 import JobCard from "../components/JobFeedPage/JobCard";
 import JobDetailCard from "../components/JobFeedPage/JobDetailCard";
+// import ApplyJobCard from "../components/JobFeedPage/ApplyJobCard";
+import { useUserContext } from "../context/UserContext";
+import { useNavigate } from "react-router-dom";
+import { API_CONFIG } from "../config/api";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 const JobFeedPage = () => {
-  const companyDummyData = [
-    {
-      id: 1,
-      compImgSrc: "/JobFeedPage/CompanyLogo.svg",
-      jobTitle:
-        "Infosys is Hiring for Senior Process Executive - HR (H2R-Employee Life Cycle)",
-      compName: "Infosys BPM",
-      experience: "0 - 1 Years",
-      jobLocation: "Bengaluru / Bangalore, India",
-      datePosted: "2 Days ago",
-      jobType: "Permanent Job",
-      jobDescription:
-        "Minimum 2 year of experience in Non-IT & IT Recruitment with strong understanding of multiple IT and NON-IT technologies and market trend Good experience in sourcing profiles from job portals (Naukri/ Monster/Indeed), LinkedIn, internet search engines and other websites Hands-on experience in sourcing active and passive candidates using multiple recruiting tools Excellent written and verbal communication skills with the ability to quickly build rapport with the candidates and colleague Have the ability to multitask and meet aggressive recruitment targets within defined timelines Good experience in MS Office tools Excel, PowerPoint, Word, Outlook etc. Will have to do analysis on all recruitment related reports and publish them as per agreed timelines Coordination between Internal HR SPOC and candidates on offers, joining and inductions related activities",
-    },
-    {
-      id: 2,
-      compImgSrc: "/JobFeedPage/CompanyLogo.svg",
-      jobTitle: "Software Engineer I - Google",
-      compName: "Google",
-      experience: "0 - 1 Years",
-      jobLocation: "Mumbai, India",
-      datePosted: "2 Days ago",
-      jobType: "Permanent Job",
-      jobDescription:
-        "Minimum 2 year of experience in Non-IT & IT Recruitment with strong understanding of multiple IT and NON-IT technologies and market trend Good experience in sourcing profiles from job portals (Naukri/ Monster/Indeed), LinkedIn, internet search engines and other websites Hands-on experience in sourcing active and passive candidates using multiple recruiting tools Excellent written and verbal communication skills with the ability to quickly build rapport with the candidates and colleague Have the ability to multitask and meet aggressive recruitment targets within defined timelines Good experience in MS Office tools Excel, PowerPoint, Word, Outlook etc. Will have to do analysis on all recruitment related reports and publish them as per agreed timelines Coordination between Internal HR SPOC and candidates on offers, joining and inductions related activities",
-    },
-    {
-      id: 3,
-      compImgSrc: "/JobFeedPage/CompanyLogo.svg",
-      jobTitle: "Technical Support Engineer",
-      compName: "Amazon",
-      experience: "0 - 1 Years",
-      jobLocation: "Delhi / Noida, India",
-      datePosted: "2 Days ago",
-      jobType: "Permanent Job",
-      jobDescription:
-        "Minimum 2 year of experience in Non-IT & IT Recruitment with strong understanding of multiple IT and NON-IT technologies and market trend Good experience in sourcing profiles from job portals (Naukri/ Monster/Indeed), LinkedIn, internet search engines and other websites Hands-on experience in sourcing active and passive candidates using multiple recruiting tools Excellent written and verbal communication skills with the ability to quickly build rapport with the candidates and colleague Have the ability to multitask and meet aggressive recruitment targets within defined timelines Good experience in MS Office tools Excel, PowerPoint, Word, Outlook etc. Will have to do analysis on all recruitment related reports and publish them as per agreed timelines Coordination between Internal HR SPOC and candidates on offers, joining and inductions related activities",
-    },
-    {
-      id: 4,
-      compImgSrc: "/JobFeedPage/CompanyLogo.svg",
-      jobTitle: "HR Manager",
-      compName: "Accenture",
-      experience: "0 - 1 Years",
-      jobLocation: "Delhi / Noida, India",
-      datePosted: "2 Days ago",
-      jobType: "Permanent Job",
-      jobDescription:
-        "Minimum 2 year of experience in Non-IT & IT Recruitment with strong understanding of multiple IT and NON-IT technologies and market trend Good experience in sourcing profiles from job portals (Naukri/ Monster/Indeed), LinkedIn, internet search engines and other websites Hands-on experience in sourcing active and passive candidates using multiple recruiting tools Excellent written and verbal communication skills with the ability to quickly build rapport with the candidates and colleague Have the ability to multitask and meet aggressive recruitment targets within defined timelines Good experience in MS Office tools Excel, PowerPoint, Word, Outlook etc. Will have to do analysis on all recruitment related reports and publish them as per agreed timelines Coordination between Internal HR SPOC and candidates on offers, joining and inductions related activities",
-    },
-    {
-      id: 5,
-      compImgSrc: "/JobFeedPage/CompanyLogo.svg",
-      jobTitle: "UX / UI Designer",
-      compName: "Youtube Studios",
-      experience: "0 - 1 Years",
-      jobLocation: "Delhi / Noida, India",
-      datePosted: "2 Days ago",
-      jobType: "Permanent Job",
-      jobDescription:
-        "Minimum 2 year of experience in Non-IT & IT Recruitment with strong understanding of multiple IT and NON-IT technologies and market trend Good experience in sourcing profiles from job portals (Naukri/ Monster/Indeed), LinkedIn, internet search engines and other websites Hands-on experience in sourcing active and passive candidates using multiple recruiting tools Excellent written and verbal communication skills with the ability to quickly build rapport with the candidates and colleague Have the ability to multitask and meet aggressive recruitment targets within defined timelines Good experience in MS Office tools Excel, PowerPoint, Word, Outlook etc. Will have to do analysis on all recruitment related reports and publish them as per agreed timelines Coordination between Internal HR SPOC and candidates on offers, joining and inductions related activities",
-    },
-    {
-      id: 6,
-      compImgSrc: "/JobFeedPage/CompanyLogo.svg",
-      jobTitle:
-        "Infosys is Hiring for Senior Process Executive - HR (H2R-Employee Life Cycle)",
-      compName: "Infosys BPM",
-      experience: "0 - 1 Years",
-      jobLocation: "Delhi / Noida, India",
-      datePosted: "2 Days ago",
-      jobType: "Permanent Job",
-      jobDescription:
-        "Minimum 2 year of experience in Non-IT & IT Recruitment with strong understanding of multiple IT and NON-IT technologies and market trend Good experience in sourcing profiles from job portals (Naukri/ Monster/Indeed), LinkedIn, internet search engines and other websites Hands-on experience in sourcing active and passive candidates using multiple recruiting tools Excellent written and verbal communication skills with the ability to quickly build rapport with the candidates and colleague Have the ability to multitask and meet aggressive recruitment targets within defined timelines Good experience in MS Office tools Excel, PowerPoint, Word, Outlook etc. Will have to do analysis on all recruitment related reports and publish them as per agreed timelines Coordination between Internal HR SPOC and candidates on offers, joining and inductions related activities",
-    },
-  ];
-
-  const [jobID, setJobID] = useState(1);
-  const [singleJob, setSingleJob] = useState(
-    companyDummyData.find((job) => job.id === jobID)
-  );
+  const navigate = useNavigate();
+  const { user } = useUserContext();
+  const [jobData, setJobData] = useState([]);
+  const [appliedJobs, setAppliedJobs] = useState([]);
+  const [savedJobs, setSavedJobs] = useState([]);
+  const [singleJob, setSingleJob] = useState([]);
   const [detailCardPop, setDetailCardPop] = useState(false);
+  const [selectedTab, setSelectedTab] = useState("Recommended");
+  const [loading, setLoading] = useState(false);
 
-  // Update `singleJob` whenever `jobID` changes
+  const token = user?.token;
+  const role = user?.authenticatedUser?.role;
+
+  const getJobs = useCallback(async () => {
+    if (!user?.token) {
+      toast.error("Pls login to continue...");
+      navigate("/UserLogin");
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data } = await axios.get(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getJobs}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setJobData(data.data);
+      // toast.success(data.msg);
+    } catch (error) {
+      toast.error(error.response?.data?.msg);
+    } finally {
+      setLoading(false);
+    }
+  }, [token, navigate]); // Using `useCallback` to memoize the function
+
+  const [jobID, setJobID] = useState("");
+
   useEffect(() => {
-    const foundJob = companyDummyData.find((job) => job.id === jobID);
-    setSingleJob(foundJob);
-  }, [jobID]);
+    if (jobData.length > 0) {
+      setJobID(jobData[0]._id); // Setting initial jobID only after jobData is populated
+    }
+  }, [jobData]);
+
+  const getJobById = async (jobID) => {
+    if (!user?.token) return;
+    try {
+      const { data } = await axios.get(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getJobById(jobID)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setSingleJob(data.data);
+    } catch (error) {
+      toast.error(error.response?.data?.msg);
+    }
+  };
+
+  const getAppliedJobs = async () => {
+    if (!user?.token) return;
+    setLoading(true);
+    try {
+      const { data } = await axios.get(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getAppliedJobs}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Fetch job details for each jobId in the applications list
+      const appliedJobs = await Promise.all(
+        data.applications.map(async (application) => {
+          try {
+            const jobResponse = await axios.get(
+              `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getJobById(
+                application.jobId
+              )}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            return jobResponse.data.data;
+          } catch (error) {
+            if (error.response?.status === 404) {
+              console.warn(`Job ${application.jobId} not found, skipping it.`);
+              return null;
+            }
+            throw error;
+          }
+        })
+      );
+
+      setAppliedJobs(appliedJobs.filter((job) => job !== null));
+    } catch (error) {
+      toast.error(error.response?.data?.msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getSavedJobs = async () => {
+    if (!user?.token) return;
+    setLoading(true);
+    try {
+      const { data } = await axios.get(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getBookmarkedJobs}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const savedJobs = await Promise.all(
+        data.bookmarked.map(async (saved) => {
+          try {
+            const jobResponse = await axios.get(
+              `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getJobById(
+                saved.jobId
+              )}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            return jobResponse.data.data;
+          } catch (error) {
+            if (error.response?.status === 404) {
+              console.warn(`Job ${saved.jobId} not found, skipping it.`);
+              return null;
+            }
+            throw error;
+          }
+        })
+      );
+      setSavedJobs(savedJobs.filter((job) => job !== null));
+    } catch (error) {
+      toast.error(error.response.data.msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveJob = async (jobId) => {
+    const token = user?.token;
+    if (!token) return;
+    try {
+      const { data } = await axios.post(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.bookmarkJob(jobId)}`,
+        { jobId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success("Job is bookmarked");
+      getSavedJobs();
+    } catch (error) {
+      toast.error(error.response?.data?.msg || "An error occurred");
+    }
+  };
+
+  useEffect(() => {
+    getJobs();
+  }, []);
+
+  const handleTabClick = (tab) => {
+    setSelectedTab(tab);
+    setDetailCardPop(false);
+    setJobID("");
+    if (tab === "Applied") {
+      getAppliedJobs();
+    } else if (tab === "Saved") {
+      getSavedJobs();
+    }
+  };
 
   // Calculating the window size for mobile responsiveness of the Detailed Card Component
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -103,6 +207,13 @@ const JobFeedPage = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  const filteredJobs =
+    selectedTab === "Recommended"
+      ? jobData
+      : selectedTab === "Applied"
+      ? appliedJobs
+      : savedJobs;
 
   return (
     <div>
@@ -116,9 +227,25 @@ const JobFeedPage = () => {
         </section>
         <section className="section-two">
           <ul className="flex justify-between md:justify-start md:space-x-4">
-            <li>Recommended</li>
-            <li>Applied</li>
-            <li>Saved Network Jobs</li>
+            {[
+              { label: "Recommended", count: jobData.length },
+              ...(role !== "employer"
+                ? [
+                    { label: "Applied", count: appliedJobs.length },
+                    { label: "Saved", count: savedJobs.length },
+                  ]
+                : []),
+            ].map(({ label, count }) => (
+              <li
+                key={label}
+                className={`cursor-pointer ${
+                  selectedTab === label ? "text-[#8d00ff] font-bold" : ""
+                }`}
+                onClick={() => handleTabClick(label)}
+              >
+                {label} ({count})
+              </li>
+            ))}
           </ul>
         </section>
         <section className="section-three space-y-[14px]">
@@ -132,36 +259,48 @@ const JobFeedPage = () => {
           </div>
           <div className="job-listing-container flex justify-center md:space-x-4">
             <div className="job-lists space-y-4 md:h-[1235px] lg:h-[995px] overflow-y-scroll">
-              {companyDummyData.map((e) => {
-                return (
-                  <div
-                    key={e.id}
-                    onClick={() => {
-                      setJobID(e.id), setDetailCardPop(true);
-                    }}
-                    className={`transition-shadow duration-300 ${
-                      jobID === e.id
-                        ? "border border-[#8d00ff] rounded-[5px]"
-                        : ""
-                    }`}
-                  >
-                    <JobCard
-                      companyLogo={e.compImgSrc}
-                      jobTitle={e.jobTitle}
-                      companyName={e.compName}
-                      experienceReq={e.experience}
-                      location={e.jobLocation}
-                      datePosted={e.datePosted}
-                    />
-                  </div>
-                );
-              })}
+              {loading ? (
+                <h1 className="mt-20 text-center text-xl font-bold">
+                  Loading wait...
+                </h1>
+              ) : filteredJobs.length !== 0 ? (
+                filteredJobs.map((e) => {
+                  return (
+                    <div
+                      key={e._id}
+                      onClick={() => {
+                        setJobID(e._id),
+                          getJobById(e._id),
+                          setDetailCardPop(true);
+                      }}
+                      className={`transition-shadow duration-300 ${
+                        jobID === e._id
+                          ? "border border-[#8d00ff] rounded-[5px]"
+                          : ""
+                      }`}
+                    >
+                      <JobCard
+                        companyLogo={e.compImgSrc}
+                        jobTitle={e.title}
+                        companyName={e.companyName}
+                        experienceReq={e.experienceLevel}
+                        location={e.location}
+                        datePosted={e.createdAt}
+                      />
+                    </div>
+                  );
+                })
+              ) : (
+                <p>not data</p>
+              )}
             </div>
             <div className="job-details hidden md:block">
-              {!isMobile && (
+              {detailCardPop && singleJob && (
                 <JobDetailCard
                   jobDetails={singleJob}
                   onClose={() => setDetailCardPop(false)}
+                  savedJob={saveJob}
+                  // openApplyJob={() => setOpenApplyJob(true)}
                 />
               )}
             </div>
@@ -175,6 +314,8 @@ const JobFeedPage = () => {
             <JobDetailCard
               jobDetails={singleJob}
               onClose={() => setDetailCardPop(false)}
+              savedJob={saveJob}
+              // openApplyJob={() => setOpenApplyJob(true)}
             />
           </div>
         </div>
