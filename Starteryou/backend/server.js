@@ -13,12 +13,11 @@ const teamRoutes = require("./routes/teamRoutes");
 const { mountRoutes } = require("./routes"); // Main routes including API docs
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 const authRoutes = require("./routes/authRoutes");
-const newsletterRoutes = require("./routes/newsletterRoutes"); //newsletter subscribers
+const newsletterRoutes = require("./routes/newsletterRoutes"); // newsletter subscribers
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
-
-
+const sessionRoutes = require('./routes/sessionRoutes'); // Import session routes
 
 // Initialize Express app
 const app = express();
@@ -38,17 +37,16 @@ app.use("/api/newsletter", newsletterRoutes);  //Newsletter subscribers
 
 app.use(cookieParser());
 
-// Configure session middleware
 app.use(
   session({
     secret: "your-secret-key",
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true, // Allow unauthenticated users to have sessions
     cookie: {
-      httpOnly: true,  // Prevents client-side JS access
-      secure: false,  // Set to true if using HTTPS
-      sameSite: "Lax", // Replace with "None" if using HTTPS
-      maxAge: 2 * 6 * 1000, // 1 hour
+      httpOnly: true,
+      secure: false, // Set to true if using HTTPS
+      sameSite: "Lax",
+      maxAge: 15 * 60 * 1000, // Default for guests: 15 minutes
     },
   })
 );
@@ -69,11 +67,6 @@ const cacheOptions = {
 };
 app.use("/docs", express.static(path.join(__dirname, "docs"), cacheOptions));
 console.log("📂 Serving static files from:", path.join(__dirname, "docs"));
-
-// Home Page Route
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname + '/index.html'));
-});
 
 // Swagger Configuration
 const swaggerOptions = {
@@ -97,7 +90,7 @@ const swaggerOptions = {
         description: "Routes for Authentication endpoints",
       },
       { name: "Newsletter", description: "Routes for newsletter subscriptions" }, // Add this line
-
+      { name: "Session", description: "Routes for session management" }, // Add session routes to swagger docs
     ],
   },
   apis: ["./routes/*.js"], // Path to your API route files
@@ -139,7 +132,9 @@ app.use("/api", teamRoutes);
  *   - name: Authentication
  *     description: Routes for Authentication endpoints
  */
-app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/auth", authRoutes); // Mount authRoutes
+
+app.use("/api", sessionRoutes); // Mount sessionRoutes
 
 // Health Check Route
 /**
@@ -188,8 +183,6 @@ app.use((err, req, res, next) => {
 // Start Server
 const PORT = process.env.PORT || 3000;
 
-
-// chek dev branch
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
   console.log(

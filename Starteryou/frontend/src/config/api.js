@@ -14,5 +14,6 @@ export const API_CONFIG = {
     authLogin: "/api/v1/auth/login",
     authRegister: "/api/v1/auth/register",
     newsletterApi: "/api/newsletter/subscribe",
+    sessionTime: "/api/session-time",
   },
 };

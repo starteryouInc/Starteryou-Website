@@ -28,6 +28,7 @@ import JobPageBefore from "./pages/JobPageBefore"; // Ensure this file exists in
 import JobPageAfter from "./pages/JobPageAfter"; // Ensure this file exists in the "pages" directory.
 import JobFeedPage from "./pages/JobFeedPage";
 import NewsLetter from "./components/Common/NewsLetter";
+import SessionTimer from "./components/Common/SessionTimer";
 import UserProfile from "./pages/UserProfile";
 import UserLogin from "./components/Auth/UserLogin";
 import ForgotPswd from "./components/Auth/ForgotPswd";
@@ -55,6 +56,9 @@ const Layout = () => {
   return (
     <div className="font-montserrat scroll-smooth">
       {!hideNavbarFooter && <Navbar />}
+      
+      {/* Session Timer added inside Layout */}
+      <SessionTimer />
 
       <Routes>
         {/* Default Routes for everyone */}

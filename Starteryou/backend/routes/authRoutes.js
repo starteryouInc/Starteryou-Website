@@ -322,10 +322,10 @@ const login = async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
     
-    req.session.loggedIn = true;
-    req.session.user = { id: user._id, role: user.role, lastActive: Date.now() };
-    req.session.save();
-
+    // Store user session
+    req.session.user = user.username; // Assigning the correct username
+    req.session.cookie.maxAge = 60 * 60 * 1000; // 1-hour session for logged-in users
+  
     return res.status(200).json({
       message: "Login successful",
       success: true,
