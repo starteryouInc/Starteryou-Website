@@ -26,27 +26,52 @@ const generateAccessToken = (user) => {
 router.post("/users-emp-register", async (req, res) => {
   const { companyName, email, companyWebsite, password, role } = req.body;
 
+  // Check if all the required fields are provided
   if (!companyName || !email || !password || !role) {
     return res.status(400).json({
       success: false,
       msg: "All fields are required",
     });
   }
+
+  // Optional company website validation (checks if it's a valid URL format)
+  if (companyWebsite) {
+    const websiteRegex =
+      /^(https?:\/\/)?(www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(:\d+)?(\/.*)?$/;
+    if (!websiteRegex.test(companyWebsite)) {
+      return res.status(400).json({
+        success: false,
+        msg: "Invalid company website URL format.",
+      });
+    }
+  }
+
+  // Validate the role to check if it is valid
   if (!validRoles.includes(role)) {
     return res.status(400).json({ msg: "Invalid role specified" });
   }
 
+  // Email validation using regex
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({
+      success: false,
+      msg: "Invalid email format.",
+    });
+  }
+
+  // Password validation using regex
   const passwordRegex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
   if (!passwordRegex.test(password)) {
     return res.status(400).json({
-      message:
-        "Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, one number, and one special character",
+      msg: "Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, one number, and one special character",
       success: false,
     });
   }
 
   try {
+    // Check if an account with this email already exists under the jobSeeker role
     const existingJobSeeker = await Users.findOne({ email, role: "jobSeeker" });
     if (existingJobSeeker) {
       return res.status(409).json({
@@ -54,6 +79,8 @@ router.post("/users-emp-register", async (req, res) => {
         msg: "This email is already associated with a job seeker account",
       });
     }
+
+    // Check if employer is already register with this email or companyName
     const existingEmployer = await Employers.findOne({
       $or: [{ email }, { companyName }],
     });
@@ -65,6 +92,7 @@ router.post("/users-emp-register", async (req, res) => {
       });
     }
 
+    // Hashing the password before storing it to the database
     const saltRounds = parseInt(process.env.SALT_ROUNDS) || 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     const newEmployer = await Employers.create({
@@ -96,32 +124,54 @@ router.post("/users-emp-register", async (req, res) => {
 router.post("/users-seeker-register", async (req, res) => {
   const { username, email, phoneNumber, password, role } = req.body;
 
+  // Check if all the required fields are provided
   if (!username || !email || !phoneNumber || !password || !role) {
     return res
       .status(400)
       .json({ success: false, msg: "All fields are required" });
   }
+
+  // Validate the role to ensure it is valid
   if (!validRoles.includes(role)) {
     return res.status(400).json({ msg: "Invalid role specified" });
   }
 
+  // Email validation using regex
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({
+      success: false,
+      msg: "Invalid email format",
+    });
+  }
+
+  // Password validation using regex
   const passwordRegex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
   if (!passwordRegex.test(password)) {
     return res.status(400).json({
-      message:
-        "Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, one number, and one special character",
       success: false,
+      msg:
+        "Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, one number, and one special character",
     });
   }
 
-  const numericPhoneNumber = Number(phoneNumber);
-  if (!numericPhoneNumber || numericPhoneNumber.toString().length !== 10) {
+  // Phone number validation using regex
+  const phoneNumberRegex = /^(?:\+1)?\d{10}$/; // Allow optional +1 prefix for US phone numbers
+  if (!phoneNumberRegex.test(phoneNumber)) {
     return res.status(400).json({
-      message: "Invalid US phone number. It must be 10 digits (with optional +1).",
       success: false,
+      msg: "Invalid phone number. It must be 10 digits (with optional +1).",
     });
   }
+
+  // const numericPhoneNumber = Number(phoneNumber);
+  // if (!numericPhoneNumber || numericPhoneNumber.toString().length !== 10) {
+  //   return res.status(400).json({
+  //     message: "Invalid US phone number. It must be 10 digits (with optional +1).",
+  //     success: false,
+  //   });
+  // }
 
   try {
     const existingUser = await Users.findOne({ email, phoneNumber });
@@ -140,6 +190,7 @@ router.post("/users-seeker-register", async (req, res) => {
       }
     }
 
+    // Hashing the password before storing in the database
     const saltRounds = parseInt(process.env.SALT_ROUNDS) || 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     const newUsers = await Users.create({
@@ -170,10 +221,23 @@ router.post("/users-seeker-register", async (req, res) => {
 // Route for the Users to login
 router.post("/users-login", async (req, res) => {
   const { email, password } = req.body;
+
+  // Check if all the required fields are provided
   if (!email || !password) {
     return res.status(400).json({ msg: "All fields are required" });
   }
+
+  // Email validation using regex
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({
+      success: false,
+      msg: "Invalid email format. Please enter a valid email address.",
+    });
+  }
+
   try {
+    // Check if user exists with this email or not
     const users = await Users.findOne({ email });
     if (!users) {
       return res
@@ -181,6 +245,7 @@ router.post("/users-login", async (req, res) => {
         .json({ msg: "User with this email does not exist" });
     }
 
+    // Comparing the input password with hashed password from the database
     const isPasswordMatch = await bcrypt.compare(password, users.password);
     if (!isPasswordMatch) {
       return res.status(401).json({ msg: "Invalid Credentials" });

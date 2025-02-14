@@ -6,8 +6,54 @@ const authorize = require("../middleware/roleMiddleware");
 router.post("/create-job", authorize("employer"), async (req, res) => {
   const userId = req.user.id;
   try {
+    const {
+      title,
+      description,
+      location,
+      industry,
+      jobType,
+      experienceLevel,
+      workplaceType,
+      startDate,
+      endDate,
+      salaryRange,
+      frequency,
+      companyName,
+    } = req.body;
+
+    // Validate required fields
+    if (
+      !title ||
+      !description ||
+      !location ||
+      !industry ||
+      !jobType ||
+      !experienceLevel ||
+      !workplaceType ||
+      !salaryRange?.min ||
+      !salaryRange?.max ||
+      !frequency ||
+      !companyName
+    ) {
+      return res.status(400).json({
+        success: false,
+        msg: "All required fields must be filled.",
+      });
+    }
+
+    // Validate salary range (min should be less than max)
+    if (
+      salaryRange.min <= 0 ||
+      salaryRange.max <= 0 ||
+      salaryRange.min >= salaryRange.max
+    ) {
+      return res.status(400).json({
+        success: false,
+        msg: "Salary range must be valid. Minimum salary should be less than maximum salary.",
+      });
+    }
     const newJob = new Job({ ...req.body, postedBy: userId });
-    // const newJob = new Job(req.body);
+
     const response = await newJob.save();
     res.status(201).json({
       success: true,

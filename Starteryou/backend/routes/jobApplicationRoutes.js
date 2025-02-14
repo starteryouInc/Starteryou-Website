@@ -43,7 +43,7 @@ router.post("/:jobId/apply-job", authorize("jobSeeker"), async (req, res) => {
     res.status(500).json({
       success: false,
       msg: "Some error occured while submitting the application",
-      error,
+      error: error.message,
     });
   }
 });
@@ -65,7 +65,7 @@ router.get("/fetch-applied-jobs", authorize("jobSeeker"), async (req, res) => {
     res.status(500).json({
       success: false,
       msg: "Some occured while fetching the applications",
-      error,
+      error: error.message,
     });
   }
 });
@@ -92,7 +92,7 @@ router.get(
       res.status(500).json({
         success: false,
         msg: "Some error occured while fetching the users",
-        error,
+        error: error.message,
       });
     }
   }
@@ -133,7 +133,7 @@ router.patch(
       res.status(500).json({
         success: false,
         msg: "Some error occured while updating the application status.",
-        error,
+        error: error.message,
       });
     }
   }

@@ -1,6 +1,5 @@
 // config/api.js
 export const API_CONFIG = {
-  // baseURL: "http://dev.starteryou.com:3000",
   baseURL: "http://localhost:3000",
   endpoints: {
     fileByTitle: (title) => `/api/files/download/${title}`,
