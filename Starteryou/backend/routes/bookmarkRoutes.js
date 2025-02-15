@@ -1,0 +1,135 @@
+const Router = require("express");
+const router = Router();
+const BookmarkedJob = require("../models/BookmarkedJobs");
+const authorize = require("../middleware/roleMiddleware");
+
+// Route to save the job
+/**
+ * @route POST /:jobId/bookmarked-job
+ * @description Bookmarks a job for a job seeker.
+ * @access Private (Job Seeker only)
+ * @middleware authorize("jobSeeker")
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - URL parameters
+ * @param {string} req.params.jobId - ID of the job to be bookmarked
+ * @param {Object} req.user - Authenticated user data
+ * @param {string} req.user.id - ID of the job seeker
+ * @param {Object} res - Express response object
+ *
+ * @returns {Object} JSON response
+ * @throws {Error} If an internal server error occurs
+ */
+router.post(
+  "/:jobId/bookmarked-job",
+  authorize("jobSeeker"),
+  async (req, res) => {
+    const userId = req.user?.id;
+    const {
+      params: { jobId },
+    } = req;
+    try {
+      const existingBookmark = await BookmarkedJob.findOne({ userId, jobId });
+      if (existingBookmark) {
+        return res.status(400).json({ msg: "Already Bookmarked" });
+      }
+
+      const bookmark = new BookmarkedJob({ userId, jobId });
+      await bookmark.save();
+      res.status(201).json({
+        success: true,
+        msg: "Job bookmarked successfully",
+        bookmark,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        msg: "Some error occured while bookmarking the job",
+        error: error.message,
+      });
+    }
+  }
+);
+
+// Route to unsave the job
+/**
+ * @route DELETE /:jobId/unbookmark-job
+ * @description Removes a bookmarked job for a job seeker.
+ * @access Private (Job Seeker only)
+ * @middleware authorize("jobSeeker")
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - URL parameters
+ * @param {string} req.params.jobId - ID of the job to be unbookmarked
+ * @param {Object} req.user - Authenticated user data
+ * @param {string} req.user.id - ID of the job seeker
+ * @param {Object} res - Express response object
+ *
+ * @returns {Object} JSON response
+ * @throws {Error} If an internal server error occurs
+ */
+router.delete(
+  "/:jobId/unbookmark-job",
+  authorize("jobSeeker"),
+  async (req, res) => {
+    const userId = req.user?.id;
+    const {
+      params: { jobId },
+    } = req;
+    try {
+      await BookmarkedJob.findOneAndDelete({ userId, jobId });
+      res.status(201).json({
+        success: true,
+        msg: "Job unsaved successfully",
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        msg: "Some error occured while unsaving the job",
+        error: error.message,
+      });
+    }
+  }
+);
+
+// Route to fetch the saved jobs my particular user
+/**
+ * @route GET /fetch-bookmarked-jobs
+ * @description Retrieves all bookmarked jobs for a job seeker.
+ * @access Private (Job Seeker only)
+ * @middleware authorize("jobSeeker")
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} req.user - Authenticated user data
+ * @param {string} req.user.id - ID of the job seeker
+ * @param {Object} res - Express response object
+ *
+ * @returns {Object} JSON response containing the list of bookmarked jobs
+ * @throws {Error} If an internal server error occurs
+ */
+router.get(
+  "/fetch-bookmarked-jobs",
+  authorize("jobSeeker"),
+  async (req, res) => {
+    try {
+      // const { params: { userId } } = req;
+      const userId = req.user?.id;
+      const bookmarked = await BookmarkedJob.find({ userId });
+      if (!bookmarked) {
+        return res.status(404).json({ msg: "No bookmarked jobs" });
+      }
+      res.status(200).json({
+        success: true,
+        bookmarked,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        msg: "Some error occured while fetching the bookmarked jobs",
+        error: error.message,
+      });
+    }
+  }
+);
+
+module.exports = router;
