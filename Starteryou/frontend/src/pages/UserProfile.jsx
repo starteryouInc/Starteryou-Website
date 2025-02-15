@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../components/Common/Navbar";
 import LeftSide from "../components/UserProfile/LeftSide";
 import RightSide from "../components/UserProfile/RightSide";
@@ -15,6 +15,19 @@ const UserProfile = () => {
 
   const token = user?.token;
 
+  /**
+   * Fetches the user's profile data from the server.
+   *
+   * @async
+   * @function getUserProfile
+   * @throws {Error} Displays an error toast if the user is not logged in or if the request fails.
+   *
+   * @description
+   * - Checks if the user is authenticated. If not, shows an error toast and redirects to login.
+   * - Retrieves the authenticated user's ID and fetches their profile from the API.
+   * - If profile data is found, updates the state and shows a success toast.
+   * - If no data is found or an error occurs, displays an error toast.
+   */
   const getUserProfile = async () => {
     if (!user?.token) {
       toast.error("Please login to continue...");
@@ -45,7 +58,23 @@ const UserProfile = () => {
     }
   };
 
-  // Function to fetch particular user profile fields
+  /**
+ * Fetches a specific field from the user's profile.
+ * 
+ * @async
+ * @function getUserProfileField
+ * @param {string} fieldName - The name of the profile field to retrieve.
+ * @returns {Promise<any|null>} The value of the requested profile field if successful, otherwise `null`.
+ * 
+ * @throws {Error} Displays an error toast if the request fails.
+ * 
+ * @description 
+ * - Retrieves the authenticated user's ID.
+ * - Sends a request to fetch a specific field from the user's profile.
+ * - If successful, returns the requested field data.
+ * - If an error occurs, logs the error and returns `null`.
+ */
+
   const getUserProfileField = async (fieldName) => {
     try {
       const userId = user?.authenticatedUser?._id;

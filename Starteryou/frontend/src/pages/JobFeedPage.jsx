@@ -1,4 +1,4 @@
-import  { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Navbar from "../components/Common/Navbar";
 import PenSvg from "/JobFeedPage/Pen.svg";
 import FilterButtons from "../components/JobFeedPage/FilterButtons";
@@ -25,6 +25,26 @@ const JobFeedPage = () => {
 
   const token = user?.token;
   const role = user?.authenticatedUser?.role;
+
+  /**
+   * Fetches job listings from the server.
+   *
+   * @async
+   * @function getJobs
+   * @returns {Promise<void>} No return value; updates state with job data.
+   *
+   * @throws {Error} Displays an error toast if the user is not authenticated or if the request fails.
+   *
+   * @description
+   * - Checks if the user is authenticated; if not, shows an error toast and redirects to login.
+   * - Sets the loading state to `true` before making the request.
+   * - Sends a request to fetch job listings.
+   * - If successful, updates the job data state.
+   * - If an error occurs, displays an error toast.
+   * - Finally, sets the loading state to `false` after the request completes.
+   *
+   * @dependency useCallback - Memoizes the function to prevent unnecessary re-creations.
+   */
 
   const getJobs = useCallback(async () => {
     if (!user?.token) {
@@ -59,6 +79,23 @@ const JobFeedPage = () => {
     }
   }, [jobData]);
 
+  /**
+   * Fetches job details by job ID.
+   *
+   * @async
+   * @function getJobById
+   * @param {string} jobID - The unique identifier of the job to retrieve.
+   * @returns {Promise<void>} No return value; updates state with job details.
+   *
+   * @throws {Error} Displays an error toast if the request fails.
+   *
+   * @description
+   * - Checks if the user is authenticated; if not, exits early.
+   * - Sends a request to fetch job details using the provided job ID.
+   * - If successful, updates the state with the retrieved job data.
+   * - If an error occurs, displays an error toast.
+   */
+
   const getJobById = async (jobID) => {
     if (!user?.token) return;
     try {
@@ -75,6 +112,26 @@ const JobFeedPage = () => {
       toast.error(error.response?.data?.msg);
     }
   };
+
+  /**
+   * Fetches the list of jobs the user has applied to.
+   *
+   * @async
+   * @function getAppliedJobs
+   * @returns {Promise<void>} No return value; updates state with applied job details.
+   *
+   * @throws {Error} Displays an error toast if the request fails.
+   *
+   * @description
+   * - Checks if the user is authenticated; if not, exits early.
+   * - Sets the loading state to `true` before making the request.
+   * - Fetches the list of applied jobs for the authenticated user.
+   * - For each application, retrieves job details using the job ID.
+   * - Filters out any jobs that are not found (404 errors).
+   * - Updates the state with the list of successfully retrieved job details.
+   * - If an error occurs, displays an error toast.
+   * - Finally, sets the loading state to `false` after the request completes.
+   */
 
   const getAppliedJobs = async () => {
     if (!user?.token) return;
@@ -122,6 +179,26 @@ const JobFeedPage = () => {
     }
   };
 
+  /**
+   * Fetches the list of jobs the user has saved/bookmarked.
+   *
+   * @async
+   * @function getSavedJobs
+   * @returns {Promise<void>} No return value; updates state with saved job details.
+   *
+   * @throws {Error} Displays an error toast if the request fails.
+   *
+   * @description
+   * - Checks if the user is authenticated; if not, exits early.
+   * - Sets the loading state to `true` before making the request.
+   * - Fetches the list of saved/bookmarked jobs for the authenticated user.
+   * - For each saved job, retrieves detailed job information using the job ID.
+   * - Filters out jobs that are not found (404 errors).
+   * - Updates the state with the list of successfully retrieved job details.
+   * - If an error occurs, displays an error toast.
+   * - Finally, sets the loading state to `false` after the request completes.
+   */
+
   const getSavedJobs = async () => {
     if (!user?.token) return;
     setLoading(true);
@@ -164,6 +241,23 @@ const JobFeedPage = () => {
       setLoading(false);
     }
   };
+
+  /**
+ * Saves (bookmarks) a job for the authenticated user.
+ * 
+ * @async
+ * @function saveJob
+ * @param {string} jobId - The unique identifier of the job to be bookmarked.
+ * @returns {Promise<void>} No return value; updates the saved jobs list.
+ * 
+ * @throws {Error} Displays an error toast if the request fails.
+ * 
+ * @description
+ * - Checks if the user is authenticated; if not, exits early.
+ * - Sends a request to bookmark the specified job.
+ * - If successful, displays a success toast and refreshes the saved jobs list.
+ * - If an error occurs, displays an error toast with a relevant message.
+ */
 
   const saveJob = async (jobId) => {
     const token = user?.token;
