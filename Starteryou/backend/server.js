@@ -18,6 +18,7 @@ const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 const sessionRoutes = require('./routes/sessionRoutes'); // Import session routes
+const { router } = require("./routes/index");
 
 // Initialize Express app
 const app = express();
@@ -50,6 +51,7 @@ app.use(
     },
   })
 );
+app.use("/api/newsletter", newsletterRoutes); //Newsletter subscribers
 
 // MongoDB connection
 (async () => {
@@ -89,8 +91,10 @@ const swaggerOptions = {
         name: "Authentication",
         description: "Routes for Authentication endpoints",
       },
-      { name: "Newsletter", description: "Routes for newsletter subscriptions" }, // Add this line
-      { name: "Session", description: "Routes for session management" }, // Add session routes to swagger docs
+      {
+        name: "Newsletter",
+        description: "Routes for newsletter subscriptions",
+      }, // Add this line
     ],
   },
   apis: ["./routes/*.js"], // Path to your API route files
@@ -135,6 +139,12 @@ app.use("/api", teamRoutes);
 app.use("/api/v1/auth", authRoutes); // Mount authRoutes
 
 app.use("/api", sessionRoutes); // Mount sessionRoutes
+
+/**
+ * Uses the imported router in the Express application.
+ * @param {import("express").Express} app - The Express application instance.
+ */
+app.use(router);
 
 // Health Check Route
 /**
@@ -183,6 +193,7 @@ app.use((err, req, res, next) => {
 // Start Server
 const PORT = process.env.PORT || 3000;
 
+// chek dev branch
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
   console.log(
