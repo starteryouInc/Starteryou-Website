@@ -330,7 +330,7 @@ const login = async (req, res) => {
       message: "Login successful",
       success: true,
       tokens: { accessToken, refreshToken },
-      user: { id: user._id, username: user.username, email: user.email, role: user.role },
+      user: { id: user._id, username: user.username, email: user.email, role: user.role || "admin" },
     });
   } catch (error) {
     console.error("Error during login:", error);

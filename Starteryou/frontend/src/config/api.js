@@ -14,10 +14,11 @@ export const API_CONFIG = {
     authLogin: "/api/v1/auth/login",
     authRegister: "/api/v1/auth/register",
     newsletterApi: "/api/newsletter/subscribe",
+    sessionTime: "/api/session-time",
     // Register and Login API's
     userEmpRegister: "/api/v1/userAuth/users-emp-register",
     userSeekerRegister: "/api/v1/userAuth/users-seeker-register",
     userLogin: "/api/v1/userAuth/users-login",
-    sessionTime: "/api/session-time",
+    
   },
 };
