@@ -8,24 +8,28 @@ const swaggerUi = require("swagger-ui-express");
 const router = express.Router();
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 const Employee = require("../models/EmployeeModel");
+const cacheQuery = require("../cache/utils/cacheQuery");
+const { invalidateCache } = require("../cache/utils/invalidateCache");
+const cacheConfig = require("../cache/config/cacheConfig");
+
 const jwtSecret = process.env.DEV_JWT_SECRET;
 if (!jwtSecret) {
   console.error("Error: DEV_JWT_SECRET is missing in the environment variables.");
   process.exit(1); // Stop the app if DEV_JWT_SECRET is not defined
 }
 
-const validRoles = ["admin", "user"]; // Add more roles as needed
+const validRoles = ["admin"]; // Add more roles as needed
 
 // Helper functions to generate tokens
 const generateAccessToken = (user) => {
-  return jwt.sign({ id: user._id, role: user.role }, jwtSecret, {
+  return jwt.sign({ id: user._id, role: user.role || "admin" }, jwtSecret, {
     expiresIn: "15m",
   });
 };
 
 const generateRefreshToken = (user) => {
   return jwt.sign({ id: user._id }, jwtSecret, {
-    expiresIn: "7d",
+    expiresIn: "15m",
   });
 };
 
@@ -91,7 +95,7 @@ router.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *                 example: "password123"
  *               role:
  *                 type: string
- *                 example: "admin"  # Example: "admin" or "user"
+ *                 example: "admin" 
  *     responses:
  *       201:
  *         description: User registered successfully
@@ -202,7 +206,6 @@ const register = async (req, res) => {
     // Save the refresh token in the database
     user.refreshToken = refreshToken;
     await user.save();
-    
 
     return res.status(201).json({
       message: "User registered successfully",
@@ -212,7 +215,7 @@ const register = async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        role: user.role,
+        role: user.role || "admin",
       },
     });
   } catch (error) {
@@ -288,7 +291,6 @@ const login = async (req, res) => {
       success: false,
     });
   }
-
   // Validate email
   const emailRegex = /^[a-zA-Z0-9._%+-]+@starteryou\.com$/i;
   if (!emailRegex.test(email)) {
@@ -315,23 +317,57 @@ const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials", success: false });
     }
 
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
-   
-    // Store the refresh token in the database
-    user.refreshToken = refreshToken;
-    await user.save();
+    /**
+     * Generates a unique cache key for user login
+     * @type {string}
+     */
+    const cacheKey = `login:${user._id}`;
+    const ttl = cacheConfig.defaultTTL; // Time to live in seconds (1 hour)
+
+    /**
+     * Invalidates existing cache entry before creating a new one
+     * Prevents serving stale login data
+     * 
+     * @param {string} cacheKey - Unique identifier for the cache entry
+     */
+
+    // Invalidate the cache for the login endpoint
+    console.log(`🔄 Invalidating cache for key: ${cacheKey}`);
+    await invalidateCache(cacheKey);
     
-    // Store user session
-    req.session.user = user.username; // Assigning the correct username
-    req.session.cookie.maxAge = 60 * 60 * 1000; // 1-hour session for logged-in users
-  
-    return res.status(200).json({
-      message: "Login successful",
-      success: true,
-      tokens: { accessToken, refreshToken },
-      user: { id: user._id, username: user.username, email: user.email, role: user.role || "admin" },
-    });
+    /**
+     * Caches login response with tokens and user information
+     * 
+     * @param {string} cacheKey - Unique cache identifier
+     * @param {Function} fetchFunction - Generates fresh login response
+     * @param {number} ttl - Time-to-live for cache entry
+     * 
+     * @returns {Object} Cached login response with status and user details
+     */
+
+    const cachedResponse = await cacheQuery(cacheKey, async () => {
+      const accessToken = generateAccessToken(user);
+      const refreshToken = generateRefreshToken(user);
+
+      // Store the refresh token in the database
+      user.refreshToken = refreshToken;
+      await user.save();
+      req.session.user = user.username; // Assigning the correct username
+      req.session.cookie.maxAge = 60 * 60 * 1000; // 1-hour session for logged-in users
+
+      return {
+        status: 200,
+        response: {
+          message: "Login successful",
+          success: true,
+          tokens: { accessToken, refreshToken },
+          user: { id: user._id, username: user.username, email: user.email, role: user.role || "admin"},
+        },
+      };
+    }, ttl);
+
+    console.log(`✅ Cache set for key: ${cacheKey}`);
+    return res.status(cachedResponse.status).json(cachedResponse.response);
   } catch (error) {
     console.error("Error during login:", error);
     return res.status(500).json({
@@ -341,19 +377,8 @@ const login = async (req, res) => {
   }
 };
 
-const logout = (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).json({ message: "Failed to log out", success: false });
-    }
-    res.clearCookie("connect.sid");
-    res.status(200).json({ message: "User logged out successfully", success: true });
-  });
-};
-
 // Set up router
 router.post("/register", register);
 router.post("/login", login);
-router.get("/logout", logout);
 
 module.exports = router;
