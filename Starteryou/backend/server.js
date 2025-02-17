@@ -44,9 +44,9 @@ app.use(
     resave: false,
     saveUninitialized: true, // Allow unauthenticated users to have sessions
     cookie: {
-      httpOnly: true,
-      secure: false, // Set to true if using HTTPS
-      sameSite: "Lax",
+      httpOnly: true, // Prevents client side JS from reading the cookie
+      secure: true, // Set to true if using HTTPS
+      sameSite: "None",// Set to 'None' if using HTTPS
       maxAge: 15 * 60 * 1000, // Default for guests: 15 minutes
     },
   })
