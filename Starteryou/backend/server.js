@@ -27,7 +27,7 @@ const app = express();
 dotenv.config();
 app.use(
   cors({
-    origin: "http://dev.starteryou.com:8080",  // Frontend URL
+    origin: process.env.FRONTEND_URL,  // Frontend URL
     credentials: true,  // Allow cookies to be sent
   })
 );
@@ -42,7 +42,7 @@ app.use(
   session({
     secret: "your-secret-key",
     resave: false,
-    saveUninitialized: true, // Allow unauthenticated users to have sessions
+    saveUninitialized: false, 
     cookie: {
       httpOnly: true, // Prevents client side JS from reading the cookie
       secure: true, // Set to true if using HTTPS and 'false' in local environment
@@ -51,6 +51,7 @@ app.use(
     },
   })
 );
+
 app.use("/api/newsletter", newsletterRoutes); //Newsletter subscribers
 
 // MongoDB connection

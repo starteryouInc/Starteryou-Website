@@ -352,8 +352,8 @@ const login = async (req, res) => {
       // Store the refresh token in the database
       user.refreshToken = refreshToken;
       await user.save();
-      req.session.user = user.username; // Assigning the correct username
-      req.session.cookie.maxAge = 60 * 60 * 1000; // 1-hour session for logged-in users
+      req.session.isLoggedIn = true;
+      req.session.user = user.username; // Assigning the correct username to the session
 
       return {
         status: 200,
@@ -376,6 +376,15 @@ const login = async (req, res) => {
     });
   }
 };
+app.get('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.redirect('/login');
+    }
+  });
+});
 
 // Set up router
 router.post("/register", register);
