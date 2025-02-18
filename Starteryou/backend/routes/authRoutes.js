@@ -376,15 +376,6 @@ const login = async (req, res) => {
     });
   }
 };
-app.get('/logout', (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.log(err);
-    } else {
-      res.redirect('/login');
-    }
-  });
-});
 
 // Set up router
 router.post("/register", register);
