@@ -45,8 +45,8 @@ app.use(
     saveUninitialized: false, 
     cookie: {
       httpOnly: true, // Prevents client side JS from reading the cookie
-      secure: true, // Set to true if using HTTPS and 'false' in local environment
-      sameSite: "None",// Set to 'None' if using HTTPS and 'Lax' in local environment
+      secure: false, // Set to true if using HTTPS and 'false' in local environment
+      sameSite: "Lax",// Set to 'None' if using HTTPS and 'Lax' in local environment
       maxAge: 60 * 60 * 1000, // 1 hour
     },
   })

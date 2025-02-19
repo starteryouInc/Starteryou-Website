@@ -41,7 +41,7 @@ function SessionTimer() {
   const formatTime = (milliseconds) => {
     if (milliseconds === null) return "Loading...";
     if (milliseconds <= 0) {
-      return isAuthenticated ? "Session timed out! Please log in again." : "Session timed out.";
+      return isAuthenticated ? "Session timed out, Please log in again." : "Session timed out, Please log in.";
     }
     const minutes = Math.floor(milliseconds / 60000);
     const seconds = Math.floor((milliseconds % 60000) / 1000);
@@ -50,5 +50,4 @@ function SessionTimer() {
 
   return <span>{formatTime(timeLeft)}</span>;
 }
-
 export default SessionTimer;

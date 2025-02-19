@@ -11,7 +11,7 @@ const Employee = require("../models/EmployeeModel");
 const cacheQuery = require("../cache/utils/cacheQuery");
 const { invalidateCache } = require("../cache/utils/invalidateCache");
 const cacheConfig = require("../cache/config/cacheConfig");
-
+const sessionTimeout = require("../middleware/sessionTimeout");
 const jwtSecret = process.env.DEV_JWT_SECRET;
 if (!jwtSecret) {
   console.error("Error: DEV_JWT_SECRET is missing in the environment variables.");
@@ -379,6 +379,6 @@ const login = async (req, res) => {
 
 // Set up router
 router.post("/register", register);
-router.post("/login", login);
+router.post("/login", sessionTimeout, login);
 
 module.exports = router;
