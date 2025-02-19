@@ -217,8 +217,8 @@ const BestBuddy = () => {
         </div>
       )}
 
-      {/* Icons and Uploaded Image */}
-      <div className="flex flex-col items-center mt-10">
+     {/* Icons and Uploaded Image */}
+     <div className="flex flex-col items-center mt-10">
         {/* Icons */}
         <div className="flex flex-wrap justify-center space-x-6">
           {icons.map(({ src, alt, text, link }, index) => (
@@ -234,8 +234,8 @@ const BestBuddy = () => {
             </a>
           ))}
         </div>
-         {/*  medium and large screens */}
-         <div className="hidden sm:flex flex-wrap justify-center space-x-6 ">
+        {/*  medium and large screens */}
+        <div className="hidden sm:flex flex-wrap justify-center space-x-6 ">
           {icons.map(({ src, alt, text, link }, index) => (
             <a href={link} key={index} className="flex items-center mb-4">
               <img

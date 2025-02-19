@@ -9,8 +9,6 @@ const Blog = () => {
   const { isAdmin } = useNavigation();
   const [title, setTitle] = useState("Our Blog");
   const [paragraph, setParagraph] = useState("Perfectly working Blog");
-  const [titleCounter, setTitleCounter] = useState(4); // Word counter for title
-  const [paragraphCounter, setParagraphCounter] = useState(17); // Word counter for paragraph
   const [isEditing, setIsEditing] = useState(false);
   const page = "HomePage";
 
@@ -54,7 +52,7 @@ const Blog = () => {
       setIsEditing(false);
       console.log("BlogsComp Data is saved: ", response);
     } catch (error) {
-      console.log("Error occurred while saving the content(BlogsComp): ", error);
+      console.log("Error occured while saving the content(BlogsComp): ", error);
     }
   };
 
@@ -64,26 +62,28 @@ const Blog = () => {
 
   const links = [
     "View All",
-    "Lorem Ipsum",
-    "Sed Diam",
-    "Consectetur",
-    "Euismod",
+    "Job Hunting",
+    "Job Applications",
+    "Career Insights",
+    "Get Inspired",
   ];
 
   const blogBoxes = [
     {
       img: "/LandingPage/Blogimg1.png",
-      title: "Lorem ipsum dolor",
+      title:
+        "Portfolio:A Step-by-Step Guider to Crafting an Outstanding High School Portfolio",
       date: "20 Jan 2023",
-      category: "Development",
-      text: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do.",
+      category: "Job Hunting",
+      text: "Crafting an Outstanding High School Portfolio: A Step-by-Step Guide",
     },
     {
       img: "/LandingPage/Blogimg2.png",
-      title: "Sed diam nonummy",
+      title:
+        "The Ultimate Guide for High School Students! to Applying for and Getting into College",
       date: "21 Jan 2023",
-      category: "Design",
-      text: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do.",
+      category: "Get Inspired",
+      text: "Applying for and Getting into College: The Ultimate Guide for High School Students!",
     },
     {
       img: "/LandingPage/Blogimg1.png",
@@ -130,20 +130,16 @@ const Blog = () => {
           <div className="mt-10 flex flex-col space-y-4 z-50">
             <textarea
               value={title}
-              onChange={(e) => setTitle(MaxWords(e.target.value, 4, setTitleCounter))}
+              onChange={(e) => setTitle(MaxWords(e.target.value, 4))}
               placeholder="Title here..."
               className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
             />
-            <p className="text-sm text-grey-400">{titleCounter} words remaining</p>
-
             <textarea
               value={paragraph}
-              onChange={(e) => setParagraph(MaxWords(e.target.value, 17, setParagraphCounter))}
+              onChange={(e) => setParagraph(MaxWords(e.target.value, 17))}
               placeholder="Paragraph here..."
               className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
             />
-            <p className="text-sm text-grey-400">{paragraphCounter} words remaining</p>
-
             <div className="lg:w-[400px] flex items-center justify-between space-x-2 text-white">
               <button
                 onClick={saveContent}
@@ -172,20 +168,19 @@ const Blog = () => {
             </button>
             {isAdmin && (
               <FaPencilAlt
-              onClick={handleEdit}
-              className="cursor-pointer absolute top-0 -right-2 lg:-right-5 text-base"
+                onClick={handleEdit}
+                className="cursor-pointer absolute top-0 -right-2 lg:-right-5"
               />
             
             )}
           </div>
         )}
 
-       
-<div className="mt-4 md:mt-0">
+        <div className="mt-4 md:mt-0">
           <button className="bg-[#D9502E] text-white py-2 px-4 rounded-lg">
             Show All
           </button>
-        </div>
+        </div> 
       </div>
 
       <div className="mt-8">

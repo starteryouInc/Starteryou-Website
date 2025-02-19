@@ -4,8 +4,46 @@ import { Carousel } from "react-responsive-carousel";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import TermsModal from "../Common/TermsModal";
+import Privacy from "../Common/Privacy";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import { API_CONFIG } from "../../config/api";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import axios from "axios";
+
 const Signup = () => {
+  const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSeekerRegister = async (e) => {
+    e.preventDefault();
+    try {
+      const { data } = await axios.post(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.userSeekerRegister}`,
+        {
+          username,
+          email,
+          phoneNumber,
+          password,
+          role: "jobSeeker",
+        }
+      );
+      toast.success(data.msg);
+      navigate("/UserLogin");
+      console.log("Working fine");
+    } catch (error) {
+      toast.error(error.response?.data?.msg);
+      console.log(error.response?.data?.msg);
+      console.log("Not working");
+    }
+  };
+
   const reviews = [
     {
       stars: 5,
@@ -123,7 +161,7 @@ const Signup = () => {
           </p>
 
           {/* Input Fields */}
-          <form>
+          <form onSubmit={handleSeekerRegister}>
             <div className="mb-4">
               <label
                 htmlFor="username"
@@ -134,6 +172,8 @@ const Signup = () => {
               <input
                 type="text"
                 id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm "
                 placeholder="Enter your Full name"
               />
@@ -149,6 +189,8 @@ const Signup = () => {
               <input
                 type="email"
                 id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm "
                 placeholder="Enter your email"
               />
@@ -160,15 +202,24 @@ const Signup = () => {
               >
                 Phone Number
               </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                placeholder="Enter your phone number"
-                pattern="[0-9]{10}"
-                required
-              />
+              <div className="relative">
+                {/* Country Code Prefix */}
+                <span className="absolute bg-[#CBD5E1] px-3 inset-y-0 flex items-center rounded-sm text-gray-600">
+                  +1
+                </span>
+
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  className="mt-1 ml-1 p-2 pl-14 block w-full rounded-md border border-[#CBD5E1] shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="Enter your phone number"
+                  pattern="[0-9]{10}"
+                  required
+                />
+              </div>
             </div>
 
             <div className="mb-4">
@@ -183,6 +234,8 @@ const Signup = () => {
                   type={showPassword ? "text" : "password"}
                   id="password"
                   name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   placeholder="Enter your password"
                   required
@@ -205,14 +258,27 @@ const Signup = () => {
             <div className="flex items-center mb-6">
               <input
                 type="checkbox"
-                id="remember"
+                id="terms"
                 className="h-4 w-4 text-indigo-600 border border-[#CBD5E1] rounded focus:ring-indigo-500"
+                required
               />
-              <label
-                htmlFor="remember"
-                className="ml-2 block text-sm text-gray-700"
-              >
-                Remember me
+              <label htmlFor="terms" className="ml-2 text-sm text-gray-700">
+                I agree to the
+                <button
+                  type="button"
+                  className="text-blue-600 hover:underline mx-1"
+                  onClick={() => setShowTerms(true)}
+                >
+                  Terms & Conditions
+                </button>
+                and
+                <button
+                  type="button"
+                  className="text-blue-600 hover:underline ml-1"
+                  onClick={() => setShowPrivacy(true)}
+                >
+                  Privacy Policy
+                </button>
               </label>
             </div>
 
@@ -231,6 +297,9 @@ const Signup = () => {
             </p>
           </form>
         </div>
+        {/* Modals */}
+        <TermsModal isOpen={showTerms} onClose={() => setShowTerms(false)} />
+        <Privacy isOpen={showPrivacy} onClose={() => setShowPrivacy(false)} />
       </div>
     </div>
   );

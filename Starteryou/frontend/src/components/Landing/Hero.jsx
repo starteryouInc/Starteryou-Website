@@ -5,7 +5,7 @@ import { API_CONFIG } from "@config/api";
 import { toast } from "react-toastify";
 import { FaPencilAlt } from "react-icons/fa";
 import axios from "axios";
-import { MaxWords } from "../Common/wordValidation"; // Import MaxWords function
+import { MaxWords } from "../Common/wordValidation";
 
 const Hero = () => {
   const { isAdmin } = useNavigation();
@@ -23,10 +23,10 @@ const Hero = () => {
   const [paragraphCounter, setParagraphCounter] = useState(11); // Counter for remaining words in paragraph
   const [isEditing, setIsEditing] = useState(false);
   const page = "HomePage";
-
+  const [titleWordsLeft, setTitleWordsLeft] = useState(9); // Counter for the title
+  const [paragraphWordsLeft, setParagraphWordsLeft] = useState(25); // Counter for the
   // Titles to identify each image in the backend
   const titles = ["hero1", "hero2", "hero3"]; // Different titles for each image
-
   // Fetch images by title on component mount
   useEffect(() => {
     const fetchImages = async () => {
@@ -168,16 +168,20 @@ const Hero = () => {
 
       {isEditing ? (
         <div className="mt-10 lg:mt-40 flex flex-col items-center space-y-4 z-10">
+          <span className="text-white text-sm">
+            {titleWordsLeft >= 0
+              ? `${titleWordsLeft} words left`
+              : `Word limit exceeded by ${Math.abs(titleWordsLeft)} words`}
+          </span>
           <textarea
             value={title}
-            onChange={handleTitleChange}
+            onChange={(e) => setTitle(MaxWords(e.target.value, 3))}
             placeholder="Title here..."
-            className="lg:w-[400px] p-2 bg-transparent border border-white rounded outline-none resize-none text-2xl text-gray-200 scrollbar"
+            className="lg:w-[400px] p-1 bg-transparent border border-white rounded outline-none resize-none text-2xl text-gray-200 scrollbar"
           />
-          <p className="text-sm text-white">{titleCounter} words remaining</p>
           <textarea
             value={paragraph}
-            onChange={handleParagraphChange}
+            onChange={(e) => setParagraph(MaxWords(e.target.value, 11))}
             placeholder="Paragraph here..."
             className="lg:w-[700px] p-2 bg-transparent border border-white rounded outline-none resize-none text-xl text-gray-200 scrollbar"
           />
@@ -208,7 +212,7 @@ const Hero = () => {
           {isAdmin && (
             <FaPencilAlt
               onClick={handleEdit}
-              className="cursor-pointer absolute top-0 -right-2 lg:-right-5"
+              className="cursor-pointer z-20 absolute top-0 -right-2 lg:-right-5"
             />
           )}
         </div>
@@ -216,16 +220,22 @@ const Hero = () => {
       
       {/* Buttons */}
       <div className="mt-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-8 z-10">
-        <button className="bg-white text-[#D9502E] font-bold px-8 py-4 rounded-md text-lg">
-          Try for free
-        </button>
-        <button className="bg-[#D9502E] text-white font-bold px-8 py-4 rounded-md text-lg">
-          Get Demo
-        </button>
+        <Link
+          to="/signup"
+          className="bg-white text-[#D9502E] font-bold px-8 py-4 rounded-md text-lg"
+        >
+          For Students
+        </Link>
+        <Link
+          to="/EmpSignUp"
+          className="bg-[#D9502E] text-white font-bold px-8 py-4 rounded-md text-lg"
+        >
+          For Employers
+        </Link>
       </div>
 
       {/* doodle1 */}
-      <div className="absolute z-20 w-[80px] h-[80px] top-[140px] left-[0px] md:w-[212px] md:h-[157px] md:top-[150px] md:left-[8px] lg:left-[195px]">
+      <div className="absolute z-20 w-[80px] h-[80px] top-[140px] left-[0px] md:w-[212px] md:h-[157px] md:top-[150px] md:left-[8px] lg:left-[65px]">
         <img
           src="/LandingPage/4 1.png"
           alt="Doodle 1"
@@ -234,7 +244,7 @@ const Hero = () => {
       </div>
 
       {/* doodle2 */}
-      <div className="absolute z-10 w-[100px] h-[100px] md:w-[150px] md:h-[150px] top-[236px] left-[280px] lg:w-[275px] lg:h-[242px] lg:top-[110px] md:top-[240px] md:left-[570px] lg:left-[1180px] opacity-90">
+      <div className="absolute w-[100px] h-[100px] md:w-[150px] md:h-[150px] top-[236px] left-[280px] lg:w-[275px] lg:h-[242px] lg:top-[100px] md:top-[240px] md:left-[570px] lg:left-[1400px] opacity-90">
         <img
           src="/LandingPage/hat.png"
           alt="Doodle 2"

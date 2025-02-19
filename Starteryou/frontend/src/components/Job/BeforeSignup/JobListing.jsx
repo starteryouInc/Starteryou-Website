@@ -1,15 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigation } from "../../../context/NavigationContext";
 import FileUpload from "../../Common/FileUpload";
-import axios from "axios"; // Ensure axios is imported
-import { FaPencilAlt } from "react-icons/fa"; // Ensure icon is imported
+import axios from "axios";
+import { FaPencilAlt } from "react-icons/fa";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { API_CONFIG } from "@config/api";
-import { MaxWords } from "../../Common/wordValidation";
-import { toast } from "react-toastify"; // Import toast notifications
-import "react-toastify/dist/ReactToastify.css"; // Import toast styles
-
-toast.configure();
-
 const JobListing = () => {
   const title = "JobList";
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -23,11 +19,11 @@ const JobListing = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState("");
   const page = "JobBeforeSignup";
+  const [titleWordsLeft, setTitleWordsLeft] = useState(MAX_TITLE_WORDS);
+  const [paragraphWordsLeft, setParagraphWordsLeft] =
+    useState(MAX_PARAGRAPH_WORDS);
+
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
-
-  const [titleWordsLeft, setTitleWordsLeft] = useState(8); // Word counter for title
-  const [paragraphWordsLeft, setParagraphWordsLeft] = useState(50); // Word counter for paragraph
-
   const fetchUploadedFile = async () => {
     if (hasFetchedOnce) return;
 
@@ -37,16 +33,16 @@ const JobListing = () => {
       );
 
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        throw new Error(`Failed to fetch file. Status: ${response.status}`);
       }
 
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      setUploadedFile(url);
-      setError(null);
+      const blob = await response.blob(); // Get the response as a Blob
+      const url = URL.createObjectURL(blob); // Create a local URL for the Blob
+      setUploadedFile(url); // Set the uploaded file data with its local URL
+      setError(null); // Reset error state on successful fetch
     } catch (error) {
       console.error("Error fetching uploaded file:", error);
-      setError("Failed to load image");
+      setError("Failed to load image"); // Set error message
     } finally {
       setHasFetchedOnce(true);
     }
@@ -55,7 +51,6 @@ const JobListing = () => {
   useEffect(() => {
     fetchUploadedFile();
   }, []);
-
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     const formData = new FormData();
@@ -70,19 +65,20 @@ const JobListing = () => {
           body: formData,
         }
       );
+
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        throw new Error(`Failed to upload file. Status: ${response.status}`);
       }
+
       setUploadedFile(URL.createObjectURL(file));
-      toast.success("Image updated successfully!");
       setError(null);
     } catch (error) {
       console.error("Error updating image:", error);
       setError("Error updating image");
-      toast.error("Failed to update image.");
     }
   };
 
+  // Fetch text content
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -94,20 +90,17 @@ const JobListing = () => {
         );
 
         if (response.data) {
-          setTitlee(
-            response.data.content ||
-              "Discover Job Listings Curated Specifically for College Students"
-          );
+          setTitlee(response.data.content || titlee);
           setParagraphh(
             Array.isArray(response.data.paragraphs)
               ? response.data.paragraphs.join("\n")
-              : "Your description paragraph here."
+              : paragraphh
           );
+          // toast.success("Content fetched successfully!");
         }
       } catch {
         console.error("Error fetching data");
         setError("Error fetching content. Please try again later.");
-        toast.error("Failed to fetch content.");
       }
     };
 
@@ -116,32 +109,30 @@ const JobListing = () => {
 
   const handleEdit = () => isAdmin && setIsEditing(true);
 
-  const handleChangeTitle = (e) =>
-    setTitlee(MaxWords(e.target.value, 8, setTitleWordsLeft));
+  const handleChangeTitle = (e) => setTitlee(e.target.value);
 
-  const handleChangeParagraph = (e) =>
-    setParagraphh(MaxWords(e.target.value, 50, setParagraphWordsLeft));
-
+  const handleChangeParagraph = (e) => setParagraphh(e.target.value);
   const saveContent = async () => {
     try {
       const normalizedParagraphs = Array.isArray(paragraphh)
         ? paragraphh
         : [paragraphh.trim()];
 
-      await axios.put(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`, {
-        page: "JobBeforeSignup",
-        component: "JobListing",
-        content: titlee.trim(),
-        paragraphs: normalizedParagraphs,
-      });
+      const response = await axios.put(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.textApi}`,
+        {
+          page,
+          component: "JobListing",
+          content: titlee.trim(),
+          paragraphs: normalizedParagraphs,
+        }
+      );
 
       setError("");
       setIsEditing(false);
-      toast.success("Content saved successfully!");
     } catch {
       console.error("Error saving content");
       setError("Error saving content. Please try again later.");
-      toast.error("Failed to save content.");
     }
   };
 
@@ -164,32 +155,25 @@ const JobListing = () => {
   ];
 
   return (
-    <div className=" mx-auto max-w-[1430px]  px-4 lg:px-10 py-14 md:py-20">
+    <div className="mx-auto max-w-[1430px] px-4 lg:px-10 py-14 md:py-20">
+      {/* Toast Notification Container */}
+      <ToastContainer />
+
       <div className="flex flex-col md:flex-row md:items-center lg:items-center space-y-6 md:space-y-0 md:space-x-6">
         {/* Left Section */}
-        <div className="flex-1 bg-white  flex flex-col justify-center">
+        <div className="flex-1 bg-white p-4 flex flex-col justify-center">
           {isEditing ? (
             <div>
-              <span className="text-gray-500 text-sm">
-                {titleWordsLeft >= 0
-                  ? `${titleWordsLeft} words left`
-                  : `Word limit exceeded by ${Math.abs(titleWordsLeft)} words`}
-              </span>
               <input
                 type="text"
                 value={titlee}
                 onChange={handleChangeTitle}
-                className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-[#1F2329] border border-gray-300 p-2 rounded w-full"
+                className="text-2xl md:text-4xl font-bold mb-4 border border-gray-300 p-2 rounded w-full"
               />
-              <span className="text-gray-500 text-sm">
-                {paragraphWordsLeft >= 0
-                  ? `${paragraphWordsLeft} words left`
-                  : `Word limit exceeded by ${Math.abs(paragraphWordsLeft)} words`}
-              </span>
               <textarea
                 value={paragraphh}
                 onChange={handleChangeParagraph}
-                className="text-[#1F2329] text-base border border-gray-300 p-2 rounded w-full"
+                className="text-base border border-gray-300 p-2 rounded w-full"
                 rows={6}
               />
               <button
@@ -208,8 +192,7 @@ const JobListing = () => {
               {isAdmin && (
                 <FaPencilAlt
                   onClick={handleEdit}
-                  style={{ cursor: "pointer", marginTop: "1rem" }}
-                  className="text-black"
+                  className="text-gray-500 cursor-pointer mt-4"
                 />
               )}
             </div>
@@ -230,22 +213,21 @@ const JobListing = () => {
         </div>
 
         {/* Right Section */}
-        <div className="flex-1 relative bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] rounded-xl overflow-hidden flex justify-center md:items-center">
+        <div className="flex-1 relative bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] rounded-xl overflow-hidden flex justify-center items-center">
           {uploadedFile ? (
             <img
               src={uploadedFile}
               alt="Preview"
               className="relative w-[340px] h-[250px] md:w-[550px] md:h-[400px] lg:w-[680px] lg:h-[500px] rounded-xl left-[30px] top-[30px] md:left-[58px] md:top-[80px]"
-              style={{ transform: "rotate(-6.44deg)" }}
             />
           ) : (
             <p className="text-sm text-center text-gray-500">
               Image preview will appear here...
             </p>
           )}
-          {/* Admin file upload section */}
           {isAdmin && (
             <div className=" absolute top-0 right-2 ">
+              {" "}
               <FileUpload
                 handleFileChange={handleFileChange}
                 uploadedFile={uploadedFile}
