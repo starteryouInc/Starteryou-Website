@@ -1,37 +1,23 @@
 import React, { useState } from "react";
-import { API_CONFIG } from "../../../config/api";
-import { useUserContext } from "../../../context/UserContext";
-import axios from "axios";
+import { API_CONFIG } from "../../../../config/api";
+import { useUserContext } from "../../../../context/UserContext";
 import { toast } from "react-toastify";
+import axios from "axios";
 
-const WorkExperienceForm = ({ openWorkForm, getProfileFieldData }) => {
+const EditWork = ({ closeEditWork, job, getProfileFieldData }) => {
   const { user } = useUserContext();
   const token = user?.token;
 
   const [formData, setFormData] = useState({
-    jobTitle: "",
-    companyName: "",
-    isCurrentCompany: false,
+    jobTitle: job.jobTitle,
+    companyName: job.companyName,
+    isCurrentCompany: job.endDate ? false : true,
     startYear: "",
     startMonth: "",
     endYear: "",
     endMonth: "",
-    description: "",
+    description: job.description,
   });
-
-  // Function to clear all fields
-  const clearAllFields = () => {
-    setFormData({
-      jobTitle: "",
-      companyName: "",
-      isCurrentCompany: true,
-      startYear: "",
-      startMonth: "",
-      endYear: "",
-      endMonth: "",
-      description: "",
-    });
-  };
 
   // Function to handle input changes
   const handleChange = (e) => {
@@ -75,9 +61,10 @@ const WorkExperienceForm = ({ openWorkForm, getProfileFieldData }) => {
 
     try {
       const userId = user?.authenticatedUser?._id;
-      const { data } = await axios.post(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.addWorkExperience(
-          userId
+      const { data } = await axios.put(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.updateWorkExperience(
+          userId,
+          job._id
         )}`,
         workExperience,
         {
@@ -88,8 +75,7 @@ const WorkExperienceForm = ({ openWorkForm, getProfileFieldData }) => {
       );
       toast.success(data.msg);
       getProfileFieldData();
-      clearAllFields();
-      openWorkForm();
+      closeEditWork();
     } catch (error) {
       toast.error(error.response?.data?.msg);
     }
@@ -97,8 +83,7 @@ const WorkExperienceForm = ({ openWorkForm, getProfileFieldData }) => {
 
   // Function to handle form cancellation
   const handleCancel = () => {
-    clearAllFields();
-    openWorkForm();
+    closeEditWork();
   };
 
   return (
@@ -300,4 +285,4 @@ const WorkExperienceForm = ({ openWorkForm, getProfileFieldData }) => {
   );
 };
 
-export default WorkExperienceForm;
+export default EditWork;
