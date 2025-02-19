@@ -15,35 +15,6 @@ import axios from "axios";
 const Signup = () => {
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
-  const navigate = useNavigate();
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleSeekerRegister = async (e) => {
-    e.preventDefault();
-    try {
-      const { data } = await axios.post(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.userSeekerRegister}`,
-        {
-          username,
-          email,
-          phoneNumber,
-          password,
-          role: "jobSeeker",
-        }
-      );
-      toast.success(data.msg);
-      navigate("/UserLogin");
-      console.log("Working fine");
-    } catch (error) {
-      toast.error(error.response?.data?.msg);
-      console.log(error.response?.data?.msg);
-      console.log("Not working");
-    }
-  };
-
   const reviews = [
     {
       stars: 5,
