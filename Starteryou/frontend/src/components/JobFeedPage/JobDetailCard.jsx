@@ -68,10 +68,12 @@ const JobDetailCard = ({ jobDetails, onClose, savedJob }) => {
         </div>
         <div className="flex justify-between items-start">
           <h1 className="text-xl font-semibold">{jobDetails.title}</h1>
-          <FaRegBookmark
-            className="cursor-pointer"
-            onClick={() => savedJob(jobDetails._id)}
-          />
+          {role === "jobSeeker" && (
+            <FaRegBookmark
+              className="cursor-pointer"
+              onClick={() => savedJob(jobDetails._id)}
+            />
+          )}
         </div>
         <ul className="text-[#9894A7] space-y-2">
           <li>{jobDetails.companyName ? jobDetails.companyName : "Unknown"}</li>

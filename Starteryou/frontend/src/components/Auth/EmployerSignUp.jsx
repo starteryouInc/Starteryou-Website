@@ -42,8 +42,7 @@ const EmployerSignUp = () => {
         token: data.token.accessToken,
       });
       toast.success(data.msg);
-      // navigate("/createProfile");
-      navigate("/UserLogin");
+      navigate("/createProfile");
     } catch (error) {
       toast.error(error.response?.data?.msg);
     }

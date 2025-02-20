@@ -34,6 +34,10 @@ import ForgotPswd from "./components/Auth/ForgotPswd";
 import ResetCode from "./components/Auth/ResetCode";
 import UpdatePswd from "./components/Auth/UpdatePswd";
 import EmployerSignUp from "./components/Auth/EmployerSignUp";
+import CompanyDashboard from "./pages/CompanyDashboard";
+import PostedJobs from "./components/CompanyDashboard/Pages/PostedJobs";
+import ProfilePage from "./components/CompanyDashboard/Pages/ProfilePage";
+import ProfileCarousel from "./pages/ProfileCarousel";
 
 const Layout = () => {
   const location = useLocation();
@@ -51,6 +55,7 @@ const Layout = () => {
     "/ResetCode",
     "/UpdatePswd",
     "/EmpSignUp",
+    "/createProfile",
   ].includes(location.pathname);
   return (
     <div className="font-montserrat scroll-smooth">
@@ -73,9 +78,17 @@ const Layout = () => {
         <Route path="/ResetCode" element={<ResetCode />} />
         <Route path="/UpdatePswd" element={<UpdatePswd />} />
         <Route path="/EmpSignUp" element={<EmployerSignUp />} />
-
-        {/* New User Profile Page ( COMPLETED ) */}
         <Route path="/userprofile" element={<UserProfile />}></Route>
+
+        <Route path="/companyDashboard" element={<CompanyDashboard />}>
+          <Route path="/companyDashboard/" element={<ProfilePage />}></Route>
+          <Route
+            path="/companyDashboard/postedJobs"
+            element={<PostedJobs />}
+          ></Route>
+        </Route>
+
+        <Route path="/createProfile" element={<ProfileCarousel />} />
 
         {/* Admin Protected Routes */}
         <Route
@@ -113,10 +126,10 @@ function App() {
   return (
     <UserProvider>
       <NavigationProvider>
+        <ToastContainer position="top-right" autoClose={3000} />
         <Router>
           <NavigationHandler />
           <Layout />
-          <ToastContainer />
         </Router>
       </NavigationProvider>
     </UserProvider>
