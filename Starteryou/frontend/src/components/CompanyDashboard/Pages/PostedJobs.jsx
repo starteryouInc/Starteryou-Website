@@ -12,6 +12,13 @@ import CreateJobCard from "../../JobFeedPage/CreateJobCard";
 import { IoAddOutline } from "react-icons/io5";
 import { IoMdClose } from "react-icons/io";
 
+/**
+ * PostedJobs Component
+ * Displays a list of jobs posted by the employer and provides functionalities to view, delete, and create jobs.
+ *
+ * @component
+ * @returns {JSX.Element} The PostedJobs component.
+ */
 const PostedJobs = () => {
   const { user } = useUserContext();
   const navigate = useNavigate();
@@ -23,6 +30,13 @@ const PostedJobs = () => {
 
   const token = user?.token;
 
+  /**
+   * Fetches the jobs posted by the employer.
+   *
+   * @async
+   * @function getPostedJobs
+   * @returns {Promise<void>} A promise that resolves when jobs are fetched.
+   */
   const getPostedJobs = async () => {
     if (!token) {
       toast.error("Pls login to continue...");
@@ -48,6 +62,14 @@ const PostedJobs = () => {
     }
   };
 
+  /**
+   * Deletes a job posting.
+   *
+   * @async
+   * @function deleteJob
+   * @param {string} jobId - The ID of the job to be deleted.
+   * @returns {Promise<void>} A promise that resolves when the job is deleted.
+   */
   const deleteJob = async (jobId) => {
     const isConfirmed = confirm("Are you sure you want to close this job");
     if (!isConfirmed) return;

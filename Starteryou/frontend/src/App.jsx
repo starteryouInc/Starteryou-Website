@@ -1,3 +1,7 @@
+/**
+ * Main application component that sets up routing, context providers, and layout.
+ * @returns {JSX.Element} The application component.
+ */
 import {
   BrowserRouter as Router,
   Routes,
@@ -39,10 +43,16 @@ import PostedJobs from "./components/CompanyDashboard/Pages/PostedJobs";
 import ProfilePage from "./components/CompanyDashboard/Pages/ProfilePage";
 import ProfileCarousel from "./pages/ProfileCarousel";
 
+/**
+ * Layout component that defines the main page structure and handles route changes.
+ * @returns {JSX.Element} The layout component.
+ */
 const Layout = () => {
   const location = useLocation();
 
-  // Scroll to top on location change
+  /**
+   * Scrolls to the top of the page when the route changes.
+   */
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]); // This will run on every route change
@@ -122,6 +132,10 @@ const Layout = () => {
   );
 };
 
+/**
+ * Main application component that wraps the application with necessary providers.
+ * @returns {JSX.Element} The application component.
+ */
 function App() {
   return (
     <UserProvider>

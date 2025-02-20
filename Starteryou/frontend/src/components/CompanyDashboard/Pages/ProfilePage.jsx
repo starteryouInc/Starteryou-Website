@@ -8,15 +8,36 @@ import { API_CONFIG } from "../../../config/api";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
+/**
+ * ProfilePage Component
+ * Displays the company profile of the logged-in employer.
+ *
+ * @component
+ * @returns {JSX.Element} The ProfilePage component.
+ */
 const ProfilePage = () => {
   const { user } = useUserContext();
   const [companyProfile, setCompanyProfile] = useState([]);
   const token = user?.token;
 
+  /**
+   * Formats a date to extract the year.
+   *
+   * @function formatFoundedYear
+   * @param {string} foundedDate - The date string representing the company's founding date.
+   * @returns {string} The formatted year as a string.
+   */
   function formatFoundedYear(foundedDate) {
     return new Date(foundedDate).getFullYear().toString();
   }
 
+  /**
+   * Fetches the company profile data for the logged-in employer.
+   *
+   * @async
+   * @function getCompanyProfile
+   * @returns {Promise<void>} A promise that resolves when company profile data is retrieved.
+   */
   const getCompanyProfile = async () => {
     if (!token) {
       toast.error("Pls login to continue...");
