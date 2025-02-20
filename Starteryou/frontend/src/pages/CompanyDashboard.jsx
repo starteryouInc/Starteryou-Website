@@ -7,6 +7,12 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Navbar from "../components/Common/Navbar";
 
+/**
+ * CompanyDashboard component - Displays the company dashboard page.
+ * Redirects to Employer SignUp if the user is not authenticated.
+ *
+ * @returns {JSX.Element} The CompanyDashboard component.
+ */
 const CompanyDashboard = () => {
   const navigate = useNavigate();
   const { user } = useUserContext();

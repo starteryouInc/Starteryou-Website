@@ -8,6 +8,12 @@ import { API_CONFIG } from "../config/api";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+/**
+ * ProfileCarousel component - Manages a multi-step company profile form.
+ * Allows users to input company details, navigate between steps, and submit the form.
+ *
+ * @returns {JSX.Element} The ProfileCarousel component.
+ */
 const ProfileCarousel = () => {
   const [step, setStep] = useState(1);
   const { user } = useUserContext();
@@ -28,6 +34,9 @@ const ProfileCarousel = () => {
     about: "",
   });
 
+  /**
+   * Clears all fields in the profile form.
+   */
   const clearAllFields = () => {
     setProfileData({
       companyName: "",
@@ -42,7 +51,12 @@ const ProfileCarousel = () => {
     });
   };
 
-  // Function to handle input changes in child components
+  /**
+   * Handles input field changes.
+   *
+   * @param {string} field - The name of the field being updated.
+   * @param {string} value - The new value of the field.
+   */
   const handleChange = (field, value) => {
     setProfileData((prev) => ({ ...prev, [field]: value }));
   };
@@ -57,14 +71,20 @@ const ProfileCarousel = () => {
     if (step > 1) setStep(step - 1);
   };
 
-  // Function to handle form submission
+  /**
+   * Handles form submission by sending profile data to the API.
+   * Validates required fields before submitting.
+   * Displays success or error messages using toast notifications.
+   */
   const handleSubmit = async () => {
     if (!profileData.companyName) {
       toast.error("Pls fill are the required fields");
       return;
     }
 
-    const foundedYear = profileData.foundedDate ? new Date(`${profileData.foundedDate}-01-01`) : null;
+    const foundedYear = profileData.foundedDate
+      ? new Date(`${profileData.foundedDate}-01-01`)
+      : null;
 
     try {
       const userId = user?.authenticatedUser?._id;
