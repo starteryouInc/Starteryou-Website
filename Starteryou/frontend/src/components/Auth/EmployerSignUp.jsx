@@ -13,6 +13,13 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { useUserContext } from "../../context/UserContext";
 
+/**
+ * EmployerSignUp Component
+ * Handles employer registration, including input fields for company details and authentication.
+ *
+ * @component
+ * @returns {JSX.Element} The EmployerSignUp component.
+ */
 const EmployerSignUp = () => {
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
@@ -23,6 +30,14 @@ const EmployerSignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  /**
+   * Handles employer registration form submission.
+   *
+   * @async
+   * @function handleRegister
+   * @param {React.FormEvent} e - The form submission event.
+   * @returns {Promise<void>} A promise that resolves when registration is complete.
+   */
   const handleRegister = async (e) => {
     e.preventDefault();
 
@@ -42,8 +57,7 @@ const EmployerSignUp = () => {
         token: data.token.accessToken,
       });
       toast.success(data.msg);
-      // navigate("/createProfile");
-      navigate("/UserLogin");
+      navigate("/createProfile");
     } catch (error) {
       toast.error(error.response?.data?.msg);
     }

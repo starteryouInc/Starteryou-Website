@@ -4,6 +4,13 @@ import { useNavigation } from "../../context/NavigationContext";
 import { useUserContext } from "../../context/UserContext";
 import { FaRegUserCircle } from "react-icons/fa";
 
+/**
+ * Navbar component for the application.
+ *
+ * @param {Object} props - Component properties.
+ * @param {boolean} props.isEduHero - Determines if the navbar is used in the education hero section.
+ * @returns {JSX.Element} The Navbar component.
+ */
 const Navbar = ({ isEduHero }) => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,13 +20,19 @@ const Navbar = ({ isEduHero }) => {
 
   const { user, logoutUser } = useUserContext();
   const token = user?.token;
-  const role = user?.authenticatedUser.role;
+  const role = user?.authenticatedUser?.role || "";
 
+  /**
+   * Handles user logout and navigates to the homepage.
+   */
   const handleLogout = () => {
     logoutUser();
     navigate("/");
   };
 
+  /**
+   * Handles scroll event to determine if the navbar should have a scrolled state.
+   */
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
@@ -97,31 +110,42 @@ const Navbar = ({ isEduHero }) => {
           >
             Sign up
           </Link>
-          <button
-            // onClick={handleRedirects}
-            className="bg-[#D9502E] text-sm sm:text-base lg:text-xl text-[white] border-[2px] font-bold border-[#D9502E] px-3 py-1 lg:px-4 lg:py-2 rounded-lg uppercase"
-          >
-            <Link to="/EmpSignUp">Post Job</Link>
+          <button className="bg-[#D9502E] text-sm sm:text-base lg:text-xl text-[white] border-[2px] font-bold border-[#D9502E] px-3 py-1 lg:px-4 lg:py-2 rounded-lg uppercase">
+            <Link to="/companyDashboard/postedJobs">Post Job</Link>
           </button>
         </div>
       ) : (
         <div className="after-login hidden md:flex items-center md:space-x-2 lg:space-x-6">
-          <button
-            onClick={handleLogout}
-            className="text-sm sm:text-base lg:text-xl font-bold  z-10 uppercase"
-          >
-            Log Out
-          </button>
-          {role === "employer" ? (
-            <button className="bg-[#D9502E] text-sm sm:text-base lg:text-xl text-[white] border-[2px] font-bold border-[#D9502E] px-3 py-1 lg:px-4 lg:py-2 rounded-lg uppercase">
-              <Link to="/EmpSignUp">Post Job</Link>
-            </button>
+          {role === "" ? (
+            <>
+              {/* <h1 className="text-xl font-bold">Admin Panel</h1> */}
+              <button
+                onClick={handleLogout}
+                className="text-sm sm:text-base lg:text-xl font-bold z-10 uppercase"
+              >
+                Log Out
+              </button>
+            </>
           ) : (
-            <button>
-              <Link to="/userprofile">
-                <FaRegUserCircle className="text-4xl" />
-              </Link>
-            </button>
+            <>
+              <button
+                onClick={handleLogout}
+                className="text-sm sm:text-base lg:text-xl font-bold  z-10 uppercase"
+              >
+                Log Out
+              </button>
+              {role === "employer" ? (
+                <button className="bg-[#D9502E] text-sm sm:text-base lg:text-xl text-[white] border-[2px] font-bold border-[#D9502E] px-3 py-1 lg:px-4 lg:py-2 rounded-lg uppercase">
+                  <Link to="/companyDashboard/postedJobs">Post Job</Link>
+                </button>
+              ) : (
+                <button>
+                  <Link to="/userprofile">
+                    <FaRegUserCircle className="text-4xl" />
+                  </Link>
+                </button>
+              )}
+            </>
           )}
         </div>
       )}
