@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import JobCard2 from "../JobCard2";
 import JobDetailedCard2 from "../JobDetailedCard2";
 import { API_CONFIG } from "../../../config/api";
@@ -132,13 +132,13 @@ const PostedJobs = () => {
               <p> </p>
             )}
             {showDetailedCard && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                <div className="relative bg-white rounded-lg shadow-lg w-[100%] h-[100%]">
+              <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 backdrop-blur-md">
+                <div className="relative bg-white/90 rounded-2xl shadow-xl w-[95%] h-[95%] overflow-y-auto p-6 border border-gray-200 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                   <button
                     onClick={() => setShowDetailedCard(false)}
-                    className="absolute top-4 right-4 bg-red-500 text-white px-3 py-3 rounded-full"
+                    className="absolute top-4 right-4 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
                   >
-                    <IoMdClose className="text-white text-lg" />
+                    <IoMdClose className="text-lg" />
                   </button>
                   <JobDetailedCard2
                     job={selectedJob}
