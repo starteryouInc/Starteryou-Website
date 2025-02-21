@@ -21,7 +21,7 @@ const ProfilePage = () => {
   const token = user?.token;
 
   /**
-   * Formats a date to extract the year.
+   * Formats date to extract the year.
    *
    * @function formatFoundedYear
    * @param {string} foundedDate - The date string representing the company's founding date.
