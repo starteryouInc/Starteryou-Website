@@ -5,7 +5,8 @@ const sessionTimeout = (req, res, next) => {
   if (isAuthenticated) {
     // For authenticated users, set session timeout to 1 hour (3600000 ms)
     req.session.cookie.maxAge = 60 * 60 * 1000; // 1 hour
-  } else {
+  }
+  else {
     // For unauthenticated users, set session timeout to 15 minutes (900000 ms)
     req.session.cookie.maxAge = 2 * 60 * 1000; // 15 minutes
   }

@@ -4,7 +4,7 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
-const { connectToMongoDB } = require("./db");
+const { connectToMongoDB, mongoUri } = require("./db");
 const textRoutes = require("./routes/textRoutes");
 const fileRoutes = require("./routes/fileRoutes");
 const swaggerJsDoc = require("swagger-jsdoc");
@@ -13,13 +13,14 @@ const teamRoutes = require("./routes/teamRoutes");
 const { mountRoutes } = require("./routes"); // Main routes including API docs
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 const authRoutes = require("./routes/authRoutes");
+const userAuthRoutes = require("./routes/userAuthRoutes");
 const newsletterRoutes = require("./routes/newsletterRoutes"); // newsletter subscribers
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 const sessionRoutes = require('./routes/sessionRoutes'); // Import session routes
 const { router } = require("./routes/index");
-
+const MongoStore = require("connect-mongo");
 // Initialize Express app
 const app = express();
 
@@ -38,19 +39,37 @@ app.use("/api/newsletter", newsletterRoutes);  //Newsletter subscribers
 
 app.use(cookieParser());
 
+const sessionStore = MongoStore.create({
+  mongoUrl: mongoUri, // MongoDB URI
+  autoRemove: 'native', // Automatically remove expired sessions
+});
+
+sessionStore.on('connected', async () => {
+  try {
+    console.log("Clearing session store...");
+    await sessionStore.clear();  // Clear all sessions
+    console.log("Session store cleared successfully.");
+  } catch (err) {
+    console.error("Error clearing session store:", err);
+  }
+});
+
+// Configure session middleware
 app.use(
   session({
     secret: "your-secret-key",
     resave: false,
-    saveUninitialized: false, 
+    saveUninitialized: false,
+    store: sessionStore,
     cookie: {
-      httpOnly: true, // Prevents client side JS from reading the cookie
-      secure: false, // Set to true if using HTTPS and 'false' in local environment
-      sameSite: "Lax",// Set to 'None' if using HTTPS and 'Lax' in local environment
-      maxAge: 60 * 60 * 1000, // 1 hour
+      httpOnly: true,
+      secure: false,
+      sameSite: "Lax",
+      maxAge: 60 * 60 * 1000,  // 1 hour session duration
     },
   })
 );
+
 
 app.use("/api/newsletter", newsletterRoutes); //Newsletter subscribers
 
@@ -140,7 +159,7 @@ app.use("/api", teamRoutes);
 app.use("/api/v1/auth", authRoutes); // Mount authRoutes
 
 app.use("/api", sessionRoutes); // Mount sessionRoutes
-
+app.use("/api/v1/userAuth", userAuthRoutes); // Mount userAuthRoutes
 /**
  * Uses the imported router in the Express application.
  * @param {import("express").Express} app - The Express application instance.

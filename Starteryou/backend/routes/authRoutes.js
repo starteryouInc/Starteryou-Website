@@ -354,6 +354,7 @@ const login = async (req, res) => {
       await user.save();
       req.session.isLoggedIn = true;
       req.session.user = user.username; // Assigning the correct username to the session
+      req.session.cookie.maxAge = 60 * 60 * 1000;
 
       return {
         status: 200,
