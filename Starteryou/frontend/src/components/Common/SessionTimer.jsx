@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { API_CONFIG } from "../../config/api";
 
-function SessionTimer() {
+export function SessionTimer() {
   const [timeLeft, setTimeLeft] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const intervalRef = useRef(null);
@@ -51,7 +51,19 @@ function SessionTimer() {
   return <span>{formatTime(timeLeft)}</span>;
 }
 
-function Footer({ lastLogin }) {
+export function Footer() {
+  const [lastLogin, setLastLogin] = useState(null);
+
+  useEffect(() => {
+    // Retrieve the last login time from localStorage
+    const storedLoginTime = localStorage.getItem("lastLogin");
+    if (storedLoginTime) {
+      setLastLogin(new Date(parseInt(storedLoginTime)).toLocaleString());
+    } else {
+      setLastLogin("0");
+    }
+  }, []);
+
   return (
     <div className="fixed bottom-0 left-0 right-0 p-1 bg-gray-800 text-white shadow-md flex items-center justify-between w-full z-50">
       <p className="text-xs text-gray-400 ml-4">
