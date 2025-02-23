@@ -63,7 +63,7 @@ app.use(
     cookie: {
       httpOnly: true,
       secure: true, // Set to true if using HTTPS and set to false if using local environment
-      sameSite: "None", // Set to 'None' for cross-origin cookies and set to 'Lax' for same-origin
+      sameSite: "None", // Set to 'None' for cross-origin cookies and set to 'Lax' for same-origin in local environment
       maxAge: 60 * 60 * 1000,  // 1 hour session duration
     },
   })
