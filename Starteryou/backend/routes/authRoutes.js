@@ -353,7 +353,9 @@ const login = async (req, res) => {
       user.refreshToken = refreshToken;
       await user.save();
       req.session.isLoggedIn = true;
-      req.session.user = user.username; // Assigning the correct username to the session
+      req.session.user = user.username;// Assigning the correct username to the session
+      req.session.userId = user._id;
+      req.session.role = user.role;
       req.session.cookie.maxAge = 60 * 60 * 1000;
 
       return {
