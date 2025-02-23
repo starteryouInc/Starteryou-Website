@@ -1,12 +1,14 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { API_CONFIG } from "../../config/api";
+import SessionExpired from "./SessionExpired"; // Import the SessionExpired component
 
 export function SessionTimer() {
   const [timeLeft, setTimeLeft] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false); // Track session expiration
   const intervalRef = useRef(null);
-  const lastApiCallTime = useRef(null);
 
+  // Fetch session time and update state when component is mounted
   useEffect(() => {
     const fetchSessionTime = async () => {
       try {
@@ -17,26 +19,39 @@ export function SessionTimer() {
         setTimeLeft(data.timeRemaining);
         setIsAuthenticated(data.isLoggedIn);
 
+        // If time remaining is 0, set sessionExpired state to true
         if (data.timeRemaining <= 0) {
           setTimeLeft(0);
+          setSessionExpired(true); // Immediately mark the session as expired
         }
       } catch (error) {
         console.error("Error fetching session time:", error);
         setTimeLeft(0);
+        setSessionExpired(true); // Mark the session as expired if there's an error
       }
     };
 
-    if (!lastApiCallTime.current || Date.now() - lastApiCallTime.current > 60000) {
-      fetchSessionTime();
-      lastApiCallTime.current = Date.now();
-    }
+    fetchSessionTime(); // Call API once on component mount
+  }, []);
+
+  // Countdown logic to decrease timeLeft
+  useEffect(() => {
+    if (timeLeft === null || timeLeft <= 0) return; // Skip if timeLeft is already expired
 
     intervalRef.current = setInterval(() => {
-      setTimeLeft((prevTimeLeft) => (prevTimeLeft !== null && prevTimeLeft > 0 ? prevTimeLeft - 1000 : prevTimeLeft));
+      setTimeLeft((prevTimeLeft) => {
+        const newTime = prevTimeLeft - 1000;
+        if (newTime <= 0) {
+          setSessionExpired(true); // Mark session as expired
+          clearInterval(intervalRef.current); // Stop the countdown once expired
+        }
+        return newTime;
+      });
     }, 1000);
 
+    // Cleanup on component unmount
     return () => clearInterval(intervalRef.current);
-  }, []);
+  }, [timeLeft]);
 
   const formatTime = (milliseconds) => {
     if (milliseconds === null) return "Loading...";
@@ -48,7 +63,12 @@ export function SessionTimer() {
     return `${minutes}m ${seconds}s remaining`;
   };
 
-  return <span>{formatTime(timeLeft)}</span>;
+  return (
+    <>
+      {sessionExpired && <SessionExpired setSessionExpired={setSessionExpired} />} {/* Show the pop-up when session expires */}
+      <span>{formatTime(timeLeft)}</span>
+    </>
+  );
 }
 
 export function Footer() {

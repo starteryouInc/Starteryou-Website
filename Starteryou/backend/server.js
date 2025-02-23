@@ -13,7 +13,6 @@ const teamRoutes = require("./routes/teamRoutes");
 const { mountRoutes } = require("./routes"); // Main routes including API docs
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 const authRoutes = require("./routes/authRoutes");
-const userAuthRoutes = require("./routes/userAuthRoutes");
 const newsletterRoutes = require("./routes/newsletterRoutes"); // newsletter subscribers
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
@@ -63,8 +62,8 @@ app.use(
     store: sessionStore,
     cookie: {
       httpOnly: true,
-      secure: false,
-      sameSite: "Lax",
+      secure: true, // Set to true if using HTTPS and set to false if using local environment
+      sameSite: "None", // Set to 'None' for cross-origin cookies and set to 'Lax' for same-origin
       maxAge: 60 * 60 * 1000,  // 1 hour session duration
     },
   })
@@ -159,7 +158,7 @@ app.use("/api", teamRoutes);
 app.use("/api/v1/auth", authRoutes); // Mount authRoutes
 
 app.use("/api", sessionRoutes); // Mount sessionRoutes
-app.use("/api/v1/userAuth", userAuthRoutes); // Mount userAuthRoutes
+
 /**
  * Uses the imported router in the Express application.
  * @param {import("express").Express} app - The Express application instance.
