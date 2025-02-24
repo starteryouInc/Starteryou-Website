@@ -1,3 +1,14 @@
+/**
+ * Middleware to manage session timeout based on user authentication status.
+ *
+ * - Authenticated users get a session timeout of 1 hour.
+ * - Unauthenticated users get a session timeout of 15 minutes.
+ * - If the session has expired, it is destroyed, and an appropriate response is sent.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ * @param {Function} next - Express next middleware function.
+ */
 const sessionTimeout = (req, res, next) => {
   // Check if user is authenticated
   const isAuthenticated = req.session && req.session.user;

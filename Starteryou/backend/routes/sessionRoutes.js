@@ -1,8 +1,24 @@
+/**
+ * Express router for handling session time and login status.
+ * 
+ * This route checks the remaining session time and the user's authentication status.
+ *
+ * @module routes/sessionTime
+ */
+
 const express = require('express');
 const sessionTimeout = require('../middleware/sessionTimeout');  // Path to sessionTimeout middleware
 const router = express.Router();
 
-// Route to check session time and login status
+/**
+ * Route to check session time and login status.
+ * 
+ * @name GET /session-time
+ * @function
+ * @memberof module:routes/sessionTime
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 router.get("/session-time", sessionTimeout, (req, res) => {
   console.log('Session Cookie:', req.session.cookie); // Log the session cookie
   console.log('Session User:', req.session.user); // Log the session user
