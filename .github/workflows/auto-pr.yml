@@ -55,13 +55,13 @@
               echo "PR_REQUIRED=true" >> $GITHUB_ENV
             fi
   
-        # Step 4: Create a pull request from 'develop' to 'main' if there are new commits
+        # Step 4: Create a pull request from 'develop' to 'main' if there are 
         - name: Create Pull Request
           if: env.PR_REQUIRED == 'true'  # Only run this step if PR_REQUIRED is 'true'
           uses: peter-evans/create-pull-request@v5
           with:
             token: ${{ secrets.GITHUB_TOKEN }}
-            base: main  # The branch we want to merge into
+            base: main  # The branch we want to merge
             branch: develop  # The source branch
             title: 'Auto PR: Merge develop into main'
             body: 'This is an automated PR to merge develop into main'
