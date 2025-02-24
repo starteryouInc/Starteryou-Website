@@ -4,7 +4,7 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
-const { connectToMongoDB } = require("./db");
+const { connectToMongoDB, mongoUri } = require("./db");
 const textRoutes = require("./routes/textRoutes");
 const fileRoutes = require("./routes/fileRoutes");
 const swaggerJsDoc = require("swagger-jsdoc");
@@ -13,17 +13,62 @@ const teamRoutes = require("./routes/teamRoutes");
 const { mountRoutes } = require("./routes"); // Main routes including API docs
 const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
 const authRoutes = require("./routes/authRoutes");
-const newsletterRoutes = require("./routes/newsletterRoutes"); //newsletter subscribers
+const newsletterRoutes = require("./routes/newsletterRoutes"); // newsletter subscribers
+const cookieParser = require("cookie-parser");
+const session = require("express-session");
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
+const sessionRoutes = require('./routes/sessionRoutes'); // Import session routes
 const { router } = require("./routes/index");
-
+const MongoStore = require("connect-mongo");
 // Initialize Express app
 const app = express();
+
 // Middleware
 dotenv.config();
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,  // Frontend URL
+    credentials: true,  // Allow cookies to be sent
+  })
+);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use("/api/newsletter", newsletterRoutes);  //Newsletter subscribers
+
+app.use(cookieParser());
+
+const sessionStore = MongoStore.create({
+  mongoUrl: mongoUri, // MongoDB URI
+  autoRemove: 'native', // Automatically remove expired sessions
+});
+
+sessionStore.on('connected', async () => {
+  try {
+    console.log("Clearing session store...");
+    await sessionStore.clear();  // Clear all sessions
+    console.log("Session store cleared successfully.");
+  } catch (err) {
+    console.error("Error clearing session store:", err);
+  }
+});
+
+// Configure session middleware
+app.use(
+  session({
+    secret: "your-secret-key",
+    resave: false,
+    saveUninitialized: false,
+    store: sessionStore,
+    cookie: {
+      httpOnly: true,
+      secure: true, // Set to true if using HTTPS and set to false if using local environment
+      sameSite: "None", // Set to 'None' for cross-origin cookies and set to 'Lax' for same-origin in local environment
+      maxAge: 60 * 60 * 1000,  // 1 hour session duration
+    },
+  })
+);
+
 
 app.use("/api/newsletter", newsletterRoutes); //Newsletter subscribers
 
@@ -100,7 +145,7 @@ app.use("/api/files", fileRoutes);
  * @swagger
  * tags:
  *   - name: TeamRoutes
- *     description: Routes for file operations
+ *     description: Routes for team operations
  */
 app.use("/api", teamRoutes);
 
@@ -110,7 +155,9 @@ app.use("/api", teamRoutes);
  *   - name: Authentication
  *     description: Routes for Authentication endpoints
  */
-app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/auth", authRoutes); // Mount authRoutes
+
+app.use("/api", sessionRoutes); // Mount sessionRoutes
 
 /**
  * Uses the imported router in the Express application.

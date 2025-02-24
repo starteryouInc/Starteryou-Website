@@ -5,32 +5,31 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/UserModel");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-const validator = require("validator");
 const router = express.Router();
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 const Employee = require("../models/EmployeeModel");
 const cacheQuery = require("../cache/utils/cacheQuery");
 const { invalidateCache } = require("../cache/utils/invalidateCache");
 const cacheConfig = require("../cache/config/cacheConfig");
-
+const sessionTimeout = require("../middleware/sessionTimeout");
 const jwtSecret = process.env.DEV_JWT_SECRET;
 if (!jwtSecret) {
   console.error("Error: DEV_JWT_SECRET is missing in the environment variables.");
   process.exit(1); // Stop the app if DEV_JWT_SECRET is not defined
 }
 
-const validRoles = ["admin", "user"]; // Add more roles as needed
+const validRoles = ["admin"]; // Add more roles as needed
 
 // Helper functions to generate tokens
 const generateAccessToken = (user) => {
-  return jwt.sign({ id: user._id, role: user.role }, jwtSecret, {
+  return jwt.sign({ id: user._id, role: user.role || "admin" }, jwtSecret, {
     expiresIn: "15m",
   });
 };
 
 const generateRefreshToken = (user) => {
   return jwt.sign({ id: user._id }, jwtSecret, {
-    expiresIn: "7d",
+    expiresIn: "15m",
   });
 };
 
@@ -96,7 +95,7 @@ router.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *                 example: "password123"
  *               role:
  *                 type: string
- *                 example: "admin"  # Example: "admin" or "user"
+ *                 example: "admin" 
  *     responses:
  *       201:
  *         description: User registered successfully
@@ -154,10 +153,10 @@ const register = async (req, res) => {
 
     // Validate password
     const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
-        message: "Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, one number, and one special character",
+        message: "Password must be at least 8 and atmost 16 characters long and include one uppercase letter, one lowercase letter, one number, and one special character",
         success: false,
       });
     }
@@ -216,7 +215,7 @@ const register = async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        role: user.role,
+        role: user.role || "admin",
       },
     });
   } catch (error) {
@@ -353,6 +352,11 @@ const login = async (req, res) => {
       // Store the refresh token in the database
       user.refreshToken = refreshToken;
       await user.save();
+      req.session.isLoggedIn = true;
+      req.session.user = user.username;// Assigning the correct username to the session
+      req.session.userId = user._id;
+      req.session.role = user.role;
+      req.session.cookie.maxAge = 60 * 60 * 1000;
 
       return {
         status: 200,
@@ -360,7 +364,7 @@ const login = async (req, res) => {
           message: "Login successful",
           success: true,
           tokens: { accessToken, refreshToken },
-          user: { id: user._id, username: user.username, email: user.email, role: user.role },
+          user: { id: user._id, username: user.username, email: user.email, role: user.role || "admin"},
         },
       };
     }, ttl);
@@ -378,5 +382,6 @@ const login = async (req, res) => {
 
 // Set up router
 router.post("/register", register);
-router.post("/login", login);
+router.post("/login", sessionTimeout, login);
+
 module.exports = router;
