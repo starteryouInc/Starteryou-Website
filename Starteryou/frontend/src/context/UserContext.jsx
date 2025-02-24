@@ -13,7 +13,7 @@ export const UserProvider = ({ children }) => {
 
     // Optionally store in localStorage/sessionStorage for persistence
     localStorage.setItem("token", token);
-    localStorage.setItem("loginUser", JSON.stringify(loginUser));
+    localStorage.setItem("loginUser", JSON.stringify(authenticatedUser));
   };
 
   const logoutUser = () => {
