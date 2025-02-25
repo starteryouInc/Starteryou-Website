@@ -2,50 +2,50 @@ import { useState, useEffect } from "react";
 import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
 import { API_CONFIG } from "@config/api";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 import { FaPencilAlt } from "react-icons/fa";
 import axios from "axios";
 import { MaxWords } from "../Common/wordValidation";
 
-const icons = [
-  {
-    src: "/LandingPage/Icons/dashboard.svg",
-    alt: "Dashboard Icon",
-    text: "Dashboard",
-    link: "/dashboard",
-  },
-  {
-    src: "/LandingPage/Icons/social.svg",
-    alt: "Settings Icon",
-    text: "Teams and socials",
-    link: "/teams-socials",
-  },
-  {
-    src: "/LandingPage/Icons/user-square.svg",
-    alt: "User Icon",
-    text: "Job Profile",
-    link: "/job-profile",
-  },
-  {
-    src: "/LandingPage/Icons/subscribe.svg",
-    alt: "Analytics Icon",
-    text: "Subscription Management",
-    link: "/subscription-management",
-  },
-  {
-    src: "/LandingPage/Icons/Setting.png",
-    alt: "Tools Icon",
-    text: "Lorem ipsum",
-    link: "/lorem-ipsum",
-  },
-];
+// const icons = [
+//   {
+//     src: "/LandingPage/Icons/dashboard.svg",
+//     alt: "Dashboard Icon",
+//     text: "Dashboard",
+//     link: "/dashboard",
+//   },
+//   {
+//     src: "/LandingPage/Icons/social.svg",
+//     alt: "Settings Icon",
+//     text: "Teams and socials",
+//     link: "/teams-socials",
+//   },
+//   {
+//     src: "/LandingPage/Icons/user-square.svg",
+//     alt: "User Icon",
+//     text: "Job Profile",
+//     link: "/job-profile",
+//   },
+//   {
+//     src: "/LandingPage/Icons/subscribe.svg",
+//     alt: "Analytics Icon",
+//     text: "Subscription Management",
+//     link: "/subscription-management",
+//   },
+//   {
+//     src: "/LandingPage/Icons/Setting.png",
+//     alt: "Tools Icon",
+//     text: "Lorem ipsum",
+//     link: "/lorem-ipsum",
+//   },
+// ];
 
 const BestBuddy = () => {
   const { isAdmin } = useNavigation();
   const [uploadedFile, setUploadedFile] = useState(null);
   const title = "bestbuddy";
   const [error, setError] = useState(null);
-  
+
   // States for text content and counters
   const [titleBB, setTitleBB] = useState("The best buddy for your career");
   const [paragraphBB, setParagraphBB] = useState("Perfectly working BestBuddy");
@@ -149,7 +149,6 @@ const BestBuddy = () => {
       }
     };
   }, []);
-  
 
   // Update title and paragraph with MaxWords and counters
   const handleTitleChange = (e) => {
@@ -163,7 +162,6 @@ const BestBuddy = () => {
   //   fetchData();
   // }, []);
 
-
   return (
     <div className="bg-white py-20 px-4 sm:py-24">
       {isEditing ? (
@@ -174,7 +172,9 @@ const BestBuddy = () => {
             placeholder="Title here..."
             className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
           />
-          <p className="text-sm text-grey-400">{titleCounter} words remaining</p>
+          <p className="text-sm text-grey-400">
+            {titleCounter} words remaining
+          </p>
 
           <textarea
             value={paragraphBB}
@@ -182,7 +182,9 @@ const BestBuddy = () => {
             placeholder="Paragraph here..."
             className="lg:w-[700px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
           />
-          <p className="text-sm text-grey-400">{paragraphCounter} words remaining</p>
+          <p className="text-sm text-grey-400">
+            {paragraphCounter} words remaining
+          </p>
 
           <div className="lg:w-[400px] flex items-center justify-between space-x-2 text-white">
             <button
@@ -217,10 +219,10 @@ const BestBuddy = () => {
         </div>
       )}
 
-     {/* Icons and Uploaded Image */}
-     <div className="flex flex-col items-center mt-10">
+      {/* Icons and Uploaded Image */}
+      <div className="flex flex-col items-center mt-10">
         {/* Icons */}
-        <div className="flex flex-col items-center space-y-4 sm:hidden">
+        {/* <div className="flex flex-col items-center space-y-4 sm:hidden">
           <div className="flex flex-wrap justify-center space-x-6">
             {icons.map(({ src, alt, text, link }, index) => (
               <a href={link} key={index} className="flex items-center mb-4">
@@ -236,10 +238,10 @@ const BestBuddy = () => {
               </a>
             ))}
           </div>
-        </div>
+        </div> */}
 
-         {/*  medium and large screens */}
-         <div className="hidden sm:flex flex-wrap justify-center space-x-6 ">
+        {/*  medium and large screens */}
+        {/* <div className="hidden sm:flex flex-wrap justify-center space-x-6 ">
           {icons.map(({ src, alt, text, link }, index) => (
             <a href={link} key={index} className="flex items-center mb-4">
               <img
@@ -252,7 +254,7 @@ const BestBuddy = () => {
               </span>
             </a>
           ))}
-        </div>
+        </div> */}
         {/* Uploaded File */}
         <div className="relative flex justify-center mt-2">
           <img

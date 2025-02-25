@@ -143,9 +143,9 @@ const LatestInsight = () => {
         ))}
       </div>
       <div className="mt-10 md:mt-20 flex justify-center">
-        <button className="bg-[#D9520E] text-white py-2 px-3 rounded-xl mr-4">
+        {/* <button className="bg-[#D9520E] text-white py-2 px-3 rounded-xl mr-4">
           View all
-        </button>
+        </button> */}
       </div>
     </section>
   );

@@ -2,7 +2,6 @@ import { useState, useEffect } from "react"; // Added useEffect import
 import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
 import { API_CONFIG } from "@config/api";
-import { toast } from "react-toastify";
 import { FaPencilAlt } from "react-icons/fa";
 import axios from "axios";
 import { MaxWords } from "../Common/wordValidation";
@@ -141,11 +140,15 @@ const BestJob3 = () => {
             <div className="mt-10 flex flex-col space-y-4 z-50">
               <textarea
                 value={titleBJ3}
-                onChange={(e) => setTitleBJ3(MaxWords(e.target.value, 5, setTitleCounter))}
+                onChange={(e) =>
+                  setTitleBJ3(MaxWords(e.target.value, 5, setTitleCounter))
+                }
                 placeholder="Title here..."
                 className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
               />
-              <p className="text-sm text-grey-400">{titleCounter} words remaining</p>
+              <p className="text-sm text-grey-400">
+                {titleCounter} words remaining
+              </p>
 
               <textarea
                 value={paragraphBJ3[0]}
@@ -163,7 +166,9 @@ const BestJob3 = () => {
                 placeholder="Paragraph here..."
                 className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
               />
-              <p className="text-sm text-grey-400">{paragraphCounter1} words remaining</p>
+              <p className="text-sm text-grey-400">
+                {paragraphCounter1} words remaining
+              </p>
             </div>
           ) : (
             <div className="relative">
@@ -182,9 +187,9 @@ const BestJob3 = () => {
             </div>
           )}
 
-          <a href="#" className="text-[#7950F2] hover:underline font-medium">
+          {/* <a href="#" className="text-[#7950F2] hover:underline font-medium">
             Request for demo &gt;
-          </a>
+          </a> */}
 
           {/* Box */}
           {isEditing ? (
@@ -211,7 +216,9 @@ const BestJob3 = () => {
                   placeholder="Title here..."
                   className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
                 />
-                <p className="text-sm text-grey-400">{paragraphCounter2} words remaining</p>
+                <p className="text-sm text-grey-400">
+                  {paragraphCounter2} words remaining
+                </p>
 
                 <textarea
                   value={paragraphBJ3[2]}
@@ -225,8 +232,9 @@ const BestJob3 = () => {
                   placeholder="Description here..."
                   className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
                 />
-                <p className="text-sm text-grey-400">{paragraphCounter2} words remaining</p>
-
+                <p className="text-sm text-grey-400">
+                  {paragraphCounter2} words remaining
+                </p>
               </div>
             </div>
           ) : (

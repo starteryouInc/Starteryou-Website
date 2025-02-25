@@ -2,6 +2,10 @@ const Router = require("express");
 const router = Router();
 const CompanyProfile = require("../models/CompanyProfile");
 const authorize = require("../middleware/roleMiddleware");
+const cacheMiddlewareJob = require("../cache/utils/cacheMiddlewareJob");
+const cacheQueryJob = require("../cache/utils/cacheQueryJob");
+const cacheConfig = require("../cache/config/cacheConfig");
+// const { invalidateCache } = require("../cache/utils/invalidateCache");
 
 /**
  * @route POST /create-company-profile
@@ -95,29 +99,49 @@ router.post(
 router.get(
   "/get-company-profile/:userId",
   authorize("employer"),
+  cacheMiddlewareJob,
   async (req, res) => {
-    const {
-      params: { userId },
-    } = req;
+    const { userId } = req.params;
+
     try {
-      const fetchCompanyProfile = await CompanyProfile.findOne({
-        employerRegistrationId: userId,
-      });
-      if (!fetchCompanyProfile) {
+      // Define cache key
+      const cacheKey = `/api/get-company-profile/${userId}`;
+      console.log(`Cache Key: ${cacheKey}`);
+
+      // Fetch from cache or database
+      const cachedCompanyProfile = await cacheQueryJob(
+        cacheKey,
+        async () => {
+          const companyProfile = await CompanyProfile.findOne({
+            employerRegistrationId: userId,
+          });
+
+          if (!companyProfile) {
+            throw new Error("Company profile not found!"); // Prevent caching empty results
+          }
+
+          return companyProfile;
+        },
+        cacheConfig.defaultTTL
+      );
+
+      if (!cachedCompanyProfile) {
         return res.status(404).json({
           success: false,
           msg: "Company profile not found!",
         });
       }
+
       res.status(200).json({
         success: true,
         msg: "Company profile found successfully",
-        data: fetchCompanyProfile,
+        data: cachedCompanyProfile,
       });
     } catch (error) {
+      console.error("Fetch Company Profile Error:", error);
       res.status(500).json({
         success: false,
-        msg: "Some error occured while fetching the company profile",
+        msg: "Some error occurred while fetching the company profile",
         error: error.message,
       });
     }

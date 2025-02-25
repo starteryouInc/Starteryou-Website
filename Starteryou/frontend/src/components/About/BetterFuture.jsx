@@ -41,7 +41,7 @@ const BetterFuture = () => {
   // Check if the user is an admin
   const { isAdmin } = useNavigation();
   const page = "AboutPage"; // Specify the page name for the current component.
-  
+
   /**
    * Fetches the text content from the backend API.
    * Updates the heading and paragraph states with the fetched data.
@@ -106,18 +106,18 @@ const BetterFuture = () => {
   };
 
   return (
-    <div className="max-w-[1300px] mx-auto text-center p-6 pt-24 md:pb-12">
+    <div
+      className="max-w-[1300px] mx-auto text-center p-6 pt-24 md:pb-12"
+      id="better-future"
+    >
       {/* Heading Section */}
       <div className="relative">
         {isEditing ? (
           <>
-           
             <input
               type="text"
               value={content} // Controlled input for editing heading
-              onChange={(e) =>
-                setContent((e.target.value))
-              }
+              onChange={(e) => setContent(e.target.value)}
               className="text-4xl font-bold md:font-extrabold mb-4 text-[#252B42] border border-gray-300 p-2 rounded w-full"
             />
           </>
@@ -140,13 +140,12 @@ const BetterFuture = () => {
       {/* Description Section */}
       {isEditing ? (
         <>
-         
           <textarea
             value={paragraphs[0]} // Controlled textarea for first paragraph
             onChange={(e) =>
               setParagraphs((prev) => {
                 const updated = [...prev];
-                updated[0] = (e.target.value); // Update specific paragraph
+                updated[0] = e.target.value; // Update specific paragraph
                 return updated;
               })
             }
@@ -221,7 +220,7 @@ const BetterFuture = () => {
                 onChange={(e) =>
                   setParagraphs((prev) => {
                     const updated = [...prev];
-                    updated[2] = (e.target.value);
+                    updated[2] = e.target.value;
                     return updated;
                   })
                 }
@@ -250,7 +249,7 @@ const BetterFuture = () => {
                         value={paragraphs[titleIndex]} // Title input
                         onChange={(e) => {
                           const updated = [...paragraphs];
-                          updated[titleIndex] = (e.target.value);
+                          updated[titleIndex] = e.target.value;
                           setParagraphs(updated);
                         }}
                         className="text-xl text-left font-semibold max-w-[400px] text-[#252B42] border border-gray-300 p-2 rounded w-full whitespace-pre-wrap "
@@ -259,9 +258,7 @@ const BetterFuture = () => {
                         value={paragraphs[titleIndex + 1]} // Paragraph input
                         onChange={(e) => {
                           const updated = [...paragraphs];
-                          updated[titleIndex + 1] =(
-                            e.target.value
-                          );
+                          updated[titleIndex + 1] = e.target.value;
                           setParagraphs(updated);
                         }}
                         className="text-[#737373] text-left max-w-[400px] text-sm border border-gray-300 p-2 rounded w-full"

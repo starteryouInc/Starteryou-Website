@@ -9,6 +9,10 @@ const {
   deleteStringFromArray,
 } = require("../services/userProfileService");
 const authorize = require("../middleware/roleMiddleware");
+const { invalidateCache } = require("../cache/utils/invalidateCache");
+const cacheQueryJob = require("../cache/utils/cacheQueryJob");
+const cacheConfig = require("../cache/config/cacheConfig");
+// const cacheMiddlewareJob = require("../cache/utils/cacheMiddlewareJob");
 
 // Route to create the profile of the user
 /**
@@ -28,7 +32,6 @@ const authorize = require("../middleware/roleMiddleware");
  * @returns {Object} JSON response with created profile data
  * @throws {Error} If required fields are missing or an internal server error occurs
  */
-
 router.post("/create-profile", authorize("jobSeeker"), async (req, res) => {
   const { userRegistrationId, name, email, phoneNo } = req.body;
   if (!userRegistrationId || !name || !email) {
@@ -60,7 +63,6 @@ router.post("/create-profile", authorize("jobSeeker"), async (req, res) => {
   }
 });
 
-// Route to fetch the full profile of the user
 /**
  * @route GET /fetch-profile/:userId
  * @description Fetches the profile of a specific user by user ID.
@@ -75,32 +77,52 @@ router.post("/create-profile", authorize("jobSeeker"), async (req, res) => {
  * @returns {Object} JSON response with the user's profile data
  * @throws {Error} If no profile is found or an internal server error occurs
  */
-
 router.get(
   "/fetch-profile/:userId",
   authorize("jobSeeker", "employer"),
   async (req, res) => {
-    const {
-      params: { userId },
-    } = req;
+    const { userId } = req.params;
+    const cacheKey = `/fetch-profile/${userId}`;
+
     try {
-      const fetchProfile = await UserProfile.find({
-        userRegistrationId: userId,
-      });
-      if (!fetchProfile || fetchProfile.length === 0) {
-        return res.status(404).json({ msg: "No profile found!" });
+      console.log(`Cache Key: ${cacheKey}`);
+
+      // Check if cache exists
+      let cachedProfile = await cacheQueryJob(cacheKey);
+
+      // If cache exists but is invalid, fetch fresh data
+      if (!cachedProfile || cachedProfile.needsRefresh) {
+        console.log("Fetching fresh profile data from database...");
+        cachedProfile = await UserProfile.find({
+          userRegistrationId: userId,
+        });
+
+        if (!cachedProfile || cachedProfile.length === 0) {
+          return res
+            .status(404)
+            .json({ success: false, msg: "No profile found!" });
+        }
+
+        // ✅ Store fresh data in cache
+        await cacheQueryJob(
+          cacheKey,
+          () => cachedProfile,
+          cacheConfig.defaultTTL
+        );
       }
+
       res.status(200).json({
         success: true,
-        dataLength: fetchProfile.length,
+        dataLength: cachedProfile.length,
         msg: "Profiles fetched successfully",
-        data: fetchProfile,
+        data: cachedProfile,
       });
     } catch (error) {
+      console.error("Fetch Profile Error:", error);
       res.status(500).json({
         success: false,
-        msg: "Some error occured while fetching the Profiles",
-        error,
+        msg: "Some error occurred while fetching the Profiles",
+        error: error.message,
       });
     }
   }
@@ -125,14 +147,11 @@ router.get(
  * @returns {Object} JSON response with updated profile data
  * @throws {Error} If the profile is not found or an internal server error occurs
  */
-
 router.patch(
   "/update-profile/:userRegistrationId",
   authorize("jobSeeker"),
   async (req, res) => {
-    const {
-      params: { userRegistrationId },
-    } = req;
+    const { userRegistrationId } = req.params;
     const {
       professionalTitle,
       location,
@@ -151,26 +170,33 @@ router.patch(
           ...(totalExperience && { totalExperience }),
           ...(phoneNo && { phoneNo }),
         },
-        {
-          new: true,
-        }
+        { new: true, lean: true }
       );
+
       if (!updatedProfile) {
         return res.status(404).json({
           success: false,
           msg: "User Profile not found!",
         });
       }
+
+      // ✅ Ensure Cache is Completely Removed
+      const cacheKey = `/fetch-profile/${userRegistrationId}`;
+      console.log(`Invalidating Cache: ${cacheKey}`);
+      await invalidateCache(cacheKey); // Ensure this function removes the cache properly
+
+      // ✅ Force a fresh fetch on the next request
       res.status(200).json({
         success: true,
         msg: "Profile updated successfully",
         data: updatedProfile,
       });
     } catch (error) {
+      console.error("Profile Update Error:", error);
       res.status(500).json({
         success: false,
-        msg: "Some error occured while updating the profile",
-        error,
+        msg: "Some error occurred while updating the profile",
+        error: error.message,
       });
     }
   }
@@ -193,7 +219,6 @@ router.patch(
  *
  * @validFields ["workExperience", "educationDetails", "skills", "certifications", "projects", "languages"]
  */
-
 router.get(
   "/get-profile-fields/:userRegistrationId",
   authorize("jobSeeker"),
@@ -218,19 +243,38 @@ router.get(
       if (!validFields.includes(field)) {
         return res.status(400).json({ msg: "Invalid field requested!" });
       }
-      // Fetch only the requested field
-      const user = await UserProfile.findOne(
-        { userRegistrationId },
-        { [field]: 1, _id: 0 } // Only return the requested field
-      );
 
-      if (!user) {
-        return res.status(404).json({ msg: "User not found!" });
-      }
+      const cacheKey = `/api/v1/jobportal/profile/get-profile-fields/${userRegistrationId}?field=${field}`;
+      console.log(`Cache Key: ${cacheKey}`);
+
+      // Fetch data with cache handling
+      const cachedResponse = await cacheQueryJob(
+        cacheKey,
+        async () => {
+          // Fetch only the requested field
+          const user = await UserProfile.findOne(
+            { userRegistrationId },
+            { [field]: 1, _id: 0 } // Only return the requested field
+          );
+          if (!user) {
+            return res.status(404).json({ msg: "User not found!" });
+          }
+          return user[field];
+        },
+        cacheConfig.defaultTTL
+      );
+      // Fetch only the requested field
+      // const user = await UserProfile.findOne(
+      //   { userRegistrationId },
+      //   { [field]: 1, _id: 0 } // Only return the requested field
+      // );
+      // if (!user) {
+      //   return res.status(404).json({ msg: "User not found!" });
+      // }
       res.status(200).json({
         success: true,
         msg: `${field} fetched successfully`,
-        data: user[field],
+        data: cachedResponse,
       });
     } catch (error) {
       res.status(500).json({
@@ -243,24 +287,6 @@ router.get(
 );
 
 // Work Experience Routes
-/**
- * @route POST /add-workExperience/:userRegistrationId
- * @description Adds a new work experience entry to a job seeker's profile.
- * @access Private (Job Seekers only)
- * @middleware authorize("jobSeeker")
- *
- * @param {Object} req - Express request object
- * @param {string} req.params.userRegistrationId - The ID of the user to whom the work experience will be added (required)
- * @param {Object} req.body - The work experience details to be added (required)
- *
- * @param {Object} res - Express response object
- *
- * @returns {Object} JSON response confirming the work experience entry was added successfully
- * @throws {Error} If the user is not found or an internal server error occurs
- *
- * @function addSubdocument - Utility function to add a subdocument (workExperience) to the user's profile
- */
-
 router.post(
   "/add-workExperience/:userRegistrationId",
   authorize("jobSeeker"),
@@ -272,32 +298,11 @@ router.post(
   }
 );
 
-/**
- * @route PUT /update-workExperience/:userRegistrationId/:subDocId
- * @description Updates a specific work experience entry in a job seeker's profile.
- * @access Private (Job Seekers only)
- * @middleware authorize("jobSeeker")
- *
- * @param {Object} req - Express request object
- * @param {string} req.params.userRegistrationId - The ID of the user whose work experience is being updated (required)
- * @param {string} req.params.subDocId - The ID of the specific work experience entry to be updated (required)
- * @param {Object} req.body - The updated work experience details (required)
- *
- * @param {Object} res - Express response object
- *
- * @returns {Object} JSON response confirming the work experience entry was updated successfully
- * @throws {Error} If the user or work experience entry is not found, or an internal server error occurs
- *
- * @function updateSubdocument - Utility function to update a subdocument (workExperience) in the user's profile
- */
-
 router.put(
   "/update-workExperience/:userRegistrationId/:subDocId",
   authorize("jobSeeker"),
   async (req, res) => {
-    const {
-      params: { userRegistrationId, subDocId },
-    } = req;
+    const { userRegistrationId, subDocId } = req.params;
     await updateSubdocument(
       userRegistrationId,
       subDocId,
@@ -307,24 +312,6 @@ router.put(
     );
   }
 );
-
-/**
- * @route DELETE /delete-workExperience/:userRegistrationId/:subDocId
- * @description Deletes a specific work experience entry from a job seeker's profile.
- * @access Private (Job Seekers only)
- * @middleware authorize("jobSeeker")
- *
- * @param {Object} req - Express request object
- * @param {string} req.params.userRegistrationId - The ID of the user whose work experience entry is being deleted (required)
- * @param {string} req.params.subDocId - The ID of the specific work experience entry to be deleted (required)
- *
- * @param {Object} res - Express response object
- *
- * @returns {Object} JSON response confirming the work experience entry was deleted successfully
- * @throws {Error} If the user or work experience entry is not found, or an internal server error occurs
- *
- * @function deleteSubdocument - Utility function to remove a subdocument (workExperience) from the user's profile
- */
 
 router.delete(
   "/delete-workExperience/:userRegistrationId/:subDocId",
@@ -377,24 +364,6 @@ router.put(
     );
   }
 );
-
-/**
- * @route DELETE /delete-educationDetails/:userRegistrationId/:subDocId
- * @description Deletes a specific education detail entry from a job seeker's profile.
- * @access Private (Job Seekers only)
- * @middleware authorize("jobSeeker")
- *
- * @param {Object} req - Express request object
- * @param {string} req.params.userRegistrationId - The ID of the user whose education detail is being deleted (required)
- * @param {string} req.params.subDocId - The ID of the specific education detail entry to be deleted (required)
- *
- * @param {Object} res - Express response object
- *
- * @returns {Object} JSON response confirming the education detail entry was deleted successfully
- * @throws {Error} If the user or education detail entry is not found, or an internal server error occurs
- *
- * @function deleteSubdocument - Utility function to remove a subdocument (educationDetails) from the user's profile
- */
 
 router.delete(
   "/delete-educationDetails/:userRegistrationId/:subDocId",
@@ -483,24 +452,6 @@ router.delete(
 );
 
 // Projects Routes
-/**
- * @route POST /add-projects/:userRegistrationId
- * @description Adds a new project entry to a job seeker's profile.
- * @access Private (Job Seekers only)
- * @middleware authorize("jobSeeker")
- *
- * @param {Object} req - Express request object
- * @param {string} req.params.userRegistrationId - The ID of the user whose project is being added (required)
- * @param {Object} req.body - The project details to be added (required)
- *
- * @param {Object} res - Express response object
- *
- * @returns {Object} JSON response confirming the project was added successfully
- * @throws {Error} If the user is not found or an internal server error occurs
- *
- * @function addSubdocument - Utility function to add a subdocument (projects) to the user's profile
- */
-
 router.post(
   "/add-projects/:userRegistrationId",
   authorize("jobSeeker"),
@@ -570,7 +521,6 @@ router.post(
  *
  * @function deleteStringFromArray - Utility function to remove a string (language) from an array in the user's profile
  */
-
 router.delete(
   "/delete-languages/:userRegistrationId",
   authorize("jobSeeker"),

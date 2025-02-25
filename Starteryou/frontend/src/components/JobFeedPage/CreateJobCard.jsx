@@ -4,7 +4,7 @@
  * @param {Object} props - Component props
  * @param {Function} props.closeCreateJobCard - Function to close the job creation form
  */
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 // import NavBar from "../Common/Navbar";
 import { useUserContext } from "../../context/UserContext";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +12,7 @@ import { API_CONFIG } from "../../config/api";
 import { toast } from "react-toastify";
 import axios from "axios";
 
-const CreateJobCard = ({ closeCreateJobCard }) => {
+const CreateJobCard = ({ fetchPostedJobs, closeCreateJobCard }) => {
   const navigate = useNavigate();
   const { user } = useUserContext();
   const token = user?.token;
@@ -103,6 +103,8 @@ const CreateJobCard = ({ closeCreateJobCard }) => {
       );
       toast.success(data.msg);
       clearAllFields();
+      closeCreateJobCard();
+      fetchPostedJobs();
     } catch (error) {
       toast.error(error.response?.data?.msg);
       // console.log(error.response?.data?.error);
