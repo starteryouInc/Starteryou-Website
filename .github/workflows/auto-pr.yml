@@ -1,11 +1,13 @@
+
 name: Auto PR from develop to main
-
+  
+# Trigger this workflow when there is a push to the 'develop' branch
 on:
-  workflow_run:
-    workflows: ["Deploy to AWS EC2-DEV-SERVER"]  # Replace with the actual name of your deploy workflow
-    types:
-      - completed
+  push:
+    branches:
+      - develop
 
+# Set the necessary permissions for the GitHub token to create a PR
 permissions:
   contents: write
   pull-requests: write
@@ -13,43 +15,54 @@ permissions:
 jobs:
   create-pull-request:
     runs-on: ubuntu-latest
+
     steps:
+      # Step 1: Checkout the repository code with full history for branch comparisons
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Ensures full history
+          fetch-depth: 0  # Ensures the full git history is fetched
 
+      # Step 2: Fetch all branches from the remote to ensure we can compare 'develop' and 'main'
       - name: Fetch all branches
         run: |
           git fetch --all
-          git branch -r  # Debug: List all remote branches
+          git branch -r  # Debugging: List all remote branches
 
+      # Step 3: Check if 'develop' is ahead of 'main' before creating a PR
       - name: Check if `develop` is ahead of `main`
         id: check_changes
         run: |
-          # Ensure the develop branch exists locally
+          # Ensure the develop branch exists locally (sometimes it may not be checked out)
           if ! git show-ref --quiet refs/heads/develop; then
             echo "'develop' branch not found locally. Fetching from remote..."
             git fetch origin develop:develop
           fi
 
-          # Checkout develop branch
+          # Switch to the develop branch to compare with main
           git checkout develop
 
+          # Check if 'develop' has commits that are not in 'main'
           ahead_count=$(git rev-list --count origin/main..origin/develop)
+
+          # If there are no new commits in develop, skip PR creation
           if [ "$ahead_count" -eq 0 ]; then
             echo "No new commits in develop. Skipping PR creation."
-            exit 0
+            echo "PR_REQUIRED=false" >> $GITHUB_ENV
+          else
+            # If develop is ahead of main, we need to create a PR
+            echo "New commits detected in develop. Proceeding with PR."
+            echo "PR_REQUIRED=true" >> $GITHUB_ENV
           fi
-          echo "New commits detected in develop. Proceeding with PR."
 
-      - name: Create pull request
-        if: success()
-        uses: peter-evans/create-pull-request@v3
+      # Step 4: Create a pull request from 'develop' to 'main' if there are 
+      - name: Create Pull Request
+        if: env.PR_REQUIRED == 'true'  # Only run this step if PR_REQUIRED is 'true'
+        uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          base: main
-          head: develop
-          title: 'Automatic PR from develop to main'
-          body: |
-            This pull request was automatically created by the GitHub Actions workflow.
+          base: main  # The branch we want to merge
+          branch: develop  # The source branch
+          title: 'Auto PR: Merge develop into main'
+          body: 'This is an automated PR to merge develop into main'
+          draft: false  # Set to 'true' if you want the PR to be a draft initially
