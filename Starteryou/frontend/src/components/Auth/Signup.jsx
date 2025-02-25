@@ -21,11 +21,49 @@ const Signup = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
 
+  // const handleSeekerRegister = async (e) => {
+  //   e.preventDefault();
+
+  //   try {
+  //     const { data: registerData } = await axios.post(
+  //       `${API_CONFIG.baseURL}${API_CONFIG.endpoints.userSeekerRegister}`,
+  //       {
+  //         username,
+  //         email,
+  //         phoneNumber,
+  //         password,
+  //         role: "jobSeeker",
+  //       }
+  //     );
+  //     console.log("id is here: ", registerData);
+
+  //     const userId = registerData.newUsers._id;
+  //     console.log(userId);
+  //     const { data: profileData } = await axios.post(
+  //       `${API_CONFIG.baseURL}${API_CONFIG.endpoints.createUserProfile}`,
+  //       {
+  //         userRegistrationId: userId,
+  //         name: username,
+  //         email,
+  //         phoneNo: phoneNumber,
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${registerData.tokens.accessToken}`,
+  //         },
+  //       }
+  //     );
+  //     toast.success(registerData.msg);
+  //     navigate("/UserLogin");
+  //   } catch (error) {
+  //     toast.error(error.response?.data?.msg);
+  //   }
+  // };
+
   const handleSeekerRegister = async (e) => {
     e.preventDefault();
-
     try {
-      const { data: registerData } = await axios.post(
+      const { data } = await axios.post(
         `${API_CONFIG.baseURL}${API_CONFIG.endpoints.userSeekerRegister}`,
         {
           username,
@@ -35,28 +73,13 @@ const Signup = () => {
           role: "jobSeeker",
         }
       );
-      console.log("id is here: ", registerData);
-
-      const userId = registerData.newUsers._id;
-      console.log(userId);
-      const { data: profileData } = await axios.post(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.createUserProfile}`,
-        {
-          userRegistrationId: userId,
-          name: username,
-          email,
-          phoneNo: phoneNumber,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${registerData.tokens.accessToken}`,
-          },
-        }
-      );
-      toast.success(registerData.msg);
+      toast.success(data.msg)
       navigate("/UserLogin");
+      console.log("Working fine");
     } catch (error) {
       toast.error(error.response?.data?.msg);
+      console.log(error.response?.data?.msg);
+      console.log("Not working");
     }
   };
 
@@ -221,7 +244,7 @@ const Signup = () => {
               <div className="relative">
                 {/* Country Code Prefix */}
                 <span className="absolute bg-[#CBD5E1] px-3 inset-y-0 flex items-center rounded-sm text-gray-600">
-                   +1 
+                  +1
                 </span>
 
                 <input

@@ -2,6 +2,10 @@ const Router = require("express");
 const router = Router();
 const BookmarkedJob = require("../models/BookmarkedJobs");
 const authorize = require("../middleware/roleMiddleware");
+const cacheMiddlewareJob = require("../cache/utils/cacheMiddlewareJob");
+const { invalidateCache } = require("../cache/utils/invalidateCache");
+const cacheQueryJob = require("../cache/utils/cacheQueryJob");
+const cacheConfig = require("../cache/config/cacheConfig");
 
 // Route to save the job
 router.post(
@@ -20,6 +24,10 @@ router.post(
 
       const bookmark = new BookmarkedJob({ userId, jobId });
       await bookmark.save();
+
+      const cacheKeyUser = `/api/v1/jobportal/bookmarks/fetch-bookmarked-jobs/${userId}`;
+      await invalidateCache(cacheKeyUser);
+
       res.status(201).json({
         success: true,
         msg: "Job bookmarked successfully",
@@ -46,6 +54,10 @@ router.delete(
     } = req;
     try {
       await BookmarkedJob.findOneAndDelete({ userId, jobId });
+
+      const cacheKeyUser = `/api/v1/jobportal/bookmarks/fetch-bookmarked-jobs/${userId}`;
+      await invalidateCache(cacheKeyUser);
+
       res.status(201).json({
         success: true,
         msg: "Job unsaved successfully",
@@ -68,13 +80,32 @@ router.get(
     try {
       // const { params: { userId } } = req;
       const userId = req.user?.id;
-      const bookmarked = await BookmarkedJob.find({ userId });
-      if (!bookmarked) {
-        return res.status(404).json({ msg: "No bookmarked jobs" });
+      const cacheKey = `/api/v1/jobportal/bookmarks/fetch-bookmarked-jobs/${userId}`;
+      console.log(`Cache Key: ${cacheKey}`);
+
+      // Fetch data with cache handling
+      const cachedResponse = await cacheQueryJob(
+        cacheKey,
+        async () => {
+          const bookmarked = await BookmarkedJob.find({ userId });
+          return bookmarked.length ? bookmarked : null; // Return empty array if no jobs found
+        },
+        cacheConfig.defaultTTL
+      );
+
+      if (cachedResponse.length === 0) {
+        return res.status(404).json({
+          success: false,
+          msg: "No jobs found for this employer",
+        });
       }
+      // const bookmarked = await BookmarkedJob.find({ userId });
+      // if (!bookmarked) {
+      //   return res.status(404).json({ msg: "No bookmarked jobs" });
+      // }
       res.status(200).json({
         success: true,
-        bookmarked,
+        bookmarked: cachedResponse,
       });
     } catch (error) {
       res.status(500).json({

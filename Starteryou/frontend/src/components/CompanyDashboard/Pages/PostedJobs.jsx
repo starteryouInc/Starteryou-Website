@@ -64,7 +64,7 @@ const PostedJobs = () => {
       setShowDetailedCard(false);
       getPostedJobs();
     } catch (error) {
-      toast.error(error.response?.data?.msg);
+      toast.error(error.response?.data?.error);
     }
   };
 
@@ -122,6 +122,7 @@ const PostedJobs = () => {
                     job={selectedJob}
                     getPostedJobs={getPostedJobs}
                     deleteJobFunction={deleteJob}
+                    closeJobDetailedCard2={() => setShowDetailedCard(false)}
                   />
                 </div>
               </div>
@@ -140,6 +141,7 @@ const PostedJobs = () => {
         justify-center z-50 overflow-hidden"
         >
           <CreateJobCard
+            fetchPostedJobs={getPostedJobs}
             closeCreateJobCard={() => setOpenCreateJobCard(false)}
           />
         </div>

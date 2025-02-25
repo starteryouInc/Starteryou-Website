@@ -20,9 +20,7 @@ import { useNavigate } from "react-router-dom";
  * @returns {JSX.Element} Profile1 Component
  */
 const Profile1 = ({ profileData, handleChange, nextPage }) => {
-  const [companyLogo, setCompanyLogo] = useState(
-    localStorage.getItem("companyLogo") || null
-  );
+  const [companyLogo, setCompanyLogo] = useState(null);
 
   /**
    * Handles the company logo upload
@@ -93,28 +91,28 @@ const Profile1 = ({ profileData, handleChange, nextPage }) => {
                 Company Logo
               </label>
 
-              <label className="w-full border-2 border-dashed p-6 flex flex-col items-center justify-center rounded-lg cursor-pointer relative">
+              <label className="w-full border-2 border-dashed p-6 flex flex-col items-center justify-center rounded-lg relative bg-gray-100 opacity-70 cursor-not-allowed">
                 {companyLogo ? (
                   <div className="relative">
                     <img
-                      // src={companyLogo}
+                      src={companyLogo}
                       alt="Company Logo"
-                      className="h-16"
+                      className="h-16 rounded-md shadow-md"
                     />
                     <button
-                      // onClick={() => setCompanyLogo(null)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 text-xs"
+                      disabled
+                      className="absolute -top-2 -right-2 bg-red-400 text-white rounded-full p-1 text-xs opacity-50 cursor-not-allowed"
                     >
                       <FiX size={14} />
                     </button>
                   </div>
                 ) : (
                   <>
-                    <FiUpload size={24} className="text-gray-500" />
-                    <p className="text-[#646773] text-md">
-                      Drag & drop or click to upload
+                    <FiUpload size={24} className="text-gray-400" />
+                    <p className="text-[#646773] text-md opacity-70">
+                      Upload Disabled
                     </p>
-                    <p className="text-[#ACB4C2] text-sm">
+                    <p className="text-[#ACB4C2] text-sm opacity-50">
                       PNG, JPG or GIF (max. 2MB)
                     </p>
                   </>
@@ -123,7 +121,7 @@ const Profile1 = ({ profileData, handleChange, nextPage }) => {
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  // onChange={handleLogoUpload}
+                  disabled
                 />
               </label>
             </div>

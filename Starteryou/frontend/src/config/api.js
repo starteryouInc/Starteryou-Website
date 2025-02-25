@@ -90,6 +90,9 @@ export const API_CONFIG = {
     deleteLanguage: (userId) =>
       `/api/v1/jobportal/profile/delete-languages/${userId}`,
 
+    addSocialLinks: (userId) =>
+      `/api/v1/jobportal/profile/add-social-links/${userId}`, 
+
     // Company profile:
     createCompanyProfile: `/api/v1/jobportal/companyProfile/create-company-profile`,
     getCompanyProfile: (userId) =>

@@ -14,7 +14,7 @@ const Navbar = ({ isEduHero }) => {
 
   const { user, logoutUser } = useUserContext();
   const token = user?.token;
-  const role = user?.authenticatedUser.role;
+  const role = user?.authenticatedUser?.role;
 
   const handleLogout = () => {
     logoutUser();

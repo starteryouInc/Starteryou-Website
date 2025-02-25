@@ -43,6 +43,7 @@ const EmployerSignUp = () => {
       });
       toast.success(data.msg);
       navigate("/createProfile");
+      // navigate("/UserLogin");
     } catch (error) {
       toast.error(error.response?.data?.msg);
     }

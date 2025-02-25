@@ -21,7 +21,7 @@ import EditJobCard from "../JobFeedPage/EditJobCard";
  * @param {Function} props.deleteJobFunction - Function to delete a job posting
  * @returns {JSX.Element} The JobDetailedCard2 component
  */
-const JobDetailedCard2 = ({ job, getPostedJobs, deleteJobFunction }) => {
+const JobDetailedCard2 = ({ job, getPostedJobs, deleteJobFunction, closeJobDetailedCard2 }) => {
   const [openEditJobCard, setOpenEditJobCard] = useState(false);
 
   /**
@@ -211,6 +211,7 @@ const JobDetailedCard2 = ({ job, getPostedJobs, deleteJobFunction }) => {
             editJob={job}
             getPostedJobs={getPostedJobs}
             closeEditJobCard={() => setOpenEditJobCard(false)}
+            closeJobDetailedCard2={closeJobDetailedCard2}
           />
         </div>
       )}

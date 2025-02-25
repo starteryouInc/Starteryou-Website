@@ -6,7 +6,7 @@ import { API_CONFIG } from "../../config/api";
 import { toast } from "react-toastify";
 import axios from "axios";
 
-const EditJobCard = ({ closeEditJobCard, editJob, getPostedJobs }) => {
+const EditJobCard = ({ closeEditJobCard, editJob, getPostedJobs, closeJobDetailedCard2 }) => {
   const navigate = useNavigate();
   const { user } = useUserContext();
   const token = user?.token;
@@ -79,6 +79,7 @@ const EditJobCard = ({ closeEditJobCard, editJob, getPostedJobs }) => {
       toast.success(data.msg);
       clearAllFields();
       closeEditJobCard();
+      closeJobDetailedCard2();
       getPostedJobs();
     } catch (error) {
       toast.error(error.response?.data?.msg);

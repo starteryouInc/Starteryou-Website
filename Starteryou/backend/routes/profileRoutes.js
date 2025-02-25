@@ -9,6 +9,10 @@ const {
   deleteStringFromArray,
 } = require("../services/userProfileService");
 const authorize = require("../middleware/roleMiddleware");
+const cacheMiddlewareJob = require("../cache/utils/cacheMiddlewareJob");
+const { invalidateCache } = require("../cache/utils/invalidateCache");
+const cacheQueryJob = require("../cache/utils/cacheQueryJob");
+const cacheConfig = require("../cache/config/cacheConfig");
 
 // Route to create the profile of the user
 router.post("/create-profile", authorize("jobSeeker"), async (req, res) => {
@@ -43,43 +47,138 @@ router.post("/create-profile", authorize("jobSeeker"), async (req, res) => {
 });
 
 // Route to fetch the full profile of the user
+// router.get(
+//   "/fetch-profile/:userId",
+//   authorize("jobSeeker", "employer"),
+//   async (req, res) => {
+//     const {
+//       params: { userId },
+//     } = req;
+//     try {
+//       const fetchProfile = await UserProfile.find({
+//         userRegistrationId: userId,
+//       });
+//       if (!fetchProfile || fetchProfile.length === 0) {
+//         return res.status(404).json({ msg: "No profile found!" });
+//       }
+//       res.status(200).json({
+//         success: true,
+//         dataLength: fetchProfile.length,
+//         msg: "Profiles fetched successfully",
+//         data: fetchProfile,
+//       });
+//     } catch (error) {
+//       res.status(500).json({
+//         success: false,
+//         msg: "Some error occured while fetching the Profiles",
+//         error,
+//       });
+//     }
+//   }
+// );
+
 router.get(
   "/fetch-profile/:userId",
   authorize("jobSeeker", "employer"),
   async (req, res) => {
-    const {
-      params: { userId },
-    } = req;
+    const { userId } = req.params;
+    const cacheKey = `/fetch-profile/${userId}`;
+
     try {
-      const fetchProfile = await UserProfile.find({
-        userRegistrationId: userId,
-      });
-      if (!fetchProfile || fetchProfile.length === 0) {
-        return res.status(404).json({ msg: "No profile found!" });
+      console.log(`Cache Key: ${cacheKey}`);
+
+      // Check if cache exists
+      let cachedProfile = await cacheQueryJob(cacheKey);
+
+      // If cache exists but is invalid, fetch fresh data
+      if (!cachedProfile || cachedProfile.needsRefresh) {
+        console.log("Fetching fresh profile data from database...");
+        cachedProfile = await UserProfile.find({
+          userRegistrationId: userId,
+        });
+
+        if (!cachedProfile || cachedProfile.length === 0) {
+          return res
+            .status(404)
+            .json({ success: false, msg: "No profile found!" });
+        }
+
+        // ✅ Store fresh data in cache
+        await cacheQueryJob(cacheKey, () => cachedProfile, cacheConfig.defaultTTL);
       }
+
       res.status(200).json({
         success: true,
-        dataLength: fetchProfile.length,
+        dataLength: cachedProfile.length,
         msg: "Profiles fetched successfully",
-        data: fetchProfile,
+        data: cachedProfile,
       });
     } catch (error) {
+      console.error("Fetch Profile Error:", error);
       res.status(500).json({
         success: false,
-        msg: "Some error occured while fetching the Profiles",
-        error,
+        msg: "Some error occurred while fetching the Profiles",
+        error: error.message,
       });
     }
   }
 );
 
+// router.patch(
+//   "/update-profile/:userRegistrationId",
+//   authorize("jobSeeker"),
+//   async (req, res) => {
+//     const {
+//       params: { userRegistrationId },
+//     } = req;
+//     const {
+//       professionalTitle,
+//       location,
+//       currentCompany,
+//       totalExperience,
+//       phoneNo,
+//     } = req.body;
+
+//     try {
+//       const updatedProfile = await UserProfile.findOneAndUpdate(
+//         { userRegistrationId },
+//         {
+//           ...(professionalTitle && { professionalTitle }),
+//           ...(location && { location }),
+//           ...(currentCompany && { currentCompany }),
+//           ...(totalExperience && { totalExperience }),
+//           ...(phoneNo && { phoneNo }),
+//         },
+//         {
+//           new: true,
+//         }
+//       );
+//       if (!updatedProfile) {
+//         return res.status(404).json({
+//           success: false,
+//           msg: "User Profile not found!",
+//         });
+//       }
+//       res.status(200).json({
+//         success: true,
+//         msg: "Profile updated successfully",
+//         data: updatedProfile,
+//       });
+//     } catch (error) {
+//       res.status(500).json({
+//         success: false,
+//         msg: "Some error occured while updating the profile",
+//         error,
+//       });
+//     }
+//   }
+// );
+
 router.patch(
   "/update-profile/:userRegistrationId",
   authorize("jobSeeker"),
   async (req, res) => {
-    const {
-      params: { userRegistrationId },
-    } = req;
+    const { userRegistrationId } = req.params;
     const {
       professionalTitle,
       location,
@@ -98,26 +197,33 @@ router.patch(
           ...(totalExperience && { totalExperience }),
           ...(phoneNo && { phoneNo }),
         },
-        {
-          new: true,
-        }
+        { new: true, lean: true }
       );
+
       if (!updatedProfile) {
         return res.status(404).json({
           success: false,
           msg: "User Profile not found!",
         });
       }
+
+      // ✅ Ensure Cache is Completely Removed
+      const cacheKey = `/fetch-profile/${userRegistrationId}`;
+      console.log(`Invalidating Cache: ${cacheKey}`);
+      await invalidateCache(cacheKey); // Ensure this function removes the cache properly
+
+      // ✅ Force a fresh fetch on the next request
       res.status(200).json({
         success: true,
         msg: "Profile updated successfully",
         data: updatedProfile,
       });
     } catch (error) {
+      console.error("Profile Update Error:", error);
       res.status(500).json({
         success: false,
-        msg: "Some error occured while updating the profile",
-        error,
+        msg: "Some error occurred while updating the profile",
+        error: error.message,
       });
     }
   }
@@ -147,19 +253,38 @@ router.get(
       if (!validFields.includes(field)) {
         return res.status(400).json({ msg: "Invalid field requested!" });
       }
-      // Fetch only the requested field
-      const user = await UserProfile.findOne(
-        { userRegistrationId },
-        { [field]: 1, _id: 0 } // Only return the requested field
-      );
 
-      if (!user) {
-        return res.status(404).json({ msg: "User not found!" });
-      }
+      const cacheKey = `/api/v1/jobportal/profile/get-profile-fields/${userRegistrationId}?field=${field}`;
+      console.log(`Cache Key: ${cacheKey}`);
+
+      // Fetch data with cache handling
+      const cachedResponse = await cacheQueryJob(
+        cacheKey,
+        async () => {
+          // Fetch only the requested field
+          const user = await UserProfile.findOne(
+            { userRegistrationId },
+            { [field]: 1, _id: 0 } // Only return the requested field
+          );
+          if (!user) {
+            return res.status(404).json({ msg: "User not found!" });
+          }
+          return user[field];
+        },
+        cacheConfig.defaultTTL
+      );
+      // Fetch only the requested field
+      // const user = await UserProfile.findOne(
+      //   { userRegistrationId },
+      //   { [field]: 1, _id: 0 } // Only return the requested field
+      // );
+      // if (!user) {
+      //   return res.status(404).json({ msg: "User not found!" });
+      // }
       res.status(200).json({
         success: true,
         msg: `${field} fetched successfully`,
-        data: user[field],
+        data: cachedResponse,
       });
     } catch (error) {
       res.status(500).json({
@@ -170,6 +295,75 @@ router.get(
     }
   }
 );
+
+// router.get(
+//   "/get-profile-fields/:userRegistrationId",
+//   authorize("jobSeeker"),
+//   cacheMiddlewareJob, // Caching applied here
+//   async (req, res) => {
+//     const {
+//       params: { userRegistrationId },
+//     } = req;
+//     const { field } = req.query;
+
+//     try {
+//       if (!field) {
+//         return res.status(400).json({ msg: "Field parameter is required!" });
+//       }
+
+//       const validFields = [
+//         "workExperience",
+//         "educationDetails",
+//         "skills",
+//         "certifications",
+//         "projects",
+//         "languages",
+//       ];
+//       if (!validFields.includes(field)) {
+//         return res.status(400).json({ msg: "Invalid field requested!" });
+//       }
+
+//       // Create a unique cache key
+//       const cacheKey = `/api/v1/jobportal/profile/get-profile-fields/${userRegistrationId}?field=${field}`;
+//       console.log(`Cache Key: ${cacheKey}`);
+
+//       // Check cache first
+//       const cachedData = await cacheQueryJob(
+//         cacheKey,
+//         async () => {
+//           console.log("Cache miss, querying database...");
+//           const user = await UserProfile.findOne(
+//             { userRegistrationId },
+//             { [field]: 1, _id: 0 } // Only return the requested field
+//           );
+
+//           if (!user) {
+//             console.error("User not found!");
+//             throw new Error("User not found!");
+//           }
+//           return user[field];
+//         },
+//         cacheConfig.defaultTTL // Cache expiry time
+//       );
+
+//       if (!cachedData) {
+//         return res.status(404).json({ msg: "User not found!" });
+//       }
+
+//       res.status(200).json({
+//         success: true,
+//         msg: `${field} fetched successfully`,
+//         data: cachedData,
+//       });
+//     } catch (error) {
+//       res.status(500).json({
+//         success: false,
+//         msg: `Some error occurred while fetching the ${field}`,
+//         error,
+//       });
+//     }
+//   }
+// );
 
 // Work Experience Routes
 router.post(
@@ -187,9 +381,7 @@ router.put(
   "/update-workExperience/:userRegistrationId/:subDocId",
   authorize("jobSeeker"),
   async (req, res) => {
-    const {
-      params: { userRegistrationId, subDocId },
-    } = req;
+    const { userRegistrationId, subDocId } = req.params;
     await updateSubdocument(
       userRegistrationId,
       subDocId,
