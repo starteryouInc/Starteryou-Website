@@ -1,5 +1,17 @@
+/**
+ * Cache model for storing cached data.
+ * @module Cache
+ */
 const Cache = require("../models/cache");
 
+/**
+ * Queries the cache for a stored value, and if not found, executes a function to fetch and store the result.
+ *
+ * @param {string} key - The cache key to query.
+ * @param {Function|null} queryFn - Function to execute if cache miss occurs.
+ * @param {number} ttl - Time-to-live (TTL) for cache in seconds.
+ * @returns {Promise<any>} - The cached or newly fetched value.
+ */
 const cacheQueryJob = async (key, queryFn, ttl) => {
   try {
     console.log(`🔍 Checking cache for key: ${key}`);

@@ -1,6 +1,25 @@
+/**
+ * Utility function to query and store cache.
+ * @module cacheQueryJob
+ */
 const cacheQueryJob = require("../utils/cacheQueryJob");
+/**
+ * Cache configuration settings.
+ * @module cacheConfig
+ */
 const cacheConfig = require("../config/cacheConfig");
 
+/**
+ * Middleware to handle caching for API responses.
+ *
+ * This middleware checks if a cached response exists for the given request.
+ * If a cached response is found, it is returned immediately.
+ * Otherwise, the request proceeds, and the response is cached before sending it.
+ *
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @param {import('express').NextFunction} next - Express next function.
+ */
 const cacheMiddlewareJob = async (req, res, next) => {
   try {
     const ttl = cacheConfig.defaultTTL;

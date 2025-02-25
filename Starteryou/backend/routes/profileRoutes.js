@@ -15,6 +15,23 @@ const cacheConfig = require("../cache/config/cacheConfig");
 // const cacheMiddlewareJob = require("../cache/utils/cacheMiddlewareJob");
 
 // Route to create the profile of the user
+/**
+ * @route POST /create-profile
+ * @description Creates a new job seeker profile.
+ * @access Private (Job Seekers only)
+ * @middleware authorize("jobSeeker")
+ *
+ * @param {Object} req - Express request object
+ * @param {string} req.body.userRegistrationId - User's unique registration ID (required)
+ * @param {string} req.body.name - User's full name (required)
+ * @param {string} req.body.email - User's email address (required)
+ * @param {string} [req.body.phoneNo] - User's phone number (optional)
+ *
+ * @param {Object} res - Express response object
+ *
+ * @returns {Object} JSON response with created profile data
+ * @throws {Error} If required fields are missing or an internal server error occurs
+ */
 router.post("/create-profile", authorize("jobSeeker"), async (req, res) => {
   const { userRegistrationId, name, email, phoneNo } = req.body;
   if (!userRegistrationId || !name || !email) {
@@ -46,6 +63,20 @@ router.post("/create-profile", authorize("jobSeeker"), async (req, res) => {
   }
 });
 
+/**
+ * @route GET /fetch-profile/:userId
+ * @description Fetches the profile of a specific user by user ID.
+ * @access Private (Job Seekers and Employers only)
+ * @middleware authorize("jobSeeker", "employer")
+ *
+ * @param {Object} req - Express request object
+ * @param {string} req.params.userId - The user registration ID to fetch the profile (required)
+ *
+ * @param {Object} res - Express response object
+ *
+ * @returns {Object} JSON response with the user's profile data
+ * @throws {Error} If no profile is found or an internal server error occurs
+ */
 router.get(
   "/fetch-profile/:userId",
   authorize("jobSeeker", "employer"),
@@ -97,6 +128,25 @@ router.get(
   }
 );
 
+/**
+ * @route PATCH /update-profile/:userRegistrationId
+ * @description Updates a job seeker's profile with the provided details.
+ * @access Private (Job Seekers only)
+ * @middleware authorize("jobSeeker")
+ *
+ * @param {Object} req - Express request object
+ * @param {string} req.params.userRegistrationId - The ID of the user whose profile is being updated (required)
+ * @param {string} [req.body.professionalTitle] - Updated professional title
+ * @param {string} [req.body.location] - Updated location
+ * @param {string} [req.body.currentCompany] - Updated current company
+ * @param {string} [req.body.totalExperience] - Updated total experience
+ * @param {string} [req.body.phoneNo] - Updated phone number
+ *
+ * @param {Object} res - Express response object
+ *
+ * @returns {Object} JSON response with updated profile data
+ * @throws {Error} If the profile is not found or an internal server error occurs
+ */
 router.patch(
   "/update-profile/:userRegistrationId",
   authorize("jobSeeker"),
@@ -152,6 +202,23 @@ router.patch(
   }
 );
 
+/**
+ * @route GET /get-profile-fields/:userRegistrationId
+ * @description Fetches a specific field from a job seeker's profile.
+ * @access Private (Job Seekers only)
+ * @middleware authorize("jobSeeker")
+ *
+ * @param {Object} req - Express request object
+ * @param {string} req.params.userRegistrationId - The ID of the user whose profile field is being fetched (required)
+ * @param {string} req.query.field - The specific profile field to fetch (required)
+ *
+ * @param {Object} res - Express response object
+ *
+ * @returns {Object} JSON response with the requested profile field data
+ * @throws {Error} If the user is not found, the field is invalid, or an internal server error occurs
+ *
+ * @validFields ["workExperience", "educationDetails", "skills", "certifications", "projects", "languages"]
+ */
 router.get(
   "/get-profile-fields/:userRegistrationId",
   authorize("jobSeeker"),
@@ -437,6 +504,23 @@ router.post(
   }
 );
 
+/**
+ * @route DELETE /delete-languages/:userRegistrationId
+ * @description Removes a specific language from a job seeker's profile.
+ * @access Private (Job Seekers only)
+ * @middleware authorize("jobSeeker")
+ *
+ * @param {Object} req - Express request object
+ * @param {string} req.params.userRegistrationId - The ID of the user whose language is being removed (required)
+ * @param {string} req.body.language - The language to be removed (required)
+ *
+ * @param {Object} res - Express response object
+ *
+ * @returns {Object} JSON response confirming the language was removed successfully
+ * @throws {Error} If the user is not found or an internal server error occurs
+ *
+ * @function deleteStringFromArray - Utility function to remove a string (language) from an array in the user's profile
+ */
 router.delete(
   "/delete-languages/:userRegistrationId",
   authorize("jobSeeker"),
