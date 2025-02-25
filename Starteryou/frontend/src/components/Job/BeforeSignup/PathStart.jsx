@@ -48,7 +48,7 @@ const PathStart = () => {
         </div>
 
         {/* Buttons */}
-        <div className="mt-10 md:mt-20">
+        {/* <div className="mt-10 md:mt-20">
           <button className="bg-[#D9520E] text-white py-2 px-3 rounded-xl mr-4">
             Sign Up
           </button>
@@ -56,7 +56,7 @@ const PathStart = () => {
             Learn More
             <span className="ml-2">{">"}</span>
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

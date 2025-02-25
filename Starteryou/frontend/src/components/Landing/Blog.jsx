@@ -182,9 +182,9 @@ const Blog = () => {
             <p className="text-[#767676] mb-4 lg:max-w-[800px] whitespace-pre-wrap">
               {paragraph}
             </p>
-            <button className="px-6 py-3 bg-[#D9502E] text-white rounded-md">
+            {/* <button className="px-6 py-3 bg-[#D9502E] text-white rounded-md">
               Learn more
-            </button>
+            </button> */}
             {isAdmin && (
               <FaPencilAlt
                 onClick={handleEdit}

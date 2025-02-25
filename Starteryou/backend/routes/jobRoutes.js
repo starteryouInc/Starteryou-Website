@@ -2,37 +2,11 @@ const Router = require("express");
 const router = Router();
 const Job = require("../models/Job");
 const authorize = require("../middleware/roleMiddleware");
+const cacheMiddlewareJob = require("../cache/utils/cacheMiddlewareJob");
+const { invalidateCache } = require("../cache/utils/invalidateCache");
+const cacheQueryJob = require("../cache/utils/cacheQueryJob");
+const cacheConfig = require("../cache/config/cacheConfig");
 
-/**
- * @route POST /create-job
- * @description Creates a new job listing.
- * @access Private (Employer only)
- * @middleware authorize("employer")
- *
- * @param {Object} req - Express request object
- * @param {Object} req.user - Authenticated user object
- * @param {string} req.user.id - ID of the employer creating the job
- * @param {Object} req.body - Job details
- * @param {string} req.body.title - Job title
- * @param {string} req.body.description - Job description
- * @param {string} req.body.location - Job location
- * @param {string} req.body.industry - Industry category
- * @param {string} req.body.jobType - Job type (e.g., full-time, part-time)
- * @param {string} req.body.experienceLevel - Required experience level
- * @param {string} req.body.workplaceType - Workplace type (e.g., remote, onsite, hybrid)
- * @param {string} req.body.startDate - Job start date
- * @param {string} req.body.endDate - Job end date
- * @param {Object} req.body.salaryRange - Salary range
- * @param {number} req.body.salaryRange.min - Minimum salary
- * @param {number} req.body.salaryRange.max - Maximum salary
- * @param {string} req.body.frequency - Salary payment frequency (e.g., monthly, yearly)
- * @param {string} req.body.companyName - Company name
- *
- * @param {Object} res - Express response object
- *
- * @returns {Object} JSON response with success status and created job details
- * @throws {Error} If required fields are missing, salary range is invalid, or an internal server error occurs
- */
 router.post("/create-job", authorize("employer"), async (req, res) => {
   const userId = req.user.id;
   try {
@@ -85,6 +59,19 @@ router.post("/create-job", authorize("employer"), async (req, res) => {
     const newJob = new Job({ ...req.body, postedBy: userId });
 
     const response = await newJob.save();
+
+    const cacheKeyUser = `/api/v1/jobportal/jobs/fetch-posted-jobs/${userId}`;
+    const cacheKeyGlobal = `/api/v1/jobportal/jobs/fetch-posted-jobs`;
+
+    const cacheKeyGlobalJob = `/api/v1/jobportal/jobs/fetch-job?{}`;
+    const cacheKeyGlobalJobQuery = `/api/v1/jobportal/jobs/fetch-job`;
+    // Invalidate all related cache keys
+    await invalidateCache(cacheKeyUser);
+    await invalidateCache(cacheKeyGlobal);
+
+    await invalidateCache(cacheKeyGlobalJob);
+    await invalidateCache(cacheKeyGlobalJobQuery);
+
     res.status(201).json({
       success: true,
       msg: "New Job created successfully",
@@ -99,42 +86,29 @@ router.post("/create-job", authorize("employer"), async (req, res) => {
   }
 });
 
-/**
- * @route GET /fetch-job
- * @description Fetches job listings based on query parameters (filters).
- * @access Private (Job Seekers & Employers)
- * @middleware authorize("jobSeeker", "employer")
- *
- * @param {Object} req - Express request object
- * @param {Object} req.query - Query parameters for filtering jobs
- * @param {string} [req.query.location] - Filter by job location
- * @param {string} [req.query.industry] - Filter by industry category
- * @param {string} [req.query.jobType] - Filter by job type (e.g., full-time, part-time)
- * @param {string} [req.query.experienceLevel] - Filter by required experience level
- * @param {number} [req.query.salaryMin] - Filter by minimum salary
- * @param {number} [req.query.salaryMax] - Filter by maximum salary
- * @param {string} [req.query.keyword] - Search keyword (matches job title or description)
- *
- * @param {Object} res - Express response object
- *
- * @returns {Object} JSON response with success status and job listings
- * @throws {Error} If no jobs are found or an internal server error occurs
- */
-
 router.get(
   "/fetch-job",
   authorize("jobSeeker", "employer"),
+  cacheMiddlewareJob, // Apply caching middleware
   async (req, res) => {
-    const {
-      location,
-      industry,
-      jobType,
-      experienceLevel,
-      salaryMin,
-      salaryMax,
-      keyword,
-    } = req.query;
     try {
+      const {
+        location,
+        industry,
+        jobType,
+        experienceLevel,
+        salaryMin,
+        salaryMax,
+        keyword,
+      } = req.query;
+
+      // Construct cache key based on query parameters
+      const cacheKey = `/api/v1/jobportal/jobs/fetch-job?${JSON.stringify(
+        req.query
+      )}`;
+      console.log(`Cache Key: ${cacheKey}`);
+
+      // Define query filters
       const filters = {};
       if (location) filters.location = location;
       if (industry) filters.industry = industry;
@@ -152,49 +126,42 @@ router.get(
         ];
       }
 
-      const fetchJobs = await Job.find(filters);
-      if (!fetchJobs) {
-        return res.status(404).json({ msg: "No jobs in the database" });
-      }
+      // Check cache before querying database
+      const cachedResponse = await cacheQueryJob(
+        cacheKey,
+        async () => {
+          const jobs = await Job.find(filters);
+          if (!jobs || jobs.length === 0) {
+            throw new Error("No jobs found"); // Prevents caching empty results
+          }
+          return jobs;
+        },
+        cacheConfig.defaultTTL
+      );
 
-      if (fetchJobs.length === 0) {
+      if (!cachedResponse) {
         return res.status(404).json({
           success: false,
           dataLength: 0,
           message: "No jobs found matching the query.",
         });
       }
+
       res.status(200).json({
         success: true,
-        dataLength: fetchJobs.length,
-        msg: "Jobs are fetched successfully",
-        data: fetchJobs,
+        dataLength: cachedResponse.length,
+        msg: "Jobs are fetched successfully ( cached )",
+        data: cachedResponse,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        msg: "Some error occured while listing New Job",
+        msg: "Some error occurred while fetching jobs",
         error: error.message,
       });
     }
   }
 );
-
-/**
- * @route GET /fetch-job/:id
- * @description Fetches a job listing by its unique ID.
- * @access Private (Job Seekers & Employers)
- * @middleware authorize("jobSeeker", "employer")
- *
- * @param {Object} req - Express request object
- * @param {Object} req.params - Route parameters
- * @param {string} req.params.id - Job ID to fetch
- *
- * @param {Object} res - Express response object
- *
- * @returns {Object} JSON response with success status and job details
- * @throws {Error} If the job is not found or an internal server error occurs
- */
 
 router.get(
   "/fetch-job/:id",
@@ -223,63 +190,46 @@ router.get(
   }
 );
 
-/**
- * @route PUT /update-job/:id
- * @description Updates an existing job listing by its ID.
- * @access Private (Employers only)
- * @middleware authorize("employer")
- *
- * @param {Object} req - Express request object
- * @param {Object} req.params - Route parameters
- * @param {string} req.params.id - Job ID to update
- * @param {Object} req.body - Updated job details
- *
- * @param {Object} res - Express response object
- *
- * @returns {Object} JSON response with success status and updated job details
- * @throws {Error} If the job is not found or an internal server error occurs
- */
-
 router.put("/update-job/:id", authorize("employer"), async (req, res) => {
-  const {
-    params: { id },
-  } = req;
   try {
-    const findJob = await Job.findById(id);
-    if (!findJob) {
+    const { id } = req.params;
+    const userId = req.user?.id;
+
+    const cacheKeyUser = `/api/v1/jobportal/jobs/fetch-posted-jobs/${userId}`;
+    const cacheKeyGlobal = `/api/v1/jobportal/jobs/fetch-posted-jobs`;
+    const cacheKeyGlobalJob = `/api/v1/jobportal/jobs/fetch-job?{}`;
+    const cacheKeyGlobalJobQuery = `/api/v1/jobportal/jobs/fetch-job`;
+
+    // Update the job and return the updated document
+    const updatedJob = await Job.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedJob) {
       return res.status(404).json({ msg: "Job not found" });
     }
 
-    const updateJob = await findJob.updateOne(req.body);
+    // Invalidate all related cache keys
+    await invalidateCache(cacheKeyUser);
+    await invalidateCache(cacheKeyGlobal);
+    await invalidateCache(cacheKeyGlobalJob);
+    await invalidateCache(cacheKeyGlobalJobQuery);
+
     res.status(200).json({
       success: true,
       msg: "Job updated successfully",
-      data: updateJob,
+      data: updatedJob,
     });
   } catch (error) {
+    console.error("Error updating job:", error.message);
     res.status(500).json({
       success: false,
-      msg: "Some error occured while updating the Jobs",
+      msg: "Some error occurred while updating the job",
       error: error.message,
     });
   }
 });
-
-/**
- * @route DELETE /delete-job/:id
- * @description Deletes a job listing by its ID.
- * @access Private (Employers only)
- * @middleware authorize("employer")
- *
- * @param {Object} req - Express request object
- * @param {Object} req.params - Route parameters
- * @param {string} req.params.id - Job ID to delete
- *
- * @param {Object} res - Express response object
- *
- * @returns {Object} JSON response with success status and deletion message
- * @throws {Error} If the job is not found or an internal server error occurs
- */
 
 router.delete("/delete-job/:id", authorize("employer"), async (req, res) => {
   const {
@@ -293,6 +243,18 @@ router.delete("/delete-job/:id", authorize("employer"), async (req, res) => {
         msg: "Job not found!",
       });
     }
+
+    const userId = req.user?.id;
+    const cacheKeyUser = `/api/v1/jobportal/jobs/fetch-posted-jobs/${userId}`;
+    const cacheKeyGlobal = `/api/v1/jobportal/jobs/fetch-posted-jobs`;
+    const cacheKeyGlobalJob = `/api/v1/jobportal/jobs/fetch-job?{}`;
+    const cacheKeyGlobalJobQuery = `/api/v1/jobportal/jobs/fetch-job`;
+    // Invalidate all related cache keys
+    await invalidateCache(cacheKeyUser);
+    await invalidateCache(cacheKeyGlobal);
+    await invalidateCache(cacheKeyGlobalJob);
+    await invalidateCache(cacheKeyGlobalJobQuery);
+
     res.status(200).json({
       success: true,
       msg: "Job deleted successfully",
@@ -306,42 +268,48 @@ router.delete("/delete-job/:id", authorize("employer"), async (req, res) => {
   }
 });
 
-/**
- * @route GET /fetch-posted-jobs
- * @description Fetches all jobs posted by the authenticated employer.
- * @access Private (Employers only)
- * @middleware authorize("employer")
- * 
- * @param {Object} req - Express request object
- * @param {Object} req.user - Authenticated user object
- * @param {string} req.user.id - Employer's user ID
- * 
- * @param {Object} res - Express response object
- * 
- * @returns {Object} JSON response with the list of posted jobs
- * @throws {Error} If no jobs are found or an internal server error occurs
- */
+router.get(
+  "/fetch-posted-jobs",
+  authorize("employer"),
+  cacheMiddlewareJob,
+  async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      const cacheKey = `/api/v1/jobportal/jobs/fetch-posted-jobs/${userId}`;
+      console.log(`Cache Key: ${cacheKey}`);
 
-router.get("/fetch-posted-jobs", authorize("employer"), async (req, res) => {
-  try {
-    const userId = req.user?.id;
-    const postedJobs = await Job.find({ postedBy: userId });
-    if (postedJobs.length === 0) {
-      return res.status(404).json({ msg: "No jobs found for this employer" });
+      // Fetch data with cache handling
+      const cachedResponse = await cacheQueryJob(
+        cacheKey,
+        async () => {
+          const postedJobs = await Job.find({ postedBy: userId });
+          return postedJobs.length ? postedJobs : null; // Return empty array if no jobs found
+        },
+        cacheConfig.defaultTTL
+      );
+
+      if (cachedResponse.length === 0) {
+        return res.status(404).json({
+          success: false,
+          msg: "No jobs found for this employer",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        length: cachedResponse.length,
+        msg: "Posted jobs fetched successfully",
+        data: cachedResponse,
+      });
+    } catch (error) {
+      console.error("Error fetching posted jobs:", error.message);
+      res.status(500).json({
+        success: false,
+        msg: "Some error occurred while fetching the posted jobs",
+        error: error.message,
+      });
     }
-    res.status(200).json({
-      success: true,
-      length: postedJobs.length,
-      msg: "Posted jobs fetched successfully",
-      data: postedJobs,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      msg: "Some error occured while fetching the posted jobs",
-      error: error.message,
-    });
   }
-});
+);
 
 module.exports = router;

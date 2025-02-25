@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import JobCard2 from "../JobCard2";
 import JobDetailedCard2 from "../JobDetailedCard2";
 import { API_CONFIG } from "../../../config/api";
@@ -162,6 +162,7 @@ const PostedJobs = () => {
         justify-center z-50 overflow-hidden"
         >
           <CreateJobCard
+            fetchPostedJobs={getPostedJobs}
             closeCreateJobCard={() => setOpenCreateJobCard(false)}
           />
         </div>

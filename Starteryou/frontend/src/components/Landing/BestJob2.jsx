@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
 import { API_CONFIG } from "@config/api";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 import { FaPencilAlt } from "react-icons/fa";
 import axios from "axios";
 import { MaxWords } from "../Common/wordValidation";
@@ -201,7 +201,9 @@ const BestJob2 = () => {
                 placeholder="Title here..."
                 className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
               />
-              <p className="text-sm text-grey-400">{titleCounter} words remaining</p>
+              <p className="text-sm text-grey-400">
+                {titleCounter} words remaining
+              </p>
 
               <textarea
                 value={paragraphBJ2}
@@ -245,9 +247,9 @@ const BestJob2 = () => {
             </div>
           )}
 
-          <a href="#" className="text-[#7950F2] hover:underline font-medium">
+          {/* <a href="#" className="text-[#7950F2] hover:underline font-medium">
             Request for demo &gt;
-          </a>
+          </a> */}
 
           {/* Feature Boxes */}
           <div className="mt-8 flex flex-col md:flex-row md:justify-between lg:flex-col md:space-x-2 space-y-4 md:space-y-0 md:px-10 lg:space-x-0 lg:px-0">

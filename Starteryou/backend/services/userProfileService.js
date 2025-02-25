@@ -1,4 +1,8 @@
 const UserProfile = require("../models/UserProfile");
+const { invalidateCache } = require("../cache/utils/invalidateCache");
+// const cacheMiddleware = require("../cache/utils/cacheMiddleware");
+// const cacheQuery = require("../cache/utils/cacheQuery");
+// const cacheConfig = require("../cache/config/cacheConfig");
 
 /**
  * Adds a subdocument to a specified field in a user's profile.
@@ -11,6 +15,8 @@ const UserProfile = require("../models/UserProfile");
  */
 const addSubdocument = async (userRegistrationId, field, data, res) => {
   try {
+    const cacheKeyUser = `/api/v1/jobportal/profile/get-profile-fields/${userRegistrationId}?field=${field}`;
+
     const user = await UserProfile.findOne({ userRegistrationId });
     if (!user) {
       return res.status(404).json({ msg: "User not found!" });
@@ -23,6 +29,8 @@ const addSubdocument = async (userRegistrationId, field, data, res) => {
 
     user[field].push(data);
     await user.save();
+
+    await invalidateCache(cacheKeyUser);
 
     res.status(201).json({
       success: true,
@@ -49,8 +57,16 @@ const addSubdocument = async (userRegistrationId, field, data, res) => {
  * @param {import("express").Response} res - The response object.
  * @returns {Promise<void>} - Sends a response indicating success or failure.
  */
-const updateSubdocument = async (userRegistrationId, subDocId, field, updates, res) => {
+const updateSubdocument = async (
+  userRegistrationId,
+  subDocId,
+  field,
+  updates,
+  res
+) => {
   try {
+    const cacheKeyUser = `/api/v1/jobportal/profile/get-profile-fields/${userRegistrationId}?field=${field}`;
+
     const user = await UserProfile.findOne({ userRegistrationId });
     if (!user) {
       return res.status(404).json({ msg: "User not found!" });
@@ -63,6 +79,8 @@ const updateSubdocument = async (userRegistrationId, subDocId, field, updates, r
 
     Object.assign(subDoc, updates);
     await user.save();
+
+    await invalidateCache(cacheKeyUser);
 
     res.status(200).json({
       success: true,
@@ -89,6 +107,8 @@ const updateSubdocument = async (userRegistrationId, subDocId, field, updates, r
  */
 const deleteSubdocument = async (userRegistrationId, subDocId, field, res) => {
   try {
+    const cacheKeyUser = `/api/v1/jobportal/profile/get-profile-fields/${userRegistrationId}?field=${field}`;
+
     const user = await UserProfile.findOne({ userRegistrationId });
     if (!user) {
       return res.status(404).json({ msg: "User not found!" });
@@ -101,6 +121,8 @@ const deleteSubdocument = async (userRegistrationId, subDocId, field, res) => {
 
     subDoc.remove();
     await user.save();
+
+    await invalidateCache(cacheKeyUser);
 
     res.status(200).json({
       success: true,
@@ -127,6 +149,8 @@ const deleteSubdocument = async (userRegistrationId, subDocId, field, res) => {
  */
 const addStringToArray = async (userRegistrationId, field, value, res) => {
   try {
+    const cacheKeyUser = `/api/v1/jobportal/profile/get-profile-fields/${userRegistrationId}?field=${field}`;
+
     if (!value || typeof value !== "string" || value.trim() === "") {
       return res.status(400).json({
         success: false,
@@ -141,6 +165,8 @@ const addStringToArray = async (userRegistrationId, field, value, res) => {
 
     user[field].push(value.trim());
     await user.save();
+
+    await invalidateCache(cacheKeyUser);
 
     res.status(201).json({
       success: true,
@@ -168,6 +194,8 @@ const addStringToArray = async (userRegistrationId, field, value, res) => {
  */
 const deleteStringFromArray = async (userRegistrationId, field, value, res) => {
   try {
+    const cacheKeyUser = `/api/v1/jobportal/profile/get-profile-fields/${userRegistrationId}?field=${field}`;
+
     const user = await UserProfile.findOne({ userRegistrationId });
     if (!user) {
       return res.status(404).json({ msg: "User not found!" });
@@ -175,11 +203,15 @@ const deleteStringFromArray = async (userRegistrationId, field, value, res) => {
 
     const index = user[field].indexOf(value);
     if (index === -1) {
-      return res.status(404).json({ msg: `${value} not found in the ${field}` });
+      return res
+        .status(404)
+        .json({ msg: `${value} not found in the ${field}` });
     }
 
     user[field].splice(index, 1);
     await user.save();
+
+    await invalidateCache(cacheKeyUser);
 
     res.status(200).json({
       success: true,
@@ -202,4 +234,3 @@ module.exports = {
   addStringToArray,
   deleteStringFromArray,
 };
-

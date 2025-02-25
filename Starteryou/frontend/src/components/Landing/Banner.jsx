@@ -4,6 +4,7 @@ import { API_CONFIG } from "@config/api";
 import { FaPencilAlt } from "react-icons/fa";
 import axios from "axios";
 import { MaxWords } from "../Common/wordValidation";
+import { Link } from "react-router-dom";
 
 const Banner = () => {
   const { isAdmin } = useNavigation();
@@ -69,19 +70,27 @@ const Banner = () => {
           <div className="mt-10 flex flex-col space-y-4 z-50">
             <textarea
               value={title}
-              onChange={(e) => setTitle(MaxWords(e.target.value, 5, setTitleCounter))}
+              onChange={(e) =>
+                setTitle(MaxWords(e.target.value, 5, setTitleCounter))
+              }
               placeholder="Title here..."
               className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
             />
-            <p className="text-sm text-grey-400">{titleCounter} words remaining</p>
+            <p className="text-sm text-grey-400">
+              {titleCounter} words remaining
+            </p>
 
             <textarea
               value={paragraph}
-              onChange={(e) => setParagraph(MaxWords(e.target.value, 15, setParagraphCounter))}
+              onChange={(e) =>
+                setParagraph(MaxWords(e.target.value, 15, setParagraphCounter))
+              }
               placeholder="Paragraph here..."
               className="lg:w-[700px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
             />
-            <p className="text-sm text-grey-400">{paragraphCounter} words remaining</p>
+            <p className="text-sm text-grey-400">
+              {paragraphCounter} words remaining
+            </p>
 
             <div className="lg:w-[400px] flex items-center justify-between space-x-2 text-white">
               <button
@@ -106,9 +115,12 @@ const Banner = () => {
             <p className="text-[#767676] mb-4 lg:max-w-[800px] whitespace-pre-wrap">
               {paragraph}
             </p>
-            <button className="px-6 py-3 bg-[#D9502E] text-white rounded-md">
+            <Link
+              to="/about"
+              className="px-6 py-3 bg-[#D9502E] text-white rounded-md"
+            >
               Learn more
-            </button>
+            </Link>
             {isAdmin && (
               <FaPencilAlt
                 onClick={handleEdit}

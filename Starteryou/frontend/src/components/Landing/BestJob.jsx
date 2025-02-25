@@ -177,7 +177,9 @@ const BestJob = () => {
                 placeholder="Title here..."
                 className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
               />
-              <p className="text-sm text-grey-400">{titleCounter} words remaining</p>
+              <p className="text-sm text-grey-400">
+                {titleCounter} words remaining
+              </p>
 
               <textarea
                 value={paragraphBJ}
@@ -185,7 +187,9 @@ const BestJob = () => {
                 placeholder="Paragraph here..."
                 className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
               />
-              <p className="text-sm text-grey-400">{paragraphCounter} words remaining</p>
+              <p className="text-sm text-grey-400">
+                {paragraphCounter} words remaining
+              </p>
 
               <div className="lg:w-[400px] flex items-center justify-between space-x-2 text-white">
                 <button
@@ -219,9 +223,9 @@ const BestJob = () => {
             </div>
           )}
 
-          <a href="#" className="text-[#7950F2] hover:underline font-medium">
+          {/* <a href="#" className="text-[#7950F2] hover:underline font-medium">
             See new openings &gt;
-          </a>
+          </a> */}
 
           {/* Boxes */}
           <div className="mt-8 flex flex-col md:flex-row md:justify-between lg:flex-col md:space-x-2 space-y-4 md:space-y-0 md:px-6 lg:space-x-0 lg:px-0">
