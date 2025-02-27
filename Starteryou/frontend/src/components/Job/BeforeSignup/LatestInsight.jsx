@@ -34,9 +34,9 @@ const LatestInsight = () => {
       id: 3,
       type: "Career Insights",
       time: "5 min read",
-      title: "Budgeting Tips for Students",
+      title: "Kickstart Your Career: The Ultimate Guide to Entry-Level Jobs",
       description:
-        "Learn how to manage your finances effectively as a student.",
+        "Learn how to secure entry-level jobs by getting tips on resume writing, experience building, and interview prep",
       link: "/read-more-3",
     },
   ];

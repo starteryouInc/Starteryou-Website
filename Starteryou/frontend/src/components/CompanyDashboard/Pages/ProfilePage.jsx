@@ -119,17 +119,17 @@ const ProfilePage = () => {
           <div className="grid grid-cols-3 gap-4 mt-4">
             <div className="flex flex-col items-center text-blue-500">
               <FaUsers className="text-3xl mb-4" />
-              <span className="text-xl text-black font-bold">1.2k</span>
+              <span className="text-xl text-black font-bold">N/A</span>
               <span className="text-sm text-gray-500">Total Applicants</span>
             </div>
             <div className="flex flex-col items-center text-green-500">
               <FaEye className="text-3xl mb-4" />
-              <span className="text-xl text-black font-bold">15k</span>
+              <span className="text-xl text-black font-bold">N/A</span>
               <span className="text-sm text-gray-500">Profile Views</span>
             </div>
             <div className="flex flex-col items-center text-purple-500">
               <BsGraphUp className="text-3xl mb-4" />
-              <span className="text-xl text-black font-bold">89%</span>
+              <span className="text-xl text-black font-bold">N/A</span>
               <span className="text-sm text-gray-500">Engagement Rate</span>
             </div>
           </div>

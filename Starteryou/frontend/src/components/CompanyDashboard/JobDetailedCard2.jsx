@@ -8,6 +8,7 @@ import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { IoAnalyticsOutline } from "react-icons/io5";
 import { HiSpeakerphone } from "react-icons/hi";
 import EditJobCard from "../JobFeedPage/EditJobCard";
+import { FaBuilding } from "react-icons/fa";
 
 /**
  * JobDetailedCard2 Component
@@ -47,24 +48,29 @@ const JobDetailedCard2 = ({ job, getPostedJobs, deleteJobFunction }) => {
     return format(new Date(dateString), "dd MMMM yyyy");
   };
   return (
-    <div className="w-[1200px] mx-auto bg-white p-6 rounded-lg">
+    <div className="w-[1200px] mx-auto bg-white p-6 rounded-lg overflow-auto max-h-[100vh]">
       <div className="p-4 flex justify-between items-center rounded-md border-2">
         <div className="flex items-center space-x-4">
-          <figure className="h-14 w-14 bg-[#e1fcff] rounded-lg">
-            <img src="" alt="" />
+          <figure className="h-14 w-14 bg-[#e1fcff] rounded-lg flex items-center justify-center">
+            <FaBuilding className="text-4xl text-gray-700" />
           </figure>
+
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold">{job.title}</h2>
-            <p className="text-gray-500">
-              {job.companyName}. - {job.location}
-              <span className="bg-gray-200 text-gray-700 ml-4 px-2 py-1 text-sm rounded-md">
+            <div className="flex items-center text-gray-500 space-x-2">
+              <span className="font-medium">{job.companyName}</span>
+              <span>-</span>
+              <span>{job.location}</span>
+              <span className="bg-gray-200 text-gray-700 px-2 py-1 text-sm rounded-md ml-2">
                 Active
               </span>
-            </p>
+            </div>
           </div>
         </div>
         <div className="flex space-x-2">
-          <button className="border px-4 py-2 rounded-md">Applicants</button>
+          <button className="border px-4 py-2 rounded-md bg-gray-50" disabled>
+            Applicants
+          </button>
           <button
             onClick={() => setOpenEditJobCard(true)}
             className="border px-4 py-2 rounded-md"
@@ -88,7 +94,7 @@ const JobDetailedCard2 = ({ job, getPostedJobs, deleteJobFunction }) => {
             </span>
             <div>
               <p className="text-gray-600">Total Applicants</p>
-              <p className="text-lg font-semibold">45</p>
+              <p className="text-lg font-semibold">N/A</p>
             </div>
           </div>
           <div className="w-full mt-2 bg-gray-300 h-2 rounded overflow-hidden">
@@ -103,7 +109,7 @@ const JobDetailedCard2 = ({ job, getPostedJobs, deleteJobFunction }) => {
             </span>
             <div>
               <p className="text-gray-600">Job Views</p>
-              <p className="text-lg font-semibold">238</p>
+              <p className="text-lg font-semibold">N/A</p>
             </div>
           </div>
           <div className="w-full mt-2 bg-gray-300 h-2 rounded overflow-hidden">
@@ -117,7 +123,7 @@ const JobDetailedCard2 = ({ job, getPostedJobs, deleteJobFunction }) => {
             </span>
             <div>
               <p className="text-gray-600">Engagement Rate</p>
-              <p className="text-lg font-semibold">18.9%</p>
+              <p className="text-lg font-semibold">N/A</p>
             </div>
           </div>
           <div className="w-full mt-2 bg-gray-300 h-2 rounded overflow-hidden">
@@ -130,7 +136,9 @@ const JobDetailedCard2 = ({ job, getPostedJobs, deleteJobFunction }) => {
         <div className="left-section w-full">
           <div className="mb-4 p-4 border-2 rounded-md">
             <h3 className="font-semibold text-lg">About the Role</h3>
-            <p className="text-gray-600">{job.description}</p>
+            <p className="text-gray-600 whitespace-pre-line">
+              {job.description}
+            </p>
           </div>
 
           <div className="my-4 p-4 border-2 rounded-md">
@@ -149,12 +157,12 @@ const JobDetailedCard2 = ({ job, getPostedJobs, deleteJobFunction }) => {
             </ul>
           </div>
 
-          <div className="my-4 p-4 border-2 rounded-md">
+          {/* <div className="my-4 p-4 border-2 rounded-md">
             <h3 className="font-semibold text-lg">Benefits</h3>
             <p className="text-gray-500">
               (Details about benefits can go here)
             </p>
-          </div>
+          </div> */}
         </div>
 
         <div className="right-section">
@@ -168,7 +176,10 @@ const JobDetailedCard2 = ({ job, getPostedJobs, deleteJobFunction }) => {
                 Boost your job post visibility and reach 3x more qualified
                 candidates.
               </p>
-              <button className="mt-2 w-full bg-orange-500 text-[#f7e4d7] px-4 py-2 rounded">
+              <button
+                className="mt-2 w-full bg-orange-500 text-[#f7e4d7] px-4 py-2 rounded"
+                disabled
+              >
                 Boost Now
               </button>
             </div>
@@ -203,15 +214,14 @@ const JobDetailedCard2 = ({ job, getPostedJobs, deleteJobFunction }) => {
         </div>
       </div>
       {openEditJobCard && (
-        <div
-          className="pop-up py-3 fixed inset-0 bg-black bg-opacity-50 flex items-start
-        justify-center z-50 overflow-hidden"
-        >
-          <EditJobCard
-            editJob={job}
-            getPostedJobs={getPostedJobs}
-            closeEditJobCard={() => setOpenEditJobCard(false)}
-          />
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-md">
+          <div className="w-full h-full ">
+            <EditJobCard
+              editJob={job}
+              getPostedJobs={getPostedJobs}
+              closeEditJobCard={() => setOpenEditJobCard(false)}
+            />
+          </div>
         </div>
       )}
     </div>

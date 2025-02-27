@@ -90,7 +90,7 @@ router.delete(
       const cacheKeyUser = `/api/v1/jobportal/bookmarks/fetch-bookmarked-jobs/${userId}`;
       await invalidateCache(cacheKeyUser);
 
-      res.status(201).json({
+      res.status(204).json({
         success: true,
         msg: "Job unsaved successfully",
       });

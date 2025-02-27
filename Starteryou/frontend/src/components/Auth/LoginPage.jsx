@@ -4,10 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useUserContext } from "../../context/UserContext";
 import { API_CONFIG } from "@config/api";
+import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 const LoginPage = () => {
   const { setUser } = useUserContext();
   const navigate = useNavigate();
-
+  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [attempts, setAttempts] = useState(0);
@@ -18,7 +19,7 @@ const LoginPage = () => {
   const validateEmail = (email) => {
     const regex = /^[a-zA-Z0-9._%+-]+@starteryou\.com$/i;
     return regex.test(email);
-    };
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -35,16 +36,19 @@ const LoginPage = () => {
 
     try {
       // Sending the login request to the backend
-      const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.authLogin}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.authLogin}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -125,14 +129,27 @@ const LoginPage = () => {
             >
               Password
             </label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
+                required
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <AiFillEyeInvisible size={20} />
+                ) : (
+                  <AiFillEye size={20} />
+                )}
+              </button>
+            </div>
           </div>
 
           <button
@@ -148,10 +165,7 @@ const LoginPage = () => {
         <div className="mt-4 text-center">
           <p className="text-sm text-gray-600">
             Don't have an account?{" "}
-            <a
-              href="/AdminSignup"
-              className="text-blue-500 hover:underline"
-            >
+            <a href="/AdminSignup" className="text-blue-500 hover:underline">
               Create an account
             </a>
           </p>

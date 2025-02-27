@@ -42,6 +42,7 @@ import CompanyDashboard from "./pages/CompanyDashboard";
 import PostedJobs from "./components/CompanyDashboard/Pages/PostedJobs";
 import ProfilePage from "./components/CompanyDashboard/Pages/ProfilePage";
 import ProfileCarousel from "./pages/ProfileCarousel";
+import NotFound from "./components/Common/NotFound";
 
 /**
  * Layout component that defines the main page structure and handles route changes.
@@ -56,17 +57,49 @@ const Layout = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]); // This will run on every route change
-  const hideNavbarFooter = [
-    "/login",
-    "/AdminSignup",
-    "/signup",
-    "/UserLogin",
-    "/ForgotPswd",
-    "/ResetCode",
-    "/UpdatePswd",
-    "/EmpSignUp",
-    "/createProfile",
-  ].includes(location.pathname);
+  const adminRoutes = [
+    "/admin",
+    "/admin/about",
+    "/admin/jobs",
+    "/admin/education",
+    "/admin/job2",
+  ]; // Add all admin-related pages
+  const isNotFoundPage =
+    location.pathname !== "/" &&
+    ![
+      "/about",
+      "/jobs",
+      "/login",
+      "/AdminSignup",
+      "/education",
+      "/signup",
+      "/InProgressPage",
+      "/job2",
+      "/jobfeeds",
+      "/UserLogin",
+      "/ForgotPswd",
+      "/ResetCode",
+      "/UpdatePswd",
+      "/EmpSignUp",
+      "/userprofile",
+      "/companyDashboard",
+      "/createProfile",
+      ...adminRoutes, // Ensure admin pages are not treated as "not found"
+    ].includes(location.pathname);
+
+  const hideNavbarFooter =
+    (isNotFoundPage && !adminRoutes.includes(location.pathname)) || // Allow navbar for admin routes
+    [
+      "/login",
+      "/AdminSignup",
+      "/signup",
+      "/UserLogin",
+      "/ForgotPswd",
+      "/ResetCode",
+      "/UpdatePswd",
+      "/EmpSignUp",
+      "/createProfile",
+    ].includes(location.pathname);
   return (
     <div className="font-montserrat scroll-smooth">
       {!hideNavbarFooter && <Navbar />}
@@ -89,7 +122,6 @@ const Layout = () => {
         <Route path="/UpdatePswd" element={<UpdatePswd />} />
         <Route path="/EmpSignUp" element={<EmployerSignUp />} />
         <Route path="/userprofile" element={<UserProfile />}></Route>
-
         <Route path="/companyDashboard" element={<CompanyDashboard />}>
           <Route path="/companyDashboard/" element={<ProfilePage />}></Route>
           <Route
@@ -97,7 +129,6 @@ const Layout = () => {
             element={<PostedJobs />}
           ></Route>
         </Route>
-
         <Route path="/createProfile" element={<ProfileCarousel />} />
 
         {/* Admin Protected Routes */}
@@ -121,6 +152,8 @@ const Layout = () => {
           path="/admin/job2"
           element={<AdminProtectedRoute element={<JobPageAfter />} />}
         />
+        {/* Catch-all route for 404 Not Found */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
 
       {/* New Letter has beeen installed in the website ( IN PROGRESS ) */}
@@ -140,7 +173,7 @@ function App() {
   return (
     <UserProvider>
       <NavigationProvider>
-        <ToastContainer position="top-right" autoClose={3000} />
+        <ToastContainer position="bottom-right" autoClose={2000} />
         <Router>
           <NavigationHandler />
           <Layout />

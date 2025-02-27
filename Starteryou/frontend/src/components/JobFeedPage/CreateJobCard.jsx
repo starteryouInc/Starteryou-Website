@@ -203,9 +203,10 @@ const CreateJobCard = ({ fetchPostedJobs, closeCreateJobCard }) => {
                   onChange={handleChange}
                   className="w-full p-2 border rounded"
                 >
-                  <option value="Entry">Entry</option>
-                  <option value="Mid">Mid</option>
-                  <option value="Senior">Senior</option>
+                  <option value="0-3">0-3 Months</option>
+                  <option value="3-6">3-6 Months</option>
+                  <option value="6-12">6-12 Months</option>
+                  <option value="12+">1 Year+</option>
                 </select>
               </div>
               <div>
