@@ -36,7 +36,7 @@ const UserLogin = () => {
       if (data.users.role === "jobSeeker") {
         navigate("/jobfeeds");
       } else {
-        navigate("/");
+        navigate("/companyDashboard/");
       }
     } catch (error) {
       toast.error(error.response?.data?.msg);

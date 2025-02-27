@@ -9,7 +9,7 @@ import { VscLightbulbSparkle } from "react-icons/vsc";
  */
 const QuickTips = () => {
   return (
-    <div className="quick-tips w-[370px] h-[240px] px-4 border border-[#dedede] rounded-[4px] flex flex-col items-start justify-center space-y-4">
+    <div className="quick-tips w-[370px] h-[240px] px-4 border rounded-lg border-[#dedede] flex flex-col items-start justify-center space-y-4">
       <h2 className="flex items-center text-[18px] text-[#736F79] font-bold">
         <VscLightbulbSparkle className="mr-2 text-[#8e88ff]" />
         Quick Tips

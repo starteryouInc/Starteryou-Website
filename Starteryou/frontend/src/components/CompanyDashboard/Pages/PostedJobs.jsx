@@ -11,6 +11,7 @@ import NeedHelp from "../NeedHelp";
 import CreateJobCard from "../../JobFeedPage/CreateJobCard";
 import { IoAddOutline } from "react-icons/io5";
 import { IoMdClose } from "react-icons/io";
+import { BsGraphUp } from "react-icons/bs";
 
 /**
  * PostedJobs Component
@@ -96,10 +97,12 @@ const PostedJobs = () => {
 
   return (
     <div className="mb-10">
-      <div className="main-container flex items-start space-x-4">
+      <div className="main-container flex flex-col md:flex-row items-start md:space-x-6 py-6">
+        {/* Left Section - Jobs List */}
         <div className="left-section w-[770px]">
+          {/* Header */}
           <div className="pb-4 flex items-center justify-between">
-            <h2 className="text-xl">Dashboard</h2>
+            <h2 className="text-2xl font-semibold text-gray-800">Dashboard</h2>
             <button
               onClick={() => setOpenCreateJobCard(true)}
               className="flex items-center justify-between py-2 px-4 bg-[#8176ff] text-white rounded-lg hover:bg-purple-500"
@@ -107,12 +110,18 @@ const PostedJobs = () => {
               <IoAddOutline className="mr-2 text-xl" /> <span>Post a Job</span>
             </button>
           </div>
-          <div className="company-detail-container mb-4 w-full h-[400px] flex items-center justify-center border">
-            Analytics
+          {/* Analytics */}
+          <div className="company-detail-container mb-6 w-full h-[350px] flex flex-col items-center justify-center border rounded-lg bg-gray-100 text-gray-600 ">
+            <BsGraphUp className="text-6xl mb-3 text-gray-500" />
+            <span className="text-lg font-medium">Analytics Coming Soon</span>
           </div>
-          <div className="posted-job-list space-y-4">
+
+          <div className="posted-job-list space-y-4 ">
             {loading ? (
-              <h1 className="text-xl font-bold">Loading wait...</h1>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 border-2 border-gray-300 border-t-[#7950F2] rounded-full animate-spin"></div>
+                <span className="text-xl font-bold">Loading...</span>
+              </div>
             ) : postedJobs.length !== 0 ? (
               postedJobs.map((e) => {
                 return (
@@ -159,7 +168,7 @@ const PostedJobs = () => {
       {openCreateJobCard && (
         <div
           className="pop-up py-3 fixed inset-0 bg-black bg-opacity-50 flex items-start
-        justify-center z-50 overflow-hidden"
+        justify-center z-50 overflow-hidden "
         >
           <CreateJobCard
             fetchPostedJobs={getPostedJobs}

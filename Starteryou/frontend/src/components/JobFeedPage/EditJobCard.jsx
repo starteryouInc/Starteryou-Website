@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 // import NavBar from "../Common/Navbar";
 import { useUserContext } from "../../context/UserContext";
 import { useNavigate } from "react-router-dom";
@@ -98,7 +98,7 @@ const EditJobCard = ({ closeEditJobCard, editJob, getPostedJobs }) => {
       <div className="w-screen h-screen flex justify-center items-center">
         <form
           onSubmit={handleEditSubmit}
-          className="w-full max-w-3xl p-6 bg-white shadow-lg rounded-lg border border-gray-300"
+          className="w-full max-w-5xl p-6 bg-white shadow-lg rounded-lg border border-gray-300"
         >
           <h2 className="text-2xl font-semibold mb-4">Edit Job</h2>
           <div className="grid grid-cols-2 gap-6">
@@ -113,6 +113,8 @@ const EditJobCard = ({ closeEditJobCard, editJob, getPostedJobs }) => {
                   name="title"
                   placeholder="Enter job title"
                   value={job.title}
+                  pattern="[A-Za-z\s]+"
+                  title="Only alphabets and spaces are allowed."
                   onChange={handleChange}
                   className="w-full p-2 border rounded"
                   required
@@ -126,6 +128,8 @@ const EditJobCard = ({ closeEditJobCard, editJob, getPostedJobs }) => {
                   type="text"
                   name="location"
                   placeholder="Enter location"
+                  pattern="[A-Za-z\s]+"
+                  title="Only alphabets and spaces are allowed."
                   value={job.location}
                   onChange={handleChange}
                   className="w-full p-2 border rounded"
@@ -141,6 +145,8 @@ const EditJobCard = ({ closeEditJobCard, editJob, getPostedJobs }) => {
                   name="industry"
                   placeholder="Enter category (e.g IT)"
                   value={job.industry}
+                  pattern="[A-Za-z\s]+"
+                  title="Only alphabets and spaces are allowed."
                   onChange={handleChange}
                   className="w-full p-2 border rounded"
                   required
@@ -175,9 +181,10 @@ const EditJobCard = ({ closeEditJobCard, editJob, getPostedJobs }) => {
                   onChange={handleChange}
                   className="w-full p-2 border rounded"
                 >
-                  <option value="Entry">Entry</option>
-                  <option value="Mid">Mid</option>
-                  <option value="Senior">Senior</option>
+                  <option value="0-3">0-3 Months</option>
+                  <option value="3-6">3-6 Months</option>
+                  <option value="6-12">6-12 Months</option>
+                  <option value="12+">1 Year+</option>
                 </select>
               </div>
               <div>
@@ -199,7 +206,7 @@ const EditJobCard = ({ closeEditJobCard, editJob, getPostedJobs }) => {
 
             {/* Right Column */}
             <div className="space-y-2">
-              <div className="set-date flex justify-between items-center">
+              <div className="set-date grid grid-cols-2 gap-4">
                 <div>
                   <label className="block font-semibold text-[#777585] mb-2">
                     Start Date
@@ -222,7 +229,7 @@ const EditJobCard = ({ closeEditJobCard, editJob, getPostedJobs }) => {
                     value={job.endDate}
                     onChange={handleChange}
                     className="w-full p-2 border rounded"
-                    min={job.startDate} // Ensures the end date is after the start date
+                    min={job.startDate}
                   />
                 </div>
               </div>
@@ -248,6 +255,7 @@ const EditJobCard = ({ closeEditJobCard, editJob, getPostedJobs }) => {
                     value={job.salaryRange.max}
                     onChange={handleSalaryChange}
                     className="w-1/2 p-2 border rounded"
+                    min={job.salaryRange.min || 0} // Ensures max is not less than min
                     required
                   />
                 </div>
@@ -267,8 +275,8 @@ const EditJobCard = ({ closeEditJobCard, editJob, getPostedJobs }) => {
                   <option value="Per Hour">Per Hour</option>
                 </select>
               </div>
-              <div className="flex-1 flex flex-col">
-                <label className="block font-semibold text-[#777585] mb-2">
+              <div className="flex-1 flex flex-col space-y-2">
+                <label className="font-semibold text-[#777585]">
                   Job Description <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -276,7 +284,7 @@ const EditJobCard = ({ closeEditJobCard, editJob, getPostedJobs }) => {
                   placeholder="Enter job description"
                   value={job.description}
                   onChange={handleChange}
-                  className="border p-2 w-full rounded mb-1 h-24"
+                  className="border border-gray-300 p-3 w-full rounded-md h-48 resize-y focus:outline-none focus:ring-2 focus:ring-blue-500"
                   maxLength="1000"
                   required
                 ></textarea>
