@@ -171,7 +171,11 @@ const LeftSide = ({ UserProfile, getProfileFunction }) => {
                   <FaRegCircleUser className="text-[60px] text-white bg-[#e7e6e9] rounded-full" />
                 </li>
                 <li>
-                  <img src={Flag} alt="Country Flag" />
+                  <img
+                    src="/UserProfile/usa.png"
+                    alt="Country Flag"
+                    width="20px"
+                  />
                 </li>
                 <li className="text-[24px] font-semibold uppercase">
                   {updateProfileData.name}
@@ -275,7 +279,14 @@ const LeftSide = ({ UserProfile, getProfileFunction }) => {
             </div>
 
             <h2 className="text-center secondary-text-color text-[18px] font-semibold">
-              Updated on : 29 November 2024
+              Updated on :{" "}
+              {UserProfile?.updatedAt
+                ? new Date(UserProfile.updatedAt).toLocaleDateString("en-US", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })
+                : "Not Available"}
             </h2>
           </div>
         </div>

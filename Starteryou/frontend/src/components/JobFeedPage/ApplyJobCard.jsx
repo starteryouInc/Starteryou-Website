@@ -92,6 +92,8 @@ const ApplyJobCard = ({ jobID, closeApplyJob }) => {
           name="firstName"
           value={formData.firstName}
           onChange={handleChange}
+          pattern="[A-Za-z\s]+"
+          title="Only alphabets and spaces are allowed."
           required
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
         />
@@ -105,6 +107,8 @@ const ApplyJobCard = ({ jobID, closeApplyJob }) => {
           name="lastName"
           value={formData.lastName}
           onChange={handleChange}
+          pattern="[A-Za-z\s]+"
+          title="Only alphabets and spaces are allowed."
           required
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
         />

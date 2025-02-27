@@ -8,20 +8,31 @@
  * @returns {JSX.Element} A detailed job card with job information, save functionality, and application option.
  */
 import React, { useState } from "react";
-// import SaveJob from "/JobFeedPage/SaveJob.svg";
+import ApplyJobCard from "../JobFeedPage/ApplyJobCard";
 import LocationIcon from "/JobFeedPage/Location.svg";
 import ExperienceIcon from "/JobFeedPage/Experience.svg";
-import MissingSkillsIcon from "/JobFeedPage/Missing.svg";
-import componayLogo from "/JobFeedPage/CompanyLogo.svg";
-import { FaBookmark, FaRegBookmark } from "react-icons/fa";
+import { FaBuilding, FaBookmark, FaRegBookmark } from "react-icons/fa";
 import { differenceInDays, format } from "date-fns";
 import { useUserContext } from "../../context/UserContext";
-import ApplyJobCard from "../JobFeedPage/ApplyJobCard";
+// import MissingSkillsIcon from "/JobFeedPage/Missing.svg";
+// import componayLogo from "/JobFeedPage/CompanyLogo.svg";
 
-const JobDetailCard = ({ jobDetails, onClose, savedJob }) => {
+const JobDetailCard = ({
+  jobDetails,
+  newSavedJobs,
+  toggleBookmark,
+  newAppliedJobs,
+  onClose,
+}) => {
   const { user } = useUserContext();
   const role = user?.authenticatedUser?.role;
   const [openApplyJob, setOpenApplyJob] = useState(false);
+  const isApplied = newAppliedJobs.some(
+    (appliedJob) => appliedJob._id === jobDetails._id
+  );
+  const isBookmarked = newSavedJobs.some(
+    (savedJob) => savedJob._id === jobDetails._id
+  );
   /**
    * Determines if the applicant is an early applicant based on job posting date.
    * @param {string} createdAt - The job posting date in ISO format.
@@ -56,22 +67,24 @@ const JobDetailCard = ({ jobDetails, onClose, savedJob }) => {
 
   return (
     <>
-      <div className="card-detailed-container lg:h-[995px] md:w-[400px] lg:w-[640px] space-y-[14px]">
+      <div className="card-detailed-container lg:min-h-[995px] md:w-[400px] lg:w-[640px] space-y-[14px]">
         <div className="flex items-center justify-between">
-          <img
-            src={jobDetails.compImgSrc ? jobDetails.compImgSrc : componayLogo}
-            alt=""
-          />
+          <div className="bg-gray-200 p-3 rounded-lg">
+            <FaBuilding className="text-2xl text-gray-700" />
+          </div>
           <button className="text-4xl md:hidden" onClick={onClose}>
             ×
           </button>
         </div>
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-center">
           <h1 className="text-xl font-semibold">{jobDetails.title}</h1>
-          <FaRegBookmark
-            className="cursor-pointer"
-            onClick={() => savedJob(jobDetails._id)}
-          />
+          <button onClick={() => toggleBookmark(jobDetails._id)}>
+            {isBookmarked ? (
+              <FaBookmark className="text-xl text-[#6A54DF]" />
+            ) : (
+              <FaRegBookmark className="text-xl" />
+            )}
+          </button>
         </div>
         <ul className="text-[#9894A7] space-y-2">
           <li>{jobDetails.companyName ? jobDetails.companyName : "Unknown"}</li>
@@ -88,22 +101,27 @@ const JobDetailCard = ({ jobDetails, onClose, savedJob }) => {
             <img src={LocationIcon} alt="location icon" className="mr-2" />
             {jobDetails.location}
           </li>
-          <li>
+          {/* <li>
             <img
               src={MissingSkillsIcon}
               alt="missing skills icon"
               className="mr-2"
             />
             5 skills missing in your profile
-          </li>
+          </li> */}
         </ul>
 
         {role === "jobSeeker" && (
           <button
-            onClick={() => setOpenApplyJob(true)}
-            className="apply-btn w-[92px] h-[38px] rounded-[8px] bg-[#6A54DF] text-white text-[14px] font-semibold leading-4"
+            onClick={() => !isApplied && setOpenApplyJob(true)}
+            disabled={isApplied}
+            className={`w-[92px] h-[38px] rounded-[8px] text-white text-[14px] font-semibold leading-4 ${
+              isApplied
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-[#6A54DF] hover:bg-[#5a44c8] cursor-pointer"
+            }`}
           >
-            Apply Now
+            {isApplied ? "Applied" : "Apply Now"}
           </button>
         )}
         <div className="job-description-container">
@@ -135,13 +153,13 @@ const JobDetailCard = ({ jobDetails, onClose, savedJob }) => {
             </ul>
           </h4>
         </div>
-        <span className="text-[#777485] font-semibold space-x-2">
+        {/* <span className="text-[#777485] font-semibold space-x-2">
           Looking for similar opportunities? Click here to explore more jobs
           like this!
           <button className="similar-job-btn ml-2 text-[#6A54DF] font-semibold">
             Similar Jobs.
           </button>
-        </span>
+        </span> */}
       </div>
       {openApplyJob && (
         <div

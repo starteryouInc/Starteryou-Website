@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
+import "./styles/JobFeedPage.css";
 import Navbar from "../components/Common/Navbar";
 import PenSvg from "/JobFeedPage/Pen.svg";
 import FilterButtons from "../components/JobFeedPage/FilterButtons";
-import "./styles/JobFeedPage.css";
 import JobCard from "../components/JobFeedPage/JobCard";
 import JobDetailCard from "../components/JobFeedPage/JobDetailCard";
-// import ApplyJobCard from "../components/JobFeedPage/ApplyJobCard";
 import { useUserContext } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import { API_CONFIG } from "../config/api";
@@ -19,6 +18,7 @@ const JobFeedPage = () => {
   const [appliedJobs, setAppliedJobs] = useState([]);
   const [savedJobs, setSavedJobs] = useState([]);
   const [singleJob, setSingleJob] = useState([]);
+  const [jobID, setJobID] = useState("");
   const [detailCardPop, setDetailCardPop] = useState(false);
   const [selectedTab, setSelectedTab] = useState("Recommended");
   const [loading, setLoading] = useState(false);
@@ -70,14 +70,6 @@ const JobFeedPage = () => {
       setLoading(false);
     }
   }, [token, navigate]); // Using `useCallback` to memoize the function
-
-  const [jobID, setJobID] = useState("");
-
-  useEffect(() => {
-    if (jobData.length > 0) {
-      setJobID(jobData[0]._id); // Setting initial jobID only after jobData is populated
-    }
-  }, [jobData]);
 
   /**
    * Fetches job details by job ID.
@@ -243,44 +235,68 @@ const JobFeedPage = () => {
   };
 
   /**
- * Saves (bookmarks) a job for the authenticated user.
- * 
- * @async
- * @function saveJob
- * @param {string} jobId - The unique identifier of the job to be bookmarked.
- * @returns {Promise<void>} No return value; updates the saved jobs list.
- * 
- * @throws {Error} Displays an error toast if the request fails.
- * 
- * @description
- * - Checks if the user is authenticated; if not, exits early.
- * - Sends a request to bookmark the specified job.
- * - If successful, displays a success toast and refreshes the saved jobs list.
- * - If an error occurs, displays an error toast with a relevant message.
- */
+   * Toggles the bookmark status of a job by adding or removing it from saved jobs.
+   *
+   * @async
+   * @function toggleBookmark
+   * @param {string} jobId - The unique ID of the job to be bookmarked or unbookmarked.
+   * @returns {Promise<void>} - No return value; updates the saved jobs list.
+   *
+   * @throws {Error} Displays an error toast if the request fails.
+   *
+   * @description
+   * - Checks if the user is authenticated using `token`. If not, the function exits.
+   * - Determines whether the job is already bookmarked by checking `savedJobs`.
+   * - If the job is bookmarked, it sends a `DELETE` request to remove it from saved jobs.
+   * - If not bookmarked, it sends a `POST` request to add it to saved jobs.
+   * - Displays success messages using `toast.success()` upon successful bookmarking/unbookmarking.
+   * - Calls `getSavedJobs()` to refresh the saved jobs list.
+   * - Handles errors with `toast.error()` and logs them to the console.
+   */
 
-  const saveJob = async (jobId) => {
-    const token = user?.token;
+  const toggleBookmark = async (jobId) => {
     if (!token) return;
+    console.log(role);
     try {
-      const { data } = await axios.post(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.bookmarkJob(jobId)}`,
-        { jobId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      toast.success("Job is bookmarked");
+      const isBookmarked = savedJobs.some((job) => job._id === jobId);
+      if (isBookmarked) {
+        await axios.delete(
+          `${API_CONFIG.baseURL}${API_CONFIG.endpoints.unbookmarkJob(jobId)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        toast.success("Removed from bookmarked");
+        console.log("This job is removed from the bookmarks");
+      } else {
+        await axios.post(
+          `${API_CONFIG.baseURL}${API_CONFIG.endpoints.bookmarkJob(jobId)}`,
+          { jobId },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        toast.success("Job is Bookmarked");
+        console.log("This job is saved in bookmarks");
+      }
       getSavedJobs();
     } catch (error) {
-      toast.error(error.response?.data?.msg || "An error occurred");
+      console.log(
+        "Failed to update the bookmark:",
+        error.response?.data?.msg || error.message
+      );
+      toast.error(error.response?.data?.msg || "Failed to update bookmark.");
     }
   };
 
   useEffect(() => {
     getJobs();
+    getAppliedJobs();
+    getSavedJobs();
   }, []);
 
   const handleTabClick = (tab) => {
@@ -308,6 +324,14 @@ const JobFeedPage = () => {
       : selectedTab === "Applied"
       ? appliedJobs
       : savedJobs;
+
+  useEffect(() => {
+    if (filteredJobs.length > 0) {
+      setSingleJob(filteredJobs[0]); // Store the first job in singleJob
+    } else {
+      setSingleJob(null); // Clear singleJob if no jobs available
+    }
+  }, [selectedTab, jobData, appliedJobs, savedJobs]);
 
   return (
     <div>
@@ -352,7 +376,7 @@ const JobFeedPage = () => {
             <FilterButtons filterName="Similar Applicants" />
           </div>
           <div className="job-listing-container flex justify-center md:space-x-4">
-            <div className="job-lists space-y-4 md:h-[1235px] lg:h-[995px] overflow-y-scroll">
+            <div className="job-lists space-y-4 md:h-[1235px] lg:min-h-[995px] overflow-y-scroll">
               {loading ? (
                 <h1 className="mt-20 text-center text-xl font-bold">
                   Loading wait...
@@ -373,27 +397,23 @@ const JobFeedPage = () => {
                           : ""
                       }`}
                     >
-                      <JobCard
-                        companyLogo={e.compImgSrc}
-                        jobTitle={e.title}
-                        companyName={e.companyName}
-                        experienceReq={e.experienceLevel}
-                        location={e.location}
-                        datePosted={e.createdAt}
-                      />
+                      <JobCard jobs={e} newSavedJobs={savedJobs} />
                     </div>
                   );
                 })
               ) : (
-                <p>not data</p>
+                <p>no data</p>
               )}
             </div>
             <div className="job-details hidden md:block">
-              {detailCardPop && singleJob && (
+              {singleJob && (
                 <JobDetailCard
                   jobDetails={singleJob}
+                  newSavedJobs={savedJobs}
+                  toggleBookmark={toggleBookmark}
+                  newAppliedJobs={appliedJobs}
                   onClose={() => setDetailCardPop(false)}
-                  savedJob={saveJob}
+                  // savedJob={saveJob}
                   // openApplyJob={() => setOpenApplyJob(true)}
                 />
               )}
@@ -407,8 +427,11 @@ const JobFeedPage = () => {
           <div className="relative bg-white rounded-lg p-4 w-[100%] max-h-[90%] overflow-y-auto">
             <JobDetailCard
               jobDetails={singleJob}
+              newSavedJobs={savedJobs}
+              toggleBookmark={toggleBookmark}
+              newAppliedJobs={appliedJobs}
               onClose={() => setDetailCardPop(false)}
-              savedJob={saveJob}
+              // savedJob={saveJob}
               // openApplyJob={() => setOpenApplyJob(true)}
             />
           </div>
