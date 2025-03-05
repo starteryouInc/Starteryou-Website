@@ -21,6 +21,7 @@ const BetterFuture = () => {
   // State for managing heading text
   const [content, setContent] = useState("Build Better Future");
 
+  //testing
   // State for managing paragraph content
   const [paragraphs, setParagraphs] = useState([
     "Lorem  dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua..",
