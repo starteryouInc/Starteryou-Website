@@ -2,13 +2,29 @@ import React, { useState, useEffect, useRef } from "react";
 import { API_CONFIG } from "../../config/api";
 import SessionExpired from "./SessionExpired"; // Import the SessionExpired component
 
+/**
+ * Component that handles the session timer countdown, fetches session time from an API,
+ * and shows a pop-up if the session has expired.
+ *
+ * @component
+ * @example
+ * <SessionTimer />
+ *
+ * @returns {JSX.Element} The rendered SessionTimer component with session time display and session expired pop-up.
+ */
 export function SessionTimer() {
   const [timeLeft, setTimeLeft] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false); // Track session expiration
   const intervalRef = useRef(null);
 
-  // Fetch session time and update state when component is mounted or session changes
+  /**
+   * Fetches the remaining session time from the API and updates state.
+   *
+   * @async
+   * @function
+   * @returns {Promise<void>} 
+   */
   const fetchSessionTime = async () => {
     try {
       const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.sessionTime}`, { credentials: "include" });
@@ -28,7 +44,7 @@ export function SessionTimer() {
       setTimeLeft(0);
       setSessionExpired(true); // Mark the session as expired if there's an error
     }
-  };
+ };
 
   useEffect(() => {
     fetchSessionTime(); // Call API once on component mount
@@ -46,7 +62,12 @@ export function SessionTimer() {
     };
   }, [isAuthenticated]);
 
-  // Countdown logic to decrease timeLeft
+  /**
+   * Decreases the session time by 1 second each interval and marks session as expired when time reaches 0.
+   *
+   * @function
+   * @returns {void}
+   */
   useEffect(() => {
     if (timeLeft === null || timeLeft <= 0) return; // Skip if timeLeft is already expired
 
@@ -65,6 +86,12 @@ export function SessionTimer() {
     return () => clearInterval(intervalRef.current);
   }, [timeLeft]);
 
+  /**
+   * Formats the time remaining in minutes and seconds.
+   *
+   * @param {number} milliseconds - The remaining time in milliseconds.
+   * @returns {string} The formatted time string (e.g., "2m 30s remaining").
+   */
   const formatTime = (milliseconds) => {
     if (milliseconds === null) return "Loading...";
     if (milliseconds <= 0) {
@@ -83,9 +110,24 @@ export function SessionTimer() {
   );
 }
 
+/**
+ * Footer component that displays the last login time and the session timer.
+ *
+ * @component
+ * @example
+ * <Footer />
+ *
+ * @returns {JSX.Element} The rendered Footer component with last login and session time.
+ */
 export function Footer() {
   const [lastLogin, setLastLogin] = useState("0");
 
+  /**
+   * Updates the last login time displayed in the footer based on localStorage.
+   *
+   * @function
+   * @returns {void}
+   */
   useEffect(() => {
     const updateLoginTime = () => {
       const storedLoginTime = localStorage.getItem("lastLogin");

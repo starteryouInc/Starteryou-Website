@@ -3,9 +3,23 @@ import { MdErrorOutline } from "react-icons/md";
 import { IoClose } from "react-icons/io5";
 import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom
 
+/**
+ * Component that displays a session expired message and allows the user to navigate to the login page.
+ *
+ * @component
+ * @example
+ * <SessionExpired setSessionExpired={setSessionExpired} />
+ *
+ * @param {Object} props - The component props
+ * @param {Function} props.setSessionExpired - Function to update the state and close the session expired popup
+ * @returns {JSX.Element} The rendered SessionExpired component
+ */
 const SessionExpired = ({ setSessionExpired }) => { // Accept setSessionExpired function as prop
   const navigate = useNavigate(); // Initialize the navigate function
 
+  /**
+   * Handler for the login button click, navigates to the login page and closes the session expired popup.
+   */
   const handleLoginClick = () => {
     navigate("/UserLogin"); // Navigate to the login page
     setSessionExpired(false); // Close the pop-up by updating the state
