@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigation } from "../../../context/NavigationContext";
 import FileUpload from "../../Common/FileUpload";
 import { API_CONFIG } from "@config/api";
+import { Link } from "react-router-dom";
 
 const LaunchBanner = () => {
   const { isAdmin } = useNavigation();
@@ -74,12 +75,15 @@ const LaunchBanner = () => {
           college <br /> students like you!
         </p>
         <div className="flex space-x-4">
-          <button className="bg-[#D9520E] text-white py-2 px-4 rounded-xl">
+          {/* <button className="bg-[#D9520E] text-white py-2 px-4 rounded-xl">
             Sign Up
-          </button>
-          <button className="bg-white border border-black text-black py-2 px-4 ">
+          </button> */}
+          <Link
+            to="/about"
+            className="bg-white border border-black text-black py-2 px-4 "
+          >
             Learn More
-          </button>
+          </Link>
         </div>
       </div>
 

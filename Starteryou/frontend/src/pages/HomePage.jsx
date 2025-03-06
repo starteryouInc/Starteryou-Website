@@ -1,4 +1,3 @@
-import Signup from "../components/Auth/Signup";
 import Banner from "../components/Landing/Banner";
 import BestBuddy from "../components/Landing/BestBuddy";
 import BestJob from "../components/Landing/BestJob";

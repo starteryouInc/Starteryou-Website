@@ -1,4 +1,4 @@
-import DiscoverPath from "../components/Job/BeforeSignup/DiscoverPath";
+// import DiscoverPath from "../components/Job/BeforeSignup/DiscoverPath";
 import HeroJobPortal from "../components/Job/BeforeSignup/HeroJobPortal";
 
 import JobListing from "../components/Job/BeforeSignup/JobListing";
@@ -12,11 +12,12 @@ export default function JobPageBefore() {
     <div>
       <HeroJobPortal />
       <JobListing />
-      <DiscoverPath />
+      <LatestInsight />
+
+      {/* <DiscoverPath /> */}
       <UnlockPotential />
       <PathStart />
       <LaunchBanner />
-      <LatestInsight />
     </div>
   );
 }

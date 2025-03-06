@@ -29,14 +29,14 @@ const DiscoverPath = () => {
         "Gain Real-World Experience with Internships and Part-Time Opportunities",
       description:
         "Explore valuable internships and part-time jobs tailored for your academic journey.",
-      linkText: "Apply",
+      linkText: "Read",
       linkUrl: "#",
     },
     {
       title: "Access Essential Career Resources to Boost Your Job Search",
       description:
         "Utilize our comprehensive resources to enhance your job readiness and skills.",
-      linkText: "Learn",
+      linkText: "Read",
       linkUrl: "#",
     },
     {
@@ -44,7 +44,7 @@ const DiscoverPath = () => {
         "Streamlined Job Listings for Students Seeking Flexible Work Options",
       description:
         "Find job listings that cater to your unique schedule and academic commitments.",
-      linkText: "Browse",
+      linkText: "Read",
       linkUrl: "#",
     },
   ]);
@@ -290,7 +290,7 @@ const DiscoverPath = () => {
             </h2>
             <p className="text-sm mb-4 px-1">{opportunity.description}</p>
             <a
-              href={opportunity.linkUrl}
+              // href={opportunity.linkUrl}
               className="text-blue-500 font-bold px-1"
             >
               {opportunity.linkText} &gt;

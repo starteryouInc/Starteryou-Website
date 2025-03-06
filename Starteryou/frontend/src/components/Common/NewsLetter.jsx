@@ -4,11 +4,12 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { API_CONFIG } from "@config/api";
 
+
 /**
  * `NewsLetter` Component
  *
  * A newsletter subscription form that allows users to enter their name and email address.
- * It validates the inputs and submits them to the backend.
+ * It validates the inputs and submits them to the backend. 
  * Displays toast notifications for success, errors, and warnings.
  *
  * @component
