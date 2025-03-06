@@ -8,14 +8,27 @@ const EditWork = ({ closeEditWork, job, getProfileFieldData }) => {
   const { user } = useUserContext();
   const token = user?.token;
 
+  // Function to formate the dates coming from the db according to their respective fields
+  const formatDate = (dateString) => {
+    if (!dateString) return { year: "", month: "" }; // Handle missing date
+    const date = new Date(dateString);
+    return {
+      year: date.getFullYear().toString(), // Extract year
+      month: (date.getMonth() + 1).toString().padStart(2, "0"), // Extract month (0-based index)
+    };
+  };
+
+  const startDate = formatDate(job.startDate);
+  const endDate = formatDate(job.endDate);
+
   const [formData, setFormData] = useState({
     jobTitle: job.jobTitle,
     companyName: job.companyName,
     isCurrentCompany: job.endDate ? false : true,
-    startYear: "",
-    startMonth: "",
-    endYear: "",
-    endMonth: "",
+    startYear: startDate.year,
+    startMonth: startDate.month,
+    endYear: endDate.year,
+    endMonth: endDate.month,
     description: job.description,
   });
 
@@ -49,6 +62,17 @@ const EditWork = ({ closeEditWork, job, getProfileFieldData }) => {
       !formData.isCurrentCompany && formData.endYear && formData.endMonth
         ? new Date(`${formData.endYear}-${formData.endMonth}-01`)
         : null;
+
+    // Validation: endDate is not earlier than startDate
+    if (endDate && endDate < startDate) {
+      return toast.error("End date cannot be earlier than start date.");
+    }
+
+    // Validation: Prevent links in the description
+    const linkRegex = /https?:\/\/|www\.|ftp:\/\//i;
+    if (linkRegex.test(formData.description)) {
+      return toast.error("Links are not allowed in the description.");
+    }
 
     // Prepare the data in the required schema
     const workExperience = {
@@ -104,6 +128,8 @@ const EditWork = ({ closeEditWork, job, getProfileFieldData }) => {
         onChange={handleChange}
         placeholder="Most recent job title"
         className="border p-2 w-full mb-4 rounded"
+        pattern="[A-Za-z\s]+"
+        title="Only alphabets and spaces are allowed."
         required
       />
 

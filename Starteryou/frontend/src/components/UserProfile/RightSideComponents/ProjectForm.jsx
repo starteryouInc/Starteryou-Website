@@ -36,16 +36,33 @@ const ProjectForm = ({ openProjectForm, getProfileFieldData }) => {
     });
   };
 
+  //Function to validate the URL's
+  const validateURL = (url) => {
+    const urlPattern =
+      /^(https?:\/\/)?([\w.-]+)\.([a-z]{2,6})([/\w .-]*)*\/?$/i;
+    return urlPattern.test(url);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.projectTitle) {
       return toast.error("Please fill out all the required fields");
     }
 
+    if (formData.projectURL && !validateURL(formData.projectURL)) {
+      return toast.error("Please enter a valid Project URL.");
+    }
+
     const endDate =
       formData.endYear && formData.endMonth
         ? new Date(`${formData.endYear}-${formData.endMonth}-01`)
         : null;
+
+    // Validation: Prevent links in the description
+    const linkRegex = /https?:\/\/|www\.|ftp:\/\//i;
+    if (linkRegex.test(formData.description)) {
+      return toast.error("Links are not allowed in the description.");
+    }
 
     const projects = {
       title: formData.projectTitle,

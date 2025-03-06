@@ -52,7 +52,11 @@ const CoursCertiCard = ({
   return (
     <div
       className={`license-display-card ${
-        data.length !== 0 ? "space-y-4" : "space-y-0"
+        openEditCourse
+          ? "space-y-0"
+          : data.length !== 0
+          ? "space-y-4"
+          : "space-y-0"
       } `}
     >
       <div className="flex justify-between items-center">
@@ -124,7 +128,7 @@ const CoursCertiCard = ({
       </section>
       {openEditCourse && (
         <div
-          className="pop-up py-3 fixed inset-0 bg-black bg-opacity-50 flex items-start
+          className="pop-up py-3 fixed inset-0 bg-black bg-opacity-50 flex items-center
          justify-center z-50 overflow-y-scroll"
         >
           <EditCourse

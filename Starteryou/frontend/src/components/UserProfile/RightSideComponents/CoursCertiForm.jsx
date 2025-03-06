@@ -40,10 +40,21 @@ const CoursCertiForm = ({ openCertificationForm, getProfileFieldData }) => {
     });
   };
 
+  //Function to validate the URL's
+  const validateURL = (url) => {
+    const urlPattern =
+      /^(https?:\/\/)?([\w.-]+)\.([a-z]{2,6})([/\w .-]*)*\/?$/i;
+    return urlPattern.test(url);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.certificateTitle || !formData.issuedBy) {
       return toast.error("Please fill out all the required fields.");
+    }
+
+    if (formData.certificateURL && !validateURL(formData.certificateURL)) {
+      return toast.error("Please enter a valid certificate URL.");
     }
 
     const expiryDate =

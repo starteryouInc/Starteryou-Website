@@ -64,6 +64,17 @@ const WorkExperienceForm = ({ openWorkForm, getProfileFieldData }) => {
         ? new Date(`${formData.endYear}-${formData.endMonth}-01`)
         : null;
 
+    // Validation: endDate is not earlier than startDate
+    if (endDate && endDate < startDate) {
+      return toast.error("End date cannot be earlier than start date.");
+    }
+
+    // Validation: Prevent links in the description
+    const linkRegex = /https?:\/\/|www\.|ftp:\/\//i;
+    if (linkRegex.test(formData.description)) {
+      return toast.error("Links are not allowed in the description.");
+    }
+
     // Prepare the data in the required schema
     const workExperience = {
       companyName: formData.companyName,
@@ -119,6 +130,8 @@ const WorkExperienceForm = ({ openWorkForm, getProfileFieldData }) => {
         onChange={handleChange}
         placeholder="Most recent job title"
         className="border p-2 w-full mb-4 rounded"
+        pattern="[A-Za-z\s]+"
+        title="Only alphabets and spaces are allowed."
         required
       />
 

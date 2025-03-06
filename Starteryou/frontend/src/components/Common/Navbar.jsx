@@ -47,11 +47,11 @@ const Navbar = ({ isEduHero }) => {
 
   return (
     <nav
-      className={`w-full flex items-center justify-between px-4 sm:px-8 md:px-2  lg:px-12 py-4 z-50 fixed md:absolute transition-all duration-300 ${
+      className={`w-full flex items-center justify-between px-4 sm:px-8 md:px-2  lg:px-12 py-4 z-50 fixed transition-all duration-300 ${
         isEduHero
           ? "bg-[#8176FF] text-white"
           : isScrolled
-          ? "bg-[#F8F8FF] text-black"
+          ? "bg-[#8176FF] text-white"
           : "bg-transparent text-white"
       }`}
     >

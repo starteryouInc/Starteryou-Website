@@ -67,7 +67,11 @@ const ProjectCard = ({ openProjectForm, data, getProfileFieldData }) => {
   return (
     <div
       className={`project-display-card ${
-        data.length !== 0 ? "space-y-4" : "space-y-0"
+        openEditProject
+          ? "space-y-0"
+          : data.length !== 0
+          ? "space-y-4"
+          : "space-y-0"
       } `}
     >
       <div className="flex justify-between items-center">
@@ -141,7 +145,7 @@ const ProjectCard = ({ openProjectForm, data, getProfileFieldData }) => {
       </section>
       {openEditProject && (
         <div
-          className="pop-up py-3 fixed inset-0 bg-black bg-opacity-50 flex items-start
+          className="pop-up py-3 fixed inset-0 bg-black bg-opacity-50 flex items-center
          justify-center z-50 overflow-y-scroll"
         >
           <EditProject

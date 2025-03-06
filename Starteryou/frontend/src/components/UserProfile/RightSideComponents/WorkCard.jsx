@@ -69,7 +69,11 @@ const WorkCard = ({ openWorkForm, data, getProfileFieldData }) => {
   return (
     <div
       className={`work-display-card ${
-        data.length !== 0 ? "space-y-4" : "space-y-0"
+        openEditWork
+          ? "space-y-0"
+          : data.length !== 0
+          ? "space-y-4"
+          : "space-y-0"
       } `}
     >
       <div className="flex items-center justify-between">
@@ -125,7 +129,7 @@ const WorkCard = ({ openWorkForm, data, getProfileFieldData }) => {
       </section>
       {openEditWork && (
         <div
-          className="pop-up py-3 fixed inset-0 bg-black bg-opacity-50 flex items-start
+          className="pop-up py-3 fixed inset-0 bg-black bg-opacity-50 flex items-center
          justify-center z-50 overflow-y-scroll"
         >
           <EditWork

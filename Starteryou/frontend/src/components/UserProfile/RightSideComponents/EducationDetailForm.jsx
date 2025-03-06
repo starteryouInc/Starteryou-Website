@@ -51,6 +51,17 @@ const EducationalDetailsForm = ({ openEducationForm, getProfileFieldData }) => {
       ? new Date(`${formData.passingYear}-01-01`)
       : "Present";
 
+    // Validation: endDate is not earlier than startDate
+    if (endDate && endDate < startDate) {
+      return toast.error("End date cannot be earlier than start date.");
+    }
+
+    // Validation: Prevent links in the description
+    const linkRegex = /https?:\/\/|www\.|ftp:\/\//i;
+    if (linkRegex.test(formData.description)) {
+      return toast.error("Links are not allowed in the description.");
+    }
+
     const educationDetails = {
       institution: formData.institute,
       degree: formData.qualification,
@@ -104,6 +115,8 @@ const EducationalDetailsForm = ({ openEducationForm, getProfileFieldData }) => {
         onChange={handleChange}
         placeholder="Most recent Qualification"
         className="border p-2 w-full mb-4 rounded"
+        pattern="[A-Za-z\s]+"
+        title="Only alphabets and spaces are allowed."
         required
       />
 
@@ -118,6 +131,8 @@ const EducationalDetailsForm = ({ openEducationForm, getProfileFieldData }) => {
         onChange={handleChange}
         placeholder="Enter the specialisation, if have"
         className="border p-2 w-full mb-4 rounded"
+        pattern="[A-Za-z\s]+"
+        title="Only alphabets and spaces are allowed."
         required
       />
 
