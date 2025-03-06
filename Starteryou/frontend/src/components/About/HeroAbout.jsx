@@ -133,11 +133,18 @@ const HeroAbout = () => {
               </div>
             )}
             <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mt-6">
-              <button className="bg-[#D9502E] text-white py-2 px-6 rounded-lg font-semibold">
-                Get Demo
-              </button>
-              <button className="bg-white text-[#D9502E] py-2 px-6 rounded-lg font-semibold">
-                Try for Free
+              {/* <button className="bg-[#D9502E] text-white py-2 px-6 rounded-lg font-semibold">
+                Find Out More
+              </button> */}
+              <button
+                className="bg-white text-[#D9502E] py-2 px-6 rounded-lg font-semibold"
+                onClick={() => {
+                  document
+                    .getElementById("better-future")
+                    ?.scrollIntoView({ behavior: "smooth" });
+                }}
+              >
+                Take a Tour
               </button>
             </div>
           </div>

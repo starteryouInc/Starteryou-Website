@@ -6,32 +6,32 @@ import { FaPencilAlt } from "react-icons/fa";
 import axios from "axios";
 import { MaxWords } from "../Common/wordValidation";
 
-const icons = [
-  {
-    src: "/LandingPage/Icons/dashboard.svg",
-    alt: "Dashboard Icon",
-    text: "Home Page",
-    link: "/dashboard",
-  },
-  {
-    src: "/LandingPage/Icons/social.svg",
-    alt: "Settings Icon",
-    text: "School Magazines",
-    link: "/teams-socials",
-  },
-  {
-    src: "/LandingPage/Icons/user-square.svg",
-    alt: "User Icon",
-    text: "XXXXXXXXXXXX",
-    link: "/job-profile",
-  },
-  {
-    src: "/LandingPage/Icons/subscribe.svg",
-    alt: "Analytics Icon",
-    text: "XXXXXXXXXXXX",
-    link: "/subscription-management",
-  },
-];
+// const icons = [
+//   {
+//     src: "/LandingPage/Icons/dashboard.svg",
+//     alt: "Dashboard Icon",
+//     text: "Home Page",
+//     link: "/dashboard",
+//   },
+//   {
+//     src: "/LandingPage/Icons/social.svg",
+//     alt: "Settings Icon",
+//     text: "School Magazines",
+//     link: "/teams-socials",
+//   },
+//   {
+//     src: "/LandingPage/Icons/user-square.svg",
+//     alt: "User Icon",
+//     text: "XXXXXXXXXXXX",
+//     link: "/job-profile",
+//   },
+//   {
+//     src: "/LandingPage/Icons/subscribe.svg",
+//     alt: "Analytics Icon",
+//     text: "XXXXXXXXXXXX",
+//     link: "/subscription-management",
+//   },
+// ];
 
 const BestJob4 = () => {
   const { isAdmin } = useNavigation();
@@ -157,7 +157,9 @@ const BestJob4 = () => {
               placeholder="Title here..."
               className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
             />
-            <p className="text-sm text-grey-400">{titleCounter} words remaining</p>
+            <p className="text-sm text-grey-400">
+              {titleCounter} words remaining
+            </p>
             <div className="lg:w-[400px] flex items-center justify-between space-x-2 text-white">
               <button
                 onClick={saveContent}
@@ -187,7 +189,7 @@ const BestJob4 = () => {
 
         <div className="flex flex-col items-center mt-10">
           {/* Icons for small screens */}
-          <div className="flex flex-col items-center space-y-4 sm:hidden">
+          {/* <div className="flex flex-col items-center space-y-4 sm:hidden">
             <div className="flex flex-wrap justify-center space-x-6">
               {icons.map(({ src, alt, text, link }, index) => (
                 <a
@@ -202,10 +204,10 @@ const BestJob4 = () => {
                 </a>
               ))}
             </div>
-          </div>
+          </div> */}
 
           {/* Icons for medium and large screens */}
-          <div className="hidden sm:flex flex-wrap justify-center space-x-6">
+          {/* <div className="hidden sm:flex flex-wrap justify-center space-x-6">
             {icons.map(({ src, alt, text }, index) => (
               <div
                 key={index}
@@ -221,7 +223,7 @@ const BestJob4 = () => {
                 </span>
               </div>
             ))}
-          </div>
+          </div> */}
 
           {/* Image */}
           <div className="w-[330px] h-[250px] md:w-[550px] lg:w-[1020px] lg:h-[550px] bg-gradient-to-b from-[#8B96E9] to-[#E2EAFF] rounded-t-2xl rounded-b-none overflow-hidden relative flex items-center justify-center lg:mt-5">

@@ -17,8 +17,7 @@ const swaggerOptions = {
     info: {
       title: "Text Content API",
       version: "1.0.0",
-      description:
-        "API for managing text content associated with specific components",
+      description: "API for managing text content associated with specific components",
     },
     servers: [
       {
@@ -181,15 +180,13 @@ router.put("/text", async (req, res) => {
   }
   if (content === undefined && !Array.isArray(paragraphs)) {
     return res.status(400).json({
-      message:
-        "At least one of 'content' or 'paragraphs' is required in the request body.",
+      message: "At least one of 'content' or 'paragraphs' is required in the request body.",
     });
   }
 
   try {
-    let textContent = await TextContent.findOne({ page, component }).maxTimeMS(
-      10000
-    );
+    let textContent = await TextContent.findOne({ page, component }).maxTimeMS(10000);
+
     if (!textContent) {
       textContent = new TextContent({ page, component });
     }

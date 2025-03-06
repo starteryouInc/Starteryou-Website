@@ -160,9 +160,7 @@ const UnlockPotential = () => {
               <span className="text-sm text-gray-500">
                 {paragraphWordsLeft >= 0
                   ? `${paragraphWordsLeft} words left`
-                  : `Word limit exceeded by ${Math.abs(
-                      paragraphWordsLeft
-                    )} words`}
+                  : `Word limit exceeded by ${Math.abs(paragraphWordsLeft)} words`}
               </span>
               <textarea
                 value={paragraphh}

@@ -4,6 +4,7 @@ import { API_CONFIG } from "@config/api";
 import { FaPencilAlt } from "react-icons/fa";
 import axios from "axios";
 import { MaxWords } from "../Common/wordValidation";
+import { Link } from "react-router-dom";
 
 const Banner = () => {
   const { isAdmin } = useNavigation();
@@ -114,9 +115,12 @@ const Banner = () => {
             <p className="text-[#767676] mb-4 lg:max-w-[800px] whitespace-pre-wrap">
               {paragraph}
             </p>
-            <button className="px-6 py-3 bg-[#D9502E] text-white rounded-md">
+            <Link
+              to="/about"
+              className="px-6 py-3 bg-[#D9502E] text-white rounded-md"
+            >
               Learn more
-            </button>
+            </Link>
             {isAdmin && (
               <FaPencilAlt
                 onClick={handleEdit}

@@ -7,7 +7,6 @@ import { API_CONFIG } from "@config/api";
 const AdminSignup = () => {
   const { setUser } = useUserContext(); 
   const navigate = useNavigate();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");

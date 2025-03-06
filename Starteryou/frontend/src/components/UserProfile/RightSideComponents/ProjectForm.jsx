@@ -1,19 +1,101 @@
 import React, { useState } from "react";
+import { toast } from "react-toastify";
+import { useUserContext } from "../../../context/UserContext";
+import axios from "axios";
+import { API_CONFIG } from "../../../config/api";
 
-const ProjectForm = ({ openProjectForm }) => {
-  const [title, setTitle] = useState("");
-  const [url, setUrl] = useState("");
-  const [year, setYear] = useState("");
-  const [month, setMonth] = useState("");
-  const [details, setDetails] = useState("");
+const ProjectForm = ({ openProjectForm, getProfileFieldData }) => {
+  const { user } = useUserContext();
+  const token = user?.token;
 
-  const handleSave = () => {
-    const data = { title, url, endDate: { year, month }, details };
-    console.log("Form Data:", data);
+  const [formData, setFormData] = useState({
+    projectTitle: "",
+    projectURL: "",
+    description: "",
+    endYear: "",
+    endMonth: "",
+  });
+
+  // Function to clear all fields
+  const clearAllFields = () => {
+    setFormData({
+      projectTitle: "",
+      projectURL: "",
+      description: "",
+      endYear: "",
+      endMonth: "",
+    });
+  };
+
+  // Function to handle input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  //Function to validate the URL's
+  const validateURL = (url) => {
+    const urlPattern =
+      /^(https?:\/\/)?([\w.-]+)\.([a-z]{2,6})([/\w .-]*)*\/?$/i;
+    return urlPattern.test(url);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.projectTitle) {
+      return toast.error("Please fill out all the required fields");
+    }
+
+    if (formData.projectURL && !validateURL(formData.projectURL)) {
+      return toast.error("Please enter a valid Project URL.");
+    }
+
+    const endDate =
+      formData.endYear && formData.endMonth
+        ? new Date(`${formData.endYear}-${formData.endMonth}-01`)
+        : null;
+
+    // Validation: Prevent links in the description
+    const linkRegex = /https?:\/\/|www\.|ftp:\/\//i;
+    if (linkRegex.test(formData.description)) {
+      return toast.error("Links are not allowed in the description.");
+    }
+
+    const projects = {
+      title: formData.projectTitle,
+      description: formData.description,
+      endYear: endDate,
+      projectURL: formData.projectURL,
+    };
+
+    try {
+      const userId = user?.authenticatedUser?._id;
+      const { data } = await axios.post(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.addProject(userId)}`,
+        projects,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success(data.msg);
+      getProfileFieldData();
+      clearAllFields();
+      openProjectForm();
+    } catch (error) {
+      toast.error(error.response?.data?.msg);
+    }
   };
 
   return (
-    <div className="max-w-3xl mx-4 bg-white p-8 border rounded-lg space-y-4 md:w-[560px]">
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-3xl mx-4 bg-white p-8 border rounded-lg space-y-4 md:w-[560px]"
+    >
       <h3 className="text-2xl font-semibold mb-4">Projects</h3>
 
       <label className="block font-semibold text-[#777585] mb-2">
@@ -21,38 +103,48 @@ const ProjectForm = ({ openProjectForm }) => {
       </label>
       <input
         type="text"
+        name="projectTitle"
         placeholder="Enter your title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        value={formData.projectTitle}
+        onChange={handleChange}
         className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+        required
       />
 
       <label className="block font-semibold text-[#777585] mb-2">URL</label>
       <input
         type="text"
+        name="projectURL"
         placeholder="Enter your URL"
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
+        value={formData.projectURL}
+        onChange={handleChange}
         className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
       />
 
-      <label className="block font-semibold text-[#777585] mb-2">End Date</label>
+      <label className="block font-semibold text-[#777585] mb-2">
+        End Date
+      </label>
       <div className="flex gap-4 mb-4">
         <select
-          value={year}
-          onChange={(e) => setYear(e.target.value)}
+          name="endYear"
+          value={formData.endYear}
+          onChange={handleChange}
           className="p-2 border border-gray-300 rounded focus:ring-2 focus:ring-purple-500"
         >
           <option value="">Year</option>
-          {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i).map((yr) => (
+          {Array.from(
+            { length: 50 },
+            (_, i) => new Date().getFullYear() - i
+          ).map((yr) => (
             <option key={yr} value={yr}>
               {yr}
             </option>
           ))}
         </select>
         <select
-          value={month}
-          onChange={(e) => setMonth(e.target.value)}
+          name="endMonth"
+          value={formData.endMonth}
+          onChange={handleChange}
           className="p-2 border border-gray-300 rounded focus:ring-2 focus:ring-purple-500"
         >
           <option value="">Month</option>
@@ -77,11 +169,14 @@ const ProjectForm = ({ openProjectForm }) => {
         </select>
       </div>
 
-      <label className="block font-semibold text-[#777585] mb-2">Details of Projects</label>
+      <label className="block font-semibold text-[#777585] mb-2">
+        Details of Projects
+      </label>
       <textarea
+        name="description"
         placeholder="Enter your project detail"
-        value={details}
-        onChange={(e) => setDetails(e.target.value)}
+        value={formData.description}
+        onChange={handleChange}
         maxLength={1000}
         rows={4}
         className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -90,19 +185,16 @@ const ProjectForm = ({ openProjectForm }) => {
 
       <div className="flex gap-4">
         <button
-          onClick={handleSave}
+          type="submit"
           className="bg-purple-600 text-white py-2 px-6 rounded hover:bg-purple-700"
         >
           Save
         </button>
-        <button
-          onClick={openProjectForm}
-          className="text-purple-600"
-        >
+        <button onClick={openProjectForm} className="text-purple-600">
           Cancel
         </button>
       </div>
-    </div>
+    </form>
   );
 };
 
