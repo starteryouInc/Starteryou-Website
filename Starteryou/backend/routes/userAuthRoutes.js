@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Users = require("../models/UsersModel");
 const Employers = require("../models/EmployersModel");
+const sessionRoutes = require("./sessionRoutes");
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 
 require("dotenv").config({ path: ".env.server" });
@@ -265,7 +266,7 @@ router.post("/users-seeker-register", async (req, res) => {
  * @throws {500} Internal Server Error - If an error occurs during login processing.
  */
 
-router.post("/users-login", async (req, res) => {
+router.post("/users-login", sessionRoutes, async (req, res) => {
   const { email, password } = req.body;
 
   // Check if all the required fields are provided
@@ -298,6 +299,16 @@ router.post("/users-login", async (req, res) => {
     }
 
     const accessToken = generateAccessToken(users);
+
+    req.session.isLoggedIn = true;
+    const lastLogin = Date.now(); // Store the last login time
+    users.lastLogin = lastLogin;
+    req.session.user = users.username; // Assigning the correct username to the session
+    req.session.userId = users._id;
+    req.session.role = users.role;
+    req.session.cookie.maxAge = 60 * 60 * 1000; // 1 hour
+    await users.save();
+    
     res.status(200).json({
       success: true,
       msg: "Login successfull",
