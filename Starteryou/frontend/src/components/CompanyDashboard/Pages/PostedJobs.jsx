@@ -46,8 +46,9 @@ const PostedJobs = () => {
     }
     setLoading(true);
     try {
+      const userId = user?.authenticatedUser?._id;
       const { data } = await axios.get(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getPostedJobs}`,
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getPostedJobs(userId)}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -153,6 +154,7 @@ const PostedJobs = () => {
                     job={selectedJob}
                     getPostedJobs={getPostedJobs}
                     deleteJobFunction={deleteJob}
+                    closeDetailedCard2={() => setShowDetailedCard(false)}
                   />
                 </div>
               </div>

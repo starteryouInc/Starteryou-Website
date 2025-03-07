@@ -3,10 +3,15 @@ import { useEffect, useState } from "react";
 import { useUserContext } from "../../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import { API_CONFIG } from "../../config/api";
-import { toast } from 'react-hot-toast';
+import { toast } from "react-hot-toast";
 import axios from "axios";
 
-const EditJobCard = ({ closeEditJobCard, editJob, getPostedJobs }) => {
+const EditJobCard = ({
+  closeEditJobCard,
+  editJob,
+  getPostedJobs,
+  closeDetailedCard2,
+}) => {
   const navigate = useNavigate();
   const { user } = useUserContext();
   const token = user?.token;
@@ -62,6 +67,12 @@ const EditJobCard = ({ closeEditJobCard, editJob, getPostedJobs }) => {
     const startDate = job.startDate ? new Date(job.startDate) : null;
     const endDate = job.endDate ? new Date(job.endDate) : null;
 
+    // Validation: Prevent links in the description
+    const linkRegex = /https?:\/\/|www\.|ftp:\/\//i;
+    if (linkRegex.test(job.description)) {
+      return toast.error("Links are not allowed in the description.");
+    }
+
     try {
       const { data } = await axios.put(
         `${API_CONFIG.baseURL}${API_CONFIG.endpoints.updateJob(editJob._id)}`,
@@ -79,9 +90,10 @@ const EditJobCard = ({ closeEditJobCard, editJob, getPostedJobs }) => {
       toast.success(data.msg);
       clearAllFields();
       closeEditJobCard();
+      closeDetailedCard2();
       getPostedJobs();
     } catch (error) {
-      toast.error(error.response?.data?.msg);
+      toast.error(error.response?.data?.error);
     }
   };
 
@@ -113,7 +125,9 @@ const EditJobCard = ({ closeEditJobCard, editJob, getPostedJobs }) => {
                   name="title"
                   placeholder="Enter job title"
                   value={job.title}
-                  pattern="[A-Za-z\s]+"
+                  pattern={
+                    "^[A-Za-z\\s&.,@!#%*()\\-+=\\[\\]:;\\\"'<>\\?/\\\\|^~`]+$"
+                  }
                   title="Only alphabets and spaces are allowed."
                   onChange={handleChange}
                   className="w-full p-2 border rounded"
@@ -128,7 +142,9 @@ const EditJobCard = ({ closeEditJobCard, editJob, getPostedJobs }) => {
                   type="text"
                   name="location"
                   placeholder="Enter location"
-                  pattern="[A-Za-z\s]+"
+                  pattern={
+                    "^[A-Za-z\\s&.,@!#%*()\\-+=\\[\\]:;\\\"'<>\\?/\\\\|^~`]+$"
+                  }
                   title="Only alphabets and spaces are allowed."
                   value={job.location}
                   onChange={handleChange}
@@ -145,7 +161,9 @@ const EditJobCard = ({ closeEditJobCard, editJob, getPostedJobs }) => {
                   name="industry"
                   placeholder="Enter category (e.g IT)"
                   value={job.industry}
-                  pattern="[A-Za-z\s]+"
+                  pattern={
+                    "^[A-Za-z\\s&.,@!#%*()\\-+=\\[\\]:;\\\"'<>\\?/\\\\|^~`]+$"
+                  }
                   title="Only alphabets and spaces are allowed."
                   onChange={handleChange}
                   className="w-full p-2 border rounded"
@@ -181,10 +199,10 @@ const EditJobCard = ({ closeEditJobCard, editJob, getPostedJobs }) => {
                   onChange={handleChange}
                   className="w-full p-2 border rounded"
                 >
-                  <option value="0-3">0-3 Months</option>
-                  <option value="3-6">3-6 Months</option>
-                  <option value="6-12">6-12 Months</option>
-                  <option value="12+">1 Year+</option>
+                  <option value="0-3 Months">0-3 Months</option>
+                  <option value="3-6 Months">3-6 Months</option>
+                  <option value="6-12 Months">6-12 Months</option>
+                  <option value="1 Year+">1 Year+</option>
                 </select>
               </div>
               <div>

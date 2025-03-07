@@ -53,7 +53,7 @@ const JobSchema = new mongoose.Schema({
   },
   experienceLevel: {
     type: String,
-    enum: ["Entry", "Mid", "Senior"],
+    enum: ["0-3 Months", "3-6 Months", "6-12 Months", "1 Year+"],
     required: true,
   },
   workplaceType: {

@@ -130,7 +130,7 @@ const WorkExperienceForm = ({ openWorkForm, getProfileFieldData }) => {
         onChange={handleChange}
         placeholder="Most recent job title"
         className="border p-2 w-full mb-4 rounded"
-        pattern="[A-Za-z\s]+"
+        pattern={'^[A-Za-z\\s&.,@!#%*()\\-+=\\[\\]:;\\"\'<>\\?/\\\\|^~`]+$'} 
         title="Only alphabets and spaces are allowed."
         required
       />

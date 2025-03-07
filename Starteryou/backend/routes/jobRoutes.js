@@ -381,12 +381,13 @@ router.delete("/delete-job/:id", authorize("employer"), async (req, res) => {
  * @throws {Error} If no jobs are found or an internal server error occurs
  */
 router.get(
-  "/fetch-posted-jobs",
+  "/fetch-posted-jobs/:userId",
   authorize("employer"),
   cacheMiddlewareJob,
   async (req, res) => {
     try {
-      const userId = req.user?.id;
+      const { userId } = req.params;
+      // const userId = req.user?.id;
       const cacheKey = `/api/v1/jobportal/jobs/fetch-posted-jobs/${userId}`;
       console.log(`Cache Key: ${cacheKey}`);
 

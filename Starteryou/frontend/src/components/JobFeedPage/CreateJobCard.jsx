@@ -85,6 +85,12 @@ const CreateJobCard = ({ fetchPostedJobs, closeCreateJobCard }) => {
     const startDate = job.startDate ? new Date(job.startDate) : null;
     const endDate = job.endDate ? new Date(job.endDate) : null;
 
+    // Validation: Prevent links in the description
+    const linkRegex = /https?:\/\/|www\.|ftp:\/\//i;
+    if (linkRegex.test(job.description)) {
+      return toast.error("Links are not allowed in the description.");
+    }
+
     try {
       const companyName = user?.authenticatedUser?.companyName;
       const { data } = await axios.post(
@@ -142,6 +148,10 @@ const CreateJobCard = ({ fetchPostedJobs, closeCreateJobCard }) => {
                   placeholder="Enter job title"
                   value={job.title}
                   onChange={handleChange}
+                  pattern={
+                    "^[A-Za-z\\s&.,@!#%*()\\-+=\\[\\]:;\\\"'<>\\?/\\\\|^~`]+$"
+                  }
+                  title="Only alphabets and spaces are allowed."
                   className="w-full p-2 border rounded"
                   required
                 />
@@ -156,6 +166,10 @@ const CreateJobCard = ({ fetchPostedJobs, closeCreateJobCard }) => {
                   placeholder="Enter location"
                   value={job.location}
                   onChange={handleChange}
+                  pattern={
+                    "^[A-Za-z\\s&.,@!#%*()\\-+=\\[\\]:;\\\"'<>\\?/\\\\|^~`]+$"
+                  }
+                  title="Only alphabets and spaces are allowed."
                   className="w-full p-2 border rounded"
                   required
                 />
@@ -170,6 +184,10 @@ const CreateJobCard = ({ fetchPostedJobs, closeCreateJobCard }) => {
                   placeholder="Enter category (e.g IT)"
                   value={job.industry}
                   onChange={handleChange}
+                  pattern={
+                    "^[A-Za-z\\s&.,@!#%*()\\-+=\\[\\]:;\\\"'<>\\?/\\\\|^~`]+$"
+                  }
+                  title="Only alphabets and spaces are allowed."
                   className="w-full p-2 border rounded"
                   required
                 />
@@ -203,9 +221,10 @@ const CreateJobCard = ({ fetchPostedJobs, closeCreateJobCard }) => {
                   onChange={handleChange}
                   className="w-full p-2 border rounded"
                 >
-                  <option value="Entry">Entry</option>
-                  <option value="Mid">Mid</option>
-                  <option value="Senior">Senior</option>
+                  <option value="0-3 Months">0-3 Months</option>
+                  <option value="3-6 Months">3-6 Months</option>
+                  <option value="6-12 Months">6-12 Months</option>
+                  <option value="1 Year+">1 Year+</option>
                 </select>
               </div>
               <div>
