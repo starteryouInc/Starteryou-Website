@@ -1,6 +1,6 @@
 // config/api.js
 export const API_CONFIG = {
-  baseURL: "http://localhost:3000",
+  baseURL: "http://dev.starteryou.com:3000",
   endpoints: {
     fileByTitle: (title) => `/api/files/download/${title}`,
     fileUpload: "/api/files/upload",
@@ -25,7 +25,8 @@ export const API_CONFIG = {
     getJobById: (id) => `/api/v1/jobportal/jobs/fetch-job/${id}`,
     updateJob: (id) => `/api/v1/jobportal/jobs/update-job/${id}`,
     deleteJob: (id) => `/api/v1/jobportal/jobs/delete-job/${id}`,
-    getPostedJobs: (userId) => `/api/v1/jobportal/jobs/fetch-posted-jobs/${userId}`,
+    getPostedJobs: (userId) =>
+      `/api/v1/jobportal/jobs/fetch-posted-jobs/${userId}`,
     // Job Application API's
     applyJob: (jobId) => `/api/v1/jobportal/applications/${jobId}/apply-job`,
     getAppliedJobs: "/api/v1/jobportal/applications/fetch-applied-jobs",
