@@ -5,7 +5,7 @@ import { GrCertificate } from "react-icons/gr";
 import { MdOutlineDelete } from "react-icons/md";
 import { API_CONFIG } from "../../../config/api";
 import { useUserContext } from "../../../context/UserContext";
-import { toast } from "react-toastify";
+import { toast } from 'react-hot-toast';;
 import axios from "axios";
 import EditCourse from "./EditableForms/EditCourse";
 

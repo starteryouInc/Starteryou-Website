@@ -5,18 +5,14 @@ import { useNavigation } from "../../../context/NavigationContext";
 import { API_CONFIG } from "@config/api";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-hot-toast";
 
 // Helper function for word validation
 export const MaxWords = (value, maxWords, setCounter) => {
   const words = value.split(/\s+/).filter(Boolean); // Split input into words
   setCounter(maxWords - words.length); // Update remaining word count
   if (words.length > maxWords) {
-    toast.error(`Word limit exceeded! Maximum allowed is ${maxWords} words.`, {
-      position: "top-right",
-      autoClose: 3000,
-    });
+    toast.error(`Word limit exceeded! Maximum allowed is ${maxWords} words.`);
     return words.slice(0, maxWords).join(" "); // Truncate the input
   }
   return value;
@@ -204,7 +200,6 @@ const DiscoverPath = () => {
 
   return (
     <div className="mx-auto max-w-[1430px] px-4 lg:px-10 py-16">
-      <ToastContainer />
       {/* Top Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center md:pb-6 gap-4">
         {isEditing ? (

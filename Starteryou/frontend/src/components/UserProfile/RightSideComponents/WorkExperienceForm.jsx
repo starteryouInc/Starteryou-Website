@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { API_CONFIG } from "../../../config/api";
 import { useUserContext } from "../../../context/UserContext";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast } from 'react-hot-toast';
 
 const WorkExperienceForm = ({ openWorkForm, getProfileFieldData }) => {
   const { user } = useUserContext();

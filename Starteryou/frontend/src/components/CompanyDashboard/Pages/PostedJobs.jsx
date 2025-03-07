@@ -4,7 +4,7 @@ import JobDetailedCard2 from "../JobDetailedCard2";
 import { API_CONFIG } from "../../../config/api";
 import { useNavigate } from "react-router-dom";
 import { useUserContext } from "../../../context/UserContext";
-import { toast } from "react-toastify";
+import { toast } from 'react-hot-toast';
 import axios from "axios";
 import QuickTips from "../QuickTips";
 import NeedHelp from "../NeedHelp";

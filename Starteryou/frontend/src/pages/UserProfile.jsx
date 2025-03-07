@@ -5,7 +5,7 @@ import RightSide from "../components/UserProfile/RightSide";
 import { API_CONFIG } from "../config/api";
 import { useUserContext } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import axios from "axios";
 
 const UserProfile = () => {
@@ -59,21 +59,21 @@ const UserProfile = () => {
   };
 
   /**
- * Fetches a specific field from the user's profile.
- * 
- * @async
- * @function getUserProfileField
- * @param {string} fieldName - The name of the profile field to retrieve.
- * @returns {Promise<any|null>} The value of the requested profile field if successful, otherwise `null`.
- * 
- * @throws {Error} Displays an error toast if the request fails.
- * 
- * @description 
- * - Retrieves the authenticated user's ID.
- * - Sends a request to fetch a specific field from the user's profile.
- * - If successful, returns the requested field data.
- * - If an error occurs, logs the error and returns `null`.
- */
+   * Fetches a specific field from the user's profile.
+   *
+   * @async
+   * @function getUserProfileField
+   * @param {string} fieldName - The name of the profile field to retrieve.
+   * @returns {Promise<any|null>} The value of the requested profile field if successful, otherwise `null`.
+   *
+   * @throws {Error} Displays an error toast if the request fails.
+   *
+   * @description
+   * - Retrieves the authenticated user's ID.
+   * - Sends a request to fetch a specific field from the user's profile.
+   * - If successful, returns the requested field data.
+   * - If an error occurs, logs the error and returns `null`.
+   */
 
   const getUserProfileField = async (fieldName) => {
     try {

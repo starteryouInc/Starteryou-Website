@@ -8,7 +8,7 @@ import JobDetailCard from "../components/JobFeedPage/JobDetailCard";
 import { useUserContext } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import { API_CONFIG } from "../config/api";
-import { toast } from "react-toastify";
+import { toast } from 'react-hot-toast';
 import axios from "axios";
 
 const JobFeedPage = () => {

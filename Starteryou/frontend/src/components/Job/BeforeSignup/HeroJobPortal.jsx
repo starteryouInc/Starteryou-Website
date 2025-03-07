@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
-import { toast } from "react-toastify";
+import { toast } from 'react-hot-toast';
 import { useNavigation } from "../../../context/NavigationContext";
 import FileUpload from "../../Common/FileUpload";
 import { MaxWords } from "../../Common/wordValidation";

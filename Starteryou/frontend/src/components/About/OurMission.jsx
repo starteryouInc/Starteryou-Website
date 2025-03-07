@@ -19,33 +19,31 @@
  * - Responsive design for both text and image sections.
  */
 
-
 import { useState, useEffect } from "react";
 import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
 import { API_CONFIG } from "@config/api";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-hot-toast";
 import { MaxWords } from "../Common/wordValidation";
 
 const OurMission = () => {
-    // State for title, paragraph, and image preview
+  // State for title, paragraph, and image preview
 
   const [title, setTitle] = useState("OUR MISSION");
   const [paragraph, setParagraph] = useState(
     "Starteryou is dedicated to empowering students by providing a vibrant and inclusive platform for discovering career opportunities. We foster a supportive community that bridges the gap between students and employers, facilitating skill development and guiding them towards meaningful career paths. We aim to transform the student learning experience, equipping individuals with essential career skills often overlooked in traditional education settings."
   );
-  const [isEditing, setIsEditing] = useState(false);// Edit mode state
-  const { isAdmin } = useNavigation();// Check if the user is an admin
-  const [error, setError] = useState("");// Error state for API actions
+  const [isEditing, setIsEditing] = useState(false); // Edit mode state
+  const { isAdmin } = useNavigation(); // Check if the user is an admin
+  const [error, setError] = useState(""); // Error state for API actions
   const page = "AboutPage"; // Specify the page name for the current component.
-  const [uploadedFile, setUploadedFile] = useState(null);// Use uploadedFile for both uploaded and previewed images
+  const [uploadedFile, setUploadedFile] = useState(null); // Use uploadedFile for both uploaded and previewed images
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false); // State to track fetch attempt
-  const [titleWordsLeft, setTitleWordsLeft] = useState(3);// Counter for the title
+  const [titleWordsLeft, setTitleWordsLeft] = useState(3); // Counter for the title
   const [paragraphWordsLeft, setParagraphWordsLeft] = useState(84); // Counter for the
-/**
+  /**
    * Fetches mission content from the server.
    * On success, updates the title and paragraph state.
    * On error, displays an error message.
@@ -63,21 +61,21 @@ const OurMission = () => {
       }
 
       const blob = await response.blob(); // Get the response as a Blob
-      const url = URL.createObjectURL(blob);// Create a local URL for the Blob
-      setUploadedFile(url);// Set the uploaded file data with its local URL
-      setError(null);// Reset error state on successful fetch
+      const url = URL.createObjectURL(blob); // Create a local URL for the Blob
+      setUploadedFile(url); // Set the uploaded file data with its local URL
+      setError(null); // Reset error state on successful fetch
     } catch (err) {
       console.error("Error fetching uploaded file:", err);
-      setError("Failed to load image. Please try again later.");// Set error message
+      setError("Failed to load image. Please try again later."); // Set error message
     } finally {
-      setHasFetchedOnce(true);// Mark as fetch attempt made
+      setHasFetchedOnce(true); // Mark as fetch attempt made
     }
   };
 
   useEffect(() => {
-    fetchUploadedFile();// Fetch the specific image on component mount
+    fetchUploadedFile(); // Fetch the specific image on component mount
   }, []);
-/**
+  /**
    * Handles the image upload process.
    * Sends the file and title to the server and updates the preview.
    *
@@ -86,8 +84,8 @@ const OurMission = () => {
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     const formData = new FormData();
-    formData.append("file", file);// Append the file to the FormData
-    formData.append("title", title);// Include the title for the update
+    formData.append("file", file); // Append the file to the FormData
+    formData.append("title", title); // Include the title for the update
 
     try {
       const response = await fetch(
@@ -102,14 +100,14 @@ const OurMission = () => {
         throw new Error("Image upload failed.");
       }
 
-      setUploadedFile(URL.createObjectURL(file));// Update the uploaded file state with the new image preview
-      setError(null);  // Reset error state on successful upload
+      setUploadedFile(URL.createObjectURL(file)); // Update the uploaded file state with the new image preview
+      setError(null); // Reset error state on successful upload
     } catch (err) {
       console.error("Error uploading file:", err);
       setError("Error updating image. Please try again later."); // Set error message
     }
   };
- /**
+  /**
    * Fetches the text content for the mission statement from the server.
    */
 
@@ -137,7 +135,7 @@ const OurMission = () => {
 
     fetchData();
   }, []);
-/**
+  /**
    * Enables the edit mode for admin users.
    */
   const handleEdit = () => isAdmin && setIsEditing(true);
@@ -149,7 +147,7 @@ const OurMission = () => {
    */
 
   const handleChangeTitle = (e) => {
-    const updatedTitle = MaxWords(e.target.value, 3, setTitleWordsLeft);// Limit to 3 words
+    const updatedTitle = MaxWords(e.target.value, 3, setTitleWordsLeft); // Limit to 3 words
     setTitle(updatedTitle);
   };
 
@@ -159,11 +157,15 @@ const OurMission = () => {
    * @param {Event} e - The change event from the textarea field.
    */
   const handleChangeParagraph = (e) => {
-    const updatedParagraph = MaxWords(e.target.value, 84, setParagraphWordsLeft);// Limit to 84 words
+    const updatedParagraph = MaxWords(
+      e.target.value,
+      84,
+      setParagraphWordsLeft
+    ); // Limit to 84 words
     setParagraph(updatedParagraph);
   };
 
-   /**
+  /**
    * Saves the edited title and paragraph content to the server.
    *
    * @async
@@ -181,10 +183,7 @@ const OurMission = () => {
 
       setError("");
       setIsEditing(false);
-      toast.success("Content saved successfully!", {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.success("This is a success message!");
     } catch (err) {
       console.error("Error saving content:", err);
       setError("Failed to save content. Please try again.");
@@ -208,7 +207,7 @@ const OurMission = () => {
                 onChange={handleChangeTitle}
                 className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-[#1F2329] border border-gray-300 p-2 rounded w-full"
               />
-               {/* Textarea for paragraph editing */}
+              {/* Textarea for paragraph editing */}
               <span className="text-gray-500 text-sm">
                 {paragraphWordsLeft >= 0
                   ? `${paragraphWordsLeft} words left`
@@ -234,8 +233,7 @@ const OurMission = () => {
             <div>
               <h2 className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-[#1F2329]">
                 {title}
-              {/* Display title and paragraph */}
-
+                {/* Display title and paragraph */}
               </h2>
               <p className="text-[#1F2329] text-base">{paragraph}</p>
               {/* Edit icon for admin users */}

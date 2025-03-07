@@ -4,7 +4,7 @@ import { IoBagHandleSharp } from "react-icons/io5";
 import { BsBell } from "react-icons/bs";
 import { FaUserCircle } from "react-icons/fa";
 import { useUserContext } from "../context/UserContext";
-import { toast } from "react-toastify";
+import { toast } from 'react-hot-toast';
 import Navbar from "../components/Common/Navbar";
 
 /**

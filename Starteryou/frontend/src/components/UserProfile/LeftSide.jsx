@@ -22,7 +22,7 @@ import {
 import SocialPresenceForm from "./LeftSideComponent/SocialPresenceForm";
 import { API_CONFIG } from "../../config/api";
 import { useUserContext } from "../../context/UserContext";
-import { toast } from "react-toastify";
+import { toast } from 'react-hot-toast';
 import axios from "axios";
 
 /**
