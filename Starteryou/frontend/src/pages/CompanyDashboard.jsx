@@ -4,7 +4,7 @@ import { IoBagHandleSharp } from "react-icons/io5";
 import { BsBell } from "react-icons/bs";
 import { FaUserCircle } from "react-icons/fa";
 import { useUserContext } from "../context/UserContext";
-import { toast } from 'react-hot-toast';
+import { toast } from "react-hot-toast";
 import Navbar from "../components/Common/Navbar";
 
 /**
@@ -39,7 +39,7 @@ const CompanyDashboard = () => {
             <li className="text-[16px]">
               <Link
                 to="/companyDashboard/"
-                className={`flex items-center px-3 py-2 transition duration-300 ${
+                className={`flex items-center px-3 py-2 rounded-md transition duration-300 ${
                   location.pathname === "/companyDashboard/"
                     ? "border-b-4 border-[#7950F2] text-[#7950F2] font-semibold"
                     : "text-gray-700 hover:text-[#7950F2] hover:border-b-4 hover:border-[#7950F2]"
@@ -54,7 +54,7 @@ const CompanyDashboard = () => {
             <li className="text-[16px]">
               <Link
                 to="/companyDashboard/postedJobs"
-                className={`flex items-center px-3 py-2 transition duration-300 ${
+                className={`flex items-center px-3 py-2 rounded-md transition duration-300 ${
                   location.pathname === "/companyDashboard/postedJobs"
                     ? "border-b-4 border-[#7950F2] text-[#7950F2] font-semibold"
                     : "text-gray-700 hover:text-[#7950F2] hover:border-b-4 hover:border-[#7950F2]"
