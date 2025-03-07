@@ -137,4 +137,4 @@ const monitorConnectionEvents = () => {
 runTest().catch(console.error);
 console.log("MongoDB URI:", mongoUri);
 
-module.exports = { connectToMongoDB, mongoConnection: mongoose.connection };
+module.exports = { connectToMongoDB, mongoUri, mongoConnection: mongoose.connection };

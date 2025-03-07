@@ -26,22 +26,42 @@ const UserLogin = () => {
         {
           email,
           password,
-        }
+        },
+        { withCredentials: true } // This ensures cookies are sent and received properly
       );
       loginUser({
         authenticatedUser: data.users,
         token: data.tokens.accessToken,
       });
+      localStorage.setItem("lastLogin", Date.now().toString());
       toast.success(data.msg);
       if (data.users.role === "jobSeeker") {
         navigate("/jobfeeds");
       } else {
         navigate("/companyDashboard/");
       }
+      // Fetch session time after login
+      await fetchSessionTime();
+      // Dispatch custom event after successful login
+      const event = new Event('userLoggedIn');
+      window.dispatchEvent(event);
     } catch (error) {
       toast.error(error.response?.data?.msg);
     }
   };
+
+  const fetchSessionTime = async () => {
+    try {
+      const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.sessionTime}`, { credentials: "include" });
+      if (!response.ok) throw new Error("Session expired");
+
+      const data = await response.json();
+      console.log("Session time fetched after login:", data);
+    } catch (error) {
+      console.error("Error fetching session time after login:", error);
+    }
+  };
+  
   const reviews = [
     {
       stars: 5,

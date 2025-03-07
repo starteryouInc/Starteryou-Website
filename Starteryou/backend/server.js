@@ -4,7 +4,11 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
-const { connectToMongoDB } = require("./db");
+const cookieParser = require("cookie-parser");
+const session = require("express-session");
+const sessionRoutes = require('./routes/sessionRoutes'); 
+const { connectToMongoDB, mongoUri } = require("./db");
+const MongoStore = require("connect-mongo");
 const textRoutes = require("./routes/textRoutes");
 const fileRoutes = require("./routes/fileRoutes");
 const swaggerJsDoc = require("swagger-jsdoc");
@@ -19,11 +23,49 @@ const { router } = require("./routes/index");
 
 // Initialize Express app
 const app = express();
+
 // Middleware
 dotenv.config();
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,  // Frontend URL
+    credentials: true,  // Allow cookies to be sent
+  })
+);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(cookieParser());
+
+const sessionStore = MongoStore.create({
+  mongoUrl: mongoUri, // MongoDB URI
+});
+
+sessionStore.on('connected', async () => {
+  try {
+    console.log("Clearing session store...");
+    await sessionStore.clear();  // Clear all sessions
+    console.log("Session store cleared successfully.");
+  } catch (err) {
+    console.error("Error clearing session store:", err);
+  }
+});
+
+// Configure session middleware
+app.use(
+  session({
+    secret: "your-secret-key",
+    resave: false,
+    saveUninitialized: false,
+    store: sessionStore,
+    cookie: {
+      httpOnly: true,
+      secure: false, // Set to true if using HTTPS and set to false if using local environment
+      sameSite: "Lax", // Set to 'None' for cross-origin cookies and set to 'Lax' for same-origin in local environment
+      maxAge: 60 * 60 * 1000,  // 1 hour session duration
+    },
+  })
+);
 
 app.use("/api/newsletter", newsletterRoutes); //Newsletter subscribers
 
@@ -78,6 +120,8 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use("/api/system", verificationRoutes);
 mountRoutes(app); // This mounts the main routes including API docs
+
+app.use("/api", sessionRoutes); // Mount sessionRoutes
 
 // Routes
 /**
