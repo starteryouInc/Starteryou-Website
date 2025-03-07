@@ -3,7 +3,7 @@ import { FaBuilding, FaUsers, FaEye } from "react-icons/fa";
 import { MdLocationOn, MdDateRange } from "react-icons/md";
 import { BsGraphUp } from "react-icons/bs";
 import { useUserContext } from "../../../context/UserContext";
-import { toast } from "react-toastify";
+import { toast } from 'react-hot-toast';
 import { API_CONFIG } from "../../../config/api";
 import axios from "axios";
 import { Link } from "react-router-dom";

@@ -8,7 +8,7 @@ import JobDetailCard from "../components/JobFeedPage/JobDetailCard";
 import { useUserContext } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import { API_CONFIG } from "../config/api";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import axios from "axios";
 
 const JobFeedPage = () => {
@@ -356,12 +356,19 @@ const JobFeedPage = () => {
             ].map(({ label, count }) => (
               <li
                 key={label}
-                className={`cursor-pointer ${
-                  selectedTab === label ? "text-[#8d00ff] font-bold" : ""
+                className={`relative cursor-pointer transition duration-300 ease-in-out transform hover:scale-105 px-4 py-2 rounded-lg ${
+                  selectedTab === label
+                    ? " text-black font-bold "
+                    : " text-gray-700 "
                 }`}
                 onClick={() => handleTabClick(label)}
               >
-                {label} ({count})
+                <span>{label}</span>
+                {count > 0 && (
+                  <span className="absolute top-0 right-0 -mt-2 -mr-2 bg-[#8176FF] text-white text-xs font-semibold rounded-full h-5 w-5 flex items-center justify-center">
+                    {count}
+                  </span>
+                )}
               </li>
             ))}
           </ul>

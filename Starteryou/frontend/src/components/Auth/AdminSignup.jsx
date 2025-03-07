@@ -1,61 +1,68 @@
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useUserContext } from "../../context/UserContext"; 
+import { useUserContext } from "../../context/UserContext";
 import { API_CONFIG } from "@config/api";
 const AdminSignup = () => {
-  const { setUser } = useUserContext(); 
+  const { setUser } = useUserContext();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [username, setUsername] = useState("");
-  
-//validate email
+
+  //validate email
   const validateEmail = (email) => {
     const regex = /^[a-zA-Z0-9._%+-]+@starteryou\.com$/i;
     return regex.test(email);
-    };
+  };
 
   const handleAdminSignup = async (e) => {
     e.preventDefault();
 
     if (!validateEmail(email)) {
-      toast.error("Email must end with @starteryou.com and be in the correct format.");
+      toast.error(
+        "Email must end with @starteryou.com and be in the correct format."
+      );
       return;
     }
 
     try {
-    const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.authRegister}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        password,
-        phoneNumber,
-        username,
-        role: "admin",
-      }),
-    });
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.authRegister}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+            phoneNumber,
+            username,
+            role: "admin",
+          }),
+        }
+      );
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
-      toast.success("Admin signup successful! You can now log in.");
-      setUser(data.user);
-      navigate("/login");
-    } else if (response.status === 409) {
-      toast.error(data.message || "A user with this email already exists. Please log in.");
-    } else {
-      toast.error(data.message || "Signup failed. Please try again.");
+      if (response.ok) {
+        toast.success("Admin signup successful! You can now log in.");
+        setUser(data.user);
+        navigate("/login");
+      } else if (response.status === 409) {
+        toast.error(
+          data.message ||
+            "A user with this email already exists. Please log in."
+        );
+      } else {
+        toast.error(data.message || "Signup failed. Please try again.");
+      }
+    } catch (error) {
+      toast.error("An error occurred during signup.");
     }
-  } catch (error) {
-    toast.error("An error occurred during signup.");
-  }
-};
+  };
 
   return (
     <div
@@ -63,10 +70,15 @@ const AdminSignup = () => {
       style={{ backgroundImage: "url(/AboutPage/Aboutbg.svg)" }}
     >
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md border border-gray-200">
-        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Admin Sign Up</h2>
+        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
+          Admin Sign Up
+        </h2>
         <form onSubmit={handleAdminSignup} className="space-y-6">
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="username"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Username
             </label>
             <input
@@ -80,7 +92,10 @@ const AdminSignup = () => {
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Email
             </label>
             <input
@@ -94,7 +109,10 @@ const AdminSignup = () => {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Password
             </label>
             <input
@@ -108,7 +126,10 @@ const AdminSignup = () => {
           </div>
 
           <div>
-            <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="phoneNumber"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Phone Number
             </label>
             <input

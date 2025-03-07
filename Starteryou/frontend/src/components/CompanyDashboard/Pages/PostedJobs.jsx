@@ -4,7 +4,7 @@ import JobDetailedCard2 from "../JobDetailedCard2";
 import { API_CONFIG } from "../../../config/api";
 import { useNavigate } from "react-router-dom";
 import { useUserContext } from "../../../context/UserContext";
-import { toast } from "react-toastify";
+import { toast } from 'react-hot-toast';
 import axios from "axios";
 import QuickTips from "../QuickTips";
 import NeedHelp from "../NeedHelp";
@@ -46,8 +46,9 @@ const PostedJobs = () => {
     }
     setLoading(true);
     try {
+      const userId = user?.authenticatedUser?._id;
       const { data } = await axios.get(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getPostedJobs}`,
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getPostedJobs(userId)}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -153,6 +154,7 @@ const PostedJobs = () => {
                     job={selectedJob}
                     getPostedJobs={getPostedJobs}
                     deleteJobFunction={deleteJob}
+                    closeDetailedCard2={() => setShowDetailedCard(false)}
                   />
                 </div>
               </div>

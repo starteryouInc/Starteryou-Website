@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { API_CONFIG } from "../../../../config/api";
 import { useUserContext } from "../../../../context/UserContext";
-import { toast } from "react-toastify";
+import { toast } from 'react-hot-toast';
 import axios from "axios";
 
 const EditWork = ({ closeEditWork, job, getProfileFieldData }) => {
@@ -128,7 +128,7 @@ const EditWork = ({ closeEditWork, job, getProfileFieldData }) => {
         onChange={handleChange}
         placeholder="Most recent job title"
         className="border p-2 w-full mb-4 rounded"
-        pattern="[A-Za-z\s]+"
+        pattern={'^[A-Za-z\\s&.,@!#%*()\\-+=\\[\\]:;\\"\'<>\\?/\\\\|^~`]+$'} 
         title="Only alphabets and spaces are allowed."
         required
       />

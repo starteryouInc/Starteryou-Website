@@ -3,7 +3,7 @@ import Profile1 from "../components/CompanyProfile/Profile1";
 import Profile2 from "../components/CompanyProfile/Profile2";
 import Profile3 from "../components/CompanyProfile/Profile3";
 import { useUserContext } from "../context/UserContext";
-import { toast } from "react-toastify";
+import { toast } from 'react-hot-toast';
 import { API_CONFIG } from "../config/api";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";

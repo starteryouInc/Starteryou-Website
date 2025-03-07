@@ -9,7 +9,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { useEffect } from "react";
-
+import { Toaster } from "react-hot-toast";
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 
@@ -21,8 +21,6 @@ import AdminProtectedRoute from "./components/Common/AdminProtectedRoute";
 import { UserProvider } from "./context/UserContext";
 import LoginPage from "./components/Auth/LoginPage";
 import AdminSignup from "./components/Auth/AdminSignup";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import EducationPage from "./pages/EducationPage";
 import Navbar from "./components/Common/Navbar";
 import Footer from "./components/Common/Footer";
@@ -177,7 +175,11 @@ function App() {
   return (
     <UserProvider>
       <NavigationProvider>
-        <ToastContainer position="bottom-right" autoClose={2000} />
+        <Toaster
+          position="bottom-right"
+          autoClose={3000}
+          reverseOrder={false}
+        />
         <Router>
           <NavigationHandler />
           <Layout />

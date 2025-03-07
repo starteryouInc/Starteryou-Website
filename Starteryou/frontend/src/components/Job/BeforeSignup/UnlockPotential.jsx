@@ -5,7 +5,7 @@ import { API_CONFIG } from "@config/api";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
 import { MaxWords } from "../../Common/wordValidation";
-import { toast } from "react-toastify";
+import { toast } from 'react-hot-toast';
 
 const UnlockPotential = () => {
   const title = "UnlockPotential";

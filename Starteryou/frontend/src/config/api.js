@@ -25,7 +25,8 @@ export const API_CONFIG = {
     getJobById: (id) => `/api/v1/jobportal/jobs/fetch-job/${id}`,
     updateJob: (id) => `/api/v1/jobportal/jobs/update-job/${id}`,
     deleteJob: (id) => `/api/v1/jobportal/jobs/delete-job/${id}`,
-    getPostedJobs: "/api/v1/jobportal/jobs/fetch-posted-jobs",
+    getPostedJobs: (userId) =>
+      `/api/v1/jobportal/jobs/fetch-posted-jobs/${userId}`,
     // Job Application API's
     applyJob: (jobId) => `/api/v1/jobportal/applications/${jobId}/apply-job`,
     getAppliedJobs: "/api/v1/jobportal/applications/fetch-applied-jobs",

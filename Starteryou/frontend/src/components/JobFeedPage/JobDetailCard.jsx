@@ -78,13 +78,15 @@ const JobDetailCard = ({
         </div>
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-semibold">{jobDetails.title}</h1>
-          <button onClick={() => toggleBookmark(jobDetails._id)}>
-            {isBookmarked ? (
-              <FaBookmark className="text-xl text-[#6A54DF]" />
-            ) : (
-              <FaRegBookmark className="text-xl" />
-            )}
-          </button>
+          {role === "jobSeeker" && (
+            <button onClick={() => toggleBookmark(jobDetails._id)}>
+              {isBookmarked ? (
+                <FaBookmark className="text-xl text-[#6A54DF]" />
+              ) : (
+                <FaRegBookmark className="text-xl" />
+              )}
+            </button>
+          )}
         </div>
         <ul className="text-[#9894A7] space-y-2">
           <li>{jobDetails.companyName ? jobDetails.companyName : "Unknown"}</li>

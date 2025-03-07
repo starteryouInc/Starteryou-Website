@@ -8,7 +8,7 @@ import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { useUserContext } from "../../context/UserContext";
 import { API_CONFIG } from "../../config/api";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast } from 'react-hot-toast';
 import axios from "axios";
 
 const UserLogin = () => {

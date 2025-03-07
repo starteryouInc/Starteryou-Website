@@ -16,7 +16,7 @@ import { MdOutlineDelete } from "react-icons/md";
 import { useUserContext } from "../../../context/UserContext";
 import axios from "axios";
 import { API_CONFIG } from "../../../config/api";
-import { toast } from "react-toastify";
+import { toast } from 'react-hot-toast';
 import EditProject from "./EditableForms/EditProject";
 
 const ProjectCard = ({ openProjectForm, data, getProfileFieldData }) => {
