@@ -165,7 +165,7 @@ const JobFeedPage = () => {
 
       setAppliedJobs(appliedJobs.filter((job) => job !== null));
     } catch (error) {
-      toast.error(error.response?.data?.msg);
+      // toast.error(error.response?.data?.msg);
     } finally {
       setLoading(false);
     }
@@ -228,7 +228,7 @@ const JobFeedPage = () => {
       );
       setSavedJobs(savedJobs.filter((job) => job !== null));
     } catch (error) {
-      toast.error(error.response.data.msg);
+      // toast.error(error.response.data.msg);
     } finally {
       setLoading(false);
     }
@@ -281,14 +281,14 @@ const JobFeedPage = () => {
           }
         );
         toast.success("Job is Bookmarked");
-        console.log("This job is saved in bookmarks");
+        // console.log("This job is saved in bookmarks");
       }
       getSavedJobs();
     } catch (error) {
-      console.log(
-        "Failed to update the bookmark:",
-        error.response?.data?.msg || error.message
-      );
+      // console.log(
+      //   "Failed to update the bookmark:",
+      //   error.response?.data?.msg || error.message
+      // );
       toast.error(error.response?.data?.msg || "Failed to update bookmark.");
     }
   };
@@ -409,7 +409,9 @@ const JobFeedPage = () => {
                   );
                 })
               ) : (
-                <p>no data</p>
+                <p className="text-gray-400 font-semibold text-xl mt-10">
+                  Oops! No {selectedTab} jobs found
+                </p>
               )}
             </div>
             <div className="job-details hidden md:block">
