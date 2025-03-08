@@ -2,9 +2,14 @@ const Router = require("express");
 const router = Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const Users = require("../models/UsersModel");
-const Employers = require("../models/EmployersModel");
+// const Users = require("../models/UsersModel");
+// const Employers = require("../models/EmployersModel");
 const sessionRoutes = require("./sessionRoutes");
+const {
+  BaseUser,
+  JobSeeker,
+  Employer,
+} = require("../models/BaseUserSchema");
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 
 require("dotenv").config({ path: ".env.server" });
@@ -38,11 +43,12 @@ const generateAccessToken = (user) => {
  * @param {Object} res - Express response object
  * @returns {Object} JSON response with success status and message
  */
+// New Employer Route:
 router.post("/users-emp-register", async (req, res) => {
   const { companyName, email, companyWebsite, password, role } = req.body;
 
   // Check if all the required fields are provided
-  if (!companyName || !email || !password || !role) {
+  if (!companyName || !email || !password || role !== "employer") {
     return res.status(400).json({
       success: false,
       msg: "All fields are required",
@@ -87,30 +93,18 @@ router.post("/users-emp-register", async (req, res) => {
 
   try {
     // Check if an account with this email already exists under the jobSeeker role
-    const existingJobSeeker = await Users.findOne({ email, role: "jobSeeker" });
-    if (existingJobSeeker) {
+    const existingUser = await BaseUser.findOne({ email });
+    if (existingUser) {
       return res.status(409).json({
         success: false,
-        msg: "This email is already associated with a job seeker account",
-      });
-    }
-
-    // Check if employer is already register with this email or companyName
-    const existingEmployer = await Employers.findOne({
-      $or: [{ email }, { companyName }],
-    });
-
-    if (existingEmployer) {
-      return res.status(409).json({
-        success: false,
-        msg: "Company name or email already registered, login to continue.",
+        msg: "This email is already associated with an account. Pls login to continue...",
       });
     }
 
     // Hashing the password before storing it to the database
     const saltRounds = parseInt(process.env.SALT_ROUNDS) || 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const newEmployer = await Employers.create({
+    const newEmployer = await Employer.create({
       companyName,
       email,
       companyWebsite,
@@ -120,6 +114,7 @@ router.post("/users-emp-register", async (req, res) => {
 
     const accessToken = generateAccessToken(newEmployer);
     await newEmployer.save();
+
     res.status(201).json({
       success: true,
       msg: "Employer registered successfully",
@@ -150,11 +145,18 @@ router.post("/users-emp-register", async (req, res) => {
  * @param {Object} res - Express response object
  * @returns {Object} JSON response with success status and message
  */
+// New Job Seeker Route:
 router.post("/users-seeker-register", async (req, res) => {
   const { username, email, phoneNumber, password, role } = req.body;
 
   // Check if all the required fields are provided
-  if (!username || !email || !phoneNumber || !password || !role) {
+  if (
+    !username ||
+    !email ||
+    !phoneNumber ||
+    !password ||
+    role !== "jobSeeker"
+  ) {
     return res
       .status(400)
       .json({ success: false, msg: "All fields are required" });
@@ -202,7 +204,7 @@ router.post("/users-seeker-register", async (req, res) => {
   // }
 
   try {
-    const existingUser = await Users.findOne({ email, phoneNumber });
+    const existingUser = await BaseUser.findOne({ email, phoneNumber });
     if (existingUser) {
       if (existingUser.email === email) {
         return res.status(409).json({
@@ -221,7 +223,7 @@ router.post("/users-seeker-register", async (req, res) => {
     // Hashing the password before storing in the database
     const saltRounds = parseInt(process.env.SALT_ROUNDS) || 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const newUsers = await Users.create({
+    const newUsers = await JobSeeker.create({
       username,
       email,
       phoneNumber,
@@ -231,6 +233,7 @@ router.post("/users-seeker-register", async (req, res) => {
 
     const accessToken = generateAccessToken(newUsers);
     await newUsers.save();
+
     res.status(201).json({
       success: true,
       msg: "User registered successfully",
@@ -285,11 +288,9 @@ router.post("/users-login", sessionRoutes, async (req, res) => {
 
   try {
     // Check if user exists with this email or not
-    const users = await Users.findOne({ email });
+    const users = await BaseUser.findOne({ email });
     if (!users) {
-      return res
-        .status(404)
-        .json({ msg: "User with this email does not exist" });
+      return res.status(404).json({ msg: "User does not exist" });
     }
 
     // Comparing the input password with hashed password from the database
@@ -301,14 +302,21 @@ router.post("/users-login", sessionRoutes, async (req, res) => {
     const accessToken = generateAccessToken(users);
 
     req.session.isLoggedIn = true;
-    const lastLogin = Date.now(); // Store the last login time
-    users.lastLogin = lastLogin;
-    req.session.user = users.username; // Assigning the correct username to the session
     req.session.userId = users._id;
     req.session.role = users.role;
     req.session.cookie.maxAge = 60 * 60 * 1000; // 1 hour
+
+    if (users.role === "jobSeeker") {
+      req.session.user = users.username;
+    } else if (users.role === "employer") {
+      req.session.user = users.companyName || null;
+    }
+
+    const lastLogin = Date.now(); // Store the last login time
+    users.lastLogin = lastLogin;
+
     await users.save();
-    
+
     res.status(200).json({
       success: true,
       msg: "Login successfull",

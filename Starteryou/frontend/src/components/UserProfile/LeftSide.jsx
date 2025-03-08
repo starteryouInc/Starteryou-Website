@@ -22,7 +22,7 @@ import {
 import SocialPresenceForm from "./LeftSideComponent/SocialPresenceForm";
 import { API_CONFIG } from "../../config/api";
 import { useUserContext } from "../../context/UserContext";
-import { toast } from 'react-hot-toast';
+import { toast } from "react-hot-toast";
 import axios from "axios";
 
 /**
@@ -104,7 +104,7 @@ const LeftSide = ({ UserProfile, getProfileFunction }) => {
               <div className="flex items-center space-x-4">
                 <button
                   onClick={handleUpdateProfile}
-                  className="bg-green-600 text-white py-2 px-4 rounded"
+                  className="bg-white text-black  py-2 px-4 rounded"
                 >
                   Save
                 </button>

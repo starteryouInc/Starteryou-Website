@@ -8,7 +8,7 @@ import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { useUserContext } from "../../context/UserContext";
 import { API_CONFIG } from "../../config/api";
 import { useNavigate } from "react-router-dom";
-import { toast } from 'react-hot-toast';
+import { toast } from "react-hot-toast";
 import axios from "axios";
 
 const UserLogin = () => {
@@ -43,16 +43,19 @@ const UserLogin = () => {
       // Fetch session time after login
       await fetchSessionTime();
       // Dispatch custom event after successful login
-      const event = new Event('userLoggedIn');
+      const event = new Event("userLoggedIn");
       window.dispatchEvent(event);
     } catch (error) {
-      toast.error(error.response?.data?.msg);
+      toast.error(error.response?.data?.error);
     }
   };
 
   const fetchSessionTime = async () => {
     try {
-      const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.sessionTime}`, { credentials: "include" });
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.sessionTime}`,
+        { credentials: "include" }
+      );
       if (!response.ok) throw new Error("Session expired");
 
       const data = await response.json();
@@ -61,7 +64,7 @@ const UserLogin = () => {
       console.error("Error fetching session time after login:", error);
     }
   };
-  
+
   const reviews = [
     {
       stars: 5,
