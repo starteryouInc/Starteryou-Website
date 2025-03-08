@@ -23,7 +23,7 @@ const authenticate = (req, res, next) => {
         // Attach the decoded user data to the request object
         req.user = verified;
 
-        console.log("Decoded User: ", req.user);
+        // console.log("Decoded User: ", req.user);
 
         next(); // Proceed to the next middleware
     } catch (error) {
