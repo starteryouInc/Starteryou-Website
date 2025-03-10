@@ -1,0 +1,233 @@
+/**
+ * JobDetailCard Component
+ * @component
+ * @param {Object} props - Component props
+ * @param {Object} props.jobDetails - Job details data
+ * @param {Function} props.onClose - Function to close the job detail card
+ * @param {boolean} props.savedJob - Boolean indicating if the job is saved
+ * @returns {JSX.Element} A detailed job card with job information, save functionality, and application option.
+ */
+import React, { useState } from "react";
+import ApplyJobCard from "../JobFeedPage/ApplyJobCard";
+import LocationIcon from "/JobFeedPage/Location.svg";
+import ExperienceIcon from "/JobFeedPage/Experience.svg";
+import { FaBuilding, FaBookmark, FaRegBookmark } from "react-icons/fa";
+import { differenceInDays, format } from "date-fns";
+import { useUserContext } from "../../context/UserContext";
+// import MissingSkillsIcon from "/JobFeedPage/Missing.svg";
+// import componayLogo from "/JobFeedPage/CompanyLogo.svg";
+
+const JobDetailCard = ({
+  jobDetails,
+  newSavedJobs,
+  toggleBookmark,
+  newAppliedJobs,
+  onClose,
+}) => {
+  const { user } = useUserContext();
+  const role = user?.authenticatedUser?.role;
+  const [openApplyJob, setOpenApplyJob] = useState(false);
+  const isApplied = newAppliedJobs.some(
+    (appliedJob) => appliedJob._id === jobDetails._id
+  );
+  const isBookmarked = newSavedJobs.some(
+    (savedJob) => savedJob._id === jobDetails._id
+  );
+  /**
+   * Determines if the applicant is an early applicant based on job posting date.
+   * @param {string} createdAt - The job posting date in ISO format.
+   * @returns {boolean} True if the job was posted less than 7 days ago, otherwise false.
+   */
+  const isEarlyApplicant = (createdAt) => {
+    const daysDifference = differenceInDays(new Date(), new Date(createdAt));
+    return daysDifference < 7;
+  };
+  /**
+   * Formats the salary range into a readable string.
+   * @param {Object} salaryRange - Salary range object containing min and max values.
+   * @param {number} salaryRange.min - Minimum salary value.
+   * @param {number} salaryRange.max - Maximum salary value.
+   * @returns {string} Formatted salary range (e.g., "$50,000 - $70,000") or "N/A" if data is missing.
+   */
+  const formatSalaryRange = (salaryRange) => {
+    if (!salaryRange || !salaryRange.min || !salaryRange.max) return "N/A";
+    const { min, max } = salaryRange;
+    return `$${min.toLocaleString()} - $${max.toLocaleString()}`;
+  };
+
+  /**
+   * Formats a date string into "dd MMMM yyyy" format.
+   * @param {string} dateString - The date string in ISO format.
+   * @returns {string} Formatted date (e.g., "10 October 2023") or an empty string if no date is provided.
+   */
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    return format(new Date(dateString), "dd MMMM yyyy");
+  };
+
+  return (
+    <>
+      <div className="card-detailed-container lg:min-h-[995px] md:w-[400px] lg:w-[640px] space-y-[14px]">
+        <div className="flex items-center justify-between">
+          <div className="bg-gray-200 p-3 rounded-lg">
+            <FaBuilding className="text-2xl text-gray-700" />
+          </div>
+          <button className="text-4xl md:hidden" onClick={onClose}>
+            ×
+          </button>
+        </div>
+        <div className="flex justify-between items-center">
+          <h1 className="text-xl font-semibold">{jobDetails.title}</h1>
+          {role === "jobSeeker" && (
+            <button onClick={() => toggleBookmark(jobDetails._id)}>
+              {isBookmarked ? (
+                <FaBookmark className="text-xl text-[#6A54DF]" />
+              ) : (
+                <FaRegBookmark className="text-xl" />
+              )}
+            </button>
+          )}
+        </div>
+        <ul className="text-[#9894A7] space-y-2">
+          <li>{jobDetails.companyName ? jobDetails.companyName : "Unknown"}</li>
+          {isEarlyApplicant(jobDetails.createdAt) && (
+            <li className="bg-green-100 text-green-500 py-1 px-3 rounded-md w-fit">
+              Be an early applicant
+            </li>
+          )}
+          <li>
+            <img src={ExperienceIcon} alt="experience icon" className="mr-2" />
+            Experience Level: {jobDetails.experienceLevel}
+          </li>
+          <li>
+            <img src={LocationIcon} alt="location icon" className="mr-2" />
+            {jobDetails.location}
+          </li>
+          {/* <li>
+            <img
+              src={MissingSkillsIcon}
+              alt="missing skills icon"
+              className="mr-2"
+            />
+            5 skills missing in your profile
+          </li> */}
+        </ul>
+
+        {role === "jobSeeker" && (
+          <button
+            onClick={() => !isApplied && setOpenApplyJob(true)}
+            disabled={isApplied}
+            className={`w-[92px] h-[38px] rounded-[8px] text-white text-[14px] font-semibold leading-4 ${
+              isApplied
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-[#6A54DF] hover:bg-[#5a44c8] cursor-pointer"
+            }`}
+          >
+            {isApplied ? "Applied" : "Apply Now"}
+          </button>
+        )}
+        <div className="job-description-container">
+          <h2 className="my-8 text-2xl font-semibold leading-7">
+            Job Description
+          </h2>
+          <h5 className="mb-2 text-lg font-semibold leading-5">
+            Required Skills and Experience:{" "}
+          </h5>
+          <h4 className="text-[#777485]">
+            {jobDetails.description}
+            <ul className="my-4 space-y-4">
+              <li>Regards</li>
+              <li>{jobDetails.companyName} Talent Acquisition Team</li>
+              <li>More Info</li>
+              {jobDetails.startDate && (
+                <li>Start Date: {formatDate(jobDetails.startDate)}</li>
+              )}
+              <li>Job Type: {jobDetails.jobType}</li>
+              <li>Workplace Type: {jobDetails.workplaceType}</li>
+              <li>
+                Expected Salary:{" "}
+                {jobDetails.salaryRange
+                  ? `${formatSalaryRange(jobDetails.salaryRange)} / ${
+                      jobDetails.frequency
+                    }`
+                  : "N/A"}
+              </li>
+            </ul>
+          </h4>
+        </div>
+        {/* <span className="text-[#777485] font-semibold space-x-2">
+          Looking for similar opportunities? Click here to explore more jobs
+          like this!
+          <button className="similar-job-btn ml-2 text-[#6A54DF] font-semibold">
+            Similar Jobs.
+          </button>
+        </span> */}
+      </div>
+      {openApplyJob && (
+        <div
+          className="pop-up py-3 fixed inset-0 bg-black bg-opacity-50 flex items-center
+       justify-center z-50 overflow-y-scroll"
+        >
+          <ApplyJobCard
+            jobID={jobDetails._id}
+            closeApplyJob={() => setOpenApplyJob(false)}
+          />
+        </div>
+      )}
+    </>
+  );
+};
+JobDetailCard.metadata = {
+  componentName: "JobDetailCard",
+  description:
+    "A component that displays detailed information about a job, including the company logo, job title, experience level, location, and application options.",
+  features: {
+    earlyApplicantIndicator: true, // Indicates if the user is an early applicant
+    saveJobFunctionality: true, // Functionality to save the job
+    applicationOption: true, // Option to apply for the job
+  },
+  data: {
+    jobDetails: {
+      title: "", // Title of the job
+      companyName: "", // Name of the company
+      compImgSrc: "", // Source for the company logo
+      experienceLevel: "", // Required experience level for the job
+      location: "", // Job location
+      createdAt: "", // Job posting date in ISO format
+      description: "", // Job description
+      salaryRange: { min: 0, max: 0 }, // Salary range object
+      frequency: "", // Frequency of salary payment (e.g., monthly, annually)
+      jobType: "", // Type of job (e.g., full-time, part-time)
+      workplaceType: "", // Workplace type (e.g., remote, onsite)
+      startDate: "", // Start date of the job
+    },
+    onClose: () => {}, // Function to close the job detail card
+    savedJob: () => {}, // Function to save the job
+  },
+  accessibility: {
+    logoAltText: "Company logo should have alt text for accessibility.",
+    jobDetails: "Job details are clearly listed for better readability.",
+    applyButton: "Apply Now button should be accessible and focusable.",
+  },
+  styles: {
+    cardContainer: {
+      width: "640px", // Width for the detailed job card
+      backgroundColor: "white", // Background color for the card
+      borderRadius: "0.375rem", // Rounded corners for the card
+      padding: "1rem", // Padding for the card
+    },
+    jobTitle: {
+      fontSize: "1.25rem", // Font size for the job title
+      fontWeight: "600", // Font weight for the job title
+    },
+    earlyApplicantBadge: {
+      backgroundColor: "#D1FAE5", // Background color for early applicant badge
+      color: "#16A34A", // Text color for early applicant badge
+    },
+    applyButton: {
+      backgroundColor: "#6A54DF", // Background color for the apply button
+      color: "white", // Text color for the apply button
+    },
+  },
+};
+export default JobDetailCard;
