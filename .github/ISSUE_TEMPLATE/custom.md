@@ -1,6 +1,6 @@
 ---
-name: Custom issue template
-about: Describe this issue template's purpose here.
+name: UI/UX Design issue template
+about: All UI/UX Desgin issues must be following this template.
 title: UI/UX Desgin for ...
 labels: UI/UX Design
 assignees: abhignamargam
