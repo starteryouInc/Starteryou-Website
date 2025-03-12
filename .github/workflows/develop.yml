@@ -117,3 +117,13 @@ jobs:
             echo "Deploying Docker services..."
             docker-compose --profile server --env-file "$ENV_FILE" down --volumes --remove-orphans
             docker-compose --profile server --env-file "$ENV_FILE" up --build -d
+      
+      # Step 4: Set GitHub Status Check
+      - name: Set GitHub Action status check
+        if: success()
+        run: echo "✅ Deployment successful!"
+      
+      - name: Fail on error
+        if: failure()
+        run: echo "❌ Deployment failed!" && exit 1
+
