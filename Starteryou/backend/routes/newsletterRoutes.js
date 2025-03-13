@@ -1,6 +1,7 @@
 const express = require("express");
 const Subscriber = require("../models/Subscriber"); // Adjust the path if necessary
 const router = express.Router();
+const logger = require("../utils/logger"); //Logger import
 
 router.post("/subscribe", async (req, res) => {
   const { name, email } = req.body;
@@ -20,7 +21,7 @@ router.post("/subscribe", async (req, res) => {
 
     return res.status(201).json({ message: "Subscription successful!" });
   } catch (err) {
-    console.error("Error saving subscriber:", err);
+    logger.error("Error saving subscriber:", err);
     return res.status(500).json({ message: "Internal server error." });
   }
 });

@@ -4,6 +4,7 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const { ObjectId } = require("mongodb");
 const FileMetadata = require("../models/FileMetadata");
+const logger = require("../utils/logger"); // Logger import
 
 // GET: Verify specific file
 /**
@@ -65,7 +66,7 @@ router.get("/verify/:title", async (req, res) => {
       isHealthy: !!(gridFsFile && chunksCount > 0),
     });
   } catch (error) {
-    console.error("Verification error:", error);
+    logger.error("Verification error:", error);
     res.status(500).json({
       success: false,
       message: "Error during verification",
@@ -135,7 +136,7 @@ router.get("/verify-all", async (req, res) => {
       results: verificationResults,
     });
   } catch (error) {
-    console.error("Verification error:", error);
+    logger.error("Verification error:", error);
     res.status(500).json({
       success: false,
       message: "Error during verification",
@@ -203,7 +204,7 @@ router.post("/repair/:title", async (req, res) => {
       updates,
     });
   } catch (error) {
-    console.error("Repair error:", error);
+    logger.error("Repair error:", error);
     res.status(500).json({
       success: false,
       message: "Error during repair",

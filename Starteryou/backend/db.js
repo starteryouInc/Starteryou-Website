@@ -1,5 +1,6 @@
 const MongoTester = require("./utils/mongoTester");
 const seedDatabase = require("./seedDatabase"); // Import seeding logic
+const logger = require("./utils/logger"); //Logger import
 
 const mongoose = require("mongoose");
 require("dotenv").config(); // Load environment variables
@@ -19,7 +20,7 @@ const mongoTlsCert = process.env.MONGO_TLS_CERT;
 const mongoTlsCa = process.env.MONGO_TLS_CA;
 const mongoAppName = process.env.MONGO_APP_NAME;
 
-console.log("Loaded Environment Variables:", {
+logger.info("Loaded Environment Variables:", {
   mongoUser: process.env.MONGO_USER,
   mongoPassword: process.env.MONGO_PASSWORD,
   mongoHost: process.env.MONGO_HOST,
@@ -32,7 +33,7 @@ console.log("Loaded Environment Variables:", {
 
 // Check for missing required environment variables
 if (!mongoUser || !mongoPassword || !mongoHost || !mongoDb) {
-  console.error("❌ Missing required MongoDB environment variables");
+  logger.error("❌ Missing required MongoDB environment variables");
   process.exit(1);
 }
 
@@ -58,9 +59,9 @@ async function runTest() {
   const tester = new MongoTester(mongoUri);
   try {
     await tester.testConnection();
-    console.log("✅ MongoDB connection test successful!");
+    logger.info("✅ MongoDB connection test successful!");
   } catch (error) {
-    console.error("❌ MongoDB connection test failed:", error);
+    logger.error("❌ MongoDB connection test failed:", error);
   }
 }
 
@@ -68,7 +69,7 @@ async function runTest() {
 const connectToMongoDB = async () => {
   while (retryCount < maxRetries) {
     try {
-      console.log(
+      logger.info(
         `🔍 Attempting to connect to MongoDB... (Retry ${
           retryCount + 1
         }/${maxRetries})`
@@ -83,7 +84,7 @@ const connectToMongoDB = async () => {
       // Wait for the connection to be fully ready
       await mongoose.connection.asPromise();
 
-      console.log("✅ MongoDB connection established!");
+      logger.info("✅ MongoDB connection established!");
 
       // Monitor connection events only after a successful connection
       monitorConnectionEvents();
@@ -91,26 +92,26 @@ const connectToMongoDB = async () => {
       // Validate the connection before running operations
       const isConnected = mongoose.connection.readyState === 1;
       if (isConnected) {
-        console.log("🔍 Connection state validated: Ready for operations.");
+        logger.info("🔍 Connection state validated: Ready for operations.");
       } else {
         console.warn("⚠️ Connection state not ready. Retrying...");
         throw new Error("Connection state not ready");
       }
 
       // Seed the database after successful connection
-      console.log("🌱 Seeding database...");
+      logger.info("🌱 Seeding database...");
       await seedDatabase();
-      console.log("✅ Database seeded successfully!");
+      logger.info("✅ Database seeded successfully!");
 
       return; // Exit loop on success
     } catch (error) {
       retryCount++;
-      console.error("❌ MongoDB Connection Error:", error.message);
+      logger.error("❌ MongoDB Connection Error:", error.message);
       if (retryCount >= maxRetries) {
-        console.error("❌ Max retries reached. Exiting...");
+        logger.error("❌ Max retries reached. Exiting...");
         process.exit(1);
       }
-      console.log(
+      logger.info(
         `Retrying connection (${retryCount}/${maxRetries}) in 5 seconds...`
       );
       await new Promise((resolve) => setTimeout(resolve, 5000));
@@ -121,20 +122,24 @@ const connectToMongoDB = async () => {
 // Function to monitor MongoDB connection events
 const monitorConnectionEvents = () => {
   mongoose.connection.on("connected", () => {
-    console.log("✅ MongoDB Connected Successfully!");
+    logger.info("✅ MongoDB Connected Successfully!");
   });
 
   mongoose.connection.on("disconnected", () => {
-    console.log("❌ MongoDB Disconnected.");
+    logger.info("❌ MongoDB Disconnected.");
   });
 
   mongoose.connection.on("error", (err) => {
-    console.error("❌ MongoDB Error:", err.message);
+    logger.error("❌ MongoDB Error:", err.message);
   });
 };
 
 // Run the connection test
-runTest().catch(console.error);
-console.log("MongoDB URI:", mongoUri);
+runTest().catch(logger.error);
+logger.info("MongoDB URI:", mongoUri);
 
-module.exports = { connectToMongoDB, mongoUri, mongoConnection: mongoose.connection };
+module.exports = {
+  connectToMongoDB,
+  mongoUri,
+  mongoConnection: mongoose.connection,
+};

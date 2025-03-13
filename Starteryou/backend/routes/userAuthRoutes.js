@@ -5,18 +5,15 @@ const jwt = require("jsonwebtoken");
 // const Users = require("../models/UsersModel");
 // const Employers = require("../models/EmployersModel");
 const sessionRoutes = require("./sessionRoutes");
-const {
-  BaseUser,
-  JobSeeker,
-  Employer,
-} = require("../models/BaseUserSchema");
+const { BaseUser, JobSeeker, Employer } = require("../models/BaseUserSchema");
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
+const logger = require("../utils/logger"); //Logger import
 
 require("dotenv").config({ path: ".env.server" });
 
 const jwtSecret = process.env.DEV_JWT_SECRET;
 if (!jwtSecret) {
-  console.error("Error: DEV_JWT_SECRET is missing in the enviroment variables");
+  logger.error("Error: DEV_JWT_SECRET is missing in the enviroment variables");
   process.exit(1);
 }
 

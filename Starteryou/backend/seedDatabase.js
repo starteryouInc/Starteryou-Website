@@ -2,15 +2,16 @@ const TextContent = require("./models/TextContent"); // Import your model
 const connectToMongoDB = require("./db"); // Import the connection function from db.js
 const mongoose = require("mongoose"); // Required for MongoDB interaction
 mongoose.set("debug", true);
+const logger = require("./utils/logger"); //Logger import
 
 const seedDatabase = async () => {
   try {
-    console.log("Seeding Database...");
-    console.log("Mongoose Connection State:", mongoose.connection.readyState);
+    logger.info("Seeding Database...");
+    logger.info("Mongoose Connection State:", mongoose.connection.readyState);
 
     const existingData = await TextContent.find({});
     if (existingData.length > 0) {
-      console.log("⚠️ Database already seeded. Skipping seeding process.");
+      logger.info("⚠️ Database already seeded. Skipping seeding process.");
       return;
     }
 
@@ -30,9 +31,9 @@ const seedDatabase = async () => {
     ];
 
     await TextContent.insertMany(seedData);
-    console.log("✅ Database seeded successfully!");
+    logger.info("✅ Database seeded successfully!");
   } catch (error) {
-    console.error("❌ Error seeding database:", error);
+    logger.error("❌ Error seeding database:", error);
   }
 };
 
@@ -43,7 +44,7 @@ if (require.main === module) {
       await connectToMongoDB(); // Ensure MongoDB connection is established
       await seedDatabase(); // Seed the database
     } catch (error) {
-      console.error("❌ Error during database seeding:", error);
+      logger.error("❌ Error during database seeding:", error);
     }
   })();
 }
