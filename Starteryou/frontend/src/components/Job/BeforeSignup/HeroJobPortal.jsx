@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
-import { toast } from 'react-hot-toast';
+import { toast } from "react-hot-toast";
 import { useNavigation } from "../../../context/NavigationContext";
 import FileUpload from "../../Common/FileUpload";
 import { MaxWords } from "../../Common/wordValidation";
@@ -168,7 +168,7 @@ const HeroJobPortal = () => {
               type="text"
               value={titlee}
               onChange={handleChangeTitle}
-              className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-[#1F2329] border border-gray-300 p-2 rounded w-full"
+              className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-[#1F2329] border border-gray-300 p-2 rounded w-full "
             />
             <span className="text-white text-sm">
               {paragraphWordsLeft >= 0
@@ -192,7 +192,7 @@ const HeroJobPortal = () => {
           </div>
         ) : (
           <div>
-            <h1 className="text-3xl md:text-5xl font-bold mb-4 text-white">
+            <h1 className="text-3xl md:text-5xl font-bold mb-4 text-white ">
               {titlee}
             </h1>
             <p className="text-lg md:text-xl mb-6 text-white">{paragraph}</p>
