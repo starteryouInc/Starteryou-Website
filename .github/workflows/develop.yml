@@ -120,10 +120,12 @@ jobs:
       
       # Step 4: Set GitHub Status Check
       - name: Set GitHub Action status check
-        if: success()
+        if: failure()  # Trigger on failure
+        run: |
+          echo "❌ Deployment failed!"
+          exit 1
+
+      - name: Set GitHub Action status check
+        if: success()  # Trigger on success
         run: echo "✅ Deployment successful!"
-      
-      - name: Fail on error
-        if: failure()
-        run: echo "❌ Deployment failed!" && exit 1
 
