@@ -83,14 +83,14 @@ const BestJob2 = () => {
     {
       id: 0,
       iconSrc: "/LandingPage/Icons/page 1.svg",
-      title: "Lorem Ipsum",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+      title: "Show off your education and skills",
+      description: "Get access to opportunities and build your resume",
     },
     {
       id: 1,
       iconSrc: "/LandingPage/Icons/userr.svg",
-      title: "Learn from the best",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+      title: "No resume or cover letter needed ",
+      description: "Instead, it’s a streamlined job application process.",
     },
   ];
 
@@ -262,6 +262,9 @@ const BestJob2 = () => {
                   <img src={box.iconSrc} alt={box.title} className="w-8 h-8" />
                   <h3 className="text-xl font-bold text-black">{box.title}</h3>
                 </div>
+                <p className="mt-4 text-gray-600 text-lg font-thin text-left">
+                  {box.description}
+                </p>
               </div>
             ))}
           </div>

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import FileUpload from "../Common/FileUpload";
 import { useNavigation } from "../../context/NavigationContext";
 import { API_CONFIG } from "@config/api";
-import { toast } from 'react-hot-toast';
+import { toast } from "react-hot-toast";
 import { FaPencilAlt } from "react-icons/fa";
 import axios from "axios";
 import { MaxWords } from "../Common/wordValidation";
@@ -29,20 +29,23 @@ const BestJob = () => {
     {
       id: 0,
       iconSrc: "/LandingPage/Icons/page 1.svg",
-      title: "Lorem Ipsum",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+      title: "Discover opportunities",
+      description:
+        "Find what you’re looking for with our intuitive job search platform. ",
     },
     {
       id: 1,
       iconSrc: "/LandingPage/Icons/FindJob.svg",
-      title: "Find Jobs",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+      title: "Apply lightning-fast ",
+      description:
+        "With an easy to use, intuitive interface, it takes no time to apply for roles.",
     },
     {
       id: 2,
       iconSrc: "/LandingPage/Icons/addJob.svg",
-      title: "Add Jobs",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+      title: "Stand out",
+      description:
+        "By creating a profile, you’ll get found by recruiters on the platform! ",
     },
   ];
 
