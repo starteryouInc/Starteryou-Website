@@ -5,6 +5,7 @@ const authorize = require("../middleware/roleMiddleware");
 const { invalidateCache } = require("../cache/utils/invalidateCache");
 const cacheQueryJob = require("../cache/utils/cacheQueryJob");
 const cacheConfig = require("../cache/config/cacheConfig");
+const logger = require("../utils/logger"); //Logger import
 // const cacheMiddlewareJob = require("../cache/utils/cacheMiddlewareJob");
 
 // Route to apply for the job
@@ -95,7 +96,7 @@ router.get("/fetch-applied-jobs", authorize("jobSeeker"), async (req, res) => {
     // const { params: { userId } } = req;
     const userId = req.user?.id;
     const cacheKey = `/api/v1/jobportal/applications/fetch-applied-jobs/${userId}`;
-    console.log(`Cache Key: ${cacheKey}`);
+    logger.info(`Cache Key: ${cacheKey}`);
 
     // Fetch data with cache handling
     const cachedResponse = await cacheQueryJob(
@@ -155,7 +156,7 @@ router.get(
     try {
       const userId = req.user?.id;
       const cacheKey = `/api/v1/jobportal/applications/fetch-applied-users/${userId}`;
-      console.log(`Cache Key: ${cacheKey}`);
+      logger.info(`Cache Key: ${cacheKey}`);
 
       // Fetch data with cache handling
       const cachedResponse = await cacheQueryJob(

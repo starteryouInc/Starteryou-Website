@@ -1,8 +1,9 @@
 // testMongo.js
 const MongoTester = require("./mongoTester");
+const logger = require("./logger"); // Logger import
 require("dotenv").config();
 
-console.log("Loaded Environment Variables:", {
+logger.info("Loaded Environment Variables:", {
   mongoUser: process.env.MONGO_USER,
   mongoPassword: process.env.MONGO_PASSWORD,
   mongoHost: process.env.MONGO_HOST,
@@ -23,7 +24,7 @@ const mongoTlsCa = process.env.MONGO_TLS_CA;
 
 // Check if necessary environment variables are set
 if (!mongoUser || !mongoPassword || !mongoHost || !mongoDb) {
-  console.error("Missing necessary environment variables.");
+  logger.error("Missing necessary environment variables.");
   process.exit(1); // Exit the process if crucial variables are missing
 }
 
@@ -34,7 +35,7 @@ async function runTest() {
 
   if (mongoTls) {
     if (!mongoTlsCert || !mongoTlsCa) {
-      console.error("Missing TLS certificate or CA file paths.");
+      logger.error("Missing TLS certificate or CA file paths.");
       process.exit(1);
     }
     mongoUri += `&tls=true&tlsCertificateKeyFile=${mongoTlsCert}&tlsCAFile=${mongoTlsCa}`;
@@ -46,10 +47,10 @@ async function runTest() {
   try {
     // Test the connection
     await tester.testConnection();
-    console.log("MongoDB connection test successful!");
+    logger.info("MongoDB connection test successful!");
   } catch (error) {
-    console.error("MongoDB connection test failed:", error);
+    logger.error("MongoDB connection test failed:", error);
   }
 }
 
-runTest().catch(console.error);
+runTest().catch(logger.error);

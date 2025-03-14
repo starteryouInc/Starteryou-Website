@@ -5,6 +5,7 @@ const authorize = require("../middleware/roleMiddleware");
 const cacheMiddlewareJob = require("../cache/utils/cacheMiddlewareJob");
 const cacheQueryJob = require("../cache/utils/cacheQueryJob");
 const cacheConfig = require("../cache/config/cacheConfig");
+const logger = require("../utils/logger"); //Logger import
 // const { invalidateCache } = require("../cache/utils/invalidateCache");
 
 /**
@@ -106,7 +107,7 @@ router.get(
     try {
       // Define cache key
       const cacheKey = `/api/get-company-profile/${userId}`;
-      console.log(`Cache Key: ${cacheKey}`);
+      logger.info(`Cache Key: ${cacheKey}`);
 
       // Fetch from cache or database
       const cachedCompanyProfile = await cacheQueryJob(
@@ -138,7 +139,7 @@ router.get(
         data: cachedCompanyProfile,
       });
     } catch (error) {
-      console.error("Fetch Company Profile Error:", error);
+      logger.error("Fetch Company Profile Error:", error);
       res.status(500).json({
         success: false,
         msg: "Some error occurred while fetching the company profile",

@@ -5,6 +5,7 @@ const authorize = require("../middleware/roleMiddleware");
 const { invalidateCache } = require("../cache/utils/invalidateCache");
 const cacheQueryJob = require("../cache/utils/cacheQueryJob");
 const cacheConfig = require("../cache/config/cacheConfig");
+const logger = require("../utils/logger"); //Logger import
 // const cacheMiddlewareJob = require("../cache/utils/cacheMiddlewareJob");
 
 // Route to save the job
@@ -127,7 +128,7 @@ router.get(
       // const { params: { userId } } = req;
       const userId = req.user?.id;
       const cacheKey = `/api/v1/jobportal/bookmarks/fetch-bookmarked-jobs/${userId}`;
-      console.log(`Cache Key: ${cacheKey}`);
+      logger.info(`Cache Key: ${cacheKey}`);
 
       // Fetch data with cache handling
       const cachedResponse = await cacheQueryJob(

@@ -12,6 +12,7 @@ const cacheMiddleware = require("../cache/utils/cacheMiddleware");
 const { invalidateCache } = require("../cache/utils/invalidateCache");
 const cacheQuery = require("../cache/utils/cacheQuery");
 const cacheConfig = require("../cache/config/cacheConfig");
+const logger = require("../utils/logger"); //Logger import
 
 // Initialize GridFSBucket
 let bucket;
@@ -19,7 +20,7 @@ mongoose.connection.once("open", () => {
   bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
     bucketName: "uploads",
   });
-  console.log("✅ GridFS bucket initialized");
+  logger.info("✅ GridFS bucket initialized");
 });
 
 // Multer configuration
@@ -149,7 +150,11 @@ router.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *                   type: string
  *                   example: Server connection failed
  */
-router.post("/upload", upload.single("file"), cacheMiddleware, async (req, res) => {
+router.post(
+  "/upload",
+  upload.single("file"),
+  cacheMiddleware,
+  async (req, res) => {
     try {
       if (!req.file) {
         return res
@@ -216,7 +221,7 @@ router.post("/upload", upload.single("file"), cacheMiddleware, async (req, res) 
         res.status(201).json(responseToCache);
       });
     } catch (error) {
-      console.error("Upload error:", error);
+      logger.error("Upload error:", error);
       res.status(500).json({
         success: false,
         message: "Error uploading file",
@@ -321,7 +326,11 @@ router.post("/upload", upload.single("file"), cacheMiddleware, async (req, res) 
  *                 error:
  *                   type: string
  */
-router.put("/update/:title", upload.single("file"), cacheMiddleware, async (req, res) => {
+router.put(
+  "/update/:title",
+  upload.single("file"),
+  cacheMiddleware,
+  async (req, res) => {
     try {
       const gridFsBucket = ensureBucket();
 
@@ -374,7 +383,7 @@ router.put("/update/:title", upload.single("file"), cacheMiddleware, async (req,
           .json({ success: false, message: "No file provided for update" });
       }
     } catch (error) {
-      console.error("Update error:", error);
+      logger.error("Update error:", error);
       res.status(500).json({
         success: false,
         message: "Error updating file",
@@ -436,7 +445,7 @@ router.get("/download/:title", cacheMiddleware, async (req, res) => {
     const gridFsBucket = ensureBucket();
 
     const cacheKey = `/api/download/${req.params.title}`;
-    console.log(`Cache Key: ${cacheKey}`);
+    logger.info(`Cache Key: ${cacheKey}`);
 
     // Validate if the parameter is a valid ObjectId
     const isValidObjectId = (id) => /^[a-fA-F0-9]{24}$/.test(id);
@@ -482,18 +491,18 @@ router.get("/download/:title", cacheMiddleware, async (req, res) => {
     downloadStream
       .pipe(res)
       .on("error", (err) => {
-        console.error("Download error:", err);
+        logger.error("Download error:", err);
         res
           .status(500)
           .json({ success: false, message: "Error downloading file" });
       })
       .on("finish", () => {
-        console.log(
+        logger.info(
           `File successfully downloaded: ${cachedResponse.originalFilename}`
         );
       });
   } catch (error) {
-    console.error("Download error:", error);
+    logger.error("Download error:", error);
     res.status(500).json({
       success: false,
       message: "Error downloading file",
@@ -546,12 +555,12 @@ router.delete("/delete/:title", cacheMiddleware, async (req, res) => {
 
     // Invalidate cache for the deleted file
     const cacheKey = `/api/download/${req.params.title}`;
-    console.log(`Invalidating cache for key: ${cacheKey}`);
+    logger.info(`Invalidating cache for key: ${cacheKey}`);
     await invalidateCache(cacheKey);
 
     res.json({ success: true, message: "File deleted successfully" });
   } catch (error) {
-    console.error("Delete error:", error);
+    logger.error("Delete error:", error);
     res.status(500).json({
       success: false,
       message: "Error deleting file",

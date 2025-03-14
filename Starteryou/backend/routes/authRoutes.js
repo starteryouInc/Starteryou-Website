@@ -1,4 +1,4 @@
-require('dotenv').config({ path: '.env.server' }); 
+require("dotenv").config({ path: ".env.server" });
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -12,10 +12,13 @@ const Employee = require("../models/EmployeeModel");
 const cacheQuery = require("../cache/utils/cacheQuery");
 const { invalidateCache } = require("../cache/utils/invalidateCache");
 const cacheConfig = require("../cache/config/cacheConfig");
+const logger = require("../utils/logger"); //Logger import
 
 const jwtSecret = process.env.DEV_JWT_SECRET;
 if (!jwtSecret) {
-  console.error("Error: DEV_JWT_SECRET is missing in the environment variables.");
+  logger.error(
+    "Error: DEV_JWT_SECRET is missing in the environment variables."
+  );
   process.exit(1); // Stop the app if DEV_JWT_SECRET is not defined
 }
 
@@ -38,7 +41,7 @@ const generateRefreshToken = (user) => {
  * Centralized error handler
  */
 const handleError = (res, error, statusCode = 500) => {
-  console.error("Error:", error);
+  logger.error("Error:", error);
   res.status(statusCode).json({
     message: error.message || "Internal Server Error",
     success: false,
@@ -129,22 +132,29 @@ const register = async (req, res) => {
   try {
     const { username, email, phoneNumber, password, role } = req.body;
     if (!username || !email || !phoneNumber || !password || !role) {
-      return res.status(400).json({ message: "All fields are required", success: false });
+      return res
+        .status(400)
+        .json({ message: "All fields are required", success: false });
     }
-    
-     // Validate email
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@starteryou\.com$/i;
-  if (!emailRegex.test(email)) {
-    return res.status(400).json({
-      message: "Email must be a valid starteryou.com email address",
-      success: false,
-    });
-  }
+
+    // Validate email
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@starteryou\.com$/i;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        message: "Email must be a valid starteryou.com email address",
+        success: false,
+      });
+    }
 
     const validEmployee = await Employee.findOne({ email });
-    console.log("Valid Employee:", validEmployee); // Log the valid employee for debugging
+    logger.info("Valid Employee:", validEmployee); // Log the valid employee for debugging
     if (!validEmployee) {
-      return res.status(400).json({ message: "This email is not associated with a valid employee", success: false });
+      return res
+        .status(400)
+        .json({
+          message: "This email is not associated with a valid employee",
+          success: false,
+        });
     }
 
     // Validate role
@@ -157,7 +167,8 @@ const register = async (req, res) => {
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
-        message: "Password must be at least 8 characters long , maximum 16 characters and include one uppercase letter, one lowercase letter, one number, and one special character",
+        message:
+          "Password must be at least 8 characters long , maximum 16 characters and include one uppercase letter, one lowercase letter, one number, and one special character",
         success: false,
       });
     }
@@ -223,10 +234,11 @@ const register = async (req, res) => {
     // Handle MongoDB duplicate key error (E11000)
     if (error.code === 11000) {
       return res.status(409).json({
-        message: "Duplicate entry. This email or phone number is already registered.",
+        message:
+          "Duplicate entry. This email or phone number is already registered.",
         success: false,
       });
-    } 
+    }
 
     // General error handler for other issues
     handleError(res, error);
@@ -302,20 +314,29 @@ const login = async (req, res) => {
   }
 
   const validEmployee = await Employee.findOne({ email });
-  console.log("Valid Employee:", validEmployee); // Log the valid employee for debugging
+  logger.info("Valid Employee:", validEmployee); // Log the valid employee for debugging
   if (!validEmployee) {
-    return res.status(400).json({ message: "This email is not associated with a valid employee", success: false });
+    return res
+      .status(400)
+      .json({
+        message: "This email is not associated with a valid employee",
+        success: false,
+      });
   }
 
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: "User does not exist", success: false });
+      return res
+        .status(400)
+        .json({ message: "User does not exist", success: false });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials", success: false });
+      return res
+        .status(401)
+        .json({ message: "Invalid credentials", success: false });
     }
 
     /**
@@ -328,47 +349,56 @@ const login = async (req, res) => {
     /**
      * Invalidates existing cache entry before creating a new one
      * Prevents serving stale login data
-     * 
+     *
      * @param {string} cacheKey - Unique identifier for the cache entry
      */
 
     // Invalidate the cache for the login endpoint
-    console.log(`🔄 Invalidating cache for key: ${cacheKey}`);
+    logger.info(`🔄 Invalidating cache for key: ${cacheKey}`);
     await invalidateCache(cacheKey);
-    
+
     /**
      * Caches login response with tokens and user information
-     * 
+     *
      * @param {string} cacheKey - Unique cache identifier
      * @param {Function} fetchFunction - Generates fresh login response
      * @param {number} ttl - Time-to-live for cache entry
-     * 
+     *
      * @returns {Object} Cached login response with status and user details
      */
 
-    const cachedResponse = await cacheQuery(cacheKey, async () => {
-      const accessToken = generateAccessToken(user);
-      const refreshToken = generateRefreshToken(user);
+    const cachedResponse = await cacheQuery(
+      cacheKey,
+      async () => {
+        const accessToken = generateAccessToken(user);
+        const refreshToken = generateRefreshToken(user);
 
-      // Store the refresh token in the database
-      user.refreshToken = refreshToken;
-      await user.save();
+        // Store the refresh token in the database
+        user.refreshToken = refreshToken;
+        await user.save();
 
-      return {
-        status: 200,
-        response: {
-          message: "Login successful",
-          success: true,
-          tokens: { accessToken, refreshToken },
-          user: { id: user._id, username: user.username, email: user.email, role: user.role },
-        },
-      };
-    }, ttl);
+        return {
+          status: 200,
+          response: {
+            message: "Login successful",
+            success: true,
+            tokens: { accessToken, refreshToken },
+            user: {
+              id: user._id,
+              username: user.username,
+              email: user.email,
+              role: user.role,
+            },
+          },
+        };
+      },
+      ttl
+    );
 
-    console.log(`✅ Cache set for key: ${cacheKey}`);
+    logger.info(`✅ Cache set for key: ${cacheKey}`);
     return res.status(cachedResponse.status).json(cachedResponse.response);
   } catch (error) {
-    console.error("Error during login:", error);
+    logger.error("Error during login:", error);
     return res.status(500).json({
       message: "Internal Server Error",
       success: false,
