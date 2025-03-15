@@ -1,0 +1,905 @@
+const cacheQueryJob = require("../cache/utils/cacheQueryJob");
+const { invalidateCache } = require("../cache/utils/invalidateCache");
+const UserProfile = require("../models/UserProfile");
+const {
+  createProfileHandler,
+  fetchProfileHandler,
+  updateProfileHandler,
+  fetchProfileFieldsHandler,
+} = require("../handlers/ProfileHandlers");
+const {
+  addSubdocument,
+  updateSubdocument,
+  deleteSubdocument,
+  addStringToArray,
+  deleteStringFromArray,
+} = require("../services/userProfileService");
+
+jest.mock("../models/UserProfile");
+jest.mock("../cache/utils/cacheQueryJob");
+jest.mock("../cache/utils/invalidateCache");
+jest.mock("../db", () => ({}));
+
+describe("createProfileHandler", () => {
+  let req, res, mockProfile;
+
+  beforeEach(() => {
+    req = {
+      body: {
+        userRegistrationId: "user123",
+        name: "John Doe",
+        email: "johndoe@example.com",
+        phoneNo: "1234567890",
+      },
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    mockProfile = {
+      userRegistrationId: "user123",
+      name: "John Doe",
+      email: "johndoe@example.com",
+      phoneNo: "1234567890",
+      save: jest.fn().mockResolvedValue(true),
+    };
+
+    jest.clearAllMocks();
+  });
+
+  it("should create a profile and return 201", async () => {
+    UserProfile.mockImplementation(() => mockProfile);
+
+    await createProfileHandler(req, res);
+
+    expect(UserProfile).toHaveBeenCalledWith({
+      userRegistrationId: "user123",
+      name: "John Doe",
+      email: "johndoe@example.com",
+      phoneNo: "1234567890",
+    });
+    expect(mockProfile.save).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      msg: "New Profile has been created successfully",
+      //   data: mockProfile,
+    });
+  });
+
+  it("should return 400 if required fields are missing", async () => {
+    req.body = { name: "John Doe", email: "johndoe@example.com" }; // Missing userRegistrationId
+
+    await createProfileHandler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      msg: "Required fields (userRegistrationId, name, email) are missing",
+    });
+  });
+
+  it("should return 500 if an error occurs", async () => {
+    UserProfile.mockImplementation(() => {
+      throw new Error("Database error");
+    });
+
+    await createProfileHandler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      msg: "Some error occured while creating the new Profile",
+      error: expect.any(Error),
+    });
+  });
+});
+
+describe("fetchProfileHandler", () => {
+  let req, res, mockProfile, cacheKey;
+
+  beforeEach(() => {
+    req = { params: { userId: "user123" } };
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    cacheKey = `/fetch-profile/user123`;
+
+    mockProfile = [
+      {
+        userRegistrationId: "user123",
+        name: "John Doe",
+        email: "johndoe@example.com",
+        phoneNo: "1234567890",
+      },
+    ];
+
+    jest.clearAllMocks();
+  });
+
+  it("should return cached profile if available", async () => {
+    cacheQueryJob.mockResolvedValue(mockProfile);
+
+    await fetchProfileHandler(req, res);
+
+    expect(cacheQueryJob).toHaveBeenCalledWith(cacheKey);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      dataLength: mockProfile.length,
+      msg: "Profiles fetched successfully",
+      data: mockProfile,
+    });
+  });
+
+  it("should fetch fresh profile data if cache is empty and return 200", async () => {
+    cacheQueryJob.mockResolvedValue(null);
+    UserProfile.find.mockResolvedValue(mockProfile);
+
+    await fetchProfileHandler(req, res);
+
+    expect(UserProfile.find).toHaveBeenCalledWith({
+      userRegistrationId: "user123",
+    });
+    expect(cacheQueryJob).toHaveBeenCalledWith(
+      cacheKey,
+      expect.any(Function),
+      expect.any(Number)
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      dataLength: mockProfile.length,
+      msg: "Profiles fetched successfully",
+      data: mockProfile,
+    });
+  });
+
+  it("should return 404 if profile is not found", async () => {
+    cacheQueryJob.mockResolvedValue(null);
+    UserProfile.find.mockResolvedValue([]);
+
+    await fetchProfileHandler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      msg: "No profile found!",
+    });
+  });
+
+  it("should return 500 if an error occurs", async () => {
+    cacheQueryJob.mockImplementation(() => {
+      throw new Error("Cache error");
+    });
+
+    await fetchProfileHandler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      msg: "Some error occurred while fetching the Profiles",
+      error: "Cache error",
+    });
+  });
+});
+
+describe("updateProfileHandler", () => {
+  let req, res, mockUpdatedProfile, cacheKey;
+
+  beforeEach(() => {
+    req = {
+      params: { userRegistrationId: "user123" },
+      body: {
+        professionalTitle: "Software Engineer",
+        location: "New York",
+        currentCompany: "TechCorp",
+        totalExperience: "5 years",
+        phoneNo: "1234567890",
+      },
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    cacheKey = `/fetch-profile/user123`;
+
+    mockUpdatedProfile = {
+      userRegistrationId: "user123",
+      professionalTitle: "Software Engineer",
+      location: "New York",
+      currentCompany: "TechCorp",
+      totalExperience: "5 years",
+      phoneNo: "1234567890",
+    };
+
+    jest.clearAllMocks();
+  });
+
+  it("should update the profile and return 200", async () => {
+    UserProfile.findOneAndUpdate.mockResolvedValue(mockUpdatedProfile);
+
+    await updateProfileHandler(req, res);
+
+    expect(UserProfile.findOneAndUpdate).toHaveBeenCalledWith(
+      { userRegistrationId: "user123" },
+      {
+        professionalTitle: "Software Engineer",
+        location: "New York",
+        currentCompany: "TechCorp",
+        totalExperience: "5 years",
+        phoneNo: "1234567890",
+      },
+      { new: true, lean: true }
+    );
+    expect(invalidateCache).toHaveBeenCalledWith(cacheKey);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      msg: "Profile updated successfully",
+      data: mockUpdatedProfile,
+    });
+  });
+
+  it("should return 404 if profile not found", async () => {
+    UserProfile.findOneAndUpdate.mockResolvedValue(null);
+
+    await updateProfileHandler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      msg: "User Profile not found!",
+    });
+  });
+
+  it("should return 500 if an error occurs", async () => {
+    UserProfile.findOneAndUpdate.mockImplementation(() => {
+      throw new Error("Database error");
+    });
+
+    await updateProfileHandler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      msg: "Some error occurred while updating the profile",
+      error: "Database error",
+    });
+  });
+});
+
+describe("fetchProfileFieldsHandler", () => {
+  let req, res, cacheKey, mockUserData;
+
+  beforeEach(() => {
+    req = {
+      params: { userRegistrationId: "user123" },
+      query: { field: "skills" },
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    cacheKey = `/api/v1/jobportal/profile/get-profile-fields/user123?field=skills`;
+
+    mockUserData = { skills: ["JavaScript", "React", "Node.js"] };
+
+    jest.clearAllMocks();
+  });
+
+  it("should return 400 if field parameter is missing", async () => {
+    req.query.field = undefined;
+
+    await fetchProfileFieldsHandler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      msg: "Field parameter is required!",
+    });
+  });
+
+  it("should return 400 if an invalid field is requested", async () => {
+    req.query.field = "invalidField";
+
+    await fetchProfileFieldsHandler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      msg: "Invalid field requested!",
+    });
+  });
+
+  it("should fetch the profile field from cache if available", async () => {
+    cacheQueryJob.mockResolvedValue(mockUserData.skills);
+
+    await fetchProfileFieldsHandler(req, res);
+
+    expect(cacheQueryJob).toHaveBeenCalledWith(
+      cacheKey,
+      expect.any(Function),
+      expect.any(Number)
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      msg: "skills fetched successfully",
+      data: mockUserData.skills,
+    });
+  });
+
+  it("should fetch the profile field from the database if cache is empty", async () => {
+    cacheQueryJob.mockImplementation(async (key, fetchFunction) =>
+      fetchFunction()
+    );
+
+    UserProfile.findOne.mockResolvedValue(mockUserData);
+
+    await fetchProfileFieldsHandler(req, res);
+
+    expect(UserProfile.findOne).toHaveBeenCalledWith(
+      { userRegistrationId: "user123" },
+      { skills: 1, _id: 0 }
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      msg: "skills fetched successfully",
+      data: mockUserData.skills,
+    });
+  });
+
+  it("should return 404 if user not found", async () => {
+    cacheQueryJob.mockImplementation(async (key, fetchFunction) =>
+      fetchFunction()
+    );
+
+    UserProfile.findOne.mockResolvedValue(null);
+
+    await fetchProfileFieldsHandler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ msg: "User not found!" });
+  });
+
+  it("should return 500 if an error occurs", async () => {
+    cacheQueryJob.mockImplementation(async () => {
+      throw new Error("Database error");
+    });
+
+    await fetchProfileFieldsHandler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      msg: "Some error occured while fetching the skills",
+      error: expect.any(Error),
+    });
+  });
+});
+
+describe("addSubdocument", () => {
+  let req, res;
+
+  beforeEach(() => {
+    req = {
+      params: { userRegistrationId: "user123" },
+      body: { field: "skills", data: { name: "JavaScript", level: "Expert" } },
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    jest.clearAllMocks();
+  });
+
+  it("should add a subdocument and return 201", async () => {
+    const mockUser = {
+      userRegistrationId: "user123",
+      skills: [{ name: "Python", level: "Intermediate" }],
+      save: jest.fn().mockResolvedValue(true),
+    };
+
+    UserProfile.findOne.mockResolvedValue(mockUser);
+
+    await addSubdocument(
+      req.params.userRegistrationId,
+      req.body.field,
+      req.body.data,
+      res
+    );
+
+    expect(UserProfile.findOne).toHaveBeenCalledWith({
+      userRegistrationId: "user123",
+    });
+    expect(mockUser.skills.length).toBe(2);
+    expect(mockUser.save).toHaveBeenCalled();
+    expect(invalidateCache).toHaveBeenCalledWith(
+      "/api/v1/jobportal/profile/get-profile-fields/user123?field=skills"
+    );
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      dataLength: 2,
+      msg: "skills added successfully",
+      data: mockUser.skills,
+    });
+  });
+
+  it("should return 404 if user is not found", async () => {
+    UserProfile.findOne.mockResolvedValue(null);
+
+    await addSubdocument(
+      req.params.userRegistrationId,
+      req.body.field,
+      req.body.data,
+      res
+    );
+
+    expect(UserProfile.findOne).toHaveBeenCalledWith({
+      userRegistrationId: "user123",
+    });
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ msg: "User not found!" });
+  });
+
+  it("should return 500 on error", async () => {
+    UserProfile.findOne.mockRejectedValue(new Error("Database error"));
+
+    await addSubdocument(
+      req.params.userRegistrationId,
+      req.body.field,
+      req.body.data,
+      res
+    );
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      msg: "Some error occurred while adding the skills",
+      error: expect.any(Error),
+    });
+  });
+});
+
+describe("updateSubdocument", () => {
+  let req, res, mockUser, mockSubDoc;
+
+  beforeEach(() => {
+    req = {
+      params: { userRegistrationId: "user123", subDocId: "subdoc456" },
+      body: { field: "skills", updates: { level: "Advanced" } },
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    mockSubDoc = {
+      _id: "subdoc456",
+      name: "JavaScript",
+      level: "Intermediate",
+    };
+    mockUser = {
+      userRegistrationId: "user123",
+      skills: [{ ...mockSubDoc }],
+      save: jest.fn().mockResolvedValue(true),
+    };
+
+    mockUser.skills.id = jest.fn((id) =>
+      id === "subdoc456" ? mockSubDoc : null
+    );
+
+    jest.clearAllMocks();
+  });
+
+  it("should update a subdocument and return 200", async () => {
+    UserProfile.findOne.mockResolvedValue(mockUser);
+
+    await updateSubdocument(
+      req.params.userRegistrationId,
+      req.params.subDocId,
+      req.body.field,
+      req.body.updates,
+      res
+    );
+
+    expect(UserProfile.findOne).toHaveBeenCalledWith({
+      userRegistrationId: "user123",
+    });
+    expect(mockUser.skills.id).toHaveBeenCalledWith("subdoc456");
+    expect(mockSubDoc.level).toBe("Advanced");
+    expect(mockUser.save).toHaveBeenCalled();
+    expect(invalidateCache).toHaveBeenCalledWith(
+      "/api/v1/jobportal/profile/get-profile-fields/user123?field=skills"
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      msg: "skills updated successfully",
+      data: mockSubDoc,
+    });
+  });
+
+  it("should return 404 if user is not found", async () => {
+    UserProfile.findOne.mockResolvedValue(null);
+
+    await updateSubdocument(
+      req.params.userRegistrationId,
+      req.params.subDocId,
+      req.body.field,
+      req.body.updates,
+      res
+    );
+
+    expect(UserProfile.findOne).toHaveBeenCalledWith({
+      userRegistrationId: "user123",
+    });
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ msg: "User not found!" });
+  });
+
+  it("should return 404 if subdocument is not found", async () => {
+    mockUser.skills.id.mockReturnValue(null);
+    UserProfile.findOne.mockResolvedValue(mockUser);
+
+    await updateSubdocument(
+      req.params.userRegistrationId,
+      req.params.subDocId,
+      req.body.field,
+      req.body.updates,
+      res
+    );
+
+    expect(UserProfile.findOne).toHaveBeenCalledWith({
+      userRegistrationId: "user123",
+    });
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ msg: "Subdocument not found!" });
+  });
+
+  it("should return 500 on error", async () => {
+    UserProfile.findOne.mockRejectedValue(new Error("Database error"));
+
+    await updateSubdocument(
+      req.params.userRegistrationId,
+      req.params.subDocId,
+      req.body.field,
+      req.body.updates,
+      res
+    );
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      msg: "Some error occurred while updating the skills",
+      error: expect.any(Error),
+    });
+  });
+});
+
+describe("deleteSubdocument", () => {
+  let req, res, mockUser, mockSubDoc;
+
+  beforeEach(() => {
+    req = {
+      params: { userRegistrationId: "user123", subDocId: "subdoc456" },
+      body: { field: "skills" },
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    mockSubDoc = { _id: "subdoc456", name: "JavaScript", remove: jest.fn() };
+    mockUser = {
+      userRegistrationId: "user123",
+      skills: [{ ...mockSubDoc }],
+      save: jest.fn().mockResolvedValue(true),
+    };
+
+    mockUser.skills.id = jest.fn((id) =>
+      id === "subdoc456" ? mockSubDoc : null
+    );
+
+    jest.clearAllMocks();
+  });
+
+  it("should delete a subdocument and return 200", async () => {
+    UserProfile.findOne.mockResolvedValue(mockUser);
+
+    await deleteSubdocument(
+      req.params.userRegistrationId,
+      req.params.subDocId,
+      req.body.field,
+      res
+    );
+
+    expect(UserProfile.findOne).toHaveBeenCalledWith({
+      userRegistrationId: "user123",
+    });
+    expect(mockUser.skills.id).toHaveBeenCalledWith("subdoc456");
+    expect(mockSubDoc.remove).toHaveBeenCalled();
+    expect(mockUser.save).toHaveBeenCalled();
+    expect(invalidateCache).toHaveBeenCalledWith(
+      "/api/v1/jobportal/profile/get-profile-fields/user123?field=skills"
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      msg: "skills deleted successfully",
+      data: mockSubDoc,
+    });
+  });
+
+  it("should return 404 if user is not found", async () => {
+    UserProfile.findOne.mockResolvedValue(null);
+
+    await deleteSubdocument(
+      req.params.userRegistrationId,
+      req.params.subDocId,
+      req.body.field,
+      res
+    );
+
+    expect(UserProfile.findOne).toHaveBeenCalledWith({
+      userRegistrationId: "user123",
+    });
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ msg: "User not found!" });
+  });
+
+  it("should return 404 if subdocument is not found", async () => {
+    mockUser.skills.id.mockReturnValue(null);
+    UserProfile.findOne.mockResolvedValue(mockUser);
+
+    await deleteSubdocument(
+      req.params.userRegistrationId,
+      req.params.subDocId,
+      req.body.field,
+      res
+    );
+
+    expect(UserProfile.findOne).toHaveBeenCalledWith({
+      userRegistrationId: "user123",
+    });
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ msg: "Subdocument not found!" });
+  });
+
+  it("should return 500 on error", async () => {
+    UserProfile.findOne.mockRejectedValue(new Error("Database error"));
+
+    await deleteSubdocument(
+      req.params.userRegistrationId,
+      req.params.subDocId,
+      req.body.field,
+      res
+    );
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      msg: "Some error occurred while deleting the skills",
+      error: expect.any(Error),
+    });
+  });
+});
+
+describe("addStringToArray", () => {
+  let req, res, mockUser;
+
+  beforeEach(() => {
+    req = {
+      params: { userRegistrationId: "user123" },
+      body: { field: "skills", value: "JavaScript" },
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    mockUser = {
+      userRegistrationId: "user123",
+      skills: ["React"],
+      save: jest.fn().mockResolvedValue(true),
+    };
+
+    jest.clearAllMocks();
+  });
+
+  it("should add a string to the array and return 201", async () => {
+    UserProfile.findOne.mockResolvedValue(mockUser);
+
+    await addStringToArray(
+      req.params.userRegistrationId,
+      req.body.field,
+      req.body.value,
+      res
+    );
+
+    expect(UserProfile.findOne).toHaveBeenCalledWith({
+      userRegistrationId: "user123",
+    });
+    expect(mockUser.skills).toContain("JavaScript");
+    expect(mockUser.save).toHaveBeenCalled();
+    expect(invalidateCache).toHaveBeenCalledWith(
+      "/api/v1/jobportal/profile/get-profile-fields/user123?field=skills"
+    );
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      dataLength: 2,
+      msg: "skills item added successfully",
+      data: mockUser.skills,
+    });
+  });
+
+  it("should return 400 if value is empty or not a string", async () => {
+    await addStringToArray(
+      req.params.userRegistrationId,
+      req.body.field,
+      "",
+      res
+    );
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      msg: "Invalid value for skills. Must be a non-empty string.",
+    });
+  });
+
+  it("should return 404 if user is not found", async () => {
+    UserProfile.findOne.mockResolvedValue(null);
+
+    await addStringToArray(
+      req.params.userRegistrationId,
+      req.body.field,
+      req.body.value,
+      res
+    );
+
+    expect(UserProfile.findOne).toHaveBeenCalledWith({
+      userRegistrationId: "user123",
+    });
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ msg: "User not found!" });
+  });
+
+  it("should return 500 if an error occurs", async () => {
+    UserProfile.findOne.mockRejectedValue(new Error("Database error"));
+
+    await addStringToArray(
+      req.params.userRegistrationId,
+      req.body.field,
+      req.body.value,
+      res
+    );
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      msg: "Some error occurred while adding to skills",
+      error: expect.any(Error),
+    });
+  });
+});
+
+describe("deleteStringFromArray", () => {
+  let req, res, mockUser;
+
+  beforeEach(() => {
+    req = {
+      params: { userRegistrationId: "user123" },
+      body: { field: "skills", value: "JavaScript" },
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    mockUser = {
+      userRegistrationId: "user123",
+      skills: ["JavaScript", "React"],
+      save: jest.fn().mockResolvedValue(true),
+    };
+
+    jest.clearAllMocks();
+  });
+
+  it("should delete a string from the array and return 200", async () => {
+    UserProfile.findOne.mockResolvedValue(mockUser);
+
+    await deleteStringFromArray(
+      req.params.userRegistrationId,
+      req.body.field,
+      req.body.value,
+      res
+    );
+
+    expect(UserProfile.findOne).toHaveBeenCalledWith({
+      userRegistrationId: "user123",
+    });
+    expect(mockUser.skills).not.toContain("JavaScript");
+    expect(mockUser.save).toHaveBeenCalled();
+    expect(invalidateCache).toHaveBeenCalledWith(
+      "/api/v1/jobportal/profile/get-profile-fields/user123?field=skills"
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      msg: "JavaScript deleted successfully",
+      data: "JavaScript",
+    });
+  });
+
+  it("should return 404 if the value is not found in the array", async () => {
+    mockUser.skills = ["React", "Node.js"]; // JavaScript is not in the array
+    UserProfile.findOne.mockResolvedValue(mockUser);
+
+    await deleteStringFromArray(
+      req.params.userRegistrationId,
+      req.body.field,
+      req.body.value,
+      res
+    );
+
+    expect(UserProfile.findOne).toHaveBeenCalledWith({
+      userRegistrationId: "user123",
+    });
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({
+      msg: "JavaScript not found in the skills",
+    });
+  });
+
+  it("should return 404 if the user is not found", async () => {
+    UserProfile.findOne.mockResolvedValue(null);
+
+    await deleteStringFromArray(
+      req.params.userRegistrationId,
+      req.body.field,
+      req.body.value,
+      res
+    );
+
+    expect(UserProfile.findOne).toHaveBeenCalledWith({
+      userRegistrationId: "user123",
+    });
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ msg: "User not found!" });
+  });
+
+  it("should return 500 if an error occurs", async () => {
+    UserProfile.findOne.mockRejectedValue(new Error("Database error"));
+
+    await deleteStringFromArray(
+      req.params.userRegistrationId,
+      req.body.field,
+      req.body.value,
+      res
+    );
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      msg: "Some error occurred while deleting the JavaScript",
+      error: expect.any(Error),
+    });
+  });
+});
