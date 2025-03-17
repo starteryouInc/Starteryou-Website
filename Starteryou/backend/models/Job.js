@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 /**
  * Mongoose schema for storing job postings.
- * 
+ *
  * @typedef {Object} Job
  * @property {string} title - The job title.
  * @property {string} description - The job description.
@@ -22,22 +22,10 @@ const mongoose = require("mongoose");
  * @property {Date} createdAt - The timestamp when the job was posted.
  */
 const JobSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-  },
-  description: {
-    type: String,
-    required: true,
-  },
-  location: {
-    type: String,
-    required: true,
-  },
-  industry: {
-    type: String,
-    required: true,
-  },
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  location: { type: String, required: true },
+  industry: { type: String, required: true },
   jobType: {
     type: String,
     enum: [
@@ -61,12 +49,8 @@ const JobSchema = new mongoose.Schema({
     enum: ["On-site", "Hybrid", "Remote"],
     required: true,
   },
-  startDate: {
-    type: Date,
-  },
-  endDate: {
-    type: Date,
-  },
+  startDate: { type: Date },
+  endDate: { type: Date },
   salaryRange: {
     min: { type: Number, required: true },
     max: { type: Number, required: true },
@@ -76,26 +60,28 @@ const JobSchema = new mongoose.Schema({
     enum: ["Per Year", "Per Month", "Per Hour"],
     required: true,
   },
-  companyName: {
-    type: String,
-    required: true,
-  },
+  companyName: { type: String, required: true },
   postedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
+  applicantsCount: { type: Number, default: 0 }, // Track applicants
+  postedAt: { type: Date, default: Date.now }, // Track when the job was posted
+  createdAt: { type: Date, default: Date.now },
+
+  jobPlanType: {
+    // Track whether the job is posted using free or paid plan
+    type: String,
+    enum: ["Free Plan", "Paid Plan"], // Define both options
+    required: true,
   },
 });
 
 /**
  * Mongoose model for the Job schema.
- * 
+ *
  * @module Job
  * @type {mongoose.Model<Job>}
  */
 module.exports = mongoose.model("Job", JobSchema);
-

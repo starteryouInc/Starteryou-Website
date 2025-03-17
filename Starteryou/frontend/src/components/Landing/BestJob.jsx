@@ -30,22 +30,22 @@ const BestJob = () => {
       id: 0,
       iconSrc: "/LandingPage/Icons/page 1.svg",
       title: "Discover opportunities",
-      description:
-        "Find what you’re looking for with our intuitive job search platform. ",
+      description: `We hit all the categories specifically for students! Such as unpaid internships, volunteer roles 
+and more`,
     },
     {
       id: 1,
       iconSrc: "/LandingPage/Icons/FindJob.svg",
       title: "Apply lightning-fast ",
       description:
-        "With an easy to use, intuitive interface, it takes no time to apply for roles.",
+        "With an easy to use, intuitive interface, it takes no time to apply for roles",
     },
     {
       id: 2,
       iconSrc: "/LandingPage/Icons/addJob.svg",
       title: "Stand out",
       description:
-        "By creating a profile, you’ll get found by recruiters on the platform! ",
+        "By creating a profile, you’ll be able to showcase things you can't on a resume! ",
     },
   ];
 

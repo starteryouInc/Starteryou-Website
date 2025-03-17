@@ -12,7 +12,7 @@ import CreateJobCard from "../../JobFeedPage/CreateJobCard";
 import { IoAddOutline } from "react-icons/io5";
 import { IoMdClose } from "react-icons/io";
 import { BsGraphUp } from "react-icons/bs";
-
+import EmployerPlan from "../EmployerPlan"; // Import the modal component
 /**
  * PostedJobs Component
  * Displays a list of jobs posted by the employer and provides functionalities to view, delete, and create jobs.
@@ -28,7 +28,7 @@ const PostedJobs = () => {
   const [selectedJob, setSelectedJob] = useState(null);
   const [openCreateJobCard, setOpenCreateJobCard] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const [openEmployerPlanModal, setOpenEmployerPlanModal] = useState(false);
   const token = user?.token;
 
   /**
@@ -105,11 +105,15 @@ const PostedJobs = () => {
           <div className="pb-4 flex items-center justify-between">
             <h2 className="text-2xl font-semibold text-gray-800">Dashboard</h2>
             <button
-              onClick={() => setOpenCreateJobCard(true)}
+              onClick={() => setOpenEmployerPlanModal(true)}
               className="flex items-center justify-between py-2 px-4 bg-[#8176ff] text-white rounded-lg hover:bg-purple-500"
             >
               <IoAddOutline className="mr-2 text-xl" /> <span>Post a Job</span>
             </button>
+
+            {openEmployerPlanModal && (
+              <EmployerPlan onClose={() => setOpenEmployerPlanModal(false)} />
+            )}
           </div>
           {/* Analytics */}
           <div className="company-detail-container mb-6 w-full h-[350px] flex flex-col items-center justify-center border rounded-lg bg-gray-100 text-gray-600 ">

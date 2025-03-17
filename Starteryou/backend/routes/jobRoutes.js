@@ -53,6 +53,7 @@ router.post("/create-job", authorize("employer"), async (req, res) => {
       salaryRange,
       frequency,
       companyName,
+      jobPlanType, // Expecting the jobPlanType to be passed in the request body
     } = req.body;
 
     // Validate required fields
@@ -67,7 +68,8 @@ router.post("/create-job", authorize("employer"), async (req, res) => {
       !salaryRange?.min ||
       !salaryRange?.max ||
       !frequency ||
-      !companyName
+      !companyName ||
+      !jobPlanType // Ensure jobPlanType is included
     ) {
       return res.status(400).json({
         success: false,
@@ -86,22 +88,50 @@ router.post("/create-job", authorize("employer"), async (req, res) => {
         msg: "Salary range must be valid. Minimum salary should be less than maximum salary.",
       });
     }
-    const newJob = new Job({ ...req.body, postedBy: userId });
 
+    // Validate that the jobPlanType is either 'Free Plan' or 'Paid Plan'
+    if (!["Free Plan", "Paid Plan"].includes(jobPlanType)) {
+      return res.status(400).json({
+        success: false,
+        msg: "jobPlanType must be either 'Free Plan' or 'Paid Plan'.",
+      });
+    }
+
+    // Create a new job with the provided data, including the jobPlanType
+    const newJob = new Job({
+      title,
+      description,
+      location,
+      industry,
+      jobType,
+      experienceLevel,
+      workplaceType,
+      startDate,
+      endDate,
+      salaryRange,
+      frequency,
+      companyName,
+      postedBy: userId,
+      applicantsCount: 0, // Set applicants count to 0 initially
+      postedAt: Date.now(), // Set postedAt to current time
+      jobPlanType, // Save the plan type (Free Plan or Paid Plan)
+    });
+
+    // Save the new job to the database
     const response = await newJob.save();
 
     const cacheKeyUser = `/api/v1/jobportal/jobs/fetch-posted-jobs/${userId}`;
     const cacheKeyGlobal = `/api/v1/jobportal/jobs/fetch-posted-jobs`;
-
     const cacheKeyGlobalJob = `/api/v1/jobportal/jobs/fetch-job?{}`;
     const cacheKeyGlobalJobQuery = `/api/v1/jobportal/jobs/fetch-job`;
+
     // Invalidate all related cache keys
     await invalidateCache(cacheKeyUser);
     await invalidateCache(cacheKeyGlobal);
-
     await invalidateCache(cacheKeyGlobalJob);
     await invalidateCache(cacheKeyGlobalJobQuery);
 
+    // Respond with the success message and created job data
     res.status(201).json({
       success: true,
       msg: "New Job created successfully",
@@ -110,7 +140,7 @@ router.post("/create-job", authorize("employer"), async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      msg: "Some error occured while listing New Job",
+      msg: "Some error occurred while listing New Job",
       error: error.message,
     });
   }
@@ -421,6 +451,41 @@ router.get(
         msg: "Some error occurred while fetching the posted jobs",
         error: error.message,
       });
+    }
+  }
+);
+// Endpoint to check if user can post a free job
+router.get(
+  "/checkFreePlanEligibility",
+  authorize("employer"),
+  async (req, res) => {
+    const userId = req.user.id;
+
+    try {
+      // Find the most recent job posted by the user using the Free Plan
+      const job = await Job.findOne({
+        postedBy: userId,
+        jobPlanType: "Free Plan",
+      }).sort({ postedAt: -1 });
+
+      if (!job) {
+        // No job posted yet under Free Plan, allow posting
+        return res.json({ isEligible: true });
+      }
+
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      // Check if the job has more than 20 applicants or is older than 7 days
+      if (job.applicantsCount >= 20 || job.postedAt < sevenDaysAgo) {
+        return res.json({ isEligible: false });
+      }
+
+      // If the job is still within limits, allow posting
+      return res.json({ isEligible: true });
+    } catch (error) {
+      console.error("Error checking eligibility:", error);
+      res.status(500).json({ isEligible: false });
     }
   }
 );

@@ -474,7 +474,7 @@ router.use(
   authenticate,
   companyProfileRoutes
 );
-
+// router.use("/api/checkFreePlanEligibility", authenticate, jobRoutes);
 // API documentation endpoint with enhanced information
 router.get("/api/docs", (req, res) => {
   const baseUrl =
