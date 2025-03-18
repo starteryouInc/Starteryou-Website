@@ -69,7 +69,7 @@ describe('Session Routes', () => {
     expect(response.body.isLoggedIn).toBe(false);  // User should be logged out
   });
 
-  test('should return remaining session time for logged-in user', async () => {
+  test('should return remaining session time for logged-in users', async () => {
     // Log in first
     await agent
       .post('/api/v1/userAuth/users-login')
