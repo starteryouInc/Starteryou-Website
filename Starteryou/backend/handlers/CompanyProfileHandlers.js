@@ -88,7 +88,7 @@ const fetchCompanyProfileHandler = async (req, res) => {
       data: cachedCompanyProfile,
     });
   } catch (error) {
-    console.error("Fetch Company Profile Error:", error);
+    // console.error("Fetch Company Profile Error:", error);
     res.status(500).json({
       success: false,
       msg: "Some error occurred while fetching the company profile",

@@ -211,7 +211,7 @@ const updateJobHandler = async (req, res) => {
       data: updatedJob,
     });
   } catch (error) {
-    console.error("Error updating job:", error.message);
+    // console.error("Error updating job:", error.message);
     res.status(500).json({
       success: false,
       msg: "Some error occurred while updating the job",
@@ -291,7 +291,7 @@ const fetchPostedJobsHandler = async (req, res) => {
       data: cachedResponse,
     });
   } catch (error) {
-    console.error("Error fetching posted jobs:", error.message);
+    // console.error("Error fetching posted jobs:", error.message);
     res.status(500).json({
       success: false,
       msg: "Some error occurred while fetching the posted jobs",

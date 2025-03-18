@@ -44,7 +44,7 @@ const fetchProfileHandler = async (req, res) => {
 
     // If cache exists but is invalid, fetch fresh data
     if (!cachedProfile || cachedProfile.needsRefresh) {
-      console.log("Fetching fresh profile data from database...");
+      // console.log("Fetching fresh profile data from database...");
       cachedProfile = await UserProfile.find({
         userRegistrationId: userId,
       });
@@ -70,7 +70,7 @@ const fetchProfileHandler = async (req, res) => {
       data: cachedProfile,
     });
   } catch (error) {
-    console.error("Fetch Profile Error:", error);
+    // console.error("Fetch Profile Error:", error);
     res.status(500).json({
       success: false,
       msg: "Some error occurred while fetching the Profiles",
@@ -121,7 +121,7 @@ const updateProfileHandler = async (req, res) => {
       data: updatedProfile,
     });
   } catch (error) {
-    console.error("Profile Update Error:", error);
+    // console.error("Profile Update Error:", error);
     res.status(500).json({
       success: false,
       msg: "Some error occurred while updating the profile",
