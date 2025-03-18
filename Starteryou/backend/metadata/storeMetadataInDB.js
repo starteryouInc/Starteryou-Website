@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { BaseUser, JobSeeker, Employer } = require("./models"); // Import models
+const { BaseUser, JobSeeker, Employer } = require("../models/BaseUserSchema"); // Import models
 
 // Function to store metadata in separate collections
 const storeMetadataInDB = async () => {
