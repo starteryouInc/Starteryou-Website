@@ -1,4 +1,4 @@
-const sessionTimeout = require('./sessionTimeout');
+const sessionTimeout = require('../middleware/sessionTimeout');
 const httpMocks = require('node-mocks-http');
 
 describe('sessionTimeout middleware', () => {

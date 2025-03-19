@@ -1,7 +1,7 @@
 const request = require('supertest');
 const express = require('express');
 const session = require('express-session');
-const sessionRoutes = require('./sessionRoutes');
+const sessionRoutes = require('../routes/sessionRoutes');
 const sessionTimeout = require('../middleware/sessionTimeout');
 
 const app = express();
