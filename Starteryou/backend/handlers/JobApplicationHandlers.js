@@ -2,6 +2,7 @@ const cacheConfig = require("../cache/config/cacheConfig");
 const cacheQueryJob = require("../cache/utils/cacheQueryJob");
 const { invalidateCache } = require("../cache/utils/invalidateCache");
 const Application = require("../models/JobApplications");
+const logger = require("../utils/logger"); // Logger import
 
 const applyJobHandler = async (req, res) => {
   const { firstName, lastName, email, whyHire } = req.body;
@@ -56,7 +57,7 @@ const fetchAppliedJobHandler = async (req, res) => {
     // const { params: { userId } } = req;
     const userId = req.user?.id;
     const cacheKey = `/api/v1/jobportal/applications/fetch-applied-jobs/${userId}`;
-    console.log(`Cache Key: ${cacheKey}`);
+    logger.info(`Cache Key: ${cacheKey}`);
 
     // Fetch data with cache handling
     const cachedResponse = await cacheQueryJob(
@@ -94,7 +95,7 @@ const fetchAppliedUsersHandler = async (req, res) => {
   try {
     const userId = req.user?.id;
     const cacheKey = `/api/v1/jobportal/applications/fetch-applied-users/${userId}`;
-    console.log(`Cache Key: ${cacheKey}`);
+    logger.info(`Cache Key: ${cacheKey}`);
 
     // Fetch data with cache handling
     const cachedResponse = await cacheQueryJob(

@@ -6,7 +6,7 @@ const cors = require("cors");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
-const sessionRoutes = require('./routes/sessionRoutes'); 
+const sessionRoutes = require("./routes/sessionRoutes");
 const { connectToMongoDB, mongoUri } = require("./db");
 const MongoStore = require("connect-mongo");
 const textRoutes = require("./routes/textRoutes");
@@ -20,6 +20,7 @@ const authRoutes = require("./routes/authRoutes");
 const newsletterRoutes = require("./routes/newsletterRoutes"); //newsletter subscribers
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 const { router } = require("./routes/index");
+const logger = require("./utils/logger");
 
 // Initialize Express app
 const app = express();
@@ -28,8 +29,8 @@ const app = express();
 dotenv.config();
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,  // Frontend URL
-    credentials: true,  // Allow cookies to be sent
+    origin: process.env.FRONTEND_URL, // Frontend URL
+    credentials: true, // Allow cookies to be sent
   })
 );
 app.use(bodyParser.json());
@@ -37,17 +38,23 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cookieParser());
 
+// **Request logging middleware for all incoming requests**
+app.use((req, res, next) => {
+  logger.info(`Incoming Request: ${req.method} ${req.url} from ${req.ip}`);
+  next();
+});
+
 const sessionStore = MongoStore.create({
   mongoUrl: mongoUri, // MongoDB URI
 });
 
-sessionStore.on('connected', async () => {
+sessionStore.on("connected", async () => {
   try {
-    console.log("Clearing session store...");
-    await sessionStore.clear();  // Clear all sessions
-    console.log("Session store cleared successfully.");
+    logger.info("Clearing session store...");
+    await sessionStore.clear(); // Clear all sessions
+    logger.info("Session store cleared successfully.");
   } catch (err) {
-    console.error("Error clearing session store:", err);
+    logger.error("Error clearing session store:", err);
   }
 });
 
@@ -62,7 +69,7 @@ app.use(
       httpOnly: true,
       secure: false, // Set to true if using HTTPS and set to false if using local environment
       sameSite: "Lax", // Set to 'None' for cross-origin cookies and set to 'Lax' for same-origin in local environment
-      maxAge: 60 * 60 * 1000,  // 1 hour session duration
+      maxAge: 60 * 60 * 1000, // 1 hour session duration
     },
   })
 );
@@ -73,9 +80,9 @@ app.use("/api/newsletter", newsletterRoutes); //Newsletter subscribers
 (async () => {
   try {
     await connectToMongoDB();
-    console.log("✅ MongoDB connected successfully");
+    logger.info("✅ MongoDB connected successfully");
   } catch (err) {
-    console.error("❌ MongoDB Connection Error:", err.message);
+    logger.error("❌ MongoDB Connection Error:", err.message);
   }
 })();
 
@@ -84,7 +91,7 @@ const cacheOptions = {
   immutable: true, // Prevent revalidation if the file hasn't changed
 };
 app.use("/docs", express.static(path.join(__dirname, "docs"), cacheOptions));
-console.log("📂 Serving static files from:", path.join(__dirname, "docs"));
+logger.info("📂 Serving static files from:", path.join(__dirname, "docs"));
 
 // Swagger Configuration
 const swaggerOptions = {
@@ -211,21 +218,21 @@ const PORT = process.env.PORT || 3000;
 
 // chek dev branch
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://dev.starteryou.com:${PORT}`);
-  console.log(
+  logger.info(`🚀 Server running at http://dev.starteryou.com:${PORT}`);
+  logger.info(
     `📖 Swagger Docs available at http://dev.starteryou.com:${PORT}/api-test`
   );
-  console.log(`💻 Health Check: http://dev.starteryou.com:${PORT}/health`);
-  console.log(
+  logger.info(`💻 Health Check: http://dev.starteryou.com:${PORT}/health`);
+  logger.info(
     `🗄️ Database Status: http://dev.starteryou.com:${PORT}/db-status`
   );
-  console.log(
+  logger.info(
     `📚 API Documentation: http://dev.starteryou.com:${PORT}/api/docs`
   );
-  console.log(
+  logger.info(
     `📋 Postman Collection: http://dev.starteryou.com:${PORT}/api/docs/postman`
   );
-  console.log(
+  logger.info(
     `⚙️ File Verification: http://dev.starteryou.com:${PORT}/api/system/verify-all`
   );
 });

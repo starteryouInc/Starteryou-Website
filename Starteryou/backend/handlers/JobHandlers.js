@@ -2,6 +2,7 @@ const cacheConfig = require("../cache/config/cacheConfig");
 const cacheQueryJob = require("../cache/utils/cacheQueryJob");
 const { invalidateCache } = require("../cache/utils/invalidateCache");
 const Job = require("../models/Job");
+const logger = require("../utils/logger"); // Logger import
 
 const createJobHandler = async (req, res) => {
   const userId = req.user.id;
@@ -97,7 +98,7 @@ const fetchJobHandler = async (req, res) => {
     const cacheKey = `/api/v1/jobportal/jobs/fetch-job?${JSON.stringify(
       req.query
     )}`;
-    console.log(`Cache Key: ${cacheKey}`);
+    logger.info(`Cache Key: ${cacheKey}`);
 
     // Define query filters
     const filters = {};
@@ -211,7 +212,7 @@ const updateJobHandler = async (req, res) => {
       data: updatedJob,
     });
   } catch (error) {
-    // console.error("Error updating job:", error.message);
+    // logger.error("Error updating job:", error.message);
     res.status(500).json({
       success: false,
       msg: "Some error occurred while updating the job",
@@ -265,7 +266,7 @@ const fetchPostedJobsHandler = async (req, res) => {
 
     // Construct cacheKey based on this route function
     const cacheKey = `/api/v1/jobportal/jobs/fetch-posted-jobs/${userId}`;
-    console.log(`Cache Key: ${cacheKey}`);
+    logger.info(`Cache Key: ${cacheKey}`);
 
     // Fetch data with cache handling
     const cachedResponse = await cacheQueryJob(
@@ -291,7 +292,7 @@ const fetchPostedJobsHandler = async (req, res) => {
       data: cachedResponse,
     });
   } catch (error) {
-    // console.error("Error fetching posted jobs:", error.message);
+    // logger.error("Error fetching posted jobs:", error.message);
     res.status(500).json({
       success: false,
       msg: "Some error occurred while fetching the posted jobs",
