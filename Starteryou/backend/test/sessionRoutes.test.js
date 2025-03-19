@@ -15,7 +15,10 @@ app.use(
   })
 );
 
-// Mock login route (Personalized feedback and adaptive questions could be added here)
+/**
+ * Mock login route
+ * Handles user authentication and stores user session.
+ */
 app.post('/api/v1/userAuth/users-login', (req, res) => {
   const { email, password } = req.body;
   if (email === 'test@example.com' && password === 'password123') {
@@ -35,6 +38,10 @@ describe('Session Routes', () => {
     agent = request.agent(app); // Use agent to maintain session across requests
   });
 
+  /**
+   * Test session expiration handling
+   * Ensures that expired sessions are properly invalidated.
+   */
   test('should handle session expiration', async () => {
     // Log in first
     const loginResponse = await agent
@@ -42,21 +49,19 @@ describe('Session Routes', () => {
       .send({ email: 'test@example.com', password: 'password123' })
       .expect('Set-Cookie', /connect.sid/); // Ensure session cookie is set
 
-    // Manually log the cookies after login
     console.log('Login response cookies:', loginResponse.headers['set-cookie']);
 
-    // Retrieve cookies after login (directly check agent.jar)
+    // Retrieve cookies after login
     const cookies = agent.jar.getCookies('http://localhost');
 
     if (!cookies || cookies.length === 0) {
       console.log('No cookies found after login. This might be due to how Supertest handles cookies.');
-      return; // Skip the rest of the test if no cookies are found
+      return;
     }
 
-    // Log the cookies to see their structure
     console.log('Session Cookies:', cookies);
 
-    // Simulate session expiration by manually setting an expired time on the cookie
+    // Simulate session expiration
     cookies.forEach(cookie => {
       cookie.expires = new Date(Date.now() - 1000); // Expired 1 second ago
     });
@@ -69,14 +74,16 @@ describe('Session Routes', () => {
     expect(response.body.isLoggedIn).toBe(false);  // User should be logged out
   });
 
+  /**
+   * Test retrieving remaining session time for logged-in users
+   * Ensures session time is correctly reported.
+   */
   test('should return remaining session time for logged-in users', async () => {
-    // Log in first
     await agent
       .post('/api/v1/userAuth/users-login')
       .send({ email: 'test@example.com', password: 'password123' })
       .expect('Set-Cookie', /connect.sid/); // Ensure session cookie is set
 
-    // Check session time
     const response = await agent.get('/api/session-time');
 
     expect(response.status).toBe(200);
@@ -84,6 +91,10 @@ describe('Session Routes', () => {
     expect(response.body.isLoggedIn).toBe(true); // User should be logged in
   });
 
+  /**
+   * Test retrieving session time for an unauthenticated user
+   * Ensures default values are returned for non-logged-in users.
+   */
   test('should return session time for an unauthenticated user', async () => {
     const response = await request(app).get('/api/session-time');
 

@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Tests for sessionTimeout middleware.
+ * Ensures session expiration logic works correctly.
+ */
+
 const sessionTimeout = require('../middleware/sessionTimeout');
 const httpMocks = require('node-mocks-http');
 
@@ -10,6 +15,9 @@ describe('sessionTimeout middleware', () => {
         next = jest.fn();
     });
 
+    /**
+     * Test if session timeout is set to 1 hour for authenticated users.
+     */
     it('should set session timeout to 1 hour for authenticated users', () => {
         req.session = { user: { id: '123' }, cookie: {} };
 
@@ -19,6 +27,9 @@ describe('sessionTimeout middleware', () => {
         expect(next).toHaveBeenCalled();
     });
 
+    /**
+     * Test if session timeout is set to 15 minutes for unauthenticated users.
+     */
     it('should set session timeout to 15 minutes for unauthenticated users', () => {
         req.session = { cookie: {} };
 
@@ -28,6 +39,9 @@ describe('sessionTimeout middleware', () => {
         expect(next).toHaveBeenCalled();
     });
 
+    /**
+     * Test session expiration handling for authenticated users.
+     */
     it('should destroy session and return 401 if session is expired for authenticated users', () => {
         req.session = {
             user: { id: '123' },
@@ -42,6 +56,9 @@ describe('sessionTimeout middleware', () => {
         expect(res._getJSONData()).toEqual({ message: 'Session timed out, please log in again' });
     });
 
+    /**
+     * Test session expiration handling for unauthenticated users.
+     */
     it('should destroy session and return 401 if session is expired for unauthenticated users', () => {
         req.session = {
             cookie: { expires: Date.now() - 1000 },
@@ -55,6 +72,9 @@ describe('sessionTimeout middleware', () => {
         expect(res._getJSONData()).toEqual({ message: 'Session timed out, please log in' });
     });
 
+    /**
+     * Test error handling when session destruction fails.
+     */
     it('should return 500 if session destruction fails', () => {
         req.session = {
             cookie: { expires: Date.now() - 1000 },
@@ -68,6 +88,9 @@ describe('sessionTimeout middleware', () => {
         expect(res._getJSONData()).toEqual({ message: 'Failed to destroy session' });
     });
 
+    /**
+     * Test if middleware calls next() when session is still active.
+     */
     it('should call next if session is still active', () => {
         req.session = { cookie: { expires: Date.now() + 1000 } };
 
