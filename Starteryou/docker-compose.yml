@@ -6,19 +6,25 @@ services:
     container_name: starteryou-backend
     restart: unless-stopped
     env_file:
-      - ${ENV_FILE:-.env.server}  # Dynamically use environment-specific .env
+      - ${ENV_FILE:-.env.server} # Dynamically use environment-specific .env
     volumes:
       - ${MONGO_TLS_CA_PATH}:/certificates/ca.crt:ro
       - ${MONGO_TLS_CERT_PATH}:/certificates/server.pem:ro
       - ./backend:/usr/src/app
       - ./backend/uploads:/usr/src/app/uploads
-      - /usr/src/app/node_modules  # Prevent overwriting node_modules
+      - /usr/src/app/node_modules # Prevent overwriting node_modules
     ports:
       - "3000:3000"
     networks:
       - backend-network
     healthcheck:
-      test: ["CMD", "wget", "--spider", "${HEALTHCHECK_URL:-http://dev.starteryou.com:3000/health}"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--spider",
+          "${HEALTHCHECK_URL:-http://dev.starteryou.com:3000/health}",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -44,6 +50,24 @@ services:
     profiles:
       - local
       - server
+
+  test:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.test
+    container_name: starteryou-tests
+    environment:
+      - NODE_ENV=test
+      - MONGO_URI=${TEST_MONGO_URI:-mongodb://localhost:27017/starteryou_test}
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules # Prevent overwriting node_modules
+    command: npm test
+    networks:
+      - backend-network
+    profiles:
+      - test
+      - ci
 
 networks:
   backend-network:
