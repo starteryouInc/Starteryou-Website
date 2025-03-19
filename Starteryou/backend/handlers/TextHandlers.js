@@ -4,6 +4,37 @@ const TextContent = require("../models/TextContent");
 const cacheConfig = require("../cache/config/cacheConfig");
 // const { invalidateCache } = require("../cache/utils/invalidateCache");
 
+/**
+ * @swagger
+ * /text:
+ *   get:
+ *     tags:
+ *       - TextRoutes
+ *     summary: Retrieves text content for a specific component.
+ *     description: Retrieve content stored in the database for a given page and component.
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The name of the page to retrieve content for.
+ *       - in: query
+ *         name: component
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: The name of the component to retrieve content for.
+ *     responses:
+ *       200:
+ *         description: Content retrieved successfully.
+ *       400:
+ *         description: Missing or invalid query parameters.
+ *       404:
+ *         description: No content found.
+ *       500:
+ *         description: Server error.
+ */
 const fetchTextContent = async (req, res) => {
   const { page, component } = req.query;
 
@@ -67,6 +98,39 @@ const fetchTextContent = async (req, res) => {
   }
 };
 
+/**
+ * @swagger
+ * /text:
+ *   put:
+ *     tags:
+ *       - TextRoutes
+ *     summary: Updates or creates text content for a specific component.
+ *     description: Update or create content in the database for a given page and component.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               page:
+ *                 type: string
+ *               component:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               paragraphs:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Content updated or created successfully.
+ *       400:
+ *         description: Missing or invalid request body.
+ *       500:
+ *         description: Server error.
+ */
 const updateTextContent = async (req, res) => {
   const { page, component, content, paragraphs } = req.body;
 
