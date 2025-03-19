@@ -27,15 +27,22 @@ jest.mock('swagger-jsdoc', () => {
   jest.mock('../models/TeamMember');
   
   const mongoose = require('mongoose');
-  const express = require('express');
   const TeamMember = require('../models/TeamMember');
   const fs = require('fs');
   const teamRoutes = require('../routes/teamRoutes');
   
+/**
+ * Test suite for Team Member API Routes
+ * Tests the CRUD operations for team members including error handling
+ */
   describe('Team Member API Routes', () => {
     let mockRequest;
     let mockResponse;
     
+    /**
+     * Setup before each test
+     * Resets mocks and initializes mock request and response objects
+     */
     beforeEach(() => {
       // Need to reset mocks before each test
       jest.clearAllMocks();
@@ -62,11 +69,25 @@ jest.mock('swagger-jsdoc', () => {
       fs.unlinkSync.mockImplementation(() => true);
     });
     
+    /**
+   * Cleanup after all tests
+   * Disconnects from MongoDB to prevent connection leaks
+   */
     afterAll(() => {
       mongoose.disconnect();
     });
   
+    /**
+     * Test group for POST /team endpoint
+     * Tests creating new team members
+     */
     describe('POST /team', () => {
+
+      /**
+       * Test case: Creating a new team member successfully
+       * Verifies that a team member can be created with valid data
+       * and the response contains the expected status and data
+       */
         it('should create a new team member successfully', async () => {
 
             const teamMemberData = {
@@ -109,6 +130,11 @@ jest.mock('swagger-jsdoc', () => {
             expect(fs.unlinkSync).toHaveBeenCalledWith(mockRequest.file.path);
           });
       
+      /**
+       * Test case: Error handling when creating a team member
+       * Verifies that errors during team member creation are properly handled
+       * and the appropriate error response is sent
+       */
       it('should handle errors when creating a team member', async () => {
 
         const errorMessage = 'Database connection error';
@@ -128,7 +154,17 @@ jest.mock('swagger-jsdoc', () => {
       });
     });
     
+    /**
+     * Test group for GET /team endpoint
+     * Tests fetching team members with various query parameters
+     */
     describe('GET /team', () => {
+
+    /**
+     * Test case: Fetching team members with pagination
+     * Verifies that team members can be retrieved with pagination
+     * and the response contains the expected data and pagination info
+     */
       it('should fetch team members successfully with pagination', async () => {
 
         const mockTeamMembers = [
@@ -162,6 +198,11 @@ jest.mock('swagger-jsdoc', () => {
         });
       });
       
+      /**
+       * Test case: Filtering team members by team
+       * Verifies that team members can be filtered by team parameter
+       * and the response contains only the members from the specified team
+       */
       it('should filter team members by team parameter', async () => {
         // Arrange
         const mockTeamMembers = [
@@ -192,7 +233,17 @@ jest.mock('swagger-jsdoc', () => {
       });
     });
     
+  /**
+   * Test group for DELETE /team/:id endpoint
+   * Tests deleting team members and error handling
+   */
     describe('Delete Team Members', () => {
+
+      /**
+       * Test case: Deleting a team member successfully
+       * Verifies that a team member can be deleted by ID
+       * and the response contains the expected success message
+       */
       it('should delete a team member successfully', async () => {
         // Arrange
         const memberId = 'mock-id-123';
@@ -218,6 +269,11 @@ jest.mock('swagger-jsdoc', () => {
         });
       });
       
+      /**
+       * Test case: Attempting to delete a non-existent team member
+       * Verifies that a 404 error is returned when trying to delete
+       * a team member that doesn't exist
+       */
       it('should return 404 when team member not found', async () => {
 
         const memberId = 'non-existent-id';
@@ -236,6 +292,11 @@ jest.mock('swagger-jsdoc', () => {
         });
       });
       
+      /**
+       * Test case: Error handling when deleting a team member
+       * Verifies that errors during team member deletion are properly handled
+       * and a 500 error response is sent with the appropriate error message
+       */
       it('should handle errors when deleting a team member', async () => {
 
         const memberId = 'mock-id-123';
