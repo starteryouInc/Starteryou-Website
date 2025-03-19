@@ -2,7 +2,7 @@ name: Auto PR from develop to main
 
 on:
   workflow_run:
-    workflows: ["Deploy to AWS EC2-DEV-SERVER"]  # Replace with the actual name of your deploy workflow
+    workflows: ["Deploy to AWS EC2-DEV-SERVER"] # Replace with the actual name of your deploy workflow
     types:
       - completed
 
@@ -11,13 +11,37 @@ permissions:
   pull-requests: write
 
 jobs:
-  create-pull-request:
+  run-tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Ensures full history
+          fetch-depth: 0 # Ensures full history
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Run tests with Docker Compose
+        run: |
+          docker-compose --profile ci build test
+          docker-compose --profile ci run test
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: ./backend/test-results
+
+  create-pull-request:
+    needs: run-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Ensures full history
 
       - name: Fetch all branches
         run: |
@@ -50,6 +74,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           base: main
           head: develop
-          title: 'Automatic PR from develop to main'
+          title: "Automatic PR from develop to main"
           body: |
             This pull request was automatically created by the GitHub Actions workflow.
