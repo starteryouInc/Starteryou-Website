@@ -3,6 +3,11 @@ const cacheQueryJob = require("../cache/utils/cacheQueryJob");
 const { invalidateCache } = require("../cache/utils/invalidateCache");
 const UserProfile = require("../models/UserProfile");
 
+/**
+ * Creates a new user profile.
+ * @param {Object} req - The request object containing user details.
+ * @param {Object} res - The response object.
+ */
 const createProfileHandler = async (req, res) => {
   const { userRegistrationId, name, email, phoneNo } = req.body;
   if (!userRegistrationId || !name || !email) {
@@ -32,6 +37,11 @@ const createProfileHandler = async (req, res) => {
   }
 };
 
+/**
+ * Fetches the user profile from the database or cache.
+ * @param {Object} req - The request object containing userId in params.
+ * @param {Object} res - The response object.
+ */
 const fetchProfileHandler = async (req, res) => {
   const { userId } = req.params;
   const cacheKey = `/fetch-profile/${userId}`;
@@ -79,6 +89,11 @@ const fetchProfileHandler = async (req, res) => {
   }
 };
 
+/**
+ * Updates an existing user profile.
+ * @param {Object} req - The request object containing updated profile fields.
+ * @param {Object} res - The response object.
+ */
 const updateProfileHandler = async (req, res) => {
   const { userRegistrationId } = req.params;
   const {
@@ -130,6 +145,11 @@ const updateProfileHandler = async (req, res) => {
   }
 };
 
+/**
+ * Fetches specific profile fields for a user.
+ * @param {Object} req - The request object containing userRegistrationId and field query.
+ * @param {Object} res - The response object.
+ */
 const fetchProfileFieldsHandler = async (req, res) => {
   const {
     params: { userRegistrationId },

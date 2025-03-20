@@ -13,6 +13,7 @@ jest.mock("../cache/utils/invalidateCache");
 jest.mock("../cache/utils/cacheQueryJob");
 jest.mock("../db", () => ({}));
 
+// Test cases for applyJobHandler, fetchAppliedJobHandler, fetchAppliedUsersHandler, updateAppliedJobStatusHandler
 describe("applyJobHandler", () => {
   let req, res;
 
@@ -36,6 +37,7 @@ describe("applyJobHandler", () => {
     jest.clearAllMocks();
   });
 
+  // Test 1: It should return 400 if required fields are missing
   it("should return 400 if required fields are missing", async () => {
     req.body = {}; // Missing required fields
 
@@ -48,6 +50,7 @@ describe("applyJobHandler", () => {
     });
   });
 
+  // Test 2: It should return 400 if the user has already applied
   it("should return 400 if the user has already applied", async () => {
     Application.findOne.mockResolvedValue({
       userId: "user123",
@@ -66,6 +69,7 @@ describe("applyJobHandler", () => {
     });
   });
 
+  // Test 3: It should submit a job application successfully
   it("should submit a job application successfully", async () => {
     Application.findOne.mockResolvedValue(null); // No existing application
     Application.prototype.save = jest.fn().mockResolvedValue({
@@ -94,6 +98,7 @@ describe("applyJobHandler", () => {
     });
   });
 
+  // Test 4: It should return 500 if an error occurs
   it("should return 500 if an error occurs", async () => {
     Application.findOne.mockRejectedValue(new Error("Database error"));
 
@@ -124,6 +129,7 @@ describe("fetchAppliedJobHandler", () => {
     jest.clearAllMocks();
   });
 
+  // Test 1: It should return 404 if no applied jobs are found
   it("should return 404 if no applied jobs are found", async () => {
     cacheQueryJob.mockResolvedValue([]);
 
@@ -141,6 +147,7 @@ describe("fetchAppliedJobHandler", () => {
     });
   });
 
+  // Test 2: It should return 200 and the list of applied jobs
   it("should return 200 and the list of applied jobs", async () => {
     const mockApplications = [
       { jobId: "job1", userId: "user123", email: "john@example.com" },
@@ -158,6 +165,7 @@ describe("fetchAppliedJobHandler", () => {
     });
   });
 
+  // Test 3: It should return 500 if an error occurs
   it("should return 500 if an error occurs", async () => {
     cacheQueryJob.mockRejectedValue(new Error("Database error"));
 
@@ -189,6 +197,7 @@ describe("fetchAppliedUsers", () => {
     jest.clearAllMocks();
   });
 
+  // Test 1: It should return 404 if no users have applied
   it("should return 404 if no users have applied", async () => {
     cacheQueryJob.mockResolvedValue([]);
 
@@ -206,6 +215,7 @@ describe("fetchAppliedUsers", () => {
     });
   });
 
+  // Test 2: It should return 200 and the list of users who applied
   it("should return 200 and the list of users who applied", async () => {
     const mockApplicants = [
       { userId: "user1", jobId: "job456", email: "user1@example.com" },
@@ -224,6 +234,7 @@ describe("fetchAppliedUsers", () => {
     });
   });
 
+  // Test 3: It should return 500 if an error occurs
   it("should return 500 if an error occurs", async () => {
     cacheQueryJob.mockRejectedValue(new Error("Database error"));
 
@@ -256,6 +267,7 @@ describe("updateAppliedJobStatusHandler", () => {
     jest.clearAllMocks();
   });
 
+  // Test 1: It should return 400 for an invalid status
   it("should return 400 for an invalid status", async () => {
     req.body.status = "invalid_status";
 
@@ -267,6 +279,7 @@ describe("updateAppliedJobStatusHandler", () => {
     });
   });
 
+  // Test 2: It should return 404 if application is not found
   it("should return 404 if application is not found", async () => {
     Application.findById.mockResolvedValue(null);
 
@@ -277,6 +290,7 @@ describe("updateAppliedJobStatusHandler", () => {
     expect(res.json).toHaveBeenCalledWith({ msg: "Application not found!" });
   });
 
+  // Test 3: It should update application status and return 200
   it("should update application status and return 200", async () => {
     const mockApplication = {
       _id: "app123",
@@ -301,6 +315,7 @@ describe("updateAppliedJobStatusHandler", () => {
     });
   });
 
+  // Test 4: It should return 500 if an error occurs
   it("should return 500 if an error occurs", async () => {
     Application.findById.mockRejectedValue(new Error("Database error"));
 

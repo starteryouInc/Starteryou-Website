@@ -3,6 +3,18 @@ const cacheQueryJob = require("../cache/utils/cacheQueryJob");
 const { invalidateCache } = require("../cache/utils/invalidateCache");
 const BookmarkedJob = require("../models/BookmarkedJobs");
 
+/**
+ * @desc    Bookmark a job for the logged-in user
+ * @route   POST /api/v1/jobportal/bookmarks/:jobId
+ * @access  Private (Authenticated Users)
+ * @param   {Object} req - Express request object
+ * @param   {Object} req.user - The authenticated user object
+ * @param   {string} req.user.id - The ID of the logged-in user
+ * @param   {Object} req.params - Request parameters
+ * @param   {string} req.params.jobId - The ID of the job to be bookmarked
+ * @param   {Object} res - Express response object
+ * @returns {Object} JSON response with success message or error
+ */
 const bookmarkedJobHandler = async (req, res) => {
   const userId = req.user?.id;
   const {
@@ -34,6 +46,18 @@ const bookmarkedJobHandler = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Remove a bookmarked job for the logged-in user
+ * @route   DELETE /api/v1/jobportal/bookmarks/:jobId
+ * @access  Private (Authenticated Users)
+ * @param   {Object} req - Express request object
+ * @param   {Object} req.user - The authenticated user object
+ * @param   {string} req.user.id - The ID of the logged-in user
+ * @param   {Object} req.params - Request parameters
+ * @param   {string} req.params.jobId - The ID of the job to be removed from bookmarks
+ * @param   {Object} res - Express response object
+ * @returns {Object} JSON response with success message or error
+ */
 const deleteBookmarkHandler = async (req, res) => {
   const userId = req.user?.id;
   const {
@@ -58,6 +82,16 @@ const deleteBookmarkHandler = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Fetch all bookmarked jobs for the logged-in user
+ * @route   GET /api/v1/jobportal/bookmarks
+ * @access  Private (Authenticated Users)
+ * @param   {Object} req - Express request object
+ * @param   {Object} req.user - The authenticated user object
+ * @param   {string} req.user.id - The ID of the logged-in user
+ * @param   {Object} res - Express response object
+ * @returns {Object} JSON response with an array of bookmarked jobs or an error
+ */
 const fetchBookmarkJobsHandler = async (req, res) => {
   try {
     const userId = req.user?.id;

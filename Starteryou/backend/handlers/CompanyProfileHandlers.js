@@ -2,6 +2,25 @@ const cacheConfig = require("../cache/config/cacheConfig");
 const cacheQueryJob = require("../cache/utils/cacheQueryJob");
 const CompanyProfile = require("../models/CompanyProfile");
 
+/**
+ * @desc    Create a new company profile
+ * @route   POST /api/v1/jobportal/company-profile
+ * @access  Private (Employers Only)
+ * @param   {Object} req - Express request object
+ * @param   {Object} req.body - Request body containing company details
+ * @param   {string} req.body.employerRegistrationId - Employer's registration ID (Required)
+ * @param   {string} req.body.companyName - Name of the company (Required)
+ * @param   {string} [req.body.companyWebsite] - Company website URL (Optional)
+ * @param   {string} [req.body.industry] - Industry sector of the company (Optional)
+ * @param   {string} [req.body.companySize] - Company size (e.g., "50-200 employees") (Optional)
+ * @param   {string} [req.body.companyType] - Type of company (e.g., "Startup", "MNC") (Optional)
+ * @param   {string} [req.body.location] - Company location (Optional)
+ * @param   {string} [req.body.foundedDate] - Year or date when the company was founded (Optional)
+ * @param   {string} [req.body.tagline] - Company tagline (Optional)
+ * @param   {string} [req.body.about] - Short description about the company (Optional)
+ * @param   {Object} res - Express response object
+ * @returns {Object} JSON response with success message or error
+ */
 const createCompanyProfileHandler = async (req, res) => {
   const {
     employerRegistrationId,
@@ -50,6 +69,16 @@ const createCompanyProfileHandler = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Fetch company profile based on employer ID
+ * @route   GET /api/v1/jobportal/company-profile/:userId
+ * @access  Private (Employers Only)
+ * @param   {Object} req - Express request object
+ * @param   {Object} req.params - Request parameters
+ * @param   {string} req.params.userId - Employer's registration ID
+ * @param   {Object} res - Express response object
+ * @returns {Object} JSON response with company profile data or an error message
+ */
 const fetchCompanyProfileHandler = async (req, res) => {
   const { userId } = req.params;
 

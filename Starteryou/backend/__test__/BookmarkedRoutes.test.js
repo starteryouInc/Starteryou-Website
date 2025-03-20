@@ -12,6 +12,7 @@ jest.mock("../cache/utils/cacheQueryJob");
 jest.mock("../cache/utils/invalidateCache");
 jest.mock("../db", () => ({}));
 
+// Test cases for bookmarkedJobHandler, deleteBookmarkHandler, fetchBookmarkJobsHandler
 describe("bookmarkedJobHandler", () => {
   let req, res;
 
@@ -26,6 +27,7 @@ describe("bookmarkedJobHandler", () => {
     };
   });
 
+  // Test 1: It should bookmark a job successfully
   it("should bookmark a job successfully", async () => {
     BookmarkedJob.findOne.mockResolvedValue(null);
     BookmarkedJob.prototype.save.mockResolvedValue({
@@ -43,6 +45,7 @@ describe("bookmarkedJobHandler", () => {
     });
   });
 
+  // Test 2: It should return 400 if job is already bookmarked
   it("should return 400 if job is already bookmarked", async () => {
     BookmarkedJob.findOne.mockResolvedValue({
       userId: "user123",
@@ -55,6 +58,7 @@ describe("bookmarkedJobHandler", () => {
     expect(res.json).toHaveBeenCalledWith({ msg: "Already Bookmarked" });
   });
 
+  // Test 3: It should handle errors properly
   it("should handle errors properly", async () => {
     BookmarkedJob.findOne.mockRejectedValue(new Error("Database error"));
 
@@ -83,6 +87,7 @@ describe("deleteBookmarkHandler", () => {
     };
   });
 
+  // Test 1: It should delete a bookmark successfully
   it("should delete a bookmark successfully", async () => {
     BookmarkedJob.findOneAndDelete.mockResolvedValue({
       userId: "user123",
@@ -103,6 +108,7 @@ describe("deleteBookmarkHandler", () => {
     });
   });
 
+  // Test 2: It should handle errors properly
   it("should handle errors properly", async () => {
     BookmarkedJob.findOneAndDelete.mockRejectedValue(
       new Error("Database error")
@@ -132,6 +138,7 @@ describe("fetchBookmarkJobsHandler", () => {
     };
   });
 
+  // Test 1: It should fetch bookmarked jobs successfully
   it("should fetch bookmarked jobs successfully", async () => {
     const mockBookmarks = [
       { jobId: "job123", userId: "user123" },
@@ -156,6 +163,7 @@ describe("fetchBookmarkJobsHandler", () => {
     });
   });
 
+  // Test 2: It should return 404 when no bookmarked jobs are found
   it("should return 404 when no bookmarked jobs are found", async () => {
     cacheQueryJob.mockResolvedValue([]);
 
@@ -168,6 +176,7 @@ describe("fetchBookmarkJobsHandler", () => {
     });
   });
 
+  // Test 3: It should handle errors properly
   it("should handle errors properly", async () => {
     cacheQueryJob.mockRejectedValue(new Error("Database error"));
 
