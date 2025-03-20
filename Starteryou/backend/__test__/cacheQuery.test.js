@@ -1,5 +1,13 @@
+/**
+ * @fileoverview Unit tests for cacheQuery function using Jest.
+ * 
+ * These tests cover various caching scenarios, including cache hits, cache misses,
+ * expiration handling, error handling, and TTL verification.
+ */
+
 const cacheQuery = require('../cache/utils/cacheQuery.js');
 const Cache = require('../cache/models/cache.js');
+const logger = require("../utils/logger");
 
 // Mock the Cache model
 jest.mock('../cache/models/cache.js', () => ({
@@ -11,11 +19,13 @@ describe('cacheQuery', () => {
   beforeEach(() => {
     // Clear mocks before each test
     jest.clearAllMocks();
-    console.log = jest.fn();
-    console.error = jest.fn();
+    logger.info = jest.fn();
+    logger.error = jest.fn();
   });
 
-  // Test 1: Cache hit - should return cached value without calling queryFn
+  /**
+   * Test 1: Should return cached value when a valid cache entry exists.
+   */
   test('should return cached value when valid cache entry exists', async () => {
     const mockCacheEntry = {
       key: 'test-key',
@@ -32,10 +42,12 @@ describe('cacheQuery', () => {
     expect(Cache.findOne).toHaveBeenCalledWith({ key: 'test-key' });
     expect(queryFn).not.toHaveBeenCalled();
     expect(result).toEqual({ data: 'cached-data' });
-    expect(console.log).toHaveBeenCalledWith('✅ Cache hit for key: test-key');
+    expect(logger.info).toHaveBeenCalledWith('✅ Cache hit for key: test-key');
   });
 
-  // Test 2: Cache miss - should call queryFn and update cache
+  /**
+   * Test 2: Should call queryFn and update cache when no valid cache entry exists.
+   */
   test('should call queryFn and update cache when no valid cache entry exists', async () => {
     // No cached entry
     Cache.findOne.mockResolvedValue(null);
@@ -50,12 +62,14 @@ describe('cacheQuery', () => {
     expect(queryFn).toHaveBeenCalled();
     expect(Cache.findOneAndUpdate).toHaveBeenCalled();
     expect(result).toEqual(mockData);
-    expect(console.log).toHaveBeenCalledWith('❌ Cache miss for key: test-key');
-    expect(console.log).toHaveBeenCalledWith('💾 Storing result in cache for key: test-key with TTL: 60 seconds');
-    expect(console.log).toHaveBeenCalledWith('✅ Cache stored for key: test-key');
+    expect(logger.info).toHaveBeenCalledWith('❌ Cache miss for key: test-key');
+    expect(logger.info).toHaveBeenCalledWith('💾 Storing result in cache for key: test-key with TTL: 60 seconds');
+    expect(logger.info).toHaveBeenCalledWith('✅ Cache stored for key: test-key');
   });
 
-  // Test 3: Expired cache - should call queryFn and update cache
+  /**
+   * Test 3: Should call queryFn and update cache when cache entry is expired.
+   */
   test('should call queryFn and update cache when cache entry is expired', async () => {
     const expiredCacheEntry = {
       key: 'test-key',
@@ -75,10 +89,12 @@ describe('cacheQuery', () => {
     expect(queryFn).toHaveBeenCalled();
     expect(Cache.findOneAndUpdate).toHaveBeenCalled();
     expect(result).toEqual(mockData);
-    expect(console.log).toHaveBeenCalledWith('❌ Cache miss for key: test-key');
+    expect(logger.info).toHaveBeenCalledWith('❌ Cache miss for key: test-key');
   });
 
-  // Test 4: No queryFn provided - should return null on cache miss
+  /**
+   * Test 4: Should return null when cache miss and no queryFn is provided.
+   */
   test('should return null when cache miss and no queryFn provided', async () => {
     Cache.findOne.mockResolvedValue(null);
     
@@ -86,10 +102,12 @@ describe('cacheQuery', () => {
     
     expect(Cache.findOne).toHaveBeenCalledWith({ key: 'test-key' });
     expect(result).toBeNull();
-    expect(console.log).toHaveBeenCalledWith('❌ Cache miss for key: test-key');
+    expect(logger.info).toHaveBeenCalledWith('❌ Cache miss for key: test-key');
   });
 
-  // Test 5: Error handling - should catch errors and return null
+   /**
+   * Test 5: Should handle errors and return null when database error occurs.
+   */
   test('should return null and log error when exception occurs', async () => {
     Cache.findOne.mockRejectedValue(new Error('Database error'));
     
@@ -100,13 +118,15 @@ describe('cacheQuery', () => {
     expect(Cache.findOne).toHaveBeenCalledWith({ key: 'test-key' });
     expect(queryFn).not.toHaveBeenCalled();
     expect(result).toBeNull();
-    expect(console.error).toHaveBeenCalledWith(
+    expect(logger.error).toHaveBeenCalledWith(
       '❌ Error in cacheQuery for key: test-key',
       expect.any(Error)
     );
   });
 
-  // Test 6: queryFn throws error - should handle and return null
+  /**
+   * Test 6: Should handle errors thrown by queryFn and return null.
+   */
   test('should handle errors from queryFn and return null', async () => {
     Cache.findOne.mockResolvedValue(null);
     
@@ -117,13 +137,15 @@ describe('cacheQuery', () => {
     expect(Cache.findOne).toHaveBeenCalledWith({ key: 'test-key' });
     expect(queryFn).toHaveBeenCalled();
     expect(result).toBeNull();
-    expect(console.error).toHaveBeenCalledWith(
+    expect(logger.error).toHaveBeenCalledWith(
       '❌ Error in cacheQuery for key: test-key',
       expect.any(Error)
     );
   });
 
-  // Test 7: findOneAndUpdate error - should handle and return null
+  /**
+   * Test 7: Should handle errors from findOneAndUpdate and return null.
+   */
   test('should handle errors from findOneAndUpdate and return null', async () => {
     Cache.findOne.mockResolvedValue(null);
     
@@ -137,13 +159,15 @@ describe('cacheQuery', () => {
     expect(queryFn).toHaveBeenCalled();
     expect(Cache.findOneAndUpdate).toHaveBeenCalled();
     expect(result).toBeNull();
-    expect(console.error).toHaveBeenCalledWith(
+    expect(logger.error).toHaveBeenCalledWith(
       '❌ Error in cacheQuery for key: test-key',
       expect.any(Error)
     );
   });
 
-  // Test 8: Verify TTL calculation
+   /**
+   * Test 8: Should calculate correct expiration time based on TTL.
+   */
   test('should calculate correct expiration time based on TTL', async () => {
     Cache.findOne.mockResolvedValue(null);
     
@@ -166,3 +190,8 @@ describe('cacheQuery', () => {
     Date.now.mockRestore();
   });
 });
+
+
+
+
+

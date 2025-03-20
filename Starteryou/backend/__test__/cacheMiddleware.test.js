@@ -1,6 +1,13 @@
+/**
+ * @fileoverview Unit tests for cacheMiddleware using Jest.
+ * 
+ * This file tests the caching behavior of cacheMiddleware, including cache hits, cache misses,
+ * response modification for caching, error handling, and TTL configurations.
+ */
 const cacheMiddleware = require('../cache/utils/cacheMiddleware');
 const cacheQuery = require('../cache/utils/cacheQuery');
 const cacheConfig = require('../cache/config/cacheConfig');
+const logger = require("../utils/logger");
 
 // Mock dependencies
 jest.mock('../cache/utils/cacheQuery');
@@ -20,9 +27,9 @@ describe('cacheMiddleware', () => {
     // Reset mocks
     jest.clearAllMocks();
     
-    // Mock console methods
-    console.log = jest.fn();
-    console.error = jest.fn();
+    // Mock logger methods
+    logger.info = jest.fn();
+    logger.error = jest.fn();
     
     // Setup request, response, and next function mocks
     req = {
@@ -36,7 +43,9 @@ describe('cacheMiddleware', () => {
     next = jest.fn();
   });
 
-  // Test 1: Cache hit - should return cached response and not call next
+  /**
+   * Test 1: Cache hit - Should return cached response and not call next.
+   */
   test('should return cached response on cache hit', async () => {
     const cachedData = { data: 'cached-response' };
     cacheQuery.mockResolvedValueOnce(cachedData);
@@ -46,10 +55,12 @@ describe('cacheMiddleware', () => {
     expect(cacheQuery).toHaveBeenCalledWith('/api/test', null, cacheConfig.defaultTTL);
     expect(res.json).toHaveBeenCalledWith(cachedData);
     expect(next).not.toHaveBeenCalled();
-    expect(console.log).toHaveBeenCalledWith('✅ Cache hit for key: /api/test');
+    expect(logger.info).toHaveBeenCalledWith('✅ Cache hit for key: /api/test');
   });
 
-  // Test 2: Cache miss - should modify res.json and call next
+  /**
+   * Test 2: Cache miss - Should modify res.json and call next.
+   */
   test('should modify res.json and call next on cache miss', async () => {
     cacheQuery.mockResolvedValueOnce(null);
     
@@ -60,10 +71,12 @@ describe('cacheMiddleware', () => {
     expect(cacheQuery).toHaveBeenCalledWith('/api/test', null, cacheConfig.defaultTTL);
     expect(res.json).not.toBe(originalJsonMethod); // Should be replaced with new function
     expect(next).toHaveBeenCalled();
-    expect(console.log).toHaveBeenCalledWith('❌ Cache miss for key: /api/test');
+    expect(logger.info).toHaveBeenCalledWith('❌ Cache miss for key: /api/test');
   });
 
-  // Test 3: Modified res.json should cache responses
+  /**
+   * Test 3: Modified res.json should cache responses.
+   */
   test('modified res.json should cache the response body', async () => {
     cacheQuery.mockResolvedValueOnce(null); // Initial cache miss
     
@@ -89,10 +102,12 @@ describe('cacheMiddleware', () => {
     const result = await cacheQueryFn();
     expect(result).toEqual(responseData);
     
-    expect(console.log).toHaveBeenCalledWith('🔄 Caching response for key: /api/test');
+    expect(logger.info).toHaveBeenCalledWith('🔄 Caching response for key: /api/test');
   });
 
-  // Test 4: Error in cacheQuery during initial check
+  /**
+   * Test 4: Error in cacheQuery during initial check.
+   */
   test('should call next if cacheQuery throws an error during initial check', async () => {
     cacheQuery.mockRejectedValueOnce(new Error('Cache error'));
     
@@ -100,10 +115,12 @@ describe('cacheMiddleware', () => {
     
     expect(cacheQuery).toHaveBeenCalledWith('/api/test', null, cacheConfig.defaultTTL);
     expect(next).toHaveBeenCalled();
-    expect(console.error).toHaveBeenCalledWith('❌ Error in cacheMiddleware:', expect.any(Error));
+    expect(logger.error).toHaveBeenCalledWith('❌ Error in cacheMiddleware:', expect.any(Error));
   });
 
-  // Test 5: Error when caching response
+  /**
+   * Test 5: Error when caching response.
+   */
 test('should handle errors when caching response', async () => {
     cacheQuery.mockResolvedValueOnce(null); // Initial cache miss
     
@@ -120,7 +137,7 @@ test('should handle errors when caching response', async () => {
     const responseData = { message: 'success' };
     await res.json(responseData);
     
-    expect(console.error).toHaveBeenCalledWith(
+    expect(logger.error).toHaveBeenCalledWith(
       '❌ Error caching response for key: /api/test', 
       expect.any(Error)
     );
@@ -129,7 +146,9 @@ test('should handle errors when caching response', async () => {
     expect(originalJson).toHaveBeenCalledWith(responseData);
   });
   
-  // Test 6: Verify res.json preserves response body
+  /**
+   * Test 6: Verify res.json preserves response body.
+   */
   test('modified res.json should preserve the original response body', async () => {
     cacheQuery.mockResolvedValueOnce(null); // Initial cache miss
     
@@ -146,7 +165,9 @@ test('should handle errors when caching response', async () => {
     expect(originalJson).toHaveBeenCalledWith(responseData);
   });
 
-  // Test 7: Different request URLs result in different cache keys
+  /**
+   * Test 7: Different request URLs result in different cache keys.
+   */
   test('should use different cache keys for different request URLs', async () => {
     cacheQuery.mockResolvedValueOnce(null);
     
@@ -157,7 +178,9 @@ test('should handle errors when caching response', async () => {
     expect(cacheQuery).toHaveBeenCalledWith('/api/different-endpoint', null, cacheConfig.defaultTTL);
   });
 
-  // Test 8: Middleware uses TTL from cacheConfig
+  /**
+   * Test 8: Middleware uses TTL from cacheConfig.
+   */
   test('should use TTL from cacheConfig', async () => {
     cacheQuery.mockResolvedValueOnce(null);
     
