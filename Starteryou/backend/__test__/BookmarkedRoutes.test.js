@@ -12,7 +12,12 @@ jest.mock("../cache/utils/cacheQueryJob");
 jest.mock("../cache/utils/invalidateCache");
 jest.mock("../db", () => ({}));
 
-// Test cases for bookmarkedJobHandler, deleteBookmarkHandler, fetchBookmarkJobsHandler
+/**
+ * Tests for the `bookmarkedJobHandler` function.
+ * - Ensures a job can be bookmarked successfully.
+ * - Prevents duplicate bookmarks.
+ * - Handles errors gracefully.
+ */
 describe("bookmarkedJobHandler", () => {
   let req, res;
 
@@ -73,6 +78,11 @@ describe("bookmarkedJobHandler", () => {
   });
 });
 
+/**
+ * Tests for the `deleteBookmarkHandler` function.
+ * - Ensures a bookmarked job can be removed.
+ * - Handles errors properly.
+ */
 describe("deleteBookmarkHandler", () => {
   let req, res;
 
@@ -127,6 +137,12 @@ describe("deleteBookmarkHandler", () => {
   });
 });
 
+/**
+ * Tests for the `fetchBookmarkJobsHandler` function.
+ * - Fetches bookmarked jobs successfully.
+ * - Handles cases where no bookmarks exist.
+ * - Ensures error handling works correctly.
+ */
 describe("fetchBookmarkJobsHandler", () => {
   let req, res;
 

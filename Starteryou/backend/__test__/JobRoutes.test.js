@@ -15,7 +15,14 @@ jest.mock("../cache/utils/cacheQueryJob");
 jest.mock("../cache/utils/invalidateCache");
 jest.mock("../db", () => ({}));
 
-// Test cases for fetchJobByIDHandler, fetchJobHandler, createJobHandler, updateJobHandler, deleteJobHandler, fetchPostedJobsHandler
+/**
+ * Test suite for createJobHandler
+ *
+ * - Ensures successful job creation.
+ * - Validates missing fields.
+ * - Checks for invalid salary range.
+ * - Handles errors properly.
+ */
 describe("createJobHandler", () => {
   let req, res;
 
@@ -98,6 +105,13 @@ describe("createJobHandler", () => {
   });
 });
 
+/**
+ * Test suite for fetchJobHandler
+ *
+ * - Fetches jobs successfully.
+ * - Returns 404 when no jobs are found.
+ * - Handles errors properly.
+ */
 describe("fetchJobHandler", () => {
   let req, res;
 
@@ -155,6 +169,13 @@ describe("fetchJobHandler", () => {
   });
 });
 
+/**
+ * Test suite for fetchJobByIDHandler
+ *
+ * - Fetches job by ID successfully.
+ * - Returns 404 if job is not found.
+ * - Handles errors properly.
+ */
 describe("fetchJobByIDHandler", () => {
   let req, res;
 
@@ -208,6 +229,13 @@ describe("fetchJobByIDHandler", () => {
   });
 });
 
+/**
+ * Test suite for updateJobHandler
+ *
+ * - Updates a job successfully.
+ * - Returns 404 if job is not found.
+ * - Handles errors properly.
+ */
 describe("updateJobHandler", () => {
   let req, res;
 
@@ -264,6 +292,13 @@ describe("updateJobHandler", () => {
   });
 });
 
+/**
+ * Test suite for deleteJobHandler
+ *
+ * - Deletes a job successfully.
+ * - Returns 404 if job is not found.
+ * - Handles errors properly.
+ */
 describe("deleteJobHandler", () => {
   let req, res;
 
@@ -320,6 +355,13 @@ describe("deleteJobHandler", () => {
   });
 });
 
+/**
+ * Test suite for fetchPostedJobsHandler
+ *
+ * - Fetches posted jobs successfully.
+ * - Returns 404 if no jobs are found.
+ * - Handles errors properly.
+ */
 describe("fetchPostedJobsHandler", () => {
   let req, res;
 

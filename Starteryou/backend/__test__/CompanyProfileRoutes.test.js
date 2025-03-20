@@ -9,7 +9,12 @@ jest.mock("../models/CompanyProfile");
 jest.mock("../cache/utils/cacheQueryJob");
 jest.mock("../db", () => ({}));
 
-// Test cases for createCompanyProfileHandler and fetchCompanyProfileHandler
+/**
+ * Tests for the `createCompanyProfileHandler` function.
+ * - Ensures a company profile is created successfully.
+ * - Validates required fields and returns an error if missing.
+ * - Handles errors gracefully.
+ */
 describe("createCompanyProfileHandler", () => {
   let req, res;
 
@@ -81,6 +86,12 @@ describe("createCompanyProfileHandler", () => {
   });
 });
 
+/**
+ * Tests for the `fetchCompanyProfileHandler` function.
+ * - Fetches a company profile successfully.
+ * - Returns 404 if no company profile is found.
+ * - Handles errors properly.
+ */
 describe("fetchCompanyProfileHandler", () => {
   let req, res;
 

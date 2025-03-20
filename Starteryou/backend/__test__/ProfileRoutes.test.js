@@ -20,7 +20,13 @@ jest.mock("../cache/utils/cacheQueryJob");
 jest.mock("../cache/utils/invalidateCache");
 jest.mock("../db", () => ({}));
 
-// Test cases for createProfileHandler, fetchProfileHandler, updateProfileHandler
+/**
+ * Test suite for createProfileHandler
+ *
+ * - Ensures successful profile creation.
+ * - Validates missing required fields.
+ * - Handles errors properly.
+ */
 describe("createProfileHandler", () => {
   let req, res, mockProfile;
 
@@ -101,6 +107,14 @@ describe("createProfileHandler", () => {
   });
 });
 
+/**
+ * Test suite for fetchProfileHandler
+ *
+ * - Fetches cached profile if available.
+ * - Retrieves fresh data if cache is empty.
+ * - Returns 404 if profile is not found.
+ * - Handles errors properly.
+ */
 describe("fetchProfileHandler", () => {
   let req, res, mockProfile, cacheKey;
 
@@ -196,6 +210,13 @@ describe("fetchProfileHandler", () => {
   });
 });
 
+/**
+ * Test suite for updateProfileHandler
+ *
+ * - Ensures profile is updated successfully.
+ * - Validates missing profile scenario.
+ * - Handles errors properly.
+ */
 describe("updateProfileHandler", () => {
   let req, res, mockUpdatedProfile, cacheKey;
 
@@ -286,6 +307,14 @@ describe("updateProfileHandler", () => {
   });
 });
 
+/**
+ * Test suite for fetchProfileFieldsHandler
+ *
+ * - Validates required field parameter.
+ * - Ensures valid/invalid field scenarios.
+ * - Fetches profile fields from cache or database.
+ * - Handles missing profile or errors properly.
+ */
 describe("fetchProfileFieldsHandler", () => {
   let req, res, cacheKey, mockUserData;
 
@@ -403,6 +432,14 @@ describe("fetchProfileFieldsHandler", () => {
   });
 });
 
+/**
+ * Adds a subdocument to a user's profile.
+ * @param {string} userRegistrationId - The ID of the user.
+ * @param {string} field - The field to which the subdocument belongs.
+ * @param {Object} data - The subdocument data to be added.
+ * @param {Object} res - The response object.
+ * @returns {Promise<void>}
+ */
 describe("addSubdocument", () => {
   let req, res;
 
@@ -492,6 +529,15 @@ describe("addSubdocument", () => {
   });
 });
 
+/**
+ * Updates a subdocument within a user's profile.
+ * @param {string} userRegistrationId - The ID of the user.
+ * @param {string} subDocId - The ID of the subdocument to update.
+ * @param {string} field - The field to which the subdocument belongs.
+ * @param {Object} updates - The updates to be applied to the subdocument.
+ * @param {Object} res - The response object.
+ * @returns {Promise<void>}
+ */
 describe("updateSubdocument", () => {
   let req, res, mockUser, mockSubDoc;
 
@@ -613,6 +659,14 @@ describe("updateSubdocument", () => {
   });
 });
 
+/**
+ * Deletes a subdocument from a user's profile.
+ * @param {string} userRegistrationId - The ID of the user.
+ * @param {string} subDocId - The ID of the subdocument to delete.
+ * @param {string} field - The field to which the subdocument belongs.
+ * @param {Object} res - The response object.
+ * @returns {Promise<void>}
+ */
 describe("deleteSubdocument", () => {
   let req, res, mockUser, mockSubDoc;
 
@@ -726,6 +780,14 @@ describe("deleteSubdocument", () => {
   });
 });
 
+/**
+ * Adds a string to an array field in the user's profile.
+ * @param {string} userRegistrationId - The ID of the user.
+ * @param {string} field - The field name where the string will be added.
+ * @param {string} value - The string value to add to the array.
+ * @param {Object} res - The response object.
+ * @returns {Promise<void>}
+ */
 describe("addStringToArray", () => {
   let req, res, mockUser;
 
@@ -831,6 +893,14 @@ describe("addStringToArray", () => {
   });
 });
 
+/**
+ * Deletes a string from an array field in the user's profile.
+ * @param {string} userRegistrationId - The ID of the user.
+ * @param {string} field - The field name where the string will be removed.
+ * @param {string} value - The string value to delete from the array.
+ * @param {Object} res - The response object.
+ * @returns {Promise<void>}
+ */
 describe("deleteStringFromArray", () => {
   let req, res, mockUser;
 

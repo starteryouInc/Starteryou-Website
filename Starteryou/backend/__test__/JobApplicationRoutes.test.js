@@ -13,7 +13,13 @@ jest.mock("../cache/utils/invalidateCache");
 jest.mock("../cache/utils/cacheQueryJob");
 jest.mock("../db", () => ({}));
 
-// Test cases for applyJobHandler, fetchAppliedJobHandler, fetchAppliedUsersHandler, updateAppliedJobStatusHandler
+/**
+ * Tests for the `applyJobHandler` function.
+ * - Ensures that job applications are submitted correctly.
+ * - Validates required fields and returns appropriate errors.
+ * - Prevents duplicate applications.
+ * - Handles errors gracefully.
+ */
 describe("applyJobHandler", () => {
   let req, res;
 
@@ -113,6 +119,12 @@ describe("applyJobHandler", () => {
   });
 });
 
+/**
+ * Tests for the `fetchAppliedJobHandler` function.
+ * - Fetches applied jobs successfully.
+ * - Returns 404 if no applied jobs are found.
+ * - Handles errors properly.
+ */
 describe("fetchAppliedJobHandler", () => {
   let req, res;
 
@@ -180,6 +192,12 @@ describe("fetchAppliedJobHandler", () => {
   });
 });
 
+/**
+ * Tests for the `fetchAppliedJobHandler` function.
+ * - Fetches applied jobs successfully.
+ * - Returns 404 if no applied jobs are found.
+ * - Handles errors properly.
+ */
 describe("fetchAppliedUsers", () => {
   let req, res;
 
@@ -249,6 +267,13 @@ describe("fetchAppliedUsers", () => {
   });
 });
 
+/**
+ * Tests for the `updateAppliedJobStatusHandler` function.
+ * - Updates the status of an applied job successfully.
+ * - Returns 400 if an invalid status is provided.
+ * - Returns 404 if the application is not found.
+ * - Handles errors properly.
+ */
 describe("updateAppliedJobStatusHandler", () => {
   let req, res;
 
