@@ -12,7 +12,7 @@ const config = {
   // bail: 0,
 
   // The directory where Jest should store its cached dependency information
-  // cacheDirectory: "C:\\Users\\91807\\AppData\\Local\\Temp\\jest",
+  // cacheDirectory: "C:\\Users\\atif\\AppData\\Local\\Temp\\jest",
 
   // Automatically clear mock calls, instances, contexts and results before every test
   clearMocks: true,
@@ -79,14 +79,12 @@ const config = {
   // An array of file extensions your modules use
   moduleFileExtensions: [
     "js",
-     "mjs",
-     "cjs",
-     "jsx",
-     "ts",
-     "tsx",
-     "json",
-     "node"
-   ],
+    "mjs",
+    "cjs",
+    "jsx",
+    "json",
+    "node"
+  ],
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
   // moduleNameMapper: {},
