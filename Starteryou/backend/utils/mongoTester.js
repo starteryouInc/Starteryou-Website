@@ -1,5 +1,6 @@
 // backend/utils/mongoTester.js
 const mongoose = require("mongoose");
+const logger = require("./logger"); // Logger import
 
 class MongoTester {
   constructor(uri) {
@@ -8,8 +9,8 @@ class MongoTester {
   }
 
   async testConnection() {
-    console.log("\n🔍 Testing MongoDB Connection...");
-    console.log("URI:", this.uri);
+    logger.info("\n🔍 Testing MongoDB Connection...");
+    logger.info("URI:", this.uri);
 
     try {
       const conn = await mongoose.connect(this.uri, {
@@ -22,11 +23,11 @@ class MongoTester {
       this.isConnected = true;
 
       // Connection info
-      console.log("\n✅ Connection Successful!");
-      console.log("MongoDB Version:", conn.connection.version);
-      console.log("Database:", conn.connection.name);
-      console.log("Host:", conn.connection.host);
-      console.log("Port:", conn.connection.port);
+      logger.info("\n✅ Connection Successful!");
+      logger.info("MongoDB Version:", conn.connection.version);
+      logger.info("Database:", conn.connection.name);
+      logger.info("Host:", conn.connection.host);
+      logger.info("Port:", conn.connection.port);
 
       // Test basic operations
       await this.testDatabaseOperations();
@@ -41,8 +42,8 @@ class MongoTester {
         },
       };
     } catch (error) {
-      console.error("\n❌ Connection Failed!");
-      console.error("Error:", error.message);
+      logger.error("\n❌ Connection Failed!");
+      logger.error("Error:", error.message);
 
       this.printTroubleshootingGuide(error);
 
@@ -69,17 +70,17 @@ class MongoTester {
         test: "connection_test",
         timestamp: new Date(),
       });
-      console.log("✅ Write operation successful");
+      logger.info("✅ Write operation successful");
 
       // Test read
       await TestModel.findOne({ test: "connection_test" });
-      console.log("✅ Read operation successful");
+      logger.info("✅ Read operation successful");
 
       // Cleanup
       await mongoose.connection.dropCollection("testconnections");
-      console.log("✅ Cleanup successful");
+      logger.info("✅ Cleanup successful");
     } catch (error) {
-      console.error("❌ Database operation failed:", error.message);
+      logger.error("❌ Database operation failed:", error.message);
       throw error;
     }
   }
@@ -130,21 +131,21 @@ class MongoTester {
   }
 
   printTroubleshootingGuide(error) {
-    console.log("\n🔧 Troubleshooting Guide:");
+    logger.info("\n🔧 Troubleshooting Guide:");
 
     if (error.name === "MongoServerSelectionError") {
-      console.log("1. Check if MongoDB server is running");
-      console.log("2. Verify the connection string is correct");
-      console.log("3. Ensure network connectivity to the database");
-      console.log("4. Check if any firewalls are blocking the connection");
+      logger.info("1. Check if MongoDB server is running");
+      logger.info("2. Verify the connection string is correct");
+      logger.info("3. Ensure network connectivity to the database");
+      logger.info("4. Check if any firewalls are blocking the connection");
     } else if (error.name === "MongoParseError") {
-      console.log("1. Check the connection string format");
-      console.log("2. Verify credentials are properly encoded");
-      console.log("3. Ensure all required connection parameters are present");
+      logger.info("1. Check the connection string format");
+      logger.info("2. Verify credentials are properly encoded");
+      logger.info("3. Ensure all required connection parameters are present");
     } else if (error.name === "MongooseError") {
-      console.log("1. Check if the database name is correct");
-      console.log("2. Verify authentication credentials");
-      console.log("3. Ensure proper access permissions");
+      logger.info("1. Check if the database name is correct");
+      logger.info("2. Verify authentication credentials");
+      logger.info("3. Ensure proper access permissions");
     }
   }
 }

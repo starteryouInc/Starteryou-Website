@@ -2,6 +2,7 @@ const cacheConfig = require("../cache/config/cacheConfig");
 const cacheQueryJob = require("../cache/utils/cacheQueryJob");
 const { invalidateCache } = require("../cache/utils/invalidateCache");
 const BookmarkedJob = require("../models/BookmarkedJobs");
+const logger = require("../utils/logger"); // Logger import
 
 /**
  * @desc    Bookmark a job for the logged-in user
@@ -96,7 +97,7 @@ const fetchBookmarkJobsHandler = async (req, res) => {
   try {
     const userId = req.user?.id;
     const cacheKey = `/api/v1/jobportal/bookmarks/fetch-bookmarked-jobs/${userId}`;
-    console.log(`Cache Key: ${cacheKey}`);
+    logger.info(`Cache Key: ${cacheKey}`);
 
     // Fetch data with cache handling
     const cachedResponse = await cacheQueryJob(

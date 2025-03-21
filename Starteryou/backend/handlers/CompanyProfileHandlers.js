@@ -1,6 +1,7 @@
 const cacheConfig = require("../cache/config/cacheConfig");
 const cacheQueryJob = require("../cache/utils/cacheQueryJob");
 const CompanyProfile = require("../models/CompanyProfile");
+const logger = require("../utils/logger"); // Logger import
 
 /**
  * @desc    Create a new company profile
@@ -85,7 +86,7 @@ const fetchCompanyProfileHandler = async (req, res) => {
   try {
     // Define cache key
     const cacheKey = `/api/get-company-profile/${userId}`;
-    console.log(`Cache Key: ${cacheKey}`);
+    logger.info(`Cache Key: ${cacheKey}`);
 
     // Fetch from cache or database
     const cachedCompanyProfile = await cacheQueryJob(
@@ -117,7 +118,7 @@ const fetchCompanyProfileHandler = async (req, res) => {
       data: cachedCompanyProfile,
     });
   } catch (error) {
-    // console.error("Fetch Company Profile Error:", error);
+    // logger.error("Fetch Company Profile Error:", error);
     res.status(500).json({
       success: false,
       msg: "Some error occurred while fetching the company profile",
