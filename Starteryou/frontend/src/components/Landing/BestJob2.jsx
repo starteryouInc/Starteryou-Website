@@ -84,13 +84,14 @@ const BestJob2 = () => {
       id: 0,
       iconSrc: "/LandingPage/Icons/page 1.svg",
       title: "Show off your education and skills",
-      description: "Get access to opportunities and build your resume",
+      description: "Get access to opportunities and build your portfolio",
     },
     {
       id: 1,
       iconSrc: "/LandingPage/Icons/userr.svg",
-      title: "No resume or cover letter needed ",
-      description: "Instead, it’s a streamlined job application process.",
+      title: "Add as much as you can",
+      description:
+        "Add as much detail as possible to increase your chances of landing the right role",
     },
   ];
 
