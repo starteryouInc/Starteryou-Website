@@ -2,6 +2,7 @@ const cacheConfig = require("../cache/config/cacheConfig");
 const cacheQueryJob = require("../cache/utils/cacheQueryJob");
 const { invalidateCache } = require("../cache/utils/invalidateCache");
 const UserProfile = require("../models/UserProfile");
+const logger = require("../utils/logger"); // Logger import
 
 /**
  * Creates a new user profile.
@@ -47,14 +48,14 @@ const fetchProfileHandler = async (req, res) => {
   const cacheKey = `/fetch-profile/${userId}`;
 
   try {
-    console.log(`Cache Key: ${cacheKey}`);
+    logger.info(`Cache Key: ${cacheKey}`);
 
     // Check if cache exists
     let cachedProfile = await cacheQueryJob(cacheKey);
 
     // If cache exists but is invalid, fetch fresh data
     if (!cachedProfile || cachedProfile.needsRefresh) {
-      // console.log("Fetching fresh profile data from database...");
+      // logger.info("Fetching fresh profile data from database...");
       cachedProfile = await UserProfile.find({
         userRegistrationId: userId,
       });
@@ -80,7 +81,7 @@ const fetchProfileHandler = async (req, res) => {
       data: cachedProfile,
     });
   } catch (error) {
-    // console.error("Fetch Profile Error:", error);
+    // logger.error("Fetch Profile Error:", error);
     res.status(500).json({
       success: false,
       msg: "Some error occurred while fetching the Profiles",
@@ -126,7 +127,7 @@ const updateProfileHandler = async (req, res) => {
 
     // ✅ Ensure Cache is Completely Removed
     const cacheKey = `/fetch-profile/${userRegistrationId}`;
-    console.log(`Invalidating Cache: ${cacheKey}`);
+    logger.info(`Invalidating Cache: ${cacheKey}`);
     await invalidateCache(cacheKey); // Ensure this function removes the cache properly
 
     // ✅ Force a fresh fetch on the next request
@@ -136,7 +137,7 @@ const updateProfileHandler = async (req, res) => {
       data: updatedProfile,
     });
   } catch (error) {
-    // console.error("Profile Update Error:", error);
+    // logger.error("Profile Update Error:", error);
     res.status(500).json({
       success: false,
       msg: "Some error occurred while updating the profile",
@@ -173,7 +174,7 @@ const fetchProfileFieldsHandler = async (req, res) => {
     }
 
     const cacheKey = `/api/v1/jobportal/profile/get-profile-fields/${userRegistrationId}?field=${field}`;
-    console.log(`Cache Key: ${cacheKey}`);
+    logger.info(`Cache Key: ${cacheKey}`);
 
     // Fetch data with cache handling
     const cachedResponse = await cacheQueryJob(

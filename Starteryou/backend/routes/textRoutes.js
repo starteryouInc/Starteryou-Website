@@ -10,6 +10,7 @@ const cacheMiddleware = require("../cache/utils/cacheMiddleware");
 const { invalidateCache } = require("../cache/utils/invalidateCache");
 const cacheQuery = require("../cache/utils/cacheQuery");
 const cacheConfig = require("../cache/config/cacheConfig");
+const logger = require("../utils/logger"); // Logger import
 const {
   fetchTextContent,
   updateTextContent,
@@ -157,11 +158,11 @@ router.delete("/text", async (req, res) => {
       });
     }
     const cacheKey = `/api/text?page=${page}&component=${component}`;
-    console.log(`Invalidating cache for key: ${cacheKey}`);
+    logger.info(`Invalidating cache for key: ${cacheKey}`);
     await invalidateCache(cacheKey);
     res.json({ message: "Content deleted successfully." });
   } catch (error) {
-    console.error("Error deleting content:", error);
+    logger.error("Error deleting content:", error);
     res.status(500).json({
       message: "An error occurred while deleting content.",
       error: error.message,
