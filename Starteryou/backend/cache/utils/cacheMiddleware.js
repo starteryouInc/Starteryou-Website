@@ -1,6 +1,6 @@
 const cacheQuery = require("../utils/cacheQuery");
 const cacheConfig = require("../config/cacheConfig");
-const logger = require("../../utils/logger");
+const logger = require("../../utils/logger"); // Logger import
 
 const cacheMiddleware = async (req, res, next) => {
   try {

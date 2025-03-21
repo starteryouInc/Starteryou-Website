@@ -1,3 +1,4 @@
+const logger = require("../../utils/logger");
 /**
  * Utility function to query and store cache.
  * @module cacheQueryJob
@@ -27,17 +28,17 @@ const cacheMiddlewareJob = async (req, res, next) => {
 
     const cachedResponse = await cacheQueryJob(key, null, ttl);
     if (cachedResponse) {
-      console.log(`✅ Cache hit for key: ${key}`);
+      logger.info(`✅ Cache hit for key: ${key}`);
       return res.json({ success: true, data: cachedResponse }); // Wrap response properly
     }
 
-    console.log(`❌ Cache miss for key: ${key}`);
+    logger.info(`❌ Cache miss for key: ${key}`);
 
     // Capture response and cache it AFTER sending
     const originalJson = res.json.bind(res);
     res.json = async (body) => {
       if (body.success) {
-        console.log(`💾 Caching response for key: ${key}`);
+        logger.info(`💾 Caching response for key: ${key}`);
         await cacheQueryJob(key, async () => body.data, ttl);
       }
       originalJson(body);
@@ -45,7 +46,7 @@ const cacheMiddlewareJob = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error("❌ Error in cacheMiddleware:", error);
+    logger.error("❌ Error in cacheMiddleware:", error);
     next();
   }
 };
