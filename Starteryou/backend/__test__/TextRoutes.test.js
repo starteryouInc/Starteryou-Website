@@ -12,11 +12,12 @@ jest.mock("../models/TextContent", () => ({
     lean: jest.fn(), // Chainable .lean() method
   }),
 }));
-
 jest.mock("../cache/utils/invalidateCache");
 jest.mock("../db", () => ({})); // Mock db module
 
-// Test suite for the fetchTextContent function
+/**
+ * Test suite for the fetchTextContent function.
+ */
 describe("fetchTextContent", () => {
   let req, res; // Define request and response objects
 
@@ -43,7 +44,10 @@ describe("fetchTextContent", () => {
     jest.clearAllMocks();
   });
 
-  // Test case: Should return 400 if 'page' query parameter is missing
+  /**
+   * Test case: Should return 400 if 'page' query parameter is missing.
+   * @returns {void}
+   */
   it("should return 400 if 'page' is not provided in query parameters", async () => {
     await fetchTextContent(req, res); // Call the handler function
     expect(res.status).toHaveBeenCalledWith(400); // Check that 400 status was set
@@ -52,7 +56,10 @@ describe("fetchTextContent", () => {
     });
   });
 
-  // Test case: Should return content from cache if available
+  /**
+   * Test case: Should return content from cache if available.
+   * @returns {void}
+   */
   it("should return content from cache if available", async () => {
     req.query.page = "home"; // Set query to include 'page'
     const cachedContent = [{ page: "home", content: "Some content" }]; // Mocked cache content
@@ -68,7 +75,10 @@ describe("fetchTextContent", () => {
     expect(res.json).toHaveBeenCalledWith(cachedContent); // Check response with cached content
   });
 
-  // Test case: Should query the database if cache misses
+  /**
+   * Test case: Should query the database if cache misses.
+   * @returns {void}
+   */
   it("should query the database if cache misses", async () => {
     req.query.page = "home"; // Set query to include 'page'
     const dbContent = [{ page: "home", content: "Some content" }]; // Mocked database content
@@ -87,7 +97,10 @@ describe("fetchTextContent", () => {
     expect(res.json).toHaveBeenCalledWith(dbContent); // Check response with DB content
   });
 
-  // Test case: Should return 404 if no content is found in cache or database
+  /**
+   * Test case: Should return 404 if no content is found in cache or database.
+   * @returns {void}
+   */
   it("should return 404 if no content is found in cache or database", async () => {
     req.query.page = "home"; // Set query to include 'page'
     cacheQuery.mockResolvedValue(null); // Simulate cache miss and no DB content
@@ -100,7 +113,10 @@ describe("fetchTextContent", () => {
     });
   });
 
-  // Test case: Should return 500 if there is an error during the query
+  /**
+   * Test case: Should return 500 if there is an error during the query.
+   * @returns {void}
+   */
   it("should throw 500 if there is an error during the query", async () => {
     req.query.page = "home"; // Set query to include 'page'
     cacheQuery.mockImplementation(async () => {
@@ -116,7 +132,10 @@ describe("fetchTextContent", () => {
     });
   });
 
-  // Test case: Should query for a specific component if provided
+  /**
+   * Test case: Should query for a specific component if provided.
+   * @returns {void}
+   */
   it("should query for a specific component if provided", async () => {
     req.query.page = "home"; // Set query to include 'page'
     req.query.component = "header"; // Set query to include 'component'
@@ -143,7 +162,10 @@ describe("fetchTextContent", () => {
     expect(res.json).toHaveBeenCalledWith(dbContent); // Check response with component-specific content
   });
 
-  // Test case: Should return 404 if component-specific content is not found
+  /**
+   * Test case: Should return 404 if component-specific content is not found.
+   * @returns {void}
+   */
   it("should return 404 if component-specific content is not found", async () => {
     req.query.page = "home"; // Set query to include 'page'
     req.query.component = "header"; // Set query to include 'component'
