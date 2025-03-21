@@ -91,7 +91,7 @@ test('should handle session expiration', async () => {
    * Test retrieving remaining session time for logged-in users
    * Ensures session time is correctly reported.
    */
-  test('should return remaining session time for logged-in users', async () => {
+  test('should return remaining session time for logged-in user', async () => {
     await agent
       .post('/api/v1/userAuth/users-login')
       .send({ email: 'test@example.com', password: 'password123' })
