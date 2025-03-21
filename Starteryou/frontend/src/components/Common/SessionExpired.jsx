@@ -25,6 +25,22 @@ const SessionExpired = ({ setSessionExpired }) => { // Accept setSessionExpired 
     setSessionExpired(false); // Close the pop-up by updating the state
   };
 
+  /**
+   * Handler for the employee signup button click, navigates to the employee signup page and closes the session expired popup.
+   */
+  const handleEmpSignUpClick = () => {
+    navigate("/EmpSignUp"); // Navigate to the employee signup page
+    setSessionExpired(false); // Close the pop-up by updating the state
+  };
+
+  /**
+   * Handler for the student signup button click, navigates to the student signup page and closes the session expired popup.
+   */
+  const handleStudentSignUpClick = () => {
+    navigate("/signup"); // Navigate to the student signup page
+    setSessionExpired(false); // Close the pop-up by updating the state
+  };
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-96 text-center relative">
@@ -44,6 +60,18 @@ const SessionExpired = ({ setSessionExpired }) => { // Accept setSessionExpired 
           onClick={handleLoginClick} // Trigger navigation to login page
         >
           Login
+        </button>
+        <button
+          className="bg-[#7950F2] text-white px-6 py-2 rounded-md mt-6 w-full"
+          onClick={handleEmpSignUpClick} // Trigger navigation to employee signup page
+        >
+          Employee Signup
+        </button>
+        <button
+          className="bg-[#7950F2] text-white px-6 py-2 rounded-md mt-6 w-full"
+          onClick={handleStudentSignUpClick} // Trigger navigation to student signup page
+        >
+          Student Signup
         </button>
       </div>
     </div>
