@@ -1,5 +1,6 @@
 const cacheQuery = require("../utils/cacheQuery");
 const cacheConfig = require("../config/cacheConfig");
+const logger = require("../../utils/logger"); // Logger import
 
 const cacheMiddleware = async (req, res, next) => {
   try {
@@ -9,27 +10,27 @@ const cacheMiddleware = async (req, res, next) => {
     // Check if a cached response exists
     const cachedResponse = await cacheQuery(key, null, ttl);
     if (cachedResponse) {
-      console.log(`✅ Cache hit for key: ${key}`);
+      logger.info(`✅ Cache hit for key: ${key}`);
       return res.json(cachedResponse); // Send cached response
     }
 
-    console.log(`❌ Cache miss for key: ${key}`);
+    logger.info(`❌ Cache miss for key: ${key}`);
 
     // Overwrite `res.json` to cache the response
     const originalSend = res.json.bind(res);
     res.json = async (body) => {
       try {
-        console.log(`🔄 Caching response for key: ${key}`);
+        logger.info(`🔄 Caching response for key: ${key}`);
         await cacheQuery(key, async () => body, ttl); // Cache the response
       } catch (error) {
-        console.error(`❌ Error caching response for key: ${key}`, error);
+        logger.error(`❌ Error caching response for key: ${key}`, error);
       }
       originalSend(body); // Send the original response
     };
 
     next(); // Proceed to the next middleware or route handler
   } catch (error) {
-    console.error("❌ Error in cacheMiddleware:", error);
+    logger.error("❌ Error in cacheMiddleware:", error);
     next(); // Ensure the request proceeds even if cache logic fails
   }
 };

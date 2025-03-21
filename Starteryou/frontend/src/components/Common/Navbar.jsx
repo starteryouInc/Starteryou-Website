@@ -1,13 +1,38 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useNavigation } from "../../context/NavigationContext";
+import { useUserContext } from "../../context/UserContext";
+import { FaRegUserCircle } from "react-icons/fa";
 
+/**
+ * Navbar component for the application.
+ *
+ * @param {Object} props - Component properties.
+ * @param {boolean} props.isEduHero - Determines if the navbar is used in the education hero section.
+ * @returns {JSX.Element} The Navbar component.
+ */
 const Navbar = ({ isEduHero }) => {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
   const { isAdmin } = useNavigation(); // Access isAdmin from context
 
+  const { user, logoutUser } = useUserContext();
+  const token = user?.token;
+  const role = user?.authenticatedUser?.role || "";
+
+  /**
+   * Handles user logout and navigates to the homepage.
+   */
+  const handleLogout = () => {
+    logoutUser();
+    navigate("/");
+  };
+
+  /**
+   * Handles scroll event to determine if the navbar should have a scrolled state.
+   */
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
@@ -22,11 +47,11 @@ const Navbar = ({ isEduHero }) => {
 
   return (
     <nav
-      className={`w-full flex items-center justify-between px-4 sm:px-8 md:px-2  lg:px-12 py-4 z-50 fixed md:absolute transition-all duration-300 ${
+      className={`w-full flex items-center justify-between px-4 sm:px-8 md:px-2  lg:px-12 py-4 z-50 fixed transition-all duration-300 ${
         isEduHero
           ? "bg-[#8176FF] text-white"
           : isScrolled
-          ? "bg-[#F8F8FF] text-black"
+          ? "bg-[#8176FF] text-white"
           : "bg-transparent text-white"
       }`}
     >
@@ -77,20 +102,53 @@ const Navbar = ({ isEduHero }) => {
       </ul>
 
       {/* Signup Button Links */}
-      <div className="hidden md:flex items-center md:space-x-2 lg:space-x-6">
-        <Link
-          to="/signup"
-          className="text-sm sm:text-base lg:text-xl font-bold  z-10 uppercase"
-        >
-          Sign up
-        </Link>
-        <Link
-          to="/EmpSignUp"
-          className="bg-[#D9502E] text-sm sm:text-base lg:text-xl text-[white] border-[2px] font-bold border-[#D9502E] px-3 py-1 lg:px-4 lg:py-2 rounded-lg uppercase"
-        >
-          List Job
-        </Link>
-      </div>
+      {!token ? (
+        <div className="hidden md:flex items-center md:space-x-2 lg:space-x-6">
+          <Link
+            to="/signup"
+            className="text-sm sm:text-base lg:text-xl font-bold  z-10 uppercase"
+          >
+            Sign up
+          </Link>
+          <button className="bg-[#D9502E] text-sm sm:text-base lg:text-xl text-[white] border-[2px] font-bold border-[#D9502E] px-3 py-1 lg:px-4 lg:py-2 rounded-lg uppercase">
+            <Link to="/companyDashboard/postedJobs">Post Job</Link>
+          </button>
+        </div>
+      ) : (
+        <div className="after-login hidden md:flex items-center md:space-x-2 lg:space-x-6">
+          {role === "" ? (
+            <>
+              {/* <h1 className="text-xl font-bold">Admin Panel</h1> */}
+              <button
+                onClick={handleLogout}
+                className="text-sm sm:text-base lg:text-xl font-bold z-10 uppercase"
+              >
+                Log Out
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={handleLogout}
+                className="text-sm sm:text-base lg:text-xl font-bold  z-10 uppercase"
+              >
+                Log Out
+              </button>
+              {role === "employer" ? (
+                <button className="bg-[#D9502E] text-sm sm:text-base lg:text-xl text-[white] border-[2px] font-bold border-[#D9502E] px-3 py-1 lg:px-4 lg:py-2 rounded-lg uppercase">
+                  <Link to="/companyDashboard/postedJobs">Post Job</Link>
+                </button>
+              ) : (
+                <button>
+                  <Link to="/userprofile">
+                    <FaRegUserCircle className="text-4xl" />
+                  </Link>
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      )}
 
       {/* Mobile Menu Button */}
       <div className="md:hidden">

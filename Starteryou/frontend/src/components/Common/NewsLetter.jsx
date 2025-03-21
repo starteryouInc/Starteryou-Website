@@ -1,7 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-hot-toast";
 import { API_CONFIG } from "@config/api";
 
 /**
@@ -91,9 +90,6 @@ const NewsLetter = () => {
 
   return (
     <div className="relative bg-[#F8FAFC] p-6 w-full">
-      {/* Toast Notification Container */}
-      <ToastContainer />
-
       <div className="relative overflow-hidden mx-auto my-12 p-12 lg:p-0 bg-[#6a54df] text-white flex flex-col justify-center items-center rounded-[18px] space-y-4 lg:w-[1166px] lg:h-[266px]">
         {/* Decorative circles for styling */}
         <div className="h-40 w-40 bg-transparent border-4 border-[#8574e4] rounded-full absolute -top-20 -left-14"></div>

@@ -79,46 +79,46 @@ const Blog = () => {
     {
       img: "/LandingPage/Blogimg1.png",
       title:
-        "Portfolio:A Step-by-Step Guider to Crafting an Outstanding High School Portfolio",
+        "A Step-by-Step Guide to Creating an Outstanding High School Portfolio",
       date: "20 Jan 2023",
       category: "Job Hunting",
       text: "Crafting an Outstanding High School Portfolio: A Step-by-Step Guide",
     },
     {
       img: "/LandingPage/Blogimg2.png",
-      title:
-        "The Ultimate Guide for High School Students! to Applying for and Getting into College",
+      title: "The Ultimate High School Guide to College Applications",
       date: "21 Jan 2023",
       category: "Get Inspired",
       text: "Applying for and Getting into College: The Ultimate Guide for High School Students!",
     },
     {
       img: "/LandingPage/Blogimg1.png",
-      title: "Consectetur adipiscing",
+      title: "Kickstart Your Career: The Ultimate Guide to Entry-Level Jobs",
       date: "22 Jan 2023",
-      category: "Marketing",
-      text: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do.",
-    },
-    {
-      img: "/LandingPage/Blogimg2.png",
-      title: "Lorem ipsum dolor",
-      date: "23 Jan 2023",
-      category: "Development",
-      text: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do.",
+      category: "Job Hunting",
+      text: "Learn how to secure entry-level jobs by getting tips on resume writing, experience building, and interview prep",
     },
     {
       img: "/LandingPage/Blogimg1.png",
-      title: "Research insights",
-      date: "24 Jan 2023",
-      category: "Research",
-      text: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do.",
+      title:
+        "A Step-by-Step Guide to Creating an Outstanding High School Portfolio",
+      date: "20 Jan 2023",
+      category: "Job Hunting",
+      text: "Crafting an Outstanding High School Portfolio: A Step-by-Step Guide",
     },
     {
       img: "/LandingPage/Blogimg2.png",
-      title: "Latest trends",
-      date: "25 Jan 2023",
-      category: "Development",
-      text: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do.",
+      title: "The Ultimate High School Guide to College Applications",
+      date: "21 Jan 2023",
+      category: "Get Inspired",
+      text: "Applying for and Getting into College: The Ultimate Guide for High School Students!",
+    },
+    {
+      img: "/LandingPage/Blogimg1.png",
+      title: "Kickstart Your Career: The Ultimate Guide to Entry-Level Jobs",
+      date: "22 Jan 2023",
+      category: "Job Hunting",
+      text: "Learn how to secure entry-level jobs by getting tips on resume writing, experience building, and interview prep",
     },
   ];
 
@@ -182,9 +182,9 @@ const Blog = () => {
             <p className="text-[#767676] mb-4 lg:max-w-[800px] whitespace-pre-wrap">
               {paragraph}
             </p>
-            <button className="px-6 py-3 bg-[#D9502E] text-white rounded-md">
+            {/* <button className="px-6 py-3 bg-[#D9502E] text-white rounded-md">
               Learn more
-            </button>
+            </button> */}
             {isAdmin && (
               <FaPencilAlt
                 onClick={handleEdit}
@@ -240,14 +240,14 @@ const Blog = () => {
                     {box.date}
                   </span>
                 </div>
-                <span className="text-white font-bold text-base md:text-lg">
+                {/* <span className="text-white font-bold text-base md:text-lg">
                   {box.category}
-                </span>
+                </span> */}
               </div>
 
               <p className="text-[#767676] mb-4">{box.text}</p>
               <a
-                href="#"
+                // href="#"
                 className="text-black font-semibold md:font-extrabold uppercase hover:underline"
               >
                 Read Post

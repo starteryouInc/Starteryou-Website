@@ -1,21 +1,19 @@
 // pages/_app.js
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import  { Toaster } from "react-hot-toast";
 
 function MyApp({ Component, pageProps }) {
   return (
     <>
       <Component {...pageProps} />
-      <ToastContainer
-        position="top-right"
+      <Toaster
+        position="bottom-right"
         autoClose={3000}
+        reverseOrder={false}
         hideProgressBar={false}
-        newestOnTop
+        newestOnTop={false}
         closeOnClick
         rtl={false}
-        pauseOnFocusLoss
         draggable
-        pauseOnHover
       />
     </>
   );

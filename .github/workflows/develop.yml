@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - develop
+      
+  pull_request:
+    branches:
+      - develop
 
 jobs:
   deploy:
@@ -117,7 +121,7 @@ jobs:
             echo "Deploying Docker services..."
             docker-compose --profile server --env-file "$ENV_FILE" down --volumes --remove-orphans
             docker-compose --profile server --env-file "$ENV_FILE" up --build -d
-      
+
       # Step 4: Set GitHub Status Check
       - name: Set GitHub Action status check
         if: failure()  # Trigger on failure
@@ -128,4 +132,3 @@ jobs:
       - name: Set GitHub Action status check
         if: success()  # Trigger on success
         run: echo "✅ Deployment successful!"
-

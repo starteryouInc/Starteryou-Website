@@ -12,13 +12,16 @@ const Employee = require("../models/EmployeeModel");
 const cacheQuery = require("../cache/utils/cacheQuery");
 const { invalidateCache } = require("../cache/utils/invalidateCache");
 const cacheConfig = require("../cache/config/cacheConfig");
-const jwtSecret = process.env.PROD_JWT_SECRET;
+const logger = require("../utils/logger"); // Logger import
+
+const jwtSecret = process.env.DEV_JWT_SECRET;
 if (!jwtSecret) {
-  console.error(
-    "Error: PROD_JWT_SECRET is missing in the environment variables."
+  logger.error(
+    "Error: DEV_JWT_SECRET is missing in the environment variables."
   );
-  process.exit(1); // Stop the app if PROD_JWT_SECRET is not defined
+  process.exit(1); // Stop the app if DEV_JWT_SECRET is not defined
 }
+
 const validRoles = ["admin", "user"]; // Add more roles as needed
 
 // Helper functions to generate tokens
@@ -38,7 +41,7 @@ const generateRefreshToken = (user) => {
  * Centralized error handler
  */
 const handleError = (res, error, statusCode = 500) => {
-  console.error("Error:", error);
+  logger.error("Error:", error);
   res.status(statusCode).json({
     message: error.message || "Internal Server Error",
     success: false,
@@ -144,12 +147,14 @@ const register = async (req, res) => {
     }
 
     const validEmployee = await Employee.findOne({ email });
-    console.log("Valid Employee:", validEmployee); // Log the valid employee for debugging
+    logger.info("Valid Employee:", validEmployee); // Log the valid employee for debugging
     if (!validEmployee) {
-      return res.status(400).json({
-        message: "This email is not associated with a valid employee",
-        success: false,
-      });
+      return res
+        .status(400)
+        .json({
+          message: "This email is not associated with a valid employee",
+          success: false,
+        });
     }
 
     // Validate role
@@ -159,11 +164,11 @@ const register = async (req, res) => {
 
     // Validate password
     const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
         message:
-          "Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, one number, and one special character",
+          "Password must be at least 8 characters long , maximum 16 characters and include one uppercase letter, one lowercase letter, one number, and one special character",
         success: false,
       });
     }
@@ -309,12 +314,14 @@ const login = async (req, res) => {
   }
 
   const validEmployee = await Employee.findOne({ email });
-  console.log("Valid Employee:", validEmployee); // Log the valid employee for debugging
+  logger.info("Valid Employee:", validEmployee); // Log the valid employee for debugging
   if (!validEmployee) {
-    return res.status(400).json({
-      message: "This email is not associated with a valid employee",
-      success: false,
-    });
+    return res
+      .status(400)
+      .json({
+        message: "This email is not associated with a valid employee",
+        success: false,
+      });
   }
 
   try {
@@ -347,7 +354,7 @@ const login = async (req, res) => {
      */
 
     // Invalidate the cache for the login endpoint
-    console.log(`🔄 Invalidating cache for key: ${cacheKey}`);
+    logger.info(`🔄 Invalidating cache for key: ${cacheKey}`);
     await invalidateCache(cacheKey);
 
     /**
@@ -388,10 +395,10 @@ const login = async (req, res) => {
       ttl
     );
 
-    console.log(`✅ Cache set for key: ${cacheKey}`);
+    logger.info(`✅ Cache set for key: ${cacheKey}`);
     return res.status(cachedResponse.status).json(cachedResponse.response);
   } catch (error) {
-    console.error("Error during login:", error);
+    logger.error("Error during login:", error);
     return res.status(500).json({
       message: "Internal Server Error",
       success: false,
