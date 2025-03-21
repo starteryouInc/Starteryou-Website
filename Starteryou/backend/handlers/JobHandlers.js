@@ -4,6 +4,12 @@ const { invalidateCache } = require("../cache/utils/invalidateCache");
 const Job = require("../models/Job");
 const logger = require("../utils/logger"); // Logger import
 
+/**
+ * Creates a new job listing.
+ * @param {Object} req - Express request object containing job details.
+ * @param {Object} res - Express response object.
+ * @returns {Promise<void>} JSON response with success or error message.
+ */
 const createJobHandler = async (req, res) => {
   const userId = req.user.id;
   try {
@@ -82,6 +88,12 @@ const createJobHandler = async (req, res) => {
   }
 };
 
+/**
+ * Fetches job listings based on query parameters.
+ * @param {Object} req - Express request object containing query filters.
+ * @param {Object} res - Express response object.
+ * @returns {Promise<void>} JSON response with matching job listings or error message.
+ */
 const fetchJobHandler = async (req, res) => {
   try {
     const {
@@ -156,6 +168,12 @@ const fetchJobHandler = async (req, res) => {
   }
 };
 
+/**
+ * Fetches a single job by ID.
+ * @param {Object} req - Express request object containing job ID.
+ * @param {Object} res - Express response object.
+ * @returns {Promise<void>} JSON response with job details or error message.
+ */
 const fetchJobByIDHandler = async (req, res) => {
   const {
     params: { id },
@@ -179,6 +197,12 @@ const fetchJobByIDHandler = async (req, res) => {
   }
 };
 
+/**
+ * Updates an existing job listing.
+ * @param {Object} req - Express request object containing job ID and updated data.
+ * @param {Object} res - Express response object.
+ * @returns {Promise<void>} JSON response with updated job details or error message.
+ */
 const updateJobHandler = async (req, res) => {
   try {
     const { id } = req.params;
@@ -221,6 +245,12 @@ const updateJobHandler = async (req, res) => {
   }
 };
 
+/**
+ * Deletes a job listing by ID.
+ * @param {Object} req - Express request object containing job ID.
+ * @param {Object} res - Express response object.
+ * @returns {Promise<void>} JSON response confirming deletion or error message.
+ */
 const deleteJobHandler = async (req, res) => {
   const {
     params: { id },
@@ -260,6 +290,12 @@ const deleteJobHandler = async (req, res) => {
   }
 };
 
+/**
+ * Fetches all jobs posted by a specific employer.
+ * @param {Object} req - Express request object containing employer ID.
+ * @param {Object} res - Express response object.
+ * @returns {Promise<void>} JSON response with job listings or error message.
+ */
 const fetchPostedJobsHandler = async (req, res) => {
   try {
     const { userId } = req.params;

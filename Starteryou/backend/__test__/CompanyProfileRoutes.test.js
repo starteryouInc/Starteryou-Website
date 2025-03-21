@@ -9,6 +9,12 @@ jest.mock("../models/CompanyProfile");
 jest.mock("../cache/utils/cacheQueryJob");
 jest.mock("../db", () => ({}));
 
+/**
+ * Tests for the `createCompanyProfileHandler` function.
+ * - Ensures a company profile is created successfully.
+ * - Validates required fields and returns an error if missing.
+ * - Handles errors gracefully.
+ */
 describe("createCompanyProfileHandler", () => {
   let req, res;
 
@@ -34,6 +40,7 @@ describe("createCompanyProfileHandler", () => {
     };
   });
 
+  // Test 1: It should create a company profile successfully
   it("should create a company profile successfully", async () => {
     const mockCompanyProfile = { ...req.body, _id: "company123" };
 
@@ -49,6 +56,7 @@ describe("createCompanyProfileHandler", () => {
     });
   });
 
+  // Test 2: It should return 400 if required fields are missing
   it("should return 400 if required fields are missing", async () => {
     req.body = { companyName: "Tech Corp" }; // Missing employerRegistrationId
 
@@ -61,6 +69,7 @@ describe("createCompanyProfileHandler", () => {
     });
   });
 
+  // Test 3: It should handle errors properly
   it("should handle errors properly", async () => {
     CompanyProfile.prototype.save.mockRejectedValue(
       new Error("Database error")
@@ -77,6 +86,12 @@ describe("createCompanyProfileHandler", () => {
   });
 });
 
+/**
+ * Tests for the `fetchCompanyProfileHandler` function.
+ * - Fetches a company profile successfully.
+ * - Returns 404 if no company profile is found.
+ * - Handles errors properly.
+ */
 describe("fetchCompanyProfileHandler", () => {
   let req, res;
 
@@ -91,6 +106,7 @@ describe("fetchCompanyProfileHandler", () => {
     };
   });
 
+  // Test 1: It should fetch a company profile successfully
   it("should fetch a company profile successfully", async () => {
     const mockCompanyProfile = {
       employerRegistrationId: "employer123",
@@ -115,6 +131,7 @@ describe("fetchCompanyProfileHandler", () => {
     });
   });
 
+  // Test 2: It should return 404 if company profile is not found
   it("should return 404 if company profile is not found", async () => {
     cacheQueryJob.mockResolvedValue(null);
 
@@ -127,6 +144,7 @@ describe("fetchCompanyProfileHandler", () => {
     });
   });
 
+  // Test 3: It should handle errors properly
   it("should handle errors properly", async () => {
     cacheQueryJob.mockRejectedValue(new Error("Database error"));
 

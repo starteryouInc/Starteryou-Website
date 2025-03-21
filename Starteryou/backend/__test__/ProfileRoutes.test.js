@@ -20,6 +20,13 @@ jest.mock("../cache/utils/cacheQueryJob");
 jest.mock("../cache/utils/invalidateCache");
 jest.mock("../db", () => ({}));
 
+/**
+ * Test suite for createProfileHandler
+ *
+ * - Ensures successful profile creation.
+ * - Validates missing required fields.
+ * - Handles errors properly.
+ */
 describe("createProfileHandler", () => {
   let req, res, mockProfile;
 
@@ -49,6 +56,7 @@ describe("createProfileHandler", () => {
     jest.clearAllMocks();
   });
 
+  // Test 1: It should create a profile and return 201
   it("should create a profile and return 201", async () => {
     UserProfile.mockImplementation(() => mockProfile);
 
@@ -69,6 +77,7 @@ describe("createProfileHandler", () => {
     });
   });
 
+  // Test 2: It should return 400 if required fields are missing
   it("should return 400 if required fields are missing", async () => {
     req.body = { name: "John Doe", email: "johndoe@example.com" }; // Missing userRegistrationId
 
@@ -81,6 +90,7 @@ describe("createProfileHandler", () => {
     });
   });
 
+  // Test 3: It should return 500 if an error occurs
   it("should return 500 if an error occurs", async () => {
     UserProfile.mockImplementation(() => {
       throw new Error("Database error");
@@ -97,6 +107,14 @@ describe("createProfileHandler", () => {
   });
 });
 
+/**
+ * Test suite for fetchProfileHandler
+ *
+ * - Fetches cached profile if available.
+ * - Retrieves fresh data if cache is empty.
+ * - Returns 404 if profile is not found.
+ * - Handles errors properly.
+ */
 describe("fetchProfileHandler", () => {
   let req, res, mockProfile, cacheKey;
 
@@ -121,6 +139,7 @@ describe("fetchProfileHandler", () => {
     jest.clearAllMocks();
   });
 
+  // Test 1: It should return cached profile if available
   it("should return cached profile if available", async () => {
     cacheQueryJob.mockResolvedValue(mockProfile);
 
@@ -136,6 +155,7 @@ describe("fetchProfileHandler", () => {
     });
   });
 
+  // Test 2: It should fetch fresh profile data if cache is empty and return 200
   it("should fetch fresh profile data if cache is empty and return 200", async () => {
     cacheQueryJob.mockResolvedValue(null);
     UserProfile.find.mockResolvedValue(mockProfile);
@@ -159,6 +179,7 @@ describe("fetchProfileHandler", () => {
     });
   });
 
+  // Test 3: It should return 404 if profile is not found
   it("should return 404 if profile is not found", async () => {
     cacheQueryJob.mockResolvedValue(null);
     UserProfile.find.mockResolvedValue([]);
@@ -172,6 +193,7 @@ describe("fetchProfileHandler", () => {
     });
   });
 
+  // Test 4: It should return 500 if an error occurs
   it("should return 500 if an error occurs", async () => {
     cacheQueryJob.mockImplementation(() => {
       throw new Error("Cache error");
@@ -188,6 +210,13 @@ describe("fetchProfileHandler", () => {
   });
 });
 
+/**
+ * Test suite for updateProfileHandler
+ *
+ * - Ensures profile is updated successfully.
+ * - Validates missing profile scenario.
+ * - Handles errors properly.
+ */
 describe("updateProfileHandler", () => {
   let req, res, mockUpdatedProfile, cacheKey;
 
@@ -222,6 +251,7 @@ describe("updateProfileHandler", () => {
     jest.clearAllMocks();
   });
 
+  // Test 1: It should update the profile and return 200
   it("should update the profile and return 200", async () => {
     UserProfile.findOneAndUpdate.mockResolvedValue(mockUpdatedProfile);
 
@@ -247,6 +277,7 @@ describe("updateProfileHandler", () => {
     });
   });
 
+  // Test 2: It should return 400 if user profile not found
   it("should return 404 if profile not found", async () => {
     UserProfile.findOneAndUpdate.mockResolvedValue(null);
 
@@ -259,6 +290,7 @@ describe("updateProfileHandler", () => {
     });
   });
 
+  // Test 3: It should return 500 if an error occurs
   it("should return 500 if an error occurs", async () => {
     UserProfile.findOneAndUpdate.mockImplementation(() => {
       throw new Error("Database error");
@@ -275,6 +307,14 @@ describe("updateProfileHandler", () => {
   });
 });
 
+/**
+ * Test suite for fetchProfileFieldsHandler
+ *
+ * - Validates required field parameter.
+ * - Ensures valid/invalid field scenarios.
+ * - Fetches profile fields from cache or database.
+ * - Handles missing profile or errors properly.
+ */
 describe("fetchProfileFieldsHandler", () => {
   let req, res, cacheKey, mockUserData;
 
@@ -296,6 +336,7 @@ describe("fetchProfileFieldsHandler", () => {
     jest.clearAllMocks();
   });
 
+  // Test 1: It should return 400 if field parameter is missing
   it("should return 400 if field parameter is missing", async () => {
     req.query.field = undefined;
 
@@ -307,6 +348,7 @@ describe("fetchProfileFieldsHandler", () => {
     });
   });
 
+  // Test 2: It should return 400 if an invalid field is requested
   it("should return 400 if an invalid field is requested", async () => {
     req.query.field = "invalidField";
 
@@ -318,6 +360,7 @@ describe("fetchProfileFieldsHandler", () => {
     });
   });
 
+  // Test 3: It should fetch the profile field from cache if available
   it("should fetch the profile field from cache if available", async () => {
     cacheQueryJob.mockResolvedValue(mockUserData.skills);
 
@@ -336,6 +379,7 @@ describe("fetchProfileFieldsHandler", () => {
     });
   });
 
+  // Test 4: It should fetch the profile field from the database if cache is empty
   it("should fetch the profile field from the database if cache is empty", async () => {
     cacheQueryJob.mockImplementation(async (key, fetchFunction) =>
       fetchFunction()
@@ -357,6 +401,7 @@ describe("fetchProfileFieldsHandler", () => {
     });
   });
 
+  // Test 5: It should return 404 if user not found
   it("should return 404 if user not found", async () => {
     cacheQueryJob.mockImplementation(async (key, fetchFunction) =>
       fetchFunction()
@@ -370,6 +415,7 @@ describe("fetchProfileFieldsHandler", () => {
     expect(res.json).toHaveBeenCalledWith({ msg: "User not found!" });
   });
 
+  // Test 6: It should return 500 if an error occurs
   it("should return 500 if an error occurs", async () => {
     cacheQueryJob.mockImplementation(async () => {
       throw new Error("Database error");
@@ -386,6 +432,14 @@ describe("fetchProfileFieldsHandler", () => {
   });
 });
 
+/**
+ * Adds a subdocument to a user's profile.
+ * @param {string} userRegistrationId - The ID of the user.
+ * @param {string} field - The field to which the subdocument belongs.
+ * @param {Object} data - The subdocument data to be added.
+ * @param {Object} res - The response object.
+ * @returns {Promise<void>}
+ */
 describe("addSubdocument", () => {
   let req, res;
 
@@ -403,6 +457,7 @@ describe("addSubdocument", () => {
     jest.clearAllMocks();
   });
 
+  // Test 1: It should add a subdocument and return 201
   it("should add a subdocument and return 201", async () => {
     const mockUser = {
       userRegistrationId: "user123",
@@ -436,6 +491,7 @@ describe("addSubdocument", () => {
     });
   });
 
+  // Test 2: It should return 404 if user is not found
   it("should return 404 if user is not found", async () => {
     UserProfile.findOne.mockResolvedValue(null);
 
@@ -453,6 +509,7 @@ describe("addSubdocument", () => {
     expect(res.json).toHaveBeenCalledWith({ msg: "User not found!" });
   });
 
+  // Test 3: It should return 500 on error
   it("should return 500 on error", async () => {
     UserProfile.findOne.mockRejectedValue(new Error("Database error"));
 
@@ -472,6 +529,15 @@ describe("addSubdocument", () => {
   });
 });
 
+/**
+ * Updates a subdocument within a user's profile.
+ * @param {string} userRegistrationId - The ID of the user.
+ * @param {string} subDocId - The ID of the subdocument to update.
+ * @param {string} field - The field to which the subdocument belongs.
+ * @param {Object} updates - The updates to be applied to the subdocument.
+ * @param {Object} res - The response object.
+ * @returns {Promise<void>}
+ */
 describe("updateSubdocument", () => {
   let req, res, mockUser, mockSubDoc;
 
@@ -504,6 +570,7 @@ describe("updateSubdocument", () => {
     jest.clearAllMocks();
   });
 
+  // Test 1: It should update a subdocument and return 200
   it("should update a subdocument and return 200", async () => {
     UserProfile.findOne.mockResolvedValue(mockUser);
 
@@ -532,6 +599,7 @@ describe("updateSubdocument", () => {
     });
   });
 
+  // Test 2: It should return 404 if user is not found
   it("should return 404 if user is not found", async () => {
     UserProfile.findOne.mockResolvedValue(null);
 
@@ -550,6 +618,7 @@ describe("updateSubdocument", () => {
     expect(res.json).toHaveBeenCalledWith({ msg: "User not found!" });
   });
 
+  // Test 3: It should return 404 if subdocument is not found
   it("should return 404 if subdocument is not found", async () => {
     mockUser.skills.id.mockReturnValue(null);
     UserProfile.findOne.mockResolvedValue(mockUser);
@@ -569,6 +638,7 @@ describe("updateSubdocument", () => {
     expect(res.json).toHaveBeenCalledWith({ msg: "Subdocument not found!" });
   });
 
+  // Test 4: It should return 500 on error
   it("should return 500 on error", async () => {
     UserProfile.findOne.mockRejectedValue(new Error("Database error"));
 
@@ -589,6 +659,14 @@ describe("updateSubdocument", () => {
   });
 });
 
+/**
+ * Deletes a subdocument from a user's profile.
+ * @param {string} userRegistrationId - The ID of the user.
+ * @param {string} subDocId - The ID of the subdocument to delete.
+ * @param {string} field - The field to which the subdocument belongs.
+ * @param {Object} res - The response object.
+ * @returns {Promise<void>}
+ */
 describe("deleteSubdocument", () => {
   let req, res, mockUser, mockSubDoc;
 
@@ -617,6 +695,7 @@ describe("deleteSubdocument", () => {
     jest.clearAllMocks();
   });
 
+  // Test 1: It should delete a subdocument and return 200
   it("should delete a subdocument and return 200", async () => {
     UserProfile.findOne.mockResolvedValue(mockUser);
 
@@ -644,6 +723,7 @@ describe("deleteSubdocument", () => {
     });
   });
 
+  // Test 2: It should return 404 if user is not found
   it("should return 404 if user is not found", async () => {
     UserProfile.findOne.mockResolvedValue(null);
 
@@ -661,6 +741,7 @@ describe("deleteSubdocument", () => {
     expect(res.json).toHaveBeenCalledWith({ msg: "User not found!" });
   });
 
+  // Test 3: It should return 404 if subdocument is not found
   it("should return 404 if subdocument is not found", async () => {
     mockUser.skills.id.mockReturnValue(null);
     UserProfile.findOne.mockResolvedValue(mockUser);
@@ -679,6 +760,7 @@ describe("deleteSubdocument", () => {
     expect(res.json).toHaveBeenCalledWith({ msg: "Subdocument not found!" });
   });
 
+  // Test 4: It should return 500 on error
   it("should return 500 on error", async () => {
     UserProfile.findOne.mockRejectedValue(new Error("Database error"));
 
@@ -698,6 +780,14 @@ describe("deleteSubdocument", () => {
   });
 });
 
+/**
+ * Adds a string to an array field in the user's profile.
+ * @param {string} userRegistrationId - The ID of the user.
+ * @param {string} field - The field name where the string will be added.
+ * @param {string} value - The string value to add to the array.
+ * @param {Object} res - The response object.
+ * @returns {Promise<void>}
+ */
 describe("addStringToArray", () => {
   let req, res, mockUser;
 
@@ -721,6 +811,7 @@ describe("addStringToArray", () => {
     jest.clearAllMocks();
   });
 
+  // Test 1: It should add a string to the array and return 201
   it("should add a string to the array and return 201", async () => {
     UserProfile.findOne.mockResolvedValue(mockUser);
 
@@ -748,6 +839,7 @@ describe("addStringToArray", () => {
     });
   });
 
+  // Test 2: It should return 400 if value is empty or not a string
   it("should return 400 if value is empty or not a string", async () => {
     await addStringToArray(
       req.params.userRegistrationId,
@@ -763,6 +855,7 @@ describe("addStringToArray", () => {
     });
   });
 
+  // Test 3: It should return 404 if user is not found
   it("should return 404 if user is not found", async () => {
     UserProfile.findOne.mockResolvedValue(null);
 
@@ -780,6 +873,7 @@ describe("addStringToArray", () => {
     expect(res.json).toHaveBeenCalledWith({ msg: "User not found!" });
   });
 
+  // Test 4: It should return 500 if an error occurs
   it("should return 500 if an error occurs", async () => {
     UserProfile.findOne.mockRejectedValue(new Error("Database error"));
 
@@ -799,6 +893,14 @@ describe("addStringToArray", () => {
   });
 });
 
+/**
+ * Deletes a string from an array field in the user's profile.
+ * @param {string} userRegistrationId - The ID of the user.
+ * @param {string} field - The field name where the string will be removed.
+ * @param {string} value - The string value to delete from the array.
+ * @param {Object} res - The response object.
+ * @returns {Promise<void>}
+ */
 describe("deleteStringFromArray", () => {
   let req, res, mockUser;
 
@@ -822,6 +924,7 @@ describe("deleteStringFromArray", () => {
     jest.clearAllMocks();
   });
 
+  // Test 1: It should delete a string from the array and return 200
   it("should delete a string from the array and return 200", async () => {
     UserProfile.findOne.mockResolvedValue(mockUser);
 
@@ -848,6 +951,7 @@ describe("deleteStringFromArray", () => {
     });
   });
 
+  // Test 2: It should return 400 if value is empty or not a string
   it("should return 404 if the value is not found in the array", async () => {
     mockUser.skills = ["React", "Node.js"]; // JavaScript is not in the array
     UserProfile.findOne.mockResolvedValue(mockUser);
@@ -868,6 +972,7 @@ describe("deleteStringFromArray", () => {
     });
   });
 
+  // Test 3: It should return 404 if user is not found
   it("should return 404 if the user is not found", async () => {
     UserProfile.findOne.mockResolvedValue(null);
 
@@ -885,6 +990,7 @@ describe("deleteStringFromArray", () => {
     expect(res.json).toHaveBeenCalledWith({ msg: "User not found!" });
   });
 
+  // Test 4: It should return 500 if an error occurs
   it("should return 500 if an error occurs", async () => {
     UserProfile.findOne.mockRejectedValue(new Error("Database error"));
 

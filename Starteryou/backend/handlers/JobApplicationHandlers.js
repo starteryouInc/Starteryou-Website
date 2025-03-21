@@ -4,6 +4,19 @@ const { invalidateCache } = require("../cache/utils/invalidateCache");
 const Application = require("../models/JobApplications");
 const logger = require("../utils/logger"); // Logger import
 
+/**
+ * @desc    Apply for a job
+ * @route   POST /api/v1/jobportal/applications/:jobId/apply
+ * @access  Private (Job Seekers Only)
+ * @param   {Object} req - Express request object
+ * @param   {Object} req.body - Request body containing application details
+ * @param   {string} req.body.firstName - Applicant's first name (Required)
+ * @param   {string} req.body.lastName - Applicant's last name (Required)
+ * @param   {string} req.body.email - Applicant's email address (Required)
+ * @param   {string} [req.body.whyHire] - Applicant's reason for applying (Optional)
+ * @param   {Object} res - Express response object
+ * @returns {Object} JSON response with success message or error
+ */
 const applyJobHandler = async (req, res) => {
   const { firstName, lastName, email, whyHire } = req.body;
   if (!firstName || !lastName || !email) {
@@ -52,6 +65,14 @@ const applyJobHandler = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Fetch all jobs applied by a user
+ * @route   GET /api/v1/jobportal/applications/fetch-applied-jobs
+ * @access  Private (Job Seekers Only)
+ * @param   {Object} req - Express request object
+ * @param   {Object} res - Express response object
+ * @returns {Object} JSON response containing applied jobs or an error message
+ */
 const fetchAppliedJobHandler = async (req, res) => {
   try {
     // const { params: { userId } } = req;
@@ -88,6 +109,16 @@ const fetchAppliedJobHandler = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Fetch all users who have applied for a specific job
+ * @route   GET /api/v1/jobportal/applications/:jobId/fetch-applied-users
+ * @access  Private (Employers Only)
+ * @param   {Object} req - Express request object
+ * @param   {Object} req.params - Request parameters
+ * @param   {string} req.params.jobId - Job ID for which applicants are being fetched
+ * @param   {Object} res - Express response object
+ * @returns {Object} JSON response containing applied users or an error message
+ */
 const fetchAppliedUsersHandler = async (req, res) => {
   const {
     params: { jobId },
@@ -131,6 +162,18 @@ const fetchAppliedUsersHandler = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Update the status of a job application
+ * @route   PATCH /api/v1/jobportal/applications/:applicationId/update-status
+ * @access  Private (Employers Only)
+ * @param   {Object} req - Express request object
+ * @param   {Object} req.params - Request parameters
+ * @param   {string} req.params.applicationId - ID of the application to be updated
+ * @param   {Object} req.body - Request body containing the new status
+ * @param   {string} req.body.status - New application status (Valid: "applied", "shortlisted", "rejected")
+ * @param   {Object} res - Express response object
+ * @returns {Object} JSON response with success message or error
+ */
 const updateAppliedJobStatusHandler = async (req, res) => {
   const {
     params: { applicationId },

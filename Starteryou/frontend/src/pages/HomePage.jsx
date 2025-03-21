@@ -5,7 +5,7 @@ import BestJob2 from "../components/Landing/BestJob2";
 import BestJob3 from "../components/Landing/BestJob3";
 import BestJob4 from "../components/Landing/BestJob4";
 import Blog from "../components/Landing/Blog";
-import Collab from "../components/Landing/Collab";
+// import Collab from "../components/Landing/Collab";
 import Contact from "../components/Landing/Contact";
 import Hero from "../components/Landing/Hero";
 // import Pricing from "../components/Landing/Pricing";
@@ -20,7 +20,7 @@ export default function HomePage() {
       <BestJob />
       <BestJob2 />
       <BestJob3 />
-      <Collab />
+      {/* <Collab /> */}
       <BestJob4 />
       <Banner />
       {/* <Pricing /> */}

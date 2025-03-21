@@ -11,6 +11,10 @@ const { invalidateCache } = require("../cache/utils/invalidateCache");
 const cacheQuery = require("../cache/utils/cacheQuery");
 const cacheConfig = require("../cache/config/cacheConfig");
 const logger = require("../utils/logger"); // Logger import
+const {
+  fetchTextContent,
+  updateTextContent,
+} = require("../handlers/TextHandlers");
 // Swagger setup
 const swaggerOptions = {
   swaggerDefinition: {
@@ -66,78 +70,7 @@ router.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *       500:
  *         description: Server error.
  */
-router.get("/text", cacheMiddleware, async (req, res) => {
-  const { page, component } = req.query;
-
-  if (!page) {
-    return res.status(400).json({
-      message: "'page' is required in query parameters.",
-    });
-  }
-
-  try {
-    // Check MongoDB connection
-    if (mongoose.connection.readyState !== 1) {
-      logger.error("MongoDB connection not ready");
-      return res.status(500).json({
-        message: "MongoDB connection lost or not ready.",
-      });
-    }
-
-    // Create a cache key
-    const cacheKey = `/api/text?page=${page}${
-      component ? `&component=${component}` : ""
-    }`;
-    logger.info(`Cache Key: ${cacheKey}`);
-
-    // Fetch data from cache or database
-    const cachedContent = await cacheQuery(
-      cacheKey,
-      async () => {
-        logger.info("Cache miss, querying database...");
-        if (component) {
-          const content = await TextContent.findOne({ page, component })
-            .maxTimeMS(10000)
-            .lean();
-
-          if (!content) {
-            logger.error(
-              `No content found for page: ${page}, component: ${component}`
-            );
-            throw new Error("Content not found.");
-          }
-          return content;
-        }
-
-        const content = await TextContent.find({ page })
-          .maxTimeMS(10000)
-          .lean();
-
-        if (!content || content.length === 0) {
-          logger.error(`No content found for page: ${page}`);
-          throw new Error(`No content found for the specified page: ${page}`);
-        }
-        return content;
-      },
-      cacheConfig.defaultTTL
-    );
-
-    if (!cachedContent) {
-      logger.error("Content not found in cache or database.");
-      return res.status(404).json({
-        message: "Content not found in cache or database.",
-      });
-    }
-
-    return res.json(cachedContent);
-  } catch (error) {
-    logger.error("Error fetching text content:", error);
-    res.status(500).json({
-      message: "An error occurred while retrieving content.",
-      error: error.message,
-    });
-  }
-});
+router.get("/text", cacheMiddleware, fetchTextContent);
 
 /**
  * @swagger
@@ -172,52 +105,7 @@ router.get("/text", cacheMiddleware, async (req, res) => {
  *       500:
  *         description: Server error.
  */
-router.put("/text", async (req, res) => {
-  const { page, component, content, paragraphs } = req.body;
-
-  if (!page || !component) {
-    return res.status(400).json({
-      message: "Both 'page' and 'component' are required in the request body.",
-    });
-  }
-  if (content === undefined && !Array.isArray(paragraphs)) {
-    return res.status(400).json({
-      message:
-        "At least one of 'content' or 'paragraphs' is required in the request body.",
-    });
-  }
-
-  try {
-    let textContent = await TextContent.findOne({ page, component }).maxTimeMS(
-      10000
-    );
-
-    if (!textContent) {
-      textContent = new TextContent({ page, component });
-    }
-
-    if (content !== undefined) {
-      textContent.content = content;
-    }
-
-    if (Array.isArray(paragraphs)) {
-      textContent.paragraphs = paragraphs;
-    }
-
-    await textContent.save();
-    const cacheKey = `/api/text?page=${page}&component=${component}`;
-    logger.info(`Invalidating cache for key: ${cacheKey}`);
-    await invalidateCache(cacheKey);
-    await cacheQuery(cacheKey, async () => textContent, cacheConfig.defaultTTL);
-    res.json(textContent);
-  } catch (error) {
-    logger.error("Error updating content:", error);
-    res.status(500).json({
-      message: "An error occurred while updating content.",
-      error: error.message,
-    });
-  }
-});
+router.put("/text", updateTextContent);
 
 /**
  * @swagger

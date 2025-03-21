@@ -15,6 +15,14 @@ jest.mock("../cache/utils/cacheQueryJob");
 jest.mock("../cache/utils/invalidateCache");
 jest.mock("../db", () => ({}));
 
+/**
+ * Test suite for createJobHandler
+ *
+ * - Ensures successful job creation.
+ * - Validates missing fields.
+ * - Checks for invalid salary range.
+ * - Handles errors properly.
+ */
 describe("createJobHandler", () => {
   let req, res;
 
@@ -42,6 +50,7 @@ describe("createJobHandler", () => {
     };
   });
 
+  // Test 1: Create a job successfully
   it("should create a job successfully", async () => {
     const mockJob = { _id: "job123", ...req.body };
     Job.prototype.save.mockResolvedValue(mockJob);
@@ -57,6 +66,7 @@ describe("createJobHandler", () => {
     });
   });
 
+  // Test 2: Return 400 if required fields are missing
   it("should return 400 if required fields are missing", async () => {
     req.body.title = ""; // Missing title
     await createJobHandler(req, res);
@@ -68,6 +78,7 @@ describe("createJobHandler", () => {
     });
   });
 
+  // Test 3: Return 400 if salary range is invalid
   it("should return 400 if salary range is invalid", async () => {
     req.body.salaryRange = { min: 100000, max: 50000 }; // Invalid salary range
     await createJobHandler(req, res);
@@ -79,6 +90,7 @@ describe("createJobHandler", () => {
     });
   });
 
+  // Test 4: Handle errors properly
   it("should handle errors properly", async () => {
     Job.prototype.save.mockRejectedValue(new Error("Database error"));
 
@@ -93,6 +105,13 @@ describe("createJobHandler", () => {
   });
 });
 
+/**
+ * Test suite for fetchJobHandler
+ *
+ * - Fetches jobs successfully.
+ * - Returns 404 when no jobs are found.
+ * - Handles errors properly.
+ */
 describe("fetchJobHandler", () => {
   let req, res;
 
@@ -104,6 +123,7 @@ describe("fetchJobHandler", () => {
     };
   });
 
+  // Test 1: Fetch jobs successfully
   it("should fetch jobs successfully", async () => {
     const mockJobs = [{ id: 1, title: "Software Engineer" }];
     cacheQueryJob.mockResolvedValue(mockJobs);
@@ -119,6 +139,7 @@ describe("fetchJobHandler", () => {
     });
   });
 
+  // Test 2: Return 404 if no jobs are found
   it("should return 404 when no jobs are found", async () => {
     cacheQueryJob.mockResolvedValue([]);
 
@@ -133,6 +154,7 @@ describe("fetchJobHandler", () => {
     });
   });
 
+  // Test 3: Handle errors properly
   it("should handle errors properly", async () => {
     cacheQueryJob.mockRejectedValue(new Error("Database error"));
 
@@ -147,6 +169,13 @@ describe("fetchJobHandler", () => {
   });
 });
 
+/**
+ * Test suite for fetchJobByIDHandler
+ *
+ * - Fetches job by ID successfully.
+ * - Returns 404 if job is not found.
+ * - Handles errors properly.
+ */
 describe("fetchJobByIDHandler", () => {
   let req, res;
 
@@ -158,6 +187,7 @@ describe("fetchJobByIDHandler", () => {
     };
   });
 
+  // Test 1: Fetch job by ID successfully
   it("should return job data when found", async () => {
     const mockJob = { _id: "123", title: "Software Engineer" };
     Job.findById.mockResolvedValue(mockJob);
@@ -172,6 +202,7 @@ describe("fetchJobByIDHandler", () => {
     });
   });
 
+  // Test 2: Return 404 if job is not found
   it("should return 404 if job not found", async () => {
     Job.findById.mockResolvedValue(null);
 
@@ -183,6 +214,7 @@ describe("fetchJobByIDHandler", () => {
     });
   });
 
+  // Test 3: Handle errors properly
   it("should return 500 if an error occurs", async () => {
     Job.findById.mockRejectedValue(new Error("Database error"));
 
@@ -197,6 +229,13 @@ describe("fetchJobByIDHandler", () => {
   });
 });
 
+/**
+ * Test suite for updateJobHandler
+ *
+ * - Updates a job successfully.
+ * - Returns 404 if job is not found.
+ * - Handles errors properly.
+ */
 describe("updateJobHandler", () => {
   let req, res;
 
@@ -212,6 +251,7 @@ describe("updateJobHandler", () => {
     };
   });
 
+  // Test 1: Update a job successfully
   it("should update a job successfully", async () => {
     const updatedJob = { _id: "job123", ...req.body };
     Job.findByIdAndUpdate.mockResolvedValue(updatedJob);
@@ -227,6 +267,7 @@ describe("updateJobHandler", () => {
     });
   });
 
+  // Test 2: Return 400 if required fields are missing
   it("should return 404 if job is not found", async () => {
     Job.findByIdAndUpdate.mockResolvedValue(null);
 
@@ -236,6 +277,7 @@ describe("updateJobHandler", () => {
     expect(res.json).toHaveBeenCalledWith({ msg: "Job not found" });
   });
 
+  // Test 3: Handle errors properly
   it("should handle errors properly", async () => {
     Job.findByIdAndUpdate.mockRejectedValue(new Error("Database error"));
 
@@ -250,6 +292,13 @@ describe("updateJobHandler", () => {
   });
 });
 
+/**
+ * Test suite for deleteJobHandler
+ *
+ * - Deletes a job successfully.
+ * - Returns 404 if job is not found.
+ * - Handles errors properly.
+ */
 describe("deleteJobHandler", () => {
   let req, res;
 
@@ -264,6 +313,7 @@ describe("deleteJobHandler", () => {
     };
   });
 
+  // Test 1: Delete a job successfully
   it("should delete a job successfully", async () => {
     Job.findByIdAndDelete.mockResolvedValue({ _id: "job123" });
 
@@ -277,6 +327,7 @@ describe("deleteJobHandler", () => {
     });
   });
 
+  // Test 2: Return 404 if job is not found
   it("should return 404 if job is not found", async () => {
     Job.findByIdAndDelete.mockResolvedValue(null);
 
@@ -289,6 +340,7 @@ describe("deleteJobHandler", () => {
     });
   });
 
+  // Test 3: Handle errors properly
   it("should handle errors properly", async () => {
     Job.findByIdAndDelete.mockRejectedValue(new Error("Database error"));
 
@@ -303,6 +355,13 @@ describe("deleteJobHandler", () => {
   });
 });
 
+/**
+ * Test suite for fetchPostedJobsHandler
+ *
+ * - Fetches posted jobs successfully.
+ * - Returns 404 if no jobs are found.
+ * - Handles errors properly.
+ */
 describe("fetchPostedJobsHandler", () => {
   let req, res;
 
@@ -316,6 +375,7 @@ describe("fetchPostedJobsHandler", () => {
     };
   });
 
+  // Test 1: Fetch posted jobs successfully
   it("should fetch posted jobs successfully", async () => {
     const mockJobs = [
       { _id: "job1", title: "Job 1", postedBy: "user123" },
@@ -334,6 +394,7 @@ describe("fetchPostedJobsHandler", () => {
     });
   });
 
+  // Test 2: Return 404 if no jobs are found
   it("should return 404 if no jobs are found", async () => {
     cacheQueryJob.mockResolvedValue([]);
 
@@ -346,6 +407,7 @@ describe("fetchPostedJobsHandler", () => {
     });
   });
 
+  // Test 3: Handle errors properly
   it("should handle errors properly", async () => {
     cacheQueryJob.mockRejectedValue(new Error("Database error"));
 
