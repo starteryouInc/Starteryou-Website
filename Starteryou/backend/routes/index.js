@@ -11,6 +11,7 @@ const jobApplicationRoutes = require("./jobApplicationRoutes");
 const bookmarkRoutes = require("./bookmarkRoutes");
 const companyProfileRoutes = require("./companyProfileRoutes");
 const authenticate = require("../middleware/authMiddleware");
+const logger = require("../utils/logger"); // Logger import
 
 // Store all API endpoints and their descriptions
 const apiEndpoints = [
@@ -547,6 +548,6 @@ module.exports = {
   apiEndpoints,
   mountRoutes: (app) => {
     app.use("/", router);
-    console.log("✅ Routes mounted successfully");
+    logger.info("✅ Routes mounted successfully");
   },
 };

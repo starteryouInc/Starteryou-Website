@@ -7,10 +7,8 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
-
 const { connectToMongoDB, mongoUri } = require("./db");
 const { storeMetadataInDB } = require("./metadata/storeMetadataInDB"); // Import metadata function
-
 const sessionRoutes = require("./routes/sessionRoutes");
 const textRoutes = require("./routes/textRoutes");
 const fileRoutes = require("./routes/fileRoutes");
@@ -20,6 +18,7 @@ const authRoutes = require("./routes/authRoutes");
 const newsletterRoutes = require("./routes/newsletterRoutes");
 const { mountRoutes } = require("./routes");
 const { router } = require("./routes/index");
+const logger = require("./utils/logger");
 
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
@@ -36,16 +35,23 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Configure session store
-const sessionStore = MongoStore.create({ mongoUrl: mongoUri });
+// **Request logging middleware for all incoming requests**
+app.use((req, res, next) => {
+  logger.info(`Incoming Request: ${req.method} ${req.url} from ${req.ip}`);
+  next();
+});
+
+const sessionStore = MongoStore.create({
+  mongoUrl: mongoUri, // MongoDB URI
+});
 
 sessionStore.on("connected", async () => {
   try {
-    console.log("🗑️ Clearing session store...");
-    await sessionStore.clear();
-    console.log("✅ Session store cleared successfully.");
+    logger.info("Clearing session store...");
+    await sessionStore.clear(); // Clear all sessions
+    logger.info("Session store cleared successfully.");
   } catch (err) {
-    console.error("❌ Error clearing session store:", err);
+    logger.error("Error clearing session store:", err);
   }
 });
 
@@ -58,9 +64,9 @@ app.use(
     store: sessionStore,
     cookie: {
       httpOnly: true,
-      secure: false,
-      sameSite: "Lax",
-      maxAge: 60 * 60 * 1000, // 1-hour session duration
+      secure: false, // Set to true if using HTTPS and set to false if using local environment
+      sameSite: "Lax", // Set to 'None' for cross-origin cookies and set to 'Lax' for same-origin in local environment
+      maxAge: 60 * 60 * 1000, // 1 hour session duration
     },
   })
 );
@@ -68,18 +74,20 @@ app.use(
 // MongoDB connection and metadata storage
 (async () => {
   try {
-    await connectToMongoDB(); // Connect to MongoDB
-    console.log("✅ MongoDB connected successfully");
-
+    await connectToMongoDB();
+    logger.info("✅ MongoDB connected successfully");
     await storeMetadataInDB(); // Call metadata function after DB connection
   } catch (err) {
-    console.error("❌ MongoDB Connection Error:", err.message);
+    logger.error("❌ MongoDB Connection Error:", err.message);
   }
 })();
 
-// Static file serving
-app.use("/docs", express.static(path.join(__dirname, "docs"), { maxAge: "1y", immutable: true }));
-console.log("📂 Serving static files from:", path.join(__dirname, "docs"));
+const cacheOptions = {
+  maxAge: "1y", // Cache for 1 year
+  immutable: true, // Prevent revalidation if the file hasn't changed
+};
+app.use("/docs", express.static(path.join(__dirname, "docs"), cacheOptions));
+logger.info("📂 Serving static files from:", path.join(__dirname, "docs"));
 
 // Swagger Configuration
 const swaggerOptions = {
@@ -129,18 +137,18 @@ app.get("/db-status", (req, res) => {
 
 // Error-handling Middleware
 app.use((err, req, res, next) => {
-  console.error("🚨 Error:", err.message);
+  logger.error("🚨 Error:", err.message);
   res.status(err.status || 500).json({ error: "Internal Server Error", message: err.message || "Something went wrong" });
 });
 
 // Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at ${BACKEND_URL}:${PORT}`);
-  console.log(`📖 Swagger Docs available at ${BACKEND_URL}:${PORT}/api-test`);
-  console.log(`💻 Health Check: ${BACKEND_URL}:${PORT}/health`);
-  console.log(`🗄️ Database Status: ${BACKEND_URL}:${PORT}/db-status`);
-  console.log(`📚 API Documentation: ${BACKEND_URL}:${PORT}/api/docs`);
-  console.log(`📋 Postman Collection: ${BACKEND_URL}:${PORT}/api/docs/postman`);
-  console.log(`⚙️ File Verification: ${BACKEND_URL}:${PORT}/api/system/verify-all`);
+  logger.info(`🚀 Server running at ${BACKEND_URL}:${PORT}`);
+  logger.info(`📖 Swagger Docs available at ${BACKEND_URL}:${PORT}/api-test`);
+  logger.info(`💻 Health Check: ${BACKEND_URL}:${PORT}/health`);
+  logger.info(`🗄️ Database Status: ${BACKEND_URL}:${PORT}/db-status`);
+  logger.info(`📚 API Documentation: ${BACKEND_URL}:${PORT}/api/docs`);
+  logger.info(`📋 Postman Collection: ${BACKEND_URL}:${PORT}/api/docs/postman`);
+  logger.info(`⚙️ File Verification: ${BACKEND_URL}:${PORT}/api/system/verify-all`);
 });
