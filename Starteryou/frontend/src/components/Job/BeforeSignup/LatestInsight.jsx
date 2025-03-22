@@ -34,9 +34,9 @@ const LatestInsight = () => {
       id: 3,
       type: "Career Insights",
       time: "5 min read",
-      title: "Budgeting Tips for Students",
+      title: "Kickstart Your Career: The Ultimate Guide to Entry-Level Jobs",
       description:
-        "Learn how to manage your finances effectively as a student.",
+        "Learn how to secure entry-level jobs by getting tips on resume writing, experience building, and interview prep",
       link: "/read-more-3",
     },
   ];
@@ -143,9 +143,9 @@ const LatestInsight = () => {
         ))}
       </div>
       <div className="mt-10 md:mt-20 flex justify-center">
-        <button className="bg-[#D9520E] text-white py-2 px-3 rounded-xl mr-4">
+        {/* <button className="bg-[#D9520E] text-white py-2 px-3 rounded-xl mr-4">
           View all
-        </button>
+        </button> */}
       </div>
     </section>
   );

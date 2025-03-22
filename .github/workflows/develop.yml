@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-      
+
     steps:
       # Step 1: Checkout Code
       - name: Checkout code
@@ -83,7 +83,7 @@ jobs:
               git fetch origin develop
               git reset --hard origin/develop
             fi
-  
+
             echo "Generating .env.server file..."
             cat > "$ENV_FILE" << EOF
             NODE_ENV=production
@@ -117,15 +117,14 @@ jobs:
             echo "Deploying Docker services..."
             docker-compose --profile server --env-file "$ENV_FILE" down --volumes --remove-orphans
             docker-compose --profile server --env-file "$ENV_FILE" up --build -d
-      
+
       # Step 4: Set GitHub Status Check
       - name: Set GitHub Action status check
-        if: failure()  # Trigger on failure
+        if: failure() # Trigger on failure
         run: |
           echo "❌ Deployment failed!"
           exit 1
 
       - name: Set GitHub Action status check
-        if: success()  # Trigger on success
+        if: success() # Trigger on success
         run: echo "✅ Deployment successful!"
-

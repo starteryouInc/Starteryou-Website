@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import FileUpload from "../Common/FileUpload";
 import { useNavigation } from "../../context/NavigationContext";
 import { API_CONFIG } from "@config/api";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { FaPencilAlt } from "react-icons/fa";
 import axios from "axios";
 import { MaxWords } from "../Common/wordValidation";
@@ -29,20 +29,23 @@ const BestJob = () => {
     {
       id: 0,
       iconSrc: "/LandingPage/Icons/page 1.svg",
-      title: "Lorem Ipsum",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+      title: "Discover opportunities",
+      description: `We hit all the categories specifically for students! Such as unpaid internships, volunteer roles 
+and more.`,
     },
     {
       id: 1,
       iconSrc: "/LandingPage/Icons/FindJob.svg",
-      title: "Find Jobs",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+      title: "Apply lightning-fast ",
+      description:
+        "With an easy to use, intuitive interface, it takes no time to apply for roles.",
     },
     {
       id: 2,
       iconSrc: "/LandingPage/Icons/addJob.svg",
-      title: "Add Jobs",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+      title: "Stand out",
+      description:
+        "By creating a profile, you’ll be able to showcase things you can't on a resume!",
     },
   ];
 
@@ -177,7 +180,9 @@ const BestJob = () => {
                 placeholder="Title here..."
                 className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-2xl text-gray-800 scrollbar"
               />
-              <p className="text-sm text-grey-400">{titleCounter} words remaining</p>
+              <p className="text-sm text-grey-400">
+                {titleCounter} words remaining
+              </p>
 
               <textarea
                 value={paragraphBJ}
@@ -185,7 +190,9 @@ const BestJob = () => {
                 placeholder="Paragraph here..."
                 className="lg:w-[400px] p-2 bg-transparent border border-black rounded outline-none resize-none text-xl text-gray-800 scrollbar"
               />
-              <p className="text-sm text-grey-400">{paragraphCounter} words remaining</p>
+              <p className="text-sm text-grey-400">
+                {paragraphCounter} words remaining
+              </p>
 
               <div className="lg:w-[400px] flex items-center justify-between space-x-2 text-white">
                 <button
@@ -219,9 +226,9 @@ const BestJob = () => {
             </div>
           )}
 
-          <a href="#" className="text-[#7950F2] hover:underline font-medium">
+          {/* <a href="#" className="text-[#7950F2] hover:underline font-medium">
             See new openings &gt;
-          </a>
+          </a> */}
 
           {/* Boxes */}
           <div className="mt-8 flex flex-col md:flex-row md:justify-between lg:flex-col md:space-x-2 space-y-4 md:space-y-0 md:px-6 lg:space-x-0 lg:px-0">

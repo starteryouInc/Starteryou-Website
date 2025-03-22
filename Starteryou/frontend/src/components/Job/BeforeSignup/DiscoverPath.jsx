@@ -5,18 +5,14 @@ import { useNavigation } from "../../../context/NavigationContext";
 import { API_CONFIG } from "@config/api";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-hot-toast";
 
 // Helper function for word validation
 export const MaxWords = (value, maxWords, setCounter) => {
   const words = value.split(/\s+/).filter(Boolean); // Split input into words
   setCounter(maxWords - words.length); // Update remaining word count
   if (words.length > maxWords) {
-    toast.error(`Word limit exceeded! Maximum allowed is ${maxWords} words.`, {
-      position: "top-right",
-      autoClose: 3000,
-    });
+    toast.error(`Word limit exceeded! Maximum allowed is ${maxWords} words.`);
     return words.slice(0, maxWords).join(" "); // Truncate the input
   }
   return value;
@@ -29,14 +25,14 @@ const DiscoverPath = () => {
         "Gain Real-World Experience with Internships and Part-Time Opportunities",
       description:
         "Explore valuable internships and part-time jobs tailored for your academic journey.",
-      linkText: "Apply",
+      linkText: "Read",
       linkUrl: "#",
     },
     {
       title: "Access Essential Career Resources to Boost Your Job Search",
       description:
         "Utilize our comprehensive resources to enhance your job readiness and skills.",
-      linkText: "Learn",
+      linkText: "Read",
       linkUrl: "#",
     },
     {
@@ -44,7 +40,7 @@ const DiscoverPath = () => {
         "Streamlined Job Listings for Students Seeking Flexible Work Options",
       description:
         "Find job listings that cater to your unique schedule and academic commitments.",
-      linkText: "Browse",
+      linkText: "Read",
       linkUrl: "#",
     },
   ]);
@@ -204,7 +200,6 @@ const DiscoverPath = () => {
 
   return (
     <div className="mx-auto max-w-[1430px] px-4 lg:px-10 py-16">
-      <ToastContainer />
       {/* Top Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center md:pb-6 gap-4">
         {isEditing ? (
@@ -290,7 +285,7 @@ const DiscoverPath = () => {
             </h2>
             <p className="text-sm mb-4 px-1">{opportunity.description}</p>
             <a
-              href={opportunity.linkUrl}
+              // href={opportunity.linkUrl}
               className="text-blue-500 font-bold px-1"
             >
               {opportunity.linkText} &gt;

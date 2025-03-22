@@ -6,6 +6,22 @@ const { ObjectId } = require("mongodb");
 const FileMetadata = require("../models/FileMetadata");
 
 // GET: Verify specific file
+/**
+ * @route GET /verify/:title
+ * @description Verifies the existence and integrity of a file by checking its metadata and GridFS storage.
+ * @access Public
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - The request parameters
+ * @param {string} req.params.title - The title of the file to verify.
+ * @param {Object} res - Express response object
+ *
+ * @returns {Object} JSON response containing file metadata and GridFS storage status.
+ *
+ * @throws {404} Not Found - If file metadata does not exist.
+ * @throws {500} Internal Server Error - If an error occurs during verification.
+ */
+
 router.get("/verify/:title", async (req, res) => {
   try {
     // Find metadata
@@ -59,6 +75,19 @@ router.get("/verify/:title", async (req, res) => {
 });
 
 // GET: Verify all files
+/**
+ * @route GET /verify-all
+ * @description Verifies the existence and integrity of all files by checking their metadata and GridFS storage.
+ * @access Public
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ *
+ * @returns {Object} JSON response containing a summary of file health and detailed verification results for each file.
+ *
+ * @throws {500} Internal Server Error - If an error occurs during verification.
+ */
+
 router.get("/verify-all", async (req, res) => {
   try {
     const files = await FileMetadata.find({});
@@ -116,6 +145,20 @@ router.get("/verify-all", async (req, res) => {
 });
 
 // POST: Repair file
+/**
+ * @route POST /repair/:title
+ * @description Repairs file metadata by checking its existence in GridFS and updating missing information.
+ * @access Public
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ *
+ * @returns {Object} JSON response indicating the repair status, including metadata updates or cleanup actions.
+ *
+ * @throws {404} Not Found - If file metadata does not exist.
+ * @throws {500} Internal Server Error - If an error occurs during the repair process.
+ */
+
 router.post("/repair/:title", async (req, res) => {
   try {
     const metadata = await FileMetadata.findOne({ title: req.params.title });

@@ -106,7 +106,10 @@ const BetterFuture = () => {
   };
 
   return (
-    <div className="max-w-[1300px] mx-auto text-center p-6 pt-24 md:pb-12">
+    <div
+      className="max-w-[1300px] mx-auto text-center p-6 pt-24 md:pb-12"
+      id="better-future"
+    >
       {/* Heading Section */}
       <div className="relative">
         {isEditing ? (

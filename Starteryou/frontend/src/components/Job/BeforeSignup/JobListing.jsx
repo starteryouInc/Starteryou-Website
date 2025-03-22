@@ -3,8 +3,7 @@ import { useNavigation } from "../../../context/NavigationContext";
 import FileUpload from "../../Common/FileUpload";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-hot-toast";
 import { API_CONFIG } from "@config/api";
 
 const MAX_TITLE_WORDS = 10;
@@ -197,9 +196,6 @@ const JobListing = () => {
 
   return (
     <div className="mx-auto max-w-[1430px] px-4 lg:px-10 py-14 md:py-20">
-      {/* Toast Notification Container */}
-      <ToastContainer />
-
       <div className="flex flex-col md:flex-row md:items-center lg:items-center space-y-6 md:space-y-0 md:space-x-6">
         {/* Left Section */}
         <div className="flex-1 bg-white p-4 flex flex-col justify-center">

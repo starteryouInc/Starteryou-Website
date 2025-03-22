@@ -25,8 +25,7 @@ import FileUpload from "../Common/FileUpload";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
 import { API_CONFIG } from "@config/api";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-hot-toast";
 import { MaxWords } from "../Common/wordValidation";
 
 const OurMission = () => {
@@ -184,10 +183,7 @@ const OurMission = () => {
 
       setError("");
       setIsEditing(false);
-      toast.success("Content saved successfully!", {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.success("This is a success message!");
     } catch (err) {
       console.error("Error saving content:", err);
       setError("Failed to save content. Please try again.");

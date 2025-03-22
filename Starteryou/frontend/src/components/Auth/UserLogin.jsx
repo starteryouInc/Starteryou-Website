@@ -5,7 +5,66 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import { useUserContext } from "../../context/UserContext";
+import { API_CONFIG } from "../../config/api";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
+import axios from "axios";
+
 const UserLogin = () => {
+  const { loginUser } = useUserContext();
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const { data } = await axios.post(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.userLogin}`,
+        {
+          email,
+          password,
+        },
+        { withCredentials: true } // This ensures cookies are sent and received properly
+      );
+      loginUser({
+        authenticatedUser: data.users,
+        token: data.tokens.accessToken,
+      });
+      localStorage.setItem("lastLogin", Date.now().toString());
+      toast.success(data.msg);
+      if (data.users.role === "jobSeeker") {
+        navigate("/jobfeeds");
+      } else {
+        navigate("/companyDashboard/");
+      }
+      // Fetch session time after login
+      await fetchSessionTime();
+      // Dispatch custom event after successful login
+      const event = new Event("userLoggedIn");
+      window.dispatchEvent(event);
+    } catch (error) {
+      toast.error(error.response?.data?.error);
+    }
+  };
+
+  const fetchSessionTime = async () => {
+    try {
+      const response = await fetch(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.sessionTime}`,
+        { credentials: "include" }
+      );
+      if (!response.ok) throw new Error("Session expired");
+
+      const data = await response.json();
+      console.log("Session time fetched after login:", data);
+    } catch (error) {
+      console.error("Error fetching session time after login:", error);
+    }
+  };
+
   const reviews = [
     {
       stars: 5,
@@ -124,7 +183,7 @@ const UserLogin = () => {
           </p>
 
           {/* Input Fields */}
-          <form>
+          <form onSubmit={handleLogin}>
             {/* Email Input */}
             <div className="mb-4">
               <label
@@ -134,8 +193,10 @@ const UserLogin = () => {
                 Email address
               </label>
               <input
-                type="text"
+                type="email"
                 id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm"
                 placeholder="Enter your email"
                 required
@@ -155,6 +216,8 @@ const UserLogin = () => {
                   type={showPassword ? "text" : "password"}
                   id="password"
                   name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="mt-1 p-2 block w-full rounded-md border border-[#CBD5E1] shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   placeholder="Enter your password"
                   required

@@ -9,7 +9,7 @@ const TermsModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex  items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
       <div className="bg-white p-6 rounded-xl shadow-2xl max-w-3xl w-full h-[80vh] flex flex-col relative border border-gray-200">
         {/* Header (Top-Left) */}
         <h2 className="text-xl font-semibold text-gray-800 absolute top-4 left-6">
