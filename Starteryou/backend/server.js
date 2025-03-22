@@ -4,34 +4,79 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
-const { connectToMongoDB } = require("./db");
+const cookieParser = require("cookie-parser");
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
+const { connectToMongoDB, mongoUri } = require("./db");
+const { storeMetadataInDB } = require("./metadata/storeMetadataInDB"); // Import metadata function
+const sessionRoutes = require("./routes/sessionRoutes");
 const textRoutes = require("./routes/textRoutes");
 const fileRoutes = require("./routes/fileRoutes");
+const teamRoutes = require("./routes/teamRoutes");
+const verificationRoutes = require("./routes/verificationRoutes");
+const authRoutes = require("./routes/authRoutes");
+const newsletterRoutes = require("./routes/newsletterRoutes");
+const { mountRoutes } = require("./routes");
+const { router } = require("./routes/index");
+const logger = require("./utils/logger");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-const teamRoutes = require("./routes/teamRoutes");
-const { mountRoutes } = require("./routes"); // Main routes including API docs
-const verificationRoutes = require("./routes/verificationRoutes"); // System verification routes
-const authRoutes = require("./routes/authRoutes");
-
 const BACKEND_URL = process.env.BACKEND_URL || "http://starteryou.com:3000";
+
 // Initialize Express app
 const app = express();
-const newsletterRoutes = require("./routes/newsletterRoutes"); //newsletter subscribers
+
 // Middleware
 dotenv.config();
-app.use(cors());
+app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use("/api/newsletter", newsletterRoutes); //Newsletter subscribers
+app.use(cookieParser());
 
-// MongoDB connection
+// **Request logging middleware for all incoming requests**
+app.use((req, res, next) => {
+  logger.info(`Incoming Request: ${req.method} ${req.url} from ${req.ip}`);
+  next();
+});
+
+const sessionStore = MongoStore.create({
+  mongoUrl: mongoUri, // MongoDB URI
+});
+
+sessionStore.on("connected", async () => {
+  try {
+    logger.info("Clearing session store...");
+    await sessionStore.clear(); // Clear all sessions
+    logger.info("Session store cleared successfully.");
+  } catch (err) {
+    logger.error("Error clearing session store:", err);
+  }
+});
+
+// Configure session middleware
+app.use(
+  session({
+    secret: "your-secret-key",
+    resave: false,
+    saveUninitialized: false,
+    store: sessionStore,
+    cookie: {
+      httpOnly: true,
+      secure: false, // Set to true if using HTTPS and set to false if using local environment
+      sameSite: "Lax", // Set to 'None' for cross-origin cookies and set to 'Lax' for same-origin in local environment
+      maxAge: 60 * 60 * 1000, // 1 hour session duration
+    },
+  })
+);
+
+// MongoDB connection and metadata storage
 (async () => {
   try {
     await connectToMongoDB();
-    console.log("✅ MongoDB connected successfully");
+    logger.info("✅ MongoDB connected successfully");
+    await storeMetadataInDB(); // Call metadata function after DB connection
   } catch (err) {
-    console.error("❌ MongoDB Connection Error:", err.message);
+    logger.error("❌ MongoDB Connection Error:", err.message);
   }
 })();
 
@@ -40,7 +85,7 @@ const cacheOptions = {
   immutable: true, // Prevent revalidation if the file hasn't changed
 };
 app.use("/docs", express.static(path.join(__dirname, "docs"), cacheOptions));
-console.log("📂 Serving static files from:", path.join(__dirname, "docs"));
+logger.info("📂 Serving static files from:", path.join(__dirname, "docs"));
 
 // Swagger Configuration
 const swaggerOptions = {
@@ -51,11 +96,7 @@ const swaggerOptions = {
       version: "1.0.0",
       description: "API documentation for testing purposes",
     },
-    servers: [
-      {
-        url: `${BACKEND_URL}/api`,
-      },
-    ],
+    servers: [{ url: `${BACKEND_URL}/api` }],
     tags: [
       { name: "TextRoutes", description: "Routes for text operations" },
       { name: "FileRoutes", description: "Routes for file operations" },
@@ -66,73 +107,32 @@ const swaggerOptions = {
       {
         name: "Newsletter",
         description: "Routes for newsletter subscriptions",
-      }, // Add this line
+      },
     ],
   },
-  apis: ["./routes/*.js"], // Path to your API route files
+  apis: ["./routes/*.js"],
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/api-test", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use("/api/system", verificationRoutes);
-mountRoutes(app); // This mounts the main routes including API docs
+mountRoutes(app);
 
 // Routes
-/**
- * @swagger
- * tags:
- *   - name: TextRoutes
- *     description: Routes for text operations
- */
+app.use("/api/newsletter", newsletterRoutes);
+app.use("/api", sessionRoutes);
 app.use("/api", textRoutes);
-
-/**
- * @swagger
- * tags:
- *   - name: FileRoutes
- *     description: Routes for file operations
- */
 app.use("/api/files", fileRoutes);
-
-/**
- * @swagger
- * tags:
- *   - name: TeamRoutes
- *     description: Routes for file operations
- */
 app.use("/api", teamRoutes);
-
-/**
- * @swagger
- * tags:
- *   - name: Authentication
- *     description: Routes for Authentication endpoints
- */
 app.use("/api/v1/auth", authRoutes);
+app.use(router);
 
 // Health Check Route
-/**
- * @swagger
- * /health:
- *   get:
- *     summary: Check server health
- *     responses:
- *       200:
- *         description: Server is running
- */
-app.get("/health", (req, res) => {
-  res.status(200).json({ message: "Server is running!" });
-});
+app.get("/health", (req, res) =>
+  res.status(200).json({ message: "Server is running!" })
+);
 
-/**
- * @swagger
- * /db-status:
- *   get:
- *     summary: Check MongoDB connection status
- *     responses:
- *       200:
- *         description: MongoDB connection status
- */
+// Check MongoDB connection status
 app.get("/db-status", (req, res) => {
   const states = mongoose.STATES;
   const connectionState = mongoose.connection.readyState;
@@ -147,27 +147,25 @@ app.get("/db-status", (req, res) => {
 
 // Error-handling Middleware
 app.use((err, req, res, next) => {
-  console.error("🚨 Error:", err.message);
-  res.status(err.status || 500).json({
-    error: "Internal Server Error",
-    message: err.message || "Something went wrong",
-  });
+  logger.error("🚨 Error:", err.message);
+  res
+    .status(err.status || 500)
+    .json({
+      error: "Internal Server Error",
+      message: err.message || "Something went wrong",
+    });
 });
 
 // Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://starteryou.com:${PORT}`);
-  console.log(
-    `📖 Swagger Docs available at http://starteryou.com:${PORT}/api-test`
-  );
-  console.log(`💻 Health Check: http://starteryou.com:${PORT}/health`);
-  console.log(`🗄️ Database Status: http://starteryou.com:${PORT}/db-status`);
-  console.log(`📚 API Documentation: http://starteryou.com:${PORT}/api/docs`);
-  console.log(
-    `📋 Postman Collection: http://starteryou.com:${PORT}/api/docs/postman`
-  );
-  console.log(
-    `⚙️ File Verification: http://starteryou.com:${PORT}/api/system/verify-all`
+  logger.info(`🚀 Server running at ${BACKEND_URL}:${PORT}`);
+  logger.info(`📖 Swagger Docs available at ${BACKEND_URL}:${PORT}/api-test`);
+  logger.info(`💻 Health Check: ${BACKEND_URL}:${PORT}/health`);
+  logger.info(`🗄️ Database Status: ${BACKEND_URL}:${PORT}/db-status`);
+  logger.info(`📚 API Documentation: ${BACKEND_URL}:${PORT}/api/docs`);
+  logger.info(`📋 Postman Collection: ${BACKEND_URL}:${PORT}/api/docs/postman`);
+  logger.info(
+    `⚙️ File Verification: ${BACKEND_URL}:${PORT}/api/system/verify-all`
   );
 });

@@ -2,43 +2,43 @@ import { useState, useEffect } from "react";
 import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
 import { API_CONFIG } from "@config/api";
-import { toast } from "react-toastify";
+// import { toast } from 'react-hot-toast';
 import { FaPencilAlt } from "react-icons/fa";
 import axios from "axios";
 import { MaxWords } from "../Common/wordValidation";
 
-const icons = [
-  {
-    src: "/LandingPage/Icons/dashboard.svg",
-    alt: "Dashboard Icon",
-    text: "Dashboard",
-    link: "/dashboard",
-  },
-  {
-    src: "/LandingPage/Icons/social.svg",
-    alt: "Settings Icon",
-    text: "Teams and socials",
-    link: "/teams-socials",
-  },
-  {
-    src: "/LandingPage/Icons/user-square.svg",
-    alt: "User Icon",
-    text: "Job Profile",
-    link: "/job-profile",
-  },
-  {
-    src: "/LandingPage/Icons/subscribe.svg",
-    alt: "Analytics Icon",
-    text: "Subscription Management",
-    link: "/subscription-management",
-  },
-  {
-    src: "/LandingPage/Icons/Setting.png",
-    alt: "Tools Icon",
-    text: "Lorem ipsum",
-    link: "/lorem-ipsum",
-  },
-];
+// const icons = [
+//   {
+//     src: "/LandingPage/Icons/dashboard.svg",
+//     alt: "Dashboard Icon",
+//     text: "Dashboard",
+//     link: "/dashboard",
+//   },
+//   {
+//     src: "/LandingPage/Icons/social.svg",
+//     alt: "Settings Icon",
+//     text: "Teams and socials",
+//     link: "/teams-socials",
+//   },
+//   {
+//     src: "/LandingPage/Icons/user-square.svg",
+//     alt: "User Icon",
+//     text: "Job Profile",
+//     link: "/job-profile",
+//   },
+//   {
+//     src: "/LandingPage/Icons/subscribe.svg",
+//     alt: "Analytics Icon",
+//     text: "Subscription Management",
+//     link: "/subscription-management",
+//   },
+//   {
+//     src: "/LandingPage/Icons/Setting.png",
+//     alt: "Tools Icon",
+//     text: "Lorem ipsum",
+//     link: "/lorem-ipsum",
+//   },
+// ];
 
 const BestBuddy = () => {
   const { isAdmin } = useNavigation();
@@ -66,7 +66,7 @@ const BestBuddy = () => {
       setUploadedFile(URL.createObjectURL(blob));
       setError(null);
     } catch (error) {
-      console.error("Error fetching uploaded file:", error);
+      // console.error("Error fetching uploaded file:", error);
       setError("Failed to load image");
     }
   };
@@ -222,7 +222,7 @@ const BestBuddy = () => {
       {/* Icons and Uploaded Image */}
       <div className="flex flex-col items-center mt-10">
         {/* Icons */}
-        <div className="flex flex-col items-center space-y-4 sm:hidden">
+        {/* <div className="flex flex-col items-center space-y-4 sm:hidden">
           <div className="flex flex-wrap justify-center space-x-6">
             {icons.map(({ src, alt, text, link }, index) => (
               <a href={link} key={index} className="flex items-center mb-4">
@@ -238,10 +238,10 @@ const BestBuddy = () => {
               </a>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/*  medium and large screens */}
-        <div className="hidden sm:flex flex-wrap justify-center space-x-6 ">
+        {/* <div className="hidden sm:flex flex-wrap justify-center space-x-6 ">
           {icons.map(({ src, alt, text, link }, index) => (
             <a href={link} key={index} className="flex items-center mb-4">
               <img
@@ -254,7 +254,7 @@ const BestBuddy = () => {
               </span>
             </a>
           ))}
-        </div>
+        </div> */}
         {/* Uploaded File */}
         <div className="relative flex justify-center mt-2">
           <img

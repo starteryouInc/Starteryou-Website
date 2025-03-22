@@ -2,7 +2,6 @@ import { useState, useEffect } from "react"; // Added useEffect import
 import { useNavigation } from "../../context/NavigationContext";
 import FileUpload from "../Common/FileUpload";
 import { API_CONFIG } from "@config/api";
-import { toast } from "react-toastify";
 import { FaPencilAlt } from "react-icons/fa";
 import axios from "axios";
 import { MaxWords } from "../Common/wordValidation";
@@ -188,9 +187,9 @@ const BestJob3 = () => {
             </div>
           )}
 
-          <a href="#" className="text-[#7950F2] hover:underline font-medium">
+          {/* <a href="#" className="text-[#7950F2] hover:underline font-medium">
             Request for demo &gt;
-          </a>
+          </a> */}
 
           {/* Box */}
           {isEditing ? (

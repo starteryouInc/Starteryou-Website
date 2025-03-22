@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { useNavigation } from "../../../context/NavigationContext";
 import FileUpload from "../../Common/FileUpload";
 import { MaxWords } from "../../Common/wordValidation";
 
 import { API_CONFIG } from "@config/api";
+import { Link } from "react-router-dom";
 
 const HeroJobPortal = () => {
   const { isAdmin } = useNavigation();
@@ -93,9 +94,7 @@ const HeroJobPortal = () => {
             params: {
               page,
 
-
-              component:
-                "HeroJobBefore",
+              component: "HeroJobBefore",
             },
           }
         );
@@ -169,7 +168,7 @@ const HeroJobPortal = () => {
               type="text"
               value={titlee}
               onChange={handleChangeTitle}
-              className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-[#1F2329] border border-gray-300 p-2 rounded w-full"
+              className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-[#1F2329] border border-gray-300 p-2 rounded w-full "
             />
             <span className="text-white text-sm">
               {paragraphWordsLeft >= 0
@@ -193,7 +192,7 @@ const HeroJobPortal = () => {
           </div>
         ) : (
           <div>
-            <h1 className="text-3xl md:text-5xl font-bold mb-4 text-white">
+            <h1 className="text-3xl md:text-5xl font-bold mb-4 text-white ">
               {titlee}
             </h1>
             <p className="text-lg md:text-xl mb-6 text-white">{paragraph}</p>
@@ -208,7 +207,7 @@ const HeroJobPortal = () => {
         )}
         <div className="flex justify-center space-x-4 mb-8">
           <button className="bg-[#D9502E] text-white py-3 px-8 rounded-lg font-semibold">
-            Explore
+            <Link to="/jobfeeds">Explore</Link>
           </button>
           <button className="bg-white text-[#D9502E] py-3 px-8 rounded-lg font-semibold">
             Signup

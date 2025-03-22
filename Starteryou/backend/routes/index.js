@@ -4,6 +4,14 @@ const router = express.Router();
 const fileRoutes = require("./fileRoutes");
 const textRoutes = require("./textRoutes.js");
 const authRoutes = require("./authRoutes");
+const userAuthRoutes = require("./userAuthRoutes");
+const jobRoutes = require("./jobRoutes");
+const profileRoutes = require("./profileRoutes");
+const jobApplicationRoutes = require("./jobApplicationRoutes");
+const bookmarkRoutes = require("./bookmarkRoutes");
+const companyProfileRoutes = require("./companyProfileRoutes");
+const authenticate = require("../middleware/authMiddleware");
+const logger = require("../utils/logger"); // Logger import
 
 // Store all API endpoints and their descriptions
 const apiEndpoints = [
@@ -451,8 +459,22 @@ const apiEndpoints = [
 
 // Mount routes
 router.use("/api/files", fileRoutes);
-router.use("/api/text", textRoutes);
+router.use("/api", textRoutes);
 router.use("/api/v1/auth", authRoutes);
+router.use("/api/v1/userAuth", userAuthRoutes);
+router.use("/api/v1/jobportal/jobs", authenticate, jobRoutes);
+router.use("/api/v1/jobportal/profile", authenticate, profileRoutes);
+router.use(
+  "/api/v1/jobportal/applications",
+  authenticate,
+  jobApplicationRoutes
+);
+router.use("/api/v1/jobportal/bookmarks", authenticate, bookmarkRoutes);
+router.use(
+  "/api/v1/jobportal/companyProfile",
+  authenticate,
+  companyProfileRoutes
+);
 
 // API documentation endpoint with enhanced information
 router.get("/api/docs", (req, res) => {
@@ -526,6 +548,6 @@ module.exports = {
   apiEndpoints,
   mountRoutes: (app) => {
     app.use("/", router);
-    console.log("✅ Routes mounted successfully");
+    logger.info("✅ Routes mounted successfully");
   },
 };
