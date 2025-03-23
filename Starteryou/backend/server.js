@@ -62,8 +62,8 @@ app.use(
     store: sessionStore,
     cookie: {
       httpOnly: true,
-      secure: false, // Set to true if using HTTPS and set to false if using local environment
-      sameSite: "Lax", // Set to 'None' for cross-origin cookies and set to 'Lax' for same-origin in local environment
+      secure: true, // Set to true if using HTTPS and set to false if using local environment
+      sameSite: "None", // Set to 'None' for cross-origin cookies and set to 'Lax' for same-origin in local environment
       maxAge: 60 * 60 * 1000, // 1 hour session duration
     },
   })
