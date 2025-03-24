@@ -29,6 +29,7 @@ const app = express();
 // Middleware
 dotenv.config();
 app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
+logger.info('frontend url: ',process.env.FRONTEND_URL);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -63,7 +64,7 @@ app.use(
     cookie: {
       httpOnly: true,
       secure: true, // Set to true if using HTTPS and set to false if using local environment
-      sameSite: "None", // Set to 'None' for cross-origin cookies and set to 'Lax' for same-origin in local environment
+      sameSite: "Lax", // Set to 'None' for cross-origin cookies and set to 'Lax' for same-origin in local environment
       maxAge: 60 * 60 * 1000, // 1 hour session duration
     },
   })
