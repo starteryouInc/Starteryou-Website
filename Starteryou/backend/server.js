@@ -21,7 +21,8 @@ const { router } = require("./routes/index");
 const logger = require("./utils/logger");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-const BACKEND_URL = process.env.BACKEND_URL || "http://starteryou.com:3000";
+const BACKEND_URL = process.env.BACKEND_URL || "https://starteryou.com:3000";
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://starteryou.com:8080";
 
 // Initialize Express app
 const app = express();
@@ -29,8 +30,8 @@ const app = express();
 // Middleware
 dotenv.config();
 app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
-logger.info('frontend url: ',process.env.FRONTEND_URL);
-logger.info('backend url: ',process.env.BACKEND_URL);
+logger.info('frontend url: ',FRONTEND_URL);
+logger.info('backend url: ',BACKEND_URL);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
