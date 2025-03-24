@@ -30,8 +30,7 @@ const app = express();
 // Middleware
 dotenv.config();
 app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
-logger.info('frontend url: ',FRONTEND_URL);
-logger.info('backend url: ',BACKEND_URL);
+logger.info(`Frontend URL: ${FRONTEND_URL}`);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
