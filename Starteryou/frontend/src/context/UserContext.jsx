@@ -14,8 +14,11 @@ const UserContext = createContext();
  * @returns {JSX.Element} The UserProvider component.
  */
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem("loginUser");
+    const savedToken = localStorage.getItem("token");
+    return savedUser && savedToken ? { authenticatedUser: JSON.parse(savedUser), token: savedToken } : null;
+  });
   /**
    * Logs in the user by storing authentication data.
    *
