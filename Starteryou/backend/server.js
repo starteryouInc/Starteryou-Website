@@ -59,20 +59,20 @@ sessionStore.on("connected", async () => {
 
 
 // Configure session middleware
-app.use(
-  session({
-    secret: "your-secret-key",
-    resave: false,
-    saveUninitialized: false,
-    store: sessionStore,
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Set to true if using HTTPS and set to false if using local environment
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-      maxAge: 60 * 60 * 1000, // 1 hour session duration
-    },
-  })
-);
+  app.use(
+    session({
+      secret: "your-secret-key",
+      resave: false,
+      saveUninitialized: false,
+      store: sessionStore,
+      cookie: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // Set to true if using HTTPS and set to false if using local environment
+        sameSite: Lax,
+        maxAge: 60 * 60 * 1000, // 1 hour session duration
+      },
+    })
+  );
 
 // MongoDB connection and metadata storage
 (async () => {
