@@ -21,7 +21,8 @@ const { router } = require("./routes/index");
 const logger = require("./utils/logger");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-const BACKEND_URL = process.env.BACKEND_URL || "http://starteryou.com:3000";
+const BACKEND_URL = process.env.BACKEND_URL || "https://starteryou.com:3000";
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://starteryou.com:8080";
 
 // Initialize Express app
 const app = express();
@@ -29,6 +30,7 @@ const app = express();
 // Middleware
 dotenv.config();
 app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
+logger.info(`Frontend URL: ${FRONTEND_URL}`);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -38,6 +40,8 @@ app.use((req, res, next) => {
   logger.info(`Incoming Request: ${req.method} ${req.url} from ${req.ip}`);
   next();
 });
+
+app.set("trust proxy", 1); // Trust proxy headers
 
 const sessionStore = MongoStore.create({
   mongoUrl: mongoUri, // MongoDB URI
@@ -53,6 +57,7 @@ sessionStore.on("connected", async () => {
   }
 });
 
+
 // Configure session middleware
 app.use(
   session({
@@ -62,8 +67,8 @@ app.use(
     store: sessionStore,
     cookie: {
       httpOnly: true,
-      secure: true, // Set to true if using HTTPS and set to false if using local environment
-      sameSite: "None", // Set to 'None' for cross-origin cookies and set to 'Lax' for same-origin in local environment
+      secure: process.env.NODE_ENV === "production", // Set to true if using HTTPS and set to false if using local environment
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
       maxAge: 60 * 60 * 1000, // 1 hour session duration
     },
   })
