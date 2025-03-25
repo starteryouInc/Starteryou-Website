@@ -6,47 +6,47 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import "./UpcomingFeatures.css";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
-
+ 
 // Titles for backend storage
 const slidesData = [
   {
-    title: "Get top Job analysis",
+    title: "Customized School Home Page ",
     description:
-      "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do",
+      "Explore clubs, events, and opportunities specific to your school—all in one place!",
   },
   {
-    title: "Get top Job analysis",
+    title: "Education Portal ",
     description:
-      "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do",
+      "Access a diverse range of courses and resources to enhance your skills and knowledge. ",
   },
   {
-    title: "Get top Job analysis",
+    title: "School Run Portal",
     description:
-      "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet do",
+      "Schools can manage their own portal, posting exclusive opportunities tailored for their students. ",
   },
 ];
-
+ 
 const UpcomingFeatures = () => {
   const { isAdmin } = useNavigation();
   const [uploadedFiles, setUploadedFiles] = useState([null, null, null]);
   const [error, setError] = useState(null);
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
   const imageTitles = ["feature1", "feature2", "feature3"];
-
+ 
   const fetchUploadedImages = async () => {
     if (hasFetchedOnce) return;
-
+ 
     try {
       const filePromises = imageTitles.map(async (title, index) => {
         const response = await fetch(
           `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileDownload(title)}`
         );
         if (!response.ok) throw new Error(`Failed to fetch image: ${title}`);
-
+ 
         const blob = await response.blob();
         return URL.createObjectURL(blob);
       });
-
+ 
       const fetchedImages = await Promise.all(filePromises);
       setUploadedFiles(fetchedImages);
       setError(null);
@@ -57,27 +57,27 @@ const UpcomingFeatures = () => {
       setHasFetchedOnce(true);
     }
   };
-
+ 
   useEffect(() => {
     fetchUploadedImages();
   }, []);
-
+ 
   const handleFileChange = async (event, imageType, index) => {
     const file = event.target.files[0];
     if (!file) return;
-
+ 
     const formData = new FormData();
     formData.append("file", file);
     formData.append("title", imageType);
-
+ 
     try {
       const response = await fetch(
         `${API_CONFIG.baseURL}${API_CONFIG.endpoints.fileUpdate(imageType)}`,
         { method: "PUT", body: formData }
       );
-
+ 
       if (!response.ok) throw new Error(`Failed to upload image: ${imageType}`);
-
+ 
       const updatedFiles = [...uploadedFiles];
       updatedFiles[index] = URL.createObjectURL(file);
       setUploadedFiles(updatedFiles);
@@ -87,7 +87,7 @@ const UpcomingFeatures = () => {
       setError(`Error uploading image: ${imageType}`);
     }
   };
-
+ 
   return (
     <div
       className="w-full py-16"
@@ -107,43 +107,48 @@ const UpcomingFeatures = () => {
             showThumbs={false}
             infiniteLoop={true}
             autoPlay={true}
-            interval={3000}
+            interval={2500}
             showStatus={false}
             emulateTouch={true}
             swipeable={true}
+            showIndicators={false} // Hides the dots
           >
             {slidesData.map((slide, index) => (
               <div key={index} className="relative">
-                <img
-                  src={
-                    uploadedFiles[index] ||
-                    "https://via.placeholder.com/800x600"
-                  }
-                  alt={`Slide ${index + 1}`}
-                  className="object-cover mx-auto px-4 lg:px-0"
-                  style={{ height: "400px", width: "100%" }}
-                />
-                {isAdmin && (
-                  <div className="absolute top-4 right-4">
-                    <label
-                      htmlFor={`file-upload-${index}`}
-                      className="cursor-pointer"
-                    >
-                      <div className="w-12 h-12 rounded-full bg-blue-700 text-white flex items-center justify-center hover:bg-blue-600 transition-colors duration-300">
-                        <FontAwesomeIcon icon={faUpload} size="lg" />
-                      </div>
-                    </label>
-                    <input
-                      id={`file-upload-${index}`}
-                      type="file"
-                      className="hidden"
-                      onChange={(e) =>
-                        handleFileChange(e, imageTitles[index], index)
-                      }
-                      aria-label="Upload Image"
-                    />
-                  </div>
-                )}
+                <div
+                  className="relative overflow-hidden"
+                  style={{ height: "400px" }}
+                >
+                  <img
+                    src={
+                      uploadedFiles[index] ||
+                      "https://via.placeholder.com/800x600"
+                    }
+                    alt={`Slide ${index + 1}`}
+                    className="object-cover w-full h-full"
+                  />
+                  {isAdmin && (
+                    <div className="absolute top-4 right-4">
+                      <label
+                        htmlFor={`file-upload-${index}`}
+                        className="cursor-pointer"
+                      >
+                        <div className="w-12 h-12 rounded-full bg-blue-700 text-white flex items-center justify-center hover:bg-blue-600 transition-colors duration-300">
+                          <FontAwesomeIcon icon={faUpload} size="lg" />
+                        </div>
+                      </label>
+                      <input
+                        id={`file-upload-${index}`}
+                        type="file"
+                        className="hidden"
+                        onChange={(e) =>
+                          handleFileChange(e, imageTitles[index], index)
+                        }
+                        aria-label="Upload Image"
+                      />
+                    </div>
+                  )}
+                </div>
                 <div className="text-center mt-4 px-4">
                   <h3 className="text-2xl font-bold">{slide.title}</h3>
                   <p className="text-lg mt-2 text-[#767676]">
@@ -154,10 +159,11 @@ const UpcomingFeatures = () => {
             ))}
           </Carousel>
         </div>
+ 
         {error && <p className="text-red-500 mt-4">{error}</p>}
       </div>
     </div>
   );
 };
-
+ 
 export default UpcomingFeatures;
