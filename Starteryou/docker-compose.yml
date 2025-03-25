@@ -15,6 +15,7 @@ services:
       - /usr/src/app/node_modules # Prevent overwriting node_modules
     ports:
       - "3000:3000"
+      - "9229:9229"  # Node.js debugger port
     networks:
       - backend-network
     healthcheck:
