@@ -68,7 +68,7 @@ sessionStore.on("connected", async () => {
       cookie: {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production", // Set to true if using HTTPS and set to false if using local environment
-        sameSite: Lax,
+        sameSite: "Lax",
         maxAge: 60 * 60 * 1000, // 1 hour session duration
       },
     })
