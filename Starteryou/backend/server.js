@@ -41,6 +41,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.set("trust proxy", 1); // Trust proxy headers
+
 const sessionStore = MongoStore.create({
   mongoUrl: mongoUri, // MongoDB URI
 });
@@ -54,6 +56,7 @@ sessionStore.on("connected", async () => {
     logger.error("Error clearing session store:", err);
   }
 });
+
 
 // Configure session middleware
 app.use(
