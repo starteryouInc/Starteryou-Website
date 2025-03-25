@@ -27,7 +27,7 @@ export function SessionTimer() {
    */
   const fetchSessionTime = async () => {
     try {
-      const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.sessionTime}`, { credentials: "include" });
+      const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.sessionTime}`, { credentials: true });
       if (!response.ok) throw new Error("Session expired");
 
       const data = await response.json();
