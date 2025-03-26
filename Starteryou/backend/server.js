@@ -126,8 +126,8 @@ app.use("/api/newsletter", newsletterRoutes);
 app.use("/api", sessionRoutes);
 app.use("/api", textRoutes);
 app.use("/api/files", fileRoutes);
-app.use("/api", teamRoutes);
-app.use("/api/v1/auth", adminauthenticate, authRoutes);
+app.use("/api", adminauthenticate, teamRoutes);
+app.use("/api/v1/auth", authRoutes);
 app.use(router);
 
 // Health Check Route
