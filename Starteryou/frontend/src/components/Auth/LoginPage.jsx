@@ -39,7 +39,6 @@ const LoginPage = () => {
         `${API_CONFIG.baseURL}${API_CONFIG.endpoints.authLogin}`,
         {
           method: "POST",
-          credentials: "include" ,
           headers: {
             "Content-Type": "application/json",
           },

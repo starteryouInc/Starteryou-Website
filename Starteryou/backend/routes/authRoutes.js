@@ -372,12 +372,7 @@ const login = async (req, res) => {
         // Store the refresh token in the database
         user.refreshToken = refreshToken;
         await user.save();
-        res.cookie("accessToken", accessToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-        });
-       
+
         return {
           status: 200,
           response: {

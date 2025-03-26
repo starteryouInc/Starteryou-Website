@@ -298,11 +298,12 @@ router.post("/users-login", sessionRoutes, async (req, res) => {
     }
 
     const accessToken = generateAccessToken(users);
-
+    req.session.user = users; 
     req.session.isLoggedIn = true;
     req.session.userId = users._id;
     req.session.role = users.role;
     req.session.cookie.maxAge = 60 * 60 * 1000; // 1 hour
+    console.log("Session Data:", req.session);
 
     if (users.role === "jobSeeker") {
       req.session.user = users.username;
