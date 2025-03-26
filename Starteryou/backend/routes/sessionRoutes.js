@@ -1,11 +1,3 @@
-/**
- * Express router for handling session time and login status.
- *
- * This route checks the remaining session time and the user's authentication status.
- *
- * @module routes/sessionTime
- */
-
 const express = require("express");
 const sessionTimeout = require("../middleware/sessionTimeout"); // Path to sessionTimeout middleware
 const router = express.Router();
@@ -13,6 +5,8 @@ const logger = require("../utils/logger"); // Logger import
 
 /**
  * Route to check session time and login status.
+ *
+ * This route checks the remaining session time and the user's authentication status.
  *
  * @name GET /session-time
  * @function
@@ -23,7 +17,7 @@ const logger = require("../utils/logger"); // Logger import
 router.get("/session-time", sessionTimeout, (req, res) => {
   logger.info(`Session Cookie: ${JSON.stringify(req.session.cookie)}`); // Corrected logger usage
   logger.info(`Session User: ${JSON.stringify(req.session.user)}`); // Ensure proper logging format
-  
+
   // Check if session exists for a logged-in user
   const isAuthenticated = !!req.session.user;
 
@@ -49,6 +43,13 @@ router.get("/session-time", sessionTimeout, (req, res) => {
   }
 
   logger.info(`Remaining time: ${remainingTime}ms`); // Log remaining time properly
+
+  // Set no-cache headers to ensure a 200 response
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.setHeader("Surrogate-Control", "no-store");
+
   res.json({ timeRemaining: remainingTime, isLoggedIn: isAuthenticated });
 });
 
