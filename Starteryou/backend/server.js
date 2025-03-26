@@ -23,13 +23,13 @@ const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const BACKEND_URL = process.env.BACKEND_URL || "https://starteryou.com:3000";
 const FRONTEND_URL = process.env.FRONTEND_URL || "https://starteryou.com:8080";
-
+const isProduction = process.env.NODE_ENV;
 // Initialize Express app
 const app = express();
 
 // Middleware
 dotenv.config();
-app.use(cors({ origin: "https://starteryou.com", credentials: true }));
+app.use(cors({ origin: FRONTEND_URL, credentials: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -45,7 +45,6 @@ app.set("trust proxy", 1); // Trust proxy headers
 const sessionStore = MongoStore.create({
   mongoUrl: mongoUri, // MongoDB URI
 });
-
 sessionStore.on("connected", async () => {
   try {
     logger.info("Clearing session store...");
@@ -56,7 +55,6 @@ sessionStore.on("connected", async () => {
   }
 });
 
-
 // Configure session middleware
   app.use(
     session({
@@ -66,7 +64,7 @@ sessionStore.on("connected", async () => {
       store: sessionStore,
       cookie: {
         httpOnly: true,
-        secure: true, // Set to true if using HTTPS and set to false if using local environment
+        secure: isProduction, // Set to true if using HTTPS and set to false if using local environment
         sameSite: "Lax",
         maxAge: 60 * 60 * 1000, // 1 hour session duration
       },
