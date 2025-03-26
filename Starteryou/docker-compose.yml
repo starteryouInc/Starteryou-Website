@@ -16,6 +16,7 @@ services:
     ports:
       - "3000:3000"
       - "9229:9229"  # Node.js debugger port
+    command: node --inspect=0.0.0.0:9229 server.js
     networks:
       - backend-network
     healthcheck:
