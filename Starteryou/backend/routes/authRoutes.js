@@ -390,6 +390,12 @@ const login = async (req, res) => {
       },
       ttl
     );
+    res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    expires: accessTokenExpiry,
+  });
 
     logger.info(`✅ Cache set for key: ${cacheKey}`);
     return res.status(cachedResponse.status).json(cachedResponse.response);
