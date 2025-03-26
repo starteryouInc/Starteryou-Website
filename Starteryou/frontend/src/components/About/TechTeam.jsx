@@ -19,7 +19,7 @@ const TechTeam = () => {
   // Fetch only Tech Team members
   useEffect(() => {
     axios
-      .get(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.teamApi}?team=techteam`)
+      .get(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.teamApi}?team=techteam`, { withCredentials: true })
       .then((response) => {
         setTeamMembers(response.data.data);
       })
