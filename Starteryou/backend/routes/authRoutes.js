@@ -372,7 +372,12 @@ const login = async (req, res) => {
         // Store the refresh token in the database
         user.refreshToken = refreshToken;
         await user.save();
-
+        res.cookie("accessToken", accessToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+        });
+       
         return {
           status: 200,
           response: {
@@ -390,13 +395,7 @@ const login = async (req, res) => {
       },
       ttl
     );
-    res.cookie("accessToken", accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-    expires: accessTokenExpiry,
-  });
-
+    
     logger.info(`✅ Cache set for key: ${cacheKey}`);
     return res.status(cachedResponse.status).json(cachedResponse.response);
   } catch (error) {
