@@ -24,7 +24,7 @@ const swaggerUi = require("swagger-ui-express");
 const BACKEND_URL = process.env.BACKEND_URL || "https://starteryou.com:3000";
 const FRONTEND_URL = process.env.FRONTEND_URL || "https://starteryou.com:8080";
 const isProduction = process.env.NODE_ENV === "production";
-const adminauthenticate = require("./middleware/adminauthenticate");
+
 // Initialize Express app
 const app = express();
 
@@ -126,7 +126,7 @@ app.use("/api/newsletter", newsletterRoutes);
 app.use("/api", sessionRoutes);
 app.use("/api", textRoutes);
 app.use("/api/files", fileRoutes);
-app.use("/api", adminauthenticate, teamRoutes);
+app.use("/api", teamRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use(router);
 
