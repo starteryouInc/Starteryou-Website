@@ -50,7 +50,7 @@ const sessionStore = MongoStore.create({
 // Configure session middleware
   app.use(
     session({
-      secret: "your-secret-key",
+      secret: process.env.PROD_SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
       store: sessionStore,
