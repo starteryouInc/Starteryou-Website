@@ -313,7 +313,13 @@ router.post("/users-login", async (req, res) => {
 
     const lastLogin = Date.now(); // Store the last login time
     users.lastLogin = lastLogin;
-
+    // Save session before saving user
+    await new Promise((resolve, reject) => {
+      req.session.save((err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
     await users.save();
 
     res.status(200).json({
