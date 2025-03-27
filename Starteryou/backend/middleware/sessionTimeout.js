@@ -14,31 +14,48 @@ const sessionTimeout = (req, res, next) => {
   const isAuthenticated = req.session && req.session.user;
 
   if (isAuthenticated) {
-    // For authenticated users, set session timeout to 1 hour (3600000 ms)
-    req.session.cookie.maxAge = 60 * 60 * 1000; // 1 hour
-  }
-  else {
-    // For unauthenticated users, set session timeout to 15 minutes (900000 ms)
-    req.session.cookie.maxAge = 15 * 60 * 1000; // 15 minutes
+    if (req.session.cookie) {
+      req.session.cookie.maxAge = 60 * 60 * 1000; // 1 hour for authenticated users
+      console.log(
+        "Session maxAge set for the authenticated user:",
+        req.session.cookie.maxAge
+      );
+      console.log(
+        "Session user name after authentication: ", req.session.user,
+        req.session.user
+      );
+    }
+    next();
+  } else if (req.session && req.session.cookie) {
+    req.session.cookie.maxAge = 15 * 60 * 1000; // 15 minutes for unauthenticated users
+    console.log(
+      "Session maxAge set for the unauthenticated user:",
+      req.session.cookie.maxAge
+    );
+    console.log(
+      "Session user name ( unauthenticated ): ",
+      req.session.user
+    );
   }
 
-  // Check if the session has expired
-  if (req.session.cookie._expires && req.session.cookie._expires <= Date.now()) {
-    // If session is expired
+  // Check session expiry only if session and cookie exist
+  if (
+    req.session &&
+    req.session.cookie &&
+    req.session.cookie._expires &&
+    new Date(req.session.cookie._expires).getTime() <= Date.now()
+  ) {
     req.session.destroy((err) => {
       if (err) {
-        return res.status(500).json({ message: 'Failed to destroy session' });
+        return res.status(500).json({ message: "Failed to destroy session" });
       }
-      
-      // Return a different message based on whether the user was logged in or not
-      if (isAuthenticated) {
-        return res.status(401).json({ message: 'Session timed out, please log in again' });
-      } else {
-        return res.status(401).json({ message: 'Session timed out, please log in' });
-      }
+      return res.status(401).json({
+        message: isAuthenticated
+          ? "Session timed out, please log in again"
+          : "Session timed out, please log in",
+      });
     });
   } else {
-    // If session is still active, continue to the next middleware/route
     next();
   }
 };
