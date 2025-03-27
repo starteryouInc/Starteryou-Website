@@ -14,9 +14,9 @@ const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 
 require("dotenv").config({ path: ".env.server" });
 
-const jwtSecret = process.env.DEV_JWT_SECRET;
+const jwtSecret = process.env.PROD_JWT_SECRET;
 if (!jwtSecret) {
-  console.error("Error: DEV_JWT_SECRET is missing in the enviroment variables");
+  console.error("Error: PROD_JWT_SECRET is missing in the enviroment variables");
   process.exit(1);
 }
 
