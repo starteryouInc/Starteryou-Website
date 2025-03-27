@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { API_CONFIG } from "../../config/api";
 import SessionExpired from "./SessionExpired"; // Import the SessionExpired component
+import axios from "axios";
 
 /**
  * Component that handles the session timer countdown, fetches session time from an API,
@@ -23,28 +24,57 @@ export function SessionTimer() {
    *
    * @async
    * @function
-   * @returns {Promise<void>} 
+   * @returns {Promise<void>}
    */
+  // const fetchSessionTime = async () => {
+  //   try {
+  //     const response = await fetch(
+  //       `${API_CONFIG.baseURL}${API_CONFIG.endpoints.sessionTime}`,
+  //       { credentials: "include" }
+  //     );
+  //     if (!response.ok) throw new Error("Session expired");
+
+  //     const data = await response.json();
+  //     setTimeLeft(data.timeRemaining);
+  //     setIsAuthenticated(data.isLoggedIn);
+
+  //     // If time remaining is 0, set sessionExpired state to true
+  //     if (data.timeRemaining <= 0) {
+  //       setTimeLeft(0);
+  //       setSessionExpired(true); // Immediately mark the session as expired
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching session time:", error);
+  //     setTimeLeft(0);
+  //     setSessionExpired(true); // Mark the session as expired if there's an error
+  //   }
+  // };
+
   const fetchSessionTime = async () => {
     try {
-      const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.sessionTime}`, { credentials: "include" });
-      if (!response.ok) throw new Error("Session expired");
+      const { data } = await axios.get(
+        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.sessionTime}`,
+        { withCredentials: true }
+      );
 
-      const data = await response.json();
       setTimeLeft(data.timeRemaining);
       setIsAuthenticated(data.isLoggedIn);
 
-      // If time remaining is 0, set sessionExpired state to true
       if (data.timeRemaining <= 0) {
         setTimeLeft(0);
         setSessionExpired(true); // Immediately mark the session as expired
       }
+      console.log("Sessiong time data from sessionTimes.jsx: ", data);
     } catch (error) {
-      console.error("Error fetching session time:", error);
+      console.log("Error fetching session time in sessionTimes.jsx:", error);
+      console.error(
+        "Error fetching session time in sessionTimes.jsx:",
+        error.response?.data?.error || error.message
+      );
       setTimeLeft(0);
       setSessionExpired(true); // Mark the session as expired if there's an error
     }
- };
+  };
 
   useEffect(() => {
     fetchSessionTime(); // Call API once on component mount
@@ -53,12 +83,12 @@ export function SessionTimer() {
   useEffect(() => {
     // Listen to authentication status change, if any (e.g., after login)
     const handleAuthChange = () => fetchSessionTime();
-    window.addEventListener('storage', handleAuthChange);
-    window.addEventListener('userLoggedIn', handleAuthChange); // Listen for custom event
+    window.addEventListener("storage", handleAuthChange);
+    window.addEventListener("userLoggedIn", handleAuthChange); // Listen for custom event
 
     return () => {
-      window.removeEventListener('storage', handleAuthChange);
-      window.removeEventListener('userLoggedIn', handleAuthChange); // Clean up event listener
+      window.removeEventListener("storage", handleAuthChange);
+      window.removeEventListener("userLoggedIn", handleAuthChange); // Clean up event listener
     };
   }, [isAuthenticated]);
 
@@ -95,7 +125,9 @@ export function SessionTimer() {
   const formatTime = (milliseconds) => {
     if (milliseconds === null) return "Loading...";
     if (milliseconds <= 0) {
-      return isAuthenticated ? "Session timed out! Please log in again." : "Session timed out! Please log in.";
+      return isAuthenticated
+        ? "Session timed out! Please log in again."
+        : "Session timed out! Please log in.";
     }
     const minutes = Math.floor(milliseconds / 60000);
     const seconds = Math.floor((milliseconds % 60000) / 1000);
@@ -104,7 +136,10 @@ export function SessionTimer() {
 
   return (
     <>
-      {sessionExpired && <SessionExpired setSessionExpired={setSessionExpired} />} {/* Show the pop-up when session expires */}
+      {sessionExpired && (
+        <SessionExpired setSessionExpired={setSessionExpired} />
+      )}{" "}
+      {/* Show the pop-up when session expires */}
       <span>{formatTime(timeLeft)}</span>
     </>
   );

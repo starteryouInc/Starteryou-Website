@@ -48,20 +48,20 @@ const sessionStore = MongoStore.create({
 });
 
 // Configure session middleware
-  app.use(
-    session({
-      secret: "your_session_secret",
-      resave: false,
-      saveUninitialized: false,
-      store: sessionStore,
-      cookie: {
-        httpOnly: true,
-        secure: isProduction, // Set to true if using HTTPS and set to false if using local environment
-        sameSite: "Lax",
-        maxAge: 60 * 60 * 1000, // 1 hour session duration
-      },
-    })
-  );
+app.use(
+  session({
+    secret: "your-secret-key",
+    resave: false,
+    saveUninitialized: false,
+    store: sessionStore,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // Secure cookies in production
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // Adjust for cross-origin
+      maxAge: 15 * 60 * 1000, // Default: 15 minutes for unauthenticated users
+    },
+  })
+);
 
 // MongoDB connection and metadata storage
 (async () => {
@@ -142,12 +142,10 @@ app.get("/db-status", (req, res) => {
 // Error-handling Middleware
 app.use((err, req, res, next) => {
   logger.error("🚨 Error:", err.message);
-  res
-    .status(err.status || 500)
-    .json({
-      error: "Internal Server Error",
-      message: err.message || "Something went wrong",
-    });
+  res.status(err.status || 500).json({
+    error: "Internal Server Error",
+    message: err.message || "Something went wrong",
+  });
 });
 
 // Start Server

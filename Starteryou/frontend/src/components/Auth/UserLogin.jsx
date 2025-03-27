@@ -41,7 +41,7 @@ const UserLogin = () => {
         navigate("/companyDashboard/");
       }
       // Fetch session time after login
-      await fetchSessionTime();
+      // await fetchSessionTime();
       // Dispatch custom event after successful login
       const event = new Event("userLoggedIn");
       window.dispatchEvent(event);
@@ -50,20 +50,20 @@ const UserLogin = () => {
     }
   };
 
-  const fetchSessionTime = async () => {
-    try {
-      const response = await fetch(
-        `${API_CONFIG.baseURL}${API_CONFIG.endpoints.sessionTime}`,
-        { credentials: "include" }
-      );
-      if (!response.ok) throw new Error("Session expired");
+  // const fetchSessionTime = async () => {
+  //   try {
+  //     const response = await fetch(
+  //       `${API_CONFIG.baseURL}${API_CONFIG.endpoints.sessionTime}`,
+  //       { credentials: "include" }
+  //     );
+  //     if (!response.ok) throw new Error("Session expired");
 
-      const data = await response.json();
-      console.log("Session time fetched after login:", data);
-    } catch (error) {
-      console.error("Error fetching session time after login:", error);
-    }
-  };
+  //     const data = await response.json();
+  //     console.log("Session time fetched after login:", data);
+  //   } catch (error) {
+  //     console.error("Error fetching session time after login:", error);
+  //   }
+  // };
 
   const reviews = [
     {

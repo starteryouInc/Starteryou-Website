@@ -5,16 +5,18 @@ const jwt = require("jsonwebtoken");
 // const Users = require("../models/UsersModel");
 // const Employers = require("../models/EmployersModel");
 const sessionRoutes = require("./sessionRoutes");
-const { BaseUser, JobSeeker, Employer } = require("../models/BaseUserSchema");
+const {
+  BaseUser,
+  JobSeeker,
+  Employer,
+} = require("../models/BaseUserSchema");
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 
 require("dotenv").config({ path: ".env.server" });
 
-const jwtSecret = process.env.PROD_JWT_SECRET;
+const jwtSecret = process.env.DEV_JWT_SECRET;
 if (!jwtSecret) {
-  console.error(
-    "Error: PROD_JWT_SECRET is missing in the enviroment variables"
-  );
+  console.error("Error: DEV_JWT_SECRET is missing in the enviroment variables");
   process.exit(1);
 }
 
@@ -267,7 +269,7 @@ router.post("/users-seeker-register", async (req, res) => {
  * @throws {500} Internal Server Error - If an error occurs during login processing.
  */
 
-router.post("/users-login", async (req, res) => {
+router.post("/users-login", sessionRoutes, async (req, res) => {
   const { email, password } = req.body;
 
   // Check if all the required fields are provided
@@ -298,12 +300,11 @@ router.post("/users-login", async (req, res) => {
     }
 
     const accessToken = generateAccessToken(users);
-    req.session.user = users; 
+
     req.session.isLoggedIn = true;
     req.session.userId = users._id;
     req.session.role = users.role;
     req.session.cookie.maxAge = 60 * 60 * 1000; // 1 hour
-    console.log("Session Data:", req.session);
 
     if (users.role === "jobSeeker") {
       req.session.user = users.username;
@@ -313,13 +314,18 @@ router.post("/users-login", async (req, res) => {
 
     const lastLogin = Date.now(); // Store the last login time
     users.lastLogin = lastLogin;
-    // Save session before saving user
+    // Save the sessions:
     await new Promise((resolve, reject) => {
       req.session.save((err) => {
-        if (err) reject(err);
-        else resolve();
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+          console.log("Session saved successfully: ", req.session.id);
+        }
       });
     });
+
     await users.save();
 
     res.status(200).json({
