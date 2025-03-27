@@ -22,7 +22,7 @@ const logger = require("./utils/logger");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const BACKEND_URL = process.env.BACKEND_URL || "https://starteryou.com:3000";
-const FRONTEND_URL = process.env.FRONTEND_URL || "https://starteryou.com:8080";
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://starteryou.com";
 const isProduction = process.env.NODE_ENV === "production";
 
 // Initialize Express app
@@ -46,27 +46,18 @@ app.set("trust proxy", 1); // Trust proxy headers
 const sessionStore = MongoStore.create({
   mongoUrl: mongoUri, // MongoDB URI
 });
-sessionStore.on("connected", async () => {
-  try {
-    logger.info("Clearing session store...");
-    await sessionStore.clear(); // Clear all sessions
-    logger.info("Session store cleared successfully.");
-  } catch (err) {
-    logger.error("Error clearing session store:", err);
-  }
-});
 
 // Configure session middleware
   app.use(
     session({
-      secret: "your-secret-key",
+      secret: "your_session_secret",
       resave: false,
       saveUninitialized: false,
       store: sessionStore,
       cookie: {
         httpOnly: true,
         secure: isProduction, // Set to true if using HTTPS and set to false if using local environment
-        sameSite: "None",
+        sameSite: "Lax",
         maxAge: 60 * 60 * 1000, // 1 hour session duration
       },
     })

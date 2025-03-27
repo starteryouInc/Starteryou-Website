@@ -267,7 +267,7 @@ router.post("/users-seeker-register", async (req, res) => {
  * @throws {500} Internal Server Error - If an error occurs during login processing.
  */
 
-router.post("/users-login", sessionRoutes, async (req, res) => {
+router.post("/users-login", async (req, res) => {
   const { email, password } = req.body;
 
   // Check if all the required fields are provided
@@ -313,7 +313,13 @@ router.post("/users-login", sessionRoutes, async (req, res) => {
 
     const lastLogin = Date.now(); // Store the last login time
     users.lastLogin = lastLogin;
-
+    // Save session before saving user
+    await new Promise((resolve, reject) => {
+      req.session.save((err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
     await users.save();
 
     res.status(200).json({

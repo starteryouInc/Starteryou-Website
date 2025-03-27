@@ -23,7 +23,7 @@ const sessionTimeout = (req, res, next) => {
   }
 
   // Check if the session has expired
-  if (req.session.cookie.expires && req.session.cookie.expires <= Date.now()) {
+  if (req.session.cookie._expires && req.session.cookie._expires <= Date.now()) {
     // If session is expired
     req.session.destroy((err) => {
       if (err) {
