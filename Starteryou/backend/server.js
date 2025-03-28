@@ -56,8 +56,6 @@ app.use(
     store: sessionStore,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Secure cookies in production
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // Adjust for cross-origin
       maxAge: 15 * 60 * 1000, // Default: 15 minutes for unauthenticated users
     },
   })
